@@ -5,24 +5,23 @@ export default defineType({
   title: 'FAQ Item',
   type: 'document',
   fields: [
-    defineField({ name: 'question', type: 'string', validation: (Rule) => Rule.required() }),
-    defineField({
-      name: 'answer',
-      type: 'array',
-      of: [{ type: 'block' }]
-    }),
+    defineField({ name: 'question', type: 'string', validation: (R) => R.required() }),
+    defineField({ name: 'answer', type: 'text', rows: 4, validation: (R) => R.required() }),
     defineField({
       name: 'category',
       type: 'string',
-      options: {
-        list: ['General', 'Pricing', 'Certification', 'Technical', 'Refunds']
-      }
+      description: 'Free-form group label (e.g. "Getting started", "Certificates & compliance")',
+      validation: (R) => R.required()
+    }),
+    defineField({
+      name: 'categoryOrder',
+      type: 'number',
+      description: 'Lower numbers appear earlier in the list'
     }),
     defineField({
       name: 'order',
       type: 'number',
-      title: 'Sort order',
-      description: 'Lower numbers appear first within their category.'
+      description: 'Sort within the category'
     })
   ],
   preview: {

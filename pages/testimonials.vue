@@ -112,29 +112,34 @@
   </div>
 </template>
 
-<script>
-import { testimonials, trustLogos } from "~/assets/data/testimonials";
+<script setup>
+useSeoMeta({
+  title: "Testimonials — Train321",
+  description: "What operators say about Train321."
+});
 
-export default {
-  name: "MarketingTestimonials",
-  data() {
-    return { testimonials, trustLogos };
-  },
-  computed: {
-    featured() { return this.testimonials[0]; },
-    rest() { return this.testimonials.slice(1); }
-  },
-  methods: {
-    initials(name) {
-      return (name || "")
-        .split(" ")
-        .map(p => p[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase();
-    }
+const { data: testimonials } = await useSanityFetch(groq`
+  *[_type == "testimonial"] | order(order asc) {
+    "id": _id, quote, name, role, company, stat
   }
-};
+`);
+
+const { data: settings } = await useSanityFetch(groq`
+  *[_id == "siteSettings"][0] { trustLogos[] { name, label } }
+`);
+
+const trustLogos = computed(() => settings.value?.trustLogos || []);
+const featured = computed(() => (testimonials.value || [])[0] || {});
+const rest = computed(() => (testimonials.value || []).slice(1));
+
+function initials(name) {
+  return (name || "")
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
 </script>
 
 <style scoped>

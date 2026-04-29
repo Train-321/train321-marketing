@@ -5,24 +5,21 @@ export default defineType({
   title: 'Legal Page',
   type: 'document',
   fields: [
-    defineField({ name: 'title', type: 'string', validation: (Rule) => Rule.required() }),
+    defineField({ name: 'title', type: 'string', validation: (R) => R.required() }),
     defineField({
       name: 'slug',
       type: 'slug',
       options: { source: 'title' },
-      validation: (Rule) => Rule.required()
+      validation: (R) => R.required()
     }),
+    defineField({ name: 'effectiveDate', type: 'date', title: 'Effective date' }),
+    defineField({ name: 'intro', type: 'text', rows: 4 }),
     defineField({
-      name: 'lastUpdated',
-      type: 'date',
-      title: 'Last updated'
-    }),
-    defineField({
-      name: 'body',
+      name: 'sections',
       type: 'array',
-      of: [{ type: 'block' }]
+      of: [{ type: 'legalSection' }]
     }),
     defineField({ name: 'seo', type: 'seo' })
   ],
-  preview: { select: { title: 'title', subtitle: 'lastUpdated' } }
+  preview: { select: { title: 'title', subtitle: 'effectiveDate' } }
 })

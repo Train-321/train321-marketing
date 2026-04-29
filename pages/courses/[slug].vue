@@ -173,31 +173,35 @@
   </div>
 </template>
 
-<script>
-import { courseFamilies } from "~/assets/data/courses";
+<script setup>
+const route = useRoute();
+const slug = computed(() => route.params.slug);
 
-export default {
-  name: "CoursePage",
-  props: {
-    slug: { type: String, default: "" }
-  },
-  computed: {
-    course() {
-      const key = this.slug || this.$route.params.slug || this.$route.meta?.slug;
-      return courseFamilies[key] || null;
-    },
-    enrollHref() {
-      if (!this.course) return "/enroll";
-      return {
-        path: "/enroll",
-        query: this.course.enrollId ? { add: this.course.enrollId, checkout: "1" } : {}
-      };
-    }
-  },
-  metaInfo() {
-    return this.course ? { title: this.course.title + " · Train321" } : {};
-  }
-};
+const { data: courseRaw } = await useSanityFetch(
+  groq`*[_type == "course" && slug.current == $slug][0] {
+    title, "slug": slug.current, eyebrow, tagline, category, color, icon,
+    summary, outcomes, modules, accreditations, certificate,
+    priceFrom, priceNote, faqs, enrollId, enrollUrl,
+    "hero": { "stats": heroStats }
+  }`,
+  { slug }
+);
+
+const course = computed(() => courseRaw.value);
+
+useSeoMeta(
+  computed(() => ({
+    title: course.value ? `${course.value.title} · Train321` : "Course · Train321",
+    description: course.value?.summary || course.value?.tagline || ""
+  }))
+);
+
+const enrollHref = computed(() => {
+  if (!course.value) return "/enroll";
+  if (course.value.enrollUrl) return course.value.enrollUrl;
+  const id = course.value.enrollId;
+  return id ? `/enroll?add=${id}&checkout=1` : "/enroll";
+});
 </script>
 
 <style scoped>

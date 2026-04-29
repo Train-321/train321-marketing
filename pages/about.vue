@@ -132,25 +132,32 @@
   </div>
 </template>
 
-<script>
-import { team, companyStats } from "~/assets/data/team";
+<script setup>
+useSeoMeta({
+  title: "About — Train321",
+  description: "The team and mission behind Train321."
+});
 
-export default {
-  name: "MarketingAbout",
-  data() {
-    return { team, companyStats };
-  },
-  methods: {
-    initials(name) {
-      return (name || "")
-        .split(" ")
-        .map(p => p[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase();
-    }
+const { data: team } = await useSanityFetch(groq`
+  *[_type == "teamMember"] | order(order asc) {
+    name, role, bio, linkedin, twitter
   }
-};
+`);
+
+const { data: settings } = await useSanityFetch(groq`
+  *[_id == "siteSettings"][0] { companyStats[] { value, label } }
+`);
+
+const companyStats = computed(() => settings.value?.companyStats || []);
+
+function initials(name) {
+  return (name || "")
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
 </script>
 
 <style scoped>

@@ -108,60 +108,62 @@
   </div>
 </template>
 
-<script>
-import { blogPosts } from "~/assets/data/blog";
+<script setup>
+useSeoMeta({
+  title: "Journal — Train321",
+  description: "Compliance updates, operator playbooks, and field notes from the Train321 team."
+});
 
-export default {
-  name: "MarketingBlog",
-  data() {
-    return {
-      posts: blogPosts,
-      query: "",
-      activeCategory: "All",
-      email: "",
-      subscribed: false
-    };
-  },
-  computed: {
-    categories() {
-      const cats = new Set(this.posts.map(p => p.category));
-      return ["All", ...Array.from(cats)];
-    },
-    sortedPosts() {
-      return [...this.posts].sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
-    },
-    filtered() {
-      const q = this.query.trim().toLowerCase();
-      return this.sortedPosts.filter(p => {
-        if (this.activeCategory !== "All" && p.category !== this.activeCategory) return false;
-        if (!q) return true;
-        return (p.title + " " + p.excerpt + " " + p.category).toLowerCase().includes(q);
-      });
-    },
-    featured() {
-      return this.sortedPosts[0];
-    },
-    filteredRest() {
-      if (!this.query && this.activeCategory === "All") {
-        return this.filtered.filter(p => p.slug !== this.featured.slug);
-      }
-      return this.filtered;
-    }
-  },
-  methods: {
-    formatDate(iso) {
-      const d = new Date(iso);
-      return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
-    },
-    resetFilters() {
-      this.query = "";
-      this.activeCategory = "All";
-    },
-    onSubscribe() {
-      this.subscribed = true;
-    }
+const { data: posts } = await useSanityFetch(groq`
+  *[_type == "blogPost"] | order(publishedAt desc) {
+    "slug": slug.current,
+    title, excerpt, category, publishedAt, readMinutes, heroTone, heroIcon,
+    "author": { "name": authorName, "role": authorRole }
   }
-};
+`);
+
+const query = ref("");
+const activeCategory = ref("All");
+const email = ref("");
+const subscribed = ref(false);
+
+const categories = computed(() => {
+  const cats = new Set((posts.value || []).map((p) => p.category).filter(Boolean));
+  return ["All", ...Array.from(cats)];
+});
+
+const filtered = computed(() => {
+  const q = query.value.trim().toLowerCase();
+  return (posts.value || []).filter((p) => {
+    if (activeCategory.value !== "All" && p.category !== activeCategory.value) return false;
+    if (!q) return true;
+    return (p.title + " " + (p.excerpt || "") + " " + (p.category || "")).toLowerCase().includes(q);
+  });
+});
+
+const featured = computed(() => (posts.value || [])[0]);
+
+const filteredRest = computed(() => {
+  if (!query.value && activeCategory.value === "All" && featured.value) {
+    return filtered.value.filter((p) => p.slug !== featured.value.slug);
+  }
+  return filtered.value;
+});
+
+function formatDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
+
+function resetFilters() {
+  query.value = "";
+  activeCategory.value = "All";
+}
+
+function onSubscribe() {
+  subscribed.value = true;
+}
 </script>
 
 <style scoped>

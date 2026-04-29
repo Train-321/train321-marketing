@@ -36,7 +36,13 @@ export default defineNuxtConfig({
     projectId: process.env.SANITY_PROJECT_ID || 'your-project-id',
     dataset: process.env.SANITY_DATASET || 'production',
     apiVersion: '2025-01-01',
-    useCdn: true
+    useCdn: true,
+    visualEditing: {
+      studioUrl: process.env.SANITY_STUDIO_URL || 'http://localhost:3333',
+      token: process.env.SANITY_WRITE_TOKEN,
+      mode: 'live-visual-editing',
+      previewMode: { enable: '/api/draft' }
+    }
   },
 
   site: {
@@ -63,6 +69,19 @@ export default defineNuxtConfig({
     public: {
       apiBase: process.env.API_BASE || 'https://api.train321.com',
       appBase: process.env.APP_BASE || 'https://app.train321.com'
+    }
+  },
+
+  // @sanity/visual-editing pulls in React 19 RC's compiler runtime, which Vite
+  // can't optimize correctly without a hint. Pre-bundle it as a single entry.
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@sanity/visual-editing',
+        '@sanity/visual-editing > react-compiler-runtime',
+        '@sanity/ui > react-compiler-runtime',
+        '@sanity/insert-menu > react-compiler-runtime'
+      ]
     }
   }
 })

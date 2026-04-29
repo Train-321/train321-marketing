@@ -5,93 +5,84 @@ export default defineType({
   title: 'Course',
   type: 'document',
   fields: [
-    defineField({
-      name: 'title',
-      type: 'string',
-      validation: (Rule) => Rule.required()
-    }),
+    defineField({ name: 'title', type: 'string', validation: (R) => R.required() }),
     defineField({
       name: 'slug',
       type: 'slug',
       options: { source: 'title', maxLength: 96 },
-      validation: (Rule) => Rule.required()
+      validation: (R) => R.required()
     }),
+    defineField({ name: 'eyebrow', type: 'string', description: 'Small line above the headline' }),
+    defineField({ name: 'tagline', type: 'text', rows: 2 }),
     defineField({
-      name: 'family',
+      name: 'category',
       type: 'string',
-      title: 'Course family',
       options: {
         list: [
-          { title: 'Food Handler', value: 'food-handler' },
-          { title: 'Food Manager', value: 'food-manager' },
-          { title: 'Alcohol Server', value: 'alcohol-server' },
-          { title: 'Allergen Awareness', value: 'allergen' },
-          { title: 'HACCP', value: 'haccp' }
+          { title: 'Food', value: 'food' },
+          { title: 'Alcohol', value: 'alcohol' },
+          { title: 'HR', value: 'hr' }
         ]
       }
     }),
     defineField({
-      name: 'state',
+      name: 'color',
       type: 'string',
-      title: 'State / jurisdiction',
-      description: 'Two-letter code (FL, TX, NY) or "national".'
+      description: 'Card accent color',
+      options: {
+        list: [
+          { title: 'Amber', value: 'amber' },
+          { title: 'Plum', value: 'plum' },
+          { title: 'Emerald', value: 'emerald' },
+          { title: 'Neutral', value: 'neutral' }
+        ]
+      }
     }),
+    defineField({ name: 'icon', type: 'string', description: 'Font Awesome class, e.g. fas fa-utensils' }),
+    defineField({ name: 'imageUrl', type: 'url', title: 'Image URL', description: 'Use this for external image URLs (e.g. Unsplash). Leave blank if uploading via the field below.' }),
+    defineField({ name: 'image', type: 'image', title: 'Image (uploaded)', options: { hotspot: true } }),
+    defineField({ name: 'summary', type: 'text', rows: 4 }),
     defineField({
-      name: 'shortDescription',
-      type: 'text',
-      rows: 3,
-      title: 'Short description',
-      description: 'Shown on cards and listings.'
-    }),
-    defineField({
-      name: 'longDescription',
+      name: 'heroStats',
+      title: 'Hero stats',
       type: 'array',
-      title: 'Full description',
-      of: [{ type: 'block' }, { type: 'image' }],
-      description: 'Rich text for the course detail page.'
+      of: [{ type: 'heroStat' }],
+      validation: (R) => R.max(4)
     }),
     defineField({
-      name: 'durationMinutes',
-      type: 'number',
-      title: 'Duration (minutes)'
+      name: 'outcomes',
+      title: 'Learning outcomes',
+      type: 'array',
+      of: [{ type: 'string' }]
     }),
     defineField({
-      name: 'price',
-      type: 'number',
-      title: 'Price (USD)',
-      description: 'Display price. Live pricing can override via API — see README.'
-    }),
-    defineField({
-      name: 'image',
-      type: 'image',
-      title: 'Course image',
-      options: { hotspot: true }
+      name: 'modules',
+      type: 'array',
+      of: [{ type: 'courseModule' }]
     }),
     defineField({
       name: 'accreditations',
       type: 'array',
-      title: 'Accreditations / approvals',
       of: [{ type: 'string' }]
     }),
     defineField({
-      name: 'whatYouLearn',
+      name: 'certificate',
+      type: 'certificateInfo',
+      title: 'Certificate'
+    }),
+    defineField({ name: 'priceFrom', type: 'number', title: 'Price from (USD)', description: 'Display price; leave blank for "contact us" pricing' }),
+    defineField({ name: 'priceNote', type: 'string', description: 'Replaces price when no priceFrom is set, or supplements it' }),
+    defineField({
+      name: 'faqs',
+      title: 'Course-specific FAQs',
       type: 'array',
-      title: 'What you\'ll learn (bullets)',
-      of: [{ type: 'string' }]
+      of: [{ type: 'courseFaq' }]
     }),
-    defineField({
-      name: 'enrollUrl',
-      type: 'string',
-      title: 'Enroll URL',
-      description: 'Where the Enroll button links to (defaults to /enroll?course=<slug>).'
-    }),
+    defineField({ name: 'enrollId', type: 'string', description: 'Identifier passed to the LMS enroll URL' }),
+    defineField({ name: 'enrollUrl', type: 'url', description: 'Override enroll URL (otherwise built from enrollId)' }),
     defineField({ name: 'seo', type: 'seo' })
   ],
   preview: {
-    select: {
-      title: 'title',
-      subtitle: 'state',
-      media: 'image'
-    }
+    select: { title: 'title', subtitle: 'category', media: 'image' }
   }
 })

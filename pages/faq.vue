@@ -77,34 +77,45 @@
   </div>
 </template>
 
-<script>
-import { faqs } from "~/assets/data/faqs";
+<script setup>
+useSeoMeta({
+  title: "FAQs — Train321",
+  description: "Answers to the questions we hear most from operators and learners."
+});
 
-export default {
-  name: "MarketingFaq",
-  data() {
-    return { faqs, query: "" };
-  },
-  computed: {
-    filteredCategories() {
-      const q = this.query.trim().toLowerCase();
-      if (!q) return this.faqs;
-      return this.faqs
-        .map(cat => ({
-          ...cat,
-          items: cat.items.filter(it =>
-            (it.q + " " + it.a).toLowerCase().includes(q)
-          )
-        }))
-        .filter(cat => cat.items.length);
-    }
-  },
-  methods: {
-    slug(s) {
-      return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    }
+const { data: items } = await useSanityFetch(groq`
+  *[_type == "faqItem"] | order(categoryOrder asc, order asc) {
+    question, answer, category, categoryOrder, order
   }
-};
+`);
+
+const faqs = computed(() => {
+  const groups = new Map();
+  for (const it of items.value || []) {
+    if (!groups.has(it.category)) {
+      groups.set(it.category, { category: it.category, order: it.categoryOrder ?? 0, items: [] });
+    }
+    groups.get(it.category).items.push({ q: it.question, a: it.answer });
+  }
+  return Array.from(groups.values()).sort((a, b) => a.order - b.order);
+});
+
+const query = ref("");
+
+const filteredCategories = computed(() => {
+  const q = query.value.trim().toLowerCase();
+  if (!q) return faqs.value;
+  return faqs.value
+    .map((cat) => ({
+      ...cat,
+      items: cat.items.filter((it) => (it.q + " " + it.a).toLowerCase().includes(q))
+    }))
+    .filter((cat) => cat.items.length);
+});
+
+function slug(s) {
+  return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
 </script>
 
 <style scoped>

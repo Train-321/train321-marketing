@@ -393,11 +393,6 @@
 </template>
 
 <script>
-import { courseFamilyList } from "~/assets/data/courses";
-import { testimonials } from "~/assets/data/testimonials";
-import { companyStats } from "~/assets/data/team";
-import { faqs } from "~/assets/data/faqs";
-
 const POPULAR_SLUGS = ["food-handler", "alcohol", "sexual-harassment", "food-manager"];
 
 const AUDIENCE_COPY = {
@@ -509,9 +504,36 @@ export default {
   props: {
     forcedAudience: { type: String, default: null }
   },
+  async setup() {
+    const coursesQ = useSanityFetch(groq`
+      *[_type == "course"] | order(title asc) {
+        "slug": slug.current, title, eyebrow, tagline, summary, category, color, icon,
+        priceFrom, priceNote, accreditations, enrollId
+      }
+    `);
+    const testimonialsQ = useSanityFetch(groq`
+      *[_type == "testimonial"] | order(order asc) [0...3] {
+        "id": _id, quote, name, role, company, stat
+      }
+    `);
+    const faqsQ = useSanityFetch(groq`
+      *[_type == "faqItem"] | order(categoryOrder asc, order asc) [0...4] {
+        question, answer
+      }
+    `);
+    const settingsQ = useSanityFetch(groq`
+      *[_id == "siteSettings"][0] { companyStats[] { value, label } }
+    `);
+    await Promise.all([coursesQ, testimonialsQ, faqsQ, settingsQ]);
+    return {
+      courseFamilyList: coursesQ.data,
+      testimonials: testimonialsQ.data,
+      faqItems: faqsQ.data,
+      settings: settingsQ.data
+    };
+  },
   data() {
     return {
-      companyStats,
       courses: HERO_COURSES,
       courseIndex: 0,
       audience: this.forcedAudience || "team"
@@ -544,16 +566,19 @@ export default {
       return this.courses[this.courseIndex] || this.courses[0];
     },
     popularCourses() {
+      const list = this.courseFamilyList || [];
       return POPULAR_SLUGS
-        .map(slug => courseFamilyList.find(c => c.slug === slug))
+        .map(slug => list.find(c => c.slug === slug))
         .filter(Boolean);
     },
     featuredTestimonials() {
-      return testimonials.slice(0, 3);
+      return this.testimonials || [];
+    },
+    companyStats() {
+      return this.settings?.companyStats || [];
     },
     homeFaqs() {
-      const first = faqs[0]?.items || [];
-      return first.slice(0, 4);
+      return (this.faqItems || []).map(it => ({ q: it.question, a: it.answer }));
     },
     copy() {
       return AUDIENCE_COPY[this.audience] || AUDIENCE_COPY.team;

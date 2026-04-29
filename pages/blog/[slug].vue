@@ -122,78 +122,123 @@
   </div>
 </template>
 
-<script>
-import { blogPosts, findPost } from "~/assets/data/blog";
+<script setup>
+const route = useRoute();
+const slug = computed(() => route.params.slug);
 
-export default {
-  name: "MarketingBlogArticle",
-  data() {
-    return { copied: false };
-  },
-  computed: {
-    slug() { return this.$route.params.slug; },
-    post() { return findPost(this.slug); },
-    related() {
-      if (!this.post) return [];
-      return blogPosts
-        .filter(p => p.slug !== this.post.slug)
-        .slice(0, 3);
-    },
-    shareUrl() {
-      if (typeof window === "undefined") return "";
-      return window.location.href;
-    },
-    twitterHref() {
-      if (!this.post) return "#";
-      return `https://twitter.com/intent/tweet?text=${encodeURIComponent(this.post.title)}&url=${encodeURIComponent(this.shareUrl)}`;
-    },
-    linkedinHref() {
-      return `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(this.shareUrl)}`;
-    }
-  },
-  methods: {
-    initials(name) {
-      return (name || "")
-        .split(" ")
-        .map(p => p[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase();
-    },
-    formatDate(iso) {
-      const d = new Date(iso);
-      return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-    },
-    tag(type) {
-      switch (type) {
-        case "h2": return "h2";
-        case "h3": return "h3";
-        case "ul": return "ul";
-        case "ol": return "ol";
-        case "callout": return "aside";
-        default: return "p";
-      }
-    },
-    blockClass(type) {
-      if (type === "callout") return "t321-mkt-article__callout";
-      return "";
-    },
-    async copyLink() {
-      try {
-        await navigator.clipboard.writeText(this.shareUrl);
-        this.copied = true;
-        setTimeout(() => { this.copied = false; }, 1800);
-      } catch (e) {
-        this.copied = false;
-      }
-    }
-  },
-  watch: {
-    "$route.params.slug"() {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }
+const BLOCK_TYPE_MAP = {
+  blockParagraph: "p",
+  blockHeading2: "h2",
+  blockHeading3: "h3",
+  blockBulletList: "ul",
+  blockOrderedList: "ol",
+  blockCallout: "callout",
+  blockQuote: "quote"
 };
+
+const POST_PROJECTION = `{
+  "slug": slug.current,
+  title, excerpt, category, publishedAt, readMinutes, heroTone, heroIcon,
+  "author": { "name": authorName, "role": authorRole },
+  body
+}`;
+
+const { data: postRaw } = await useSanityFetch(
+  groq`*[_type == "blogPost" && slug.current == $slug][0] ${POST_PROJECTION}`,
+  { slug }
+);
+
+const { data: relatedRaw } = await useSanityFetch(
+  groq`*[_type == "blogPost" && slug.current != $slug] | order(publishedAt desc)[0...3] ${POST_PROJECTION}`,
+  { slug }
+);
+
+function normalizePost(p) {
+  if (!p) return null;
+  return {
+    ...p,
+    body: (p.body || []).map((b) => ({
+      type: BLOCK_TYPE_MAP[b._type] || "p",
+      content: b.content
+    }))
+  };
+}
+
+const post = computed(() => normalizePost(postRaw.value));
+const related = computed(() => (relatedRaw.value || []).map(normalizePost));
+
+useSeoMeta(
+  computed(() => ({
+    title: post.value ? `${post.value.title} — Train321` : "Article — Train321",
+    description: post.value?.excerpt || ""
+  }))
+);
+
+const copied = ref(false);
+
+const shareUrl = computed(() => (typeof window === "undefined" ? "" : window.location.href));
+const twitterHref = computed(() => {
+  if (!post.value) return "#";
+  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.value.title)}&url=${encodeURIComponent(shareUrl.value)}`;
+});
+const linkedinHref = computed(
+  () => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl.value)}`
+);
+
+function initials(name) {
+  return (name || "")
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+function formatDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+}
+
+function tag(type) {
+  switch (type) {
+    case "h2":
+      return "h2";
+    case "h3":
+      return "h3";
+    case "ul":
+      return "ul";
+    case "ol":
+      return "ol";
+    case "callout":
+      return "aside";
+    default:
+      return "p";
+  }
+}
+
+function blockClass(type) {
+  return type === "callout" ? "t321-mkt-article__callout" : "";
+}
+
+async function copyLink() {
+  try {
+    await navigator.clipboard.writeText(shareUrl.value);
+    copied.value = true;
+    setTimeout(() => {
+      copied.value = false;
+    }, 1800);
+  } catch (e) {
+    copied.value = false;
+  }
+}
+
+watch(
+  () => route.params.slug,
+  () => {
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+);
 </script>
 
 <style scoped>

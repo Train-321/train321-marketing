@@ -20,6 +20,18 @@ export default defineType({
         { name: 'youtube', type: 'url' }
       ]
     }),
+    defineField({
+      name: 'companyStats',
+      title: 'Company stats (about page)',
+      type: 'array',
+      of: [{ type: 'labeledStat' }]
+    }),
+    defineField({
+      name: 'trustLogos',
+      title: 'Trust logos',
+      type: 'array',
+      of: [{ type: 'trustLogo' }]
+    }),
     defineField({ name: 'defaultSeo', type: 'seo', title: 'Default SEO' })
   ]
 })

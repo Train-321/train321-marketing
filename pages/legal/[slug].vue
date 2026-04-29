@@ -58,28 +58,55 @@
   </div>
 </template>
 
-<script>
-import { legalPages } from "~/assets/data/legal";
+<script setup>
+const route = useRoute();
+const slug = computed(() => route.params.slug);
 
-export default {
-  name: "LegalPage",
-  props: {
-    slug: { type: String, default: "" }
-  },
-  computed: {
-    page() {
-      const key = this.slug || this.$route.params.slug || this.$route.meta?.slug;
-      return legalPages[key] || null;
-    }
-  },
-  methods: {
-    formatDate(iso) {
-      if (!iso) return "";
-      const d = new Date(iso);
-      return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-    }
-  }
+const BLOCK_TYPE_MAP = {
+  blockParagraph: "p",
+  blockHeading2: "h2",
+  blockHeading3: "h3",
+  blockBulletList: "ul",
+  blockOrderedList: "ol",
+  blockCallout: "callout",
+  blockQuote: "quote"
 };
+
+const { data: pageRaw } = await useSanityFetch(
+  groq`*[_type == "legalPage" && slug.current == $slug][0] {
+    title, "slug": slug.current, effectiveDate, intro,
+    sections[] { heading, blocks }
+  }`,
+  { slug }
+);
+
+const page = computed(() => {
+  const p = pageRaw.value;
+  if (!p) return null;
+  return {
+    ...p,
+    sections: (p.sections || []).map((s) => ({
+      heading: s.heading,
+      blocks: (s.blocks || []).map((b) => ({
+        type: BLOCK_TYPE_MAP[b._type] || "p",
+        content: b.content
+      }))
+    }))
+  };
+});
+
+useSeoMeta(
+  computed(() => ({
+    title: page.value ? `${page.value.title} — Train321` : "Legal — Train321",
+    description: page.value?.intro || ""
+  }))
+);
+
+function formatDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+}
 </script>
 
 <style scoped>

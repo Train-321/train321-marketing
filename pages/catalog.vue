@@ -172,7 +172,7 @@ const config = useRuntimeConfig();
 
 // Fetched at build time when running `nuxt generate` (SSG = great SEO).
 // Becomes SSR if running `nuxt build` instead. Either way, Google sees real content.
-const { data: courses, pending } = await useSanityQuery(
+const { data: courses, pending } = await useSanityFetch(
   groq`*[_type == "course"] | order(title asc) {
     _id,
     title,
