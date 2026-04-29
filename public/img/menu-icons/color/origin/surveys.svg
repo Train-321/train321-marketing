@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="26.275" height="26.278" viewBox="0 0 26.275 26.278">
+  <g transform="translate(-2.009 -2)">
+    <path d="M28.156,6.945,23.339,2.127A.452.452,0,0,0,23.028,2H12.078a1.318,1.318,0,0,0-1.314,1.314v21.65a1.318,1.318,0,0,0,1.314,1.314H26.97a1.318,1.318,0,0,0,1.314-1.314V7.256A.452.452,0,0,0,28.156,6.945ZM23.466,3.493,26.79,6.818H23.9a.438.438,0,0,1-.438-.438ZM12.078,24.965a.438.438,0,0,1-.438-.438V3.314a.438.438,0,0,1,.438-.438H22.59v3.5A1.318,1.318,0,0,0,23.9,7.694h3.5V24.527a.438.438,0,0,1-.438.438Z" fill="#00ACA8"/>
+    <rect x="5.5" y="10" width="4" height="4" stroke="#00ACA8" fill="none" stroke-width="0.8"/>
+    <rect x="5.5" y="16" width="4" height="4" stroke="#00ACA8" fill="none" stroke-width="0.8"/>
+    <rect x="5.5" y="22" width="4" height="4" stroke="#00ACA8" fill="none" stroke-width="0.8"/>
+    <line x1="14" y1="12" x2="22" y2="12" stroke="#00ACA8" stroke-width="0.8"/>
+    <line x1="14" y1="18" x2="22" y2="18" stroke="#00ACA8" stroke-width="0.8"/>
+    <line x1="14" y1="24" x2="22" y2="24" stroke="#00ACA8" stroke-width="0.8"/>
+    <path d="M9 13L7 15L10 18" stroke="#00ACA8" fill="none" stroke-width="0.8" stroke-linecap="round"/>
+  </g>
+</svg>

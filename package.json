@@ -1,0 +1,27 @@
+{
+  "name": "train321-marketing",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "studio:dev": "cd studio && npm run dev",
+    "studio:build": "cd studio && npm run build",
+    "studio:deploy": "cd studio && npm run deploy"
+  },
+  "devDependencies": {
+    "@nuxt/image": "^1.8.0",
+    "@nuxtjs/sanity": "^1.13.0",
+    "@nuxtjs/sitemap": "^6.1.0",
+    "nuxt": "^3.13.0",
+    "vue": "^3.5.0",
+    "vue-router": "^4.4.0"
+  },
+  "dependencies": {
+    "@sanity/client": "^6.22.0",
+    "@sanity/image-url": "^1.0.2"
+  }
+}
