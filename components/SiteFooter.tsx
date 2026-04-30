@@ -23,13 +23,9 @@ export default function SiteFooter() {
     <footer className="t321-mkt-footer">
       <div className="t321-mkt-container t321-mkt-footer__inner">
         <div className="t321-mkt-footer__brand">
-          <Link href="/" className="t321-mkt-brand t321-mkt-brand--dark">
-            <span className="t321-mkt-brand__mark" aria-hidden="true">
-              <i className="fas fa-graduation-cap" />
-            </span>
-            <span className="t321-mkt-brand__word">
-              Train<span className="t321-mkt-brand__accent">321</span>
-            </span>
+          <Link href="/" className="t321-mkt-footer__logo" aria-label="Train321 home">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/img/logos/train321_logo.png" alt="Train321" />
           </Link>
           <p className="t321-mkt-footer__tagline">
             Compliance training your team will actually finish. Built for restaurants, retailers,
