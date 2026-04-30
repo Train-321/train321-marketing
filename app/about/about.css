@@ -1,0 +1,184 @@
+.t321-mkt-about__hero {
+  padding: 3rem 0 2rem;
+  background: linear-gradient(180deg, var(--t321-mkt-paper) 0%, var(--t321-mkt-paper-sunk) 100%);
+  border-bottom: 1px solid var(--t321-mkt-line);
+}
+.t321-mkt-about__hero .t321-mkt-h1 { max-width: 18ch; }
+
+.t321-mkt-about__story {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+.t321-mkt-about__story-body p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--t321-mkt-ink);
+  margin: 0 0 1rem;
+}
+.t321-mkt-about__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+.t321-mkt-about__stat {
+  background: #ffffff;
+  border: 1px solid var(--t321-mkt-line);
+  border-radius: 14px;
+  padding: 1.25rem;
+  text-align: center;
+}
+.t321-mkt-about__stat strong {
+  display: block;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: var(--t321-mkt-ink);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.t321-mkt-about__stat span {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--t321-mkt-ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.t321-mkt-about__pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+.t321-mkt-about__pillar p {
+  margin: 0.4rem 0 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--t321-mkt-ink-muted);
+}
+.t321-mkt-about__pillar-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+.t321-mkt-about__pillar-icon--accent {
+  background: var(--t321-mkt-accent-wash);
+  color: var(--t321-mkt-accent);
+}
+.t321-mkt-about__pillar-icon--warn {
+  background: var(--t321-mkt-warn-wash);
+  color: var(--t321-mkt-warn);
+}
+.t321-mkt-about__pillar-icon--positive {
+  background: var(--t321-mkt-positive-wash);
+  color: var(--t321-mkt-positive);
+}
+
+.t321-mkt-about__team {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+.t321-mkt-about__team-card {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.t321-mkt-about__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--t321-mkt-accent), var(--t321-mkt-accent-bright));
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+.t321-mkt-about__team-role {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--t321-mkt-ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: -0.2rem;
+  margin-bottom: 0.75rem;
+}
+.t321-mkt-about__team-card p {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  color: var(--t321-mkt-ink-muted);
+  line-height: 1.55;
+}
+.t321-mkt-about__socials {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+.t321-mkt-about__socials a {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--t321-mkt-paper-sunk);
+  color: var(--t321-mkt-ink-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  text-decoration: none;
+  transition: background 120ms ease, color 120ms ease;
+}
+.t321-mkt-about__socials a:hover {
+  background: var(--t321-mkt-accent);
+  color: #ffffff;
+}
+
+.t321-mkt-about__cta {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  align-items: center;
+}
+.t321-mkt-about__cta-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.t321-mkt-about__cta-actions .t321-mkt-btn--ghost {
+  background: transparent;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.t321-mkt-about__cta-actions .t321-mkt-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #ffffff;
+}
+
+@media (max-width: 991.98px) {
+  .t321-mkt-about__story,
+  .t321-mkt-about__cta {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .t321-mkt-about__pillars,
+  .t321-mkt-about__team {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .t321-mkt-about__pillars,
+  .t321-mkt-about__team,
+  .t321-mkt-about__stats {
+    grid-template-columns: 1fr;
+  }
+}
