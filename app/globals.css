@@ -34,18 +34,12 @@ html, body {
   color: var(--t321-mkt-ink);
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
 }
-body { display: flex; flex-direction: column; }
 
 a { color: inherit; }
 
-.t321-mkt-page {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-.t321-mkt-main { flex: 1; }
+.t321-mkt-page { /* natural flow — footer follows content */ }
+.t321-mkt-main { /* no flex:1 — let main be its natural height */ }
 
 .t321-mkt-container {
   max-width: 1280px;
