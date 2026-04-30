@@ -193,6 +193,12 @@ function safe<T>(fn: () => T, fallback: T): T {
 // timeout race so the catch block can do its filesystem fallback.
 const TINA_TIMEOUT_MS = Number(process.env.TINA_QUERY_TIMEOUT_MS || 4000);
 
+// Strip class instances / non-plain bits from Tina's query result so Next 15
+// can safely pass it from server → client component (plain-objects rule).
+function serialize<T>(v: T): T {
+  return JSON.parse(JSON.stringify(v));
+}
+
 function withTimeout<T>(p: Promise<T>): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(
@@ -202,7 +208,7 @@ function withTimeout<T>(p: Promise<T>): Promise<T> {
     p.then(
       (v) => {
         clearTimeout(timer);
-        resolve(v);
+        resolve(serialize(v));
       },
       (e) => {
         clearTimeout(timer);
