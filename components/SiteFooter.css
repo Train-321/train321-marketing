@@ -1,113 +1,5 @@
-<template>
-  <footer class="t321-mkt-footer">
-    <div class="t321-mkt-container t321-mkt-footer__inner">
-      <div class="t321-mkt-footer__brand">
-        <NuxtLink to="/" class="t321-mkt-brand t321-mkt-brand--dark">
-          <span class="t321-mkt-brand__mark" aria-hidden="true">
-            <i class="fas fa-graduation-cap"></i>
-          </span>
-          <span class="t321-mkt-brand__word">
-            Train<span class="t321-mkt-brand__accent">321</span>
-          </span>
-        </NuxtLink>
-        <p class="t321-mkt-footer__tagline">
-          Compliance training your team will actually finish. Built for restaurants, retailers,
-          and service businesses that need certified staff — without the hassle.
-        </p>
-        <div class="t321-mkt-footer__social" aria-label="Social">
-          <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i></a>
-          <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noopener"><i class="fab fa-twitter"></i></a>
-          <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener"><i class="fab fa-linkedin-in"></i></a>
-          <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
-          <a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener"><i class="fab fa-youtube"></i></a>
-        </div>
-      </div>
+/* SiteFooter styles — ported from SiteFooter.vue scoped block */
 
-      <div class="t321-mkt-footer__col">
-        <h4>Company</h4>
-        <ul>
-          <li v-for="l in footerNav.company" :key="l.to">
-            <NuxtLink :to="l.to">{{ l.label }}</NuxtLink>
-          </li>
-        </ul>
-      </div>
-
-      <div class="t321-mkt-footer__col">
-        <h4>Support</h4>
-        <ul>
-          <li v-for="l in footerNav.support" :key="l.to">
-            <NuxtLink :to="l.to">{{ l.label }}</NuxtLink>
-          </li>
-        </ul>
-      </div>
-
-      <div class="t321-mkt-footer__col t321-mkt-footer__col--wide">
-        <h4>Stay in the loop</h4>
-        <p class="t321-mkt-footer__news-sub">
-          Monthly tips on compliance deadlines, state-law changes, and training ROI.
-        </p>
-        <form class="t321-mkt-footer__news" @submit.prevent="onSubscribe">
-          <label class="t321-mkt-footer__news-label" for="t321-footer-email">Email</label>
-          <div class="t321-mkt-footer__news-wrap">
-            <i class="fas fa-envelope" aria-hidden="true"></i>
-            <input
-              id="t321-footer-email"
-              v-model="email"
-              type="email"
-              placeholder="you@work.com"
-              autocomplete="email"
-              required
-            />
-            <button type="submit" class="t321-mkt-btn t321-mkt-btn--primary">
-              {{ subscribed ? 'Subscribed' : 'Subscribe' }}
-            </button>
-          </div>
-          <p v-if="subscribed" class="t321-mkt-footer__news-ok">
-            <i class="fas fa-check-circle" aria-hidden="true"></i>
-            Thanks — you're on the list.
-          </p>
-        </form>
-        <div class="t321-mkt-footer__contact">
-          <a href="tel:+15613257300"><i class="fas fa-phone" aria-hidden="true"></i> 561-325-7300</a>
-          <a href="mailto:info@train321.com"><i class="fas fa-envelope" aria-hidden="true"></i> info@train321.com</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="t321-mkt-footer__meta">
-      <div class="t321-mkt-container t321-mkt-footer__meta-inner">
-        <span>&copy; {{ year }} Train321. All rights reserved.</span>
-        <nav class="t321-mkt-footer__meta-nav" aria-label="Legal">
-          <NuxtLink v-for="l in footerNav.legal" :key="l.to" :to="l.to">{{ l.label }}</NuxtLink>
-        </nav>
-      </div>
-    </div>
-  </footer>
-</template>
-
-<script>
-import { footerNav } from "~/assets/data/nav";
-
-export default {
-  name: "MarketingFooter",
-  data() {
-    return {
-      footerNav,
-      email: "",
-      subscribed: false,
-      year: new Date().getFullYear()
-    };
-  },
-  methods: {
-    onSubscribe() {
-      this.subscribed = true;
-      setTimeout(() => { this.subscribed = false; this.email = ""; }, 2500);
-    }
-  }
-};
-</script>
-
-<style scoped>
 .t321-mkt-footer {
   background: #0F0F0E;
   color: #D7D1C4;
@@ -151,10 +43,7 @@ export default {
   color: #A8A39A;
   max-width: 38ch;
 }
-.t321-mkt-footer__social {
-  display: flex;
-  gap: 0.5rem;
-}
+.t321-mkt-footer__social { display: flex; gap: 0.5rem; }
 .t321-mkt-footer__social a {
   width: 36px;
   height: 36px;
@@ -316,4 +205,3 @@ export default {
   }
   .t321-mkt-footer__meta-inner { justify-content: flex-start; }
 }
-</style>

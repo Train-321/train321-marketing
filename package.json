@@ -1,28 +1,24 @@
 {
   "name": "train321-marketing",
+  "version": "0.2.0",
   "private": true,
-  "type": "module",
   "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "studio:dev": "cd studio && npm run dev",
-    "studio:build": "cd studio && npm run build",
-    "studio:deploy": "cd studio && npm run deploy"
-  },
-  "devDependencies": {
-    "@nuxt/image": "^1.8.0",
-    "@nuxtjs/sanity": "^1.13.0",
-    "@nuxtjs/sitemap": "^6.1.0",
-    "nuxt": "^3.13.0",
-    "unstorage": "^1.17.5",
-    "vue": "^3.5.0",
-    "vue-router": "^4.4.0"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
   },
   "dependencies": {
-    "@sanity/client": "^6.22.0",
-    "@sanity/image-url": "^1.0.2"
+    "next": "16.2.4",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.4",
+    "typescript": "^5"
   }
 }
