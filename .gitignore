@@ -62,3 +62,5 @@ next-env.d.ts
 /tina/__generated__/_lookup.json
 /tina/__generated__/_schema.json
 /tina/tina-lock.json
+
+.vercel
