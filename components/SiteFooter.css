@@ -172,13 +172,13 @@
 .t321-mkt-footer__meta {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   margin-top: 3rem;
+  padding: 1.5rem 0;
 }
 .t321-mkt-footer__meta-inner {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1.25rem;
-  padding: 1.5rem 1.5rem;
   font-size: 0.8rem;
   color: #6E6C67;
   flex-wrap: wrap;
