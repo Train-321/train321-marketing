@@ -1,0 +1,57 @@
+{
+  "slug": "accredited-food-handler",
+  "title": "Accredited Food Handler",
+  "eyebrow": "Food safety · accredited",
+  "tagline": "The accredited version of our Food Handler course — for states and employers that require it.",
+  "category": "food",
+  "color": "amber",
+  "icon": "fas fa-medal",
+  "image": "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80",
+  "summary": "Identical content to our standard Food Handler course, but delivered under our ANSI National Accreditation Board (ANAB) accreditation. Required by a handful of jurisdictions (California, Texas, Illinois and others) and by employers with stricter compliance programs.",
+  "outcomes": [
+    "Meet ANAB-accredited training requirements in California, Texas, Illinois, and beyond",
+    "Earn a credential that satisfies stricter corporate compliance audits",
+    "Receive a digital certificate accepted by every state health department"
+  ],
+  "modules": [
+    {
+      "title": "Foundations of food safety",
+      "duration": "18 min"
+    },
+    {
+      "title": "Personal hygiene & illness reporting",
+      "duration": "22 min"
+    },
+    {
+      "title": "Time & temperature control",
+      "duration": "28 min"
+    },
+    {
+      "title": "Cleaning, sanitizing & cross-contact",
+      "duration": "21 min"
+    },
+    {
+      "title": "Allergens & special diets",
+      "duration": "19 min"
+    },
+    {
+      "title": "State-specific supplement",
+      "duration": "15 min"
+    },
+    {
+      "title": "Accredited final exam",
+      "duration": "40 min"
+    }
+  ],
+  "accreditations": [
+    "ANAB-accredited (ANSI National Accreditation Board)",
+    "State-approved in all required jurisdictions"
+  ],
+  "certificate": {
+    "delivery": "Instant digital PDF",
+    "validity": "3 years",
+    "accepted": "All accredited-required jurisdictions"
+  },
+  "priceFrom": 19,
+  "enrollId": "food-handler"
+}

@@ -1,0 +1,41 @@
+{
+  "slug": "bar-basics",
+  "title": "Bar Basics",
+  "eyebrow": "Bar operations",
+  "tagline": "The bar opener-to-closer playbook: prep, pours, pace, and pass-down.",
+  "category": "alcohol",
+  "color": "plum",
+  "icon": "fas fa-glass-martini-alt",
+  "image": "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?auto=format&fit=crop&w=800&q=80",
+  "summary": "A practical, non-certification course that teaches new bartenders and barbacks how a well-run bar works — from stocking a well to closing the books. Pairs well with Alcohol Safety for full compliance.",
+  "outcomes": [
+    "Open and close a bar without leaving surprises for the next shift",
+    "Pour with consistent speed and cost control",
+    "Handle a three-deep rail without losing your head",
+    "Communicate cleanly with servers and the kitchen"
+  ],
+  "modules": [
+    {
+      "title": "Opening checklist",
+      "duration": "15 min"
+    },
+    {
+      "title": "Pour cost & control",
+      "duration": "25 min"
+    },
+    {
+      "title": "Speed techniques",
+      "duration": "20 min"
+    },
+    {
+      "title": "Guest recovery",
+      "duration": "20 min"
+    },
+    {
+      "title": "Close-out & pass-down",
+      "duration": "20 min"
+    }
+  ],
+  "priceFrom": 12,
+  "enrollId": "alcohol"
+}

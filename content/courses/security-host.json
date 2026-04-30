@@ -1,0 +1,41 @@
+{
+  "slug": "security-host",
+  "title": "Security Host / Door Host",
+  "eyebrow": "Venue security",
+  "tagline": "De-escalation, crowd management, and lawful refusal for bars, clubs, and event venues.",
+  "category": "alcohol",
+  "color": "plum",
+  "icon": "fas fa-user-shield",
+  "image": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80",
+  "summary": "Written for doormen, security hosts, and club staff in states that require security training. Focused on keeping everyone — guests, staff, the venue's liquor license — safe and within the law.",
+  "outcomes": [
+    "De-escalate an escalating guest before it becomes an incident",
+    "Refuse entry lawfully and without discrimination",
+    "Manage a crowded entrance and fire-code occupancy",
+    "Document and report incidents in a way that holds up"
+  ],
+  "modules": [
+    {
+      "title": "Legal foundations for venue security",
+      "duration": "25 min"
+    },
+    {
+      "title": "Reading a crowd",
+      "duration": "20 min"
+    },
+    {
+      "title": "De-escalation scripts",
+      "duration": "30 min"
+    },
+    {
+      "title": "Use of force limits",
+      "duration": "20 min"
+    },
+    {
+      "title": "Incident documentation",
+      "duration": "15 min"
+    }
+  ],
+  "priceFrom": 19,
+  "enrollId": "alcohol"
+}

@@ -1,0 +1,44 @@
+{
+  "slug": "california-sexual-harassment",
+  "title": "California Sexual Harassment Training",
+  "eyebrow": "CA · SB 1343",
+  "tagline": "SB 1343-compliant training for every California employer with 5+ employees.",
+  "category": "hr",
+  "color": "emerald",
+  "icon": "fas fa-map-marker-alt",
+  "image": "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=800&q=80",
+  "summary": "California law requires 1 hour of training for every non-supervisory employee and 2 hours for every supervisor, every two years, for any employer with 5 or more employees. This course satisfies SB 1343 and is pre-loaded with California-specific examples, reporting paths, and the DFEH poster.",
+  "outcomes": [
+    "Satisfy the SB 1343 requirement for supervisors or non-supervisors",
+    "Understand FEHA's protected categories (broader than federal)",
+    "Know exactly how and where to report in California",
+    "Receive a certificate that satisfies audit requirements"
+  ],
+  "modules": [
+    {
+      "title": "SB 1343 in context",
+      "duration": "15 min"
+    },
+    {
+      "title": "FEHA protected categories",
+      "duration": "15 min"
+    },
+    {
+      "title": "California case studies",
+      "duration": "25 min"
+    },
+    {
+      "title": "Bystander intervention",
+      "duration": "15 min"
+    },
+    {
+      "title": "Reporting in California",
+      "duration": "20 min"
+    }
+  ],
+  "accreditations": [
+    "SB 1343 compliant · CA DFEH"
+  ],
+  "priceFrom": 19,
+  "enrollId": "sexual-harassment"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "jimena-a",
+  "quote": "Setup took less than an hour. We used to outsource training to a compliance firm — now it runs itself and our managers aren't babysitting the process.",
+  "name": "Jimena A.",
+  "role": "Multi-unit franchisee",
+  "company": "Taco Cabana",
+  "stat": {
+    "value": "< 1 hr",
+    "label": "to full rollout"
+  },
+  "featured": true,
+  "order": 1
+}

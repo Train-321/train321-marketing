@@ -1,0 +1,39 @@
+{
+  "slug": "illinois-sexual-harassment",
+  "title": "Illinois Sexual Harassment Training",
+  "eyebrow": "IL · SHPA",
+  "tagline": "Illinois Sexual Harassment Prevention Act-compliant training for all Illinois employers.",
+  "category": "hr",
+  "color": "emerald",
+  "icon": "fas fa-map-marker-alt",
+  "image": "https://images.unsplash.com/photo-1444664597500-035db93e2323?auto=format&fit=crop&w=800&q=80",
+  "summary": "Illinois requires annual sexual harassment prevention training for every employee of every Illinois employer — no headcount minimum. Restaurants have an additional supplement under the Illinois Liquor Control Act. This course covers both.",
+  "outcomes": [
+    "Satisfy the Illinois SHPA annual requirement",
+    "Meet the restaurant-industry supplement if your operation serves alcohol",
+    "Understand IDHR's reporting channels"
+  ],
+  "modules": [
+    {
+      "title": "Illinois SHPA overview",
+      "duration": "15 min"
+    },
+    {
+      "title": "Illinois case studies",
+      "duration": "25 min"
+    },
+    {
+      "title": "Restaurant industry supplement",
+      "duration": "15 min"
+    },
+    {
+      "title": "Reporting to IDHR",
+      "duration": "15 min"
+    }
+  ],
+  "accreditations": [
+    "SHPA compliant · IDHR"
+  ],
+  "priceFrom": 19,
+  "enrollId": "sexual-harassment"
+}

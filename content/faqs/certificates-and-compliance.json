@@ -1,0 +1,22 @@
+{
+  "category": "Certificates & compliance",
+  "order": 1,
+  "items": [
+    {
+      "q": "Are Train321 certificates accepted in my state?",
+      "a": "Our core food-handler and alcohol courses are ANSI-accredited and accepted in all US states that require training. For states with extra local requirements (e.g., certain Arizona and Texas counties), we link learners to the correct supplemental module inside the course."
+    },
+    {
+      "q": "How long are certificates valid?",
+      "a": "It varies by course and state. Food Handler is typically 3 years; Food Manager is 5 years; Alcohol Safety is 2-3 years; Sexual Harassment training is annual or biennial. Every certificate shows its exact expiration date."
+    },
+    {
+      "q": "What happens when a certificate expires?",
+      "a": "Learners get an email reminder 30 days before expiration. Renewal is a quick refresher plus the final exam — usually under an hour."
+    },
+    {
+      "q": "Can I get a paper certificate?",
+      "a": "Digital PDFs are delivered instantly and are accepted by all state health departments. For Food Manager, we also ship a physical certificate at no extra cost."
+    }
+  ]
+}

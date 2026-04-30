@@ -1,0 +1,18 @@
+{
+  "category": "Platform & tech",
+  "order": 3,
+  "items": [
+    {
+      "q": "Does this work on a phone?",
+      "a": "Yes. Every course is fully responsive and works on any modern browser on any device. Most cooks take it on their phone during prep."
+    },
+    {
+      "q": "What languages are available?",
+      "a": "All core courses are offered in English and Spanish. Food Handler is additionally available in Mandarin, Vietnamese, and Korean."
+    },
+    {
+      "q": "Can I integrate with my HRIS?",
+      "a": "Yes — on the business plan. We offer SCIM-based user provisioning and SSO through Okta, Google Workspace, and Azure AD. Completion data can also be pushed to your LMS via SCORM 2004 or xAPI."
+    }
+  ]
+}

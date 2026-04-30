@@ -1,0 +1,41 @@
+{
+  "slug": "service-basics",
+  "title": "Service Basics",
+  "eyebrow": "Front-of-house",
+  "tagline": "Confidence-building fundamentals for new servers and hosts.",
+  "category": "food",
+  "color": "amber",
+  "icon": "fas fa-concierge-bell",
+  "image": "https://images.unsplash.com/photo-1424847651672-bf20a4b0982b?auto=format&fit=crop&w=800&q=80",
+  "summary": "Service isn't a personality — it's a repeatable set of moves. This course covers greeting, table management, upselling without being pushy, handling complaints, and running a section on a busy Saturday.",
+  "outcomes": [
+    "Greet, seat, and read a table correctly",
+    "Upsell appetizers and wine without feeling slimy",
+    "Handle a guest complaint so they come back",
+    "Run a 6-top section during a rush without a ticket getting lost"
+  ],
+  "modules": [
+    {
+      "title": "First impressions",
+      "duration": "15 min"
+    },
+    {
+      "title": "Running a section",
+      "duration": "25 min"
+    },
+    {
+      "title": "The art of the suggestive sell",
+      "duration": "20 min"
+    },
+    {
+      "title": "Service recovery",
+      "duration": "20 min"
+    },
+    {
+      "title": "Final assessment",
+      "duration": "15 min"
+    }
+  ],
+  "priceFrom": 12,
+  "enrollId": "food-handler"
+}

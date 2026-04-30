@@ -1,0 +1,41 @@
+{
+  "slug": "safety-basics",
+  "title": "Safety Basics",
+  "eyebrow": "Workplace safety",
+  "tagline": "OSHA-aligned foundations for any workplace — slips, lifts, knives, fires, first aid.",
+  "category": "food",
+  "color": "amber",
+  "icon": "fas fa-hard-hat",
+  "image": "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=800&q=80",
+  "summary": "A broad workplace-safety primer that satisfies the \"we trained them on safety\" requirement most operations need. Focused on real incidents that actually happen in restaurants, retail, and service: slips, burns, lifts, knife cuts.",
+  "outcomes": [
+    "Recognize the most common workplace hazards in service environments",
+    "Perform safe lifts and avoid the most common back injuries",
+    "Respond correctly to a burn, cut, or fall",
+    "Know when to call 911, when to file, and when to clean and keep going"
+  ],
+  "modules": [
+    {
+      "title": "Workplace hazard awareness",
+      "duration": "25 min"
+    },
+    {
+      "title": "Slips, trips & falls",
+      "duration": "15 min"
+    },
+    {
+      "title": "Burns, cuts & knife safety",
+      "duration": "25 min"
+    },
+    {
+      "title": "Lifting & back care",
+      "duration": "15 min"
+    },
+    {
+      "title": "Basic first aid response",
+      "duration": "20 min"
+    }
+  ],
+  "priceFrom": 14,
+  "enrollId": "food-handler"
+}

@@ -1,0 +1,66 @@
+{
+  "slug": "alcohol",
+  "title": "Alcohol Safety Training",
+  "eyebrow": "Responsible alcohol service",
+  "tagline": "TIPS-equivalent responsible alcohol service training — state-approved in all alcohol jurisdictions.",
+  "category": "alcohol",
+  "color": "plum",
+  "icon": "fas fa-wine-glass-alt",
+  "image": "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80",
+  "summary": "Spot fake IDs, recognize visible intoxication, refuse a sale without losing the guest. Required in most states for anyone who serves or sells alcohol — and cheap insurance for the states where it's \"strongly recommended.\"",
+  "hero": {
+    "stats": [
+      {
+        "value": "90 min",
+        "label": "Average time"
+      },
+      {
+        "value": "41k+",
+        "label": "Certified this year"
+      },
+      {
+        "value": "48 states",
+        "label": "Approved"
+      }
+    ]
+  },
+  "outcomes": [
+    "Verify age and detect altered or fake IDs",
+    "Recognize the stages of intoxication and intervene early",
+    "Refuse service with confidence — and without escalation",
+    "Document incidents in a way that protects you and your license"
+  ],
+  "modules": [
+    {
+      "title": "Alcohol law in your state",
+      "duration": "25 min"
+    },
+    {
+      "title": "ID verification",
+      "duration": "20 min"
+    },
+    {
+      "title": "Recognizing intoxication",
+      "duration": "30 min"
+    },
+    {
+      "title": "Responsible refusal & intervention",
+      "duration": "20 min"
+    },
+    {
+      "title": "Final exam",
+      "duration": "25 min"
+    }
+  ],
+  "accreditations": [
+    "TIPS-equivalent",
+    "State-approved in 48 states"
+  ],
+  "certificate": {
+    "delivery": "Instant digital + wallet card",
+    "validity": "2-3 years (varies by state)",
+    "accepted": "All states requiring seller/server training"
+  },
+  "priceFrom": 15,
+  "enrollId": "alcohol"
+}

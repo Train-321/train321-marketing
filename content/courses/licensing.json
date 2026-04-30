@@ -1,0 +1,24 @@
+{
+  "slug": "licensing",
+  "title": "Licensing Train321",
+  "eyebrow": "For trade associations",
+  "tagline": "License our full catalog for your members — branded as yours.",
+  "category": "food",
+  "color": "neutral",
+  "icon": "fas fa-id-card",
+  "image": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=800&q=80",
+  "summary": "State restaurant associations, franchise organizations, and trade groups use Train321 as the training engine behind their member-facing brand. We handle the content, tech, and compliance; you handle the relationship.",
+  "outcomes": [
+    "Offer a complete compliance catalog under your association's brand",
+    "Track completion across your entire membership",
+    "Get content updates as laws change — with no engineering lift"
+  ],
+  "priceNote": "Licensing terms by association — contact us for a quote.",
+  "faqs": [
+    {
+      "q": "Is this the same as white labeling?",
+      "a": "They're related. White labeling is for individual operators who want a branded LMS for their own staff. Licensing is for associations and multi-brand owners who need to offer training to members or franchisees."
+    }
+  ],
+  "enrollId": "food-manager"
+}

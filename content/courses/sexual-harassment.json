@@ -1,0 +1,63 @@
+{
+  "slug": "sexual-harassment",
+  "title": "Sexual Harassment Prevention",
+  "eyebrow": "HR · compliance",
+  "tagline": "Practical, jurisdiction-aware harassment prevention training — supervisor and employee versions.",
+  "category": "hr",
+  "color": "emerald",
+  "icon": "fas fa-shield-alt",
+  "image": "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=800&q=80",
+  "summary": "Satisfies the federal baseline and is pre-configured for the five states with specific mandates (CA, NY, IL, CT, DE). Supervisor version adds bystander intervention, reporting obligations, and investigation basics.",
+  "hero": {
+    "stats": [
+      {
+        "value": "60 min",
+        "label": "Employee version"
+      },
+      {
+        "value": "120 min",
+        "label": "Supervisor version"
+      },
+      {
+        "value": "5 states",
+        "label": "Mandated"
+      }
+    ]
+  },
+  "outcomes": [
+    "Identify harassment in its subtler, real-world forms",
+    "Intervene as a bystander without making things worse",
+    "Know exactly how and where to report",
+    "Understand the employer's obligation to investigate"
+  ],
+  "modules": [
+    {
+      "title": "What the law actually says",
+      "duration": "20 min"
+    },
+    {
+      "title": "Harassment in real situations",
+      "duration": "25 min"
+    },
+    {
+      "title": "Bystander intervention",
+      "duration": "20 min"
+    },
+    {
+      "title": "Reporting & retaliation",
+      "duration": "20 min"
+    },
+    {
+      "title": "Supervisor-only: investigations",
+      "duration": "35 min (supervisor)"
+    }
+  ],
+  "accreditations": [
+    "CA SB 1343 compliant",
+    "NY State & NYC compliant",
+    "Illinois SHPA compliant",
+    "Connecticut & Delaware compliant"
+  ],
+  "priceFrom": 19,
+  "enrollId": "sexual-harassment"
+}

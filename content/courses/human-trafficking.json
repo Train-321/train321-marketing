@@ -1,0 +1,41 @@
+{
+  "slug": "human-trafficking",
+  "title": "Human Trafficking Awareness",
+  "eyebrow": "Hospitality compliance",
+  "tagline": "Required in several states for hotels, motels, and hospitality staff. One hour. Handled.",
+  "category": "hr",
+  "color": "emerald",
+  "icon": "fas fa-hands-helping",
+  "image": "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&w=800&q=80",
+  "summary": "Teaches hospitality staff how to recognize the signs of labor and sex trafficking, how to respond safely, and how to report. Satisfies mandates in Florida, California, Texas, and Connecticut, among others.",
+  "outcomes": [
+    "Recognize common trafficking indicators in hospitality settings",
+    "Respond without putting yourself, colleagues, or victims at risk",
+    "Report to the right authority through the right channel",
+    "Receive a certificate that satisfies state hospitality mandates"
+  ],
+  "modules": [
+    {
+      "title": "What trafficking looks like",
+      "duration": "20 min"
+    },
+    {
+      "title": "Indicators in hospitality",
+      "duration": "20 min"
+    },
+    {
+      "title": "Safe response protocols",
+      "duration": "15 min"
+    },
+    {
+      "title": "Reporting channels",
+      "duration": "10 min"
+    }
+  ],
+  "accreditations": [
+    "FL Department of Business & Professional Regulation approved",
+    "Accepted in CA, TX, CT"
+  ],
+  "priceFrom": 12,
+  "enrollId": "sexual-harassment"
+}

@@ -1,0 +1,41 @@
+{
+  "slug": "human-resources",
+  "title": "Human Resources Training",
+  "eyebrow": "HR · management",
+  "tagline": "The HR essentials every manager needs — hiring, firing, discipline, documentation, done right.",
+  "category": "hr",
+  "color": "emerald",
+  "icon": "fas fa-users-cog",
+  "image": "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
+  "summary": "A practical HR curriculum for operators and shift managers, built around the situations that actually cost small businesses money — wage-and-hour mistakes, bad documentation, discrimination blind spots, and the hiring interview that ends in a lawsuit.",
+  "outcomes": [
+    "Run a legal, bias-resistant interview",
+    "Document performance issues so a decision sticks",
+    "Handle a complaint without creating a retaliation claim",
+    "Navigate termination conversations professionally"
+  ],
+  "modules": [
+    {
+      "title": "Hiring & interviewing legally",
+      "duration": "30 min"
+    },
+    {
+      "title": "Wage & hour fundamentals",
+      "duration": "25 min"
+    },
+    {
+      "title": "Progressive discipline",
+      "duration": "25 min"
+    },
+    {
+      "title": "Investigating complaints",
+      "duration": "30 min"
+    },
+    {
+      "title": "Termination conversations",
+      "duration": "25 min"
+    }
+  ],
+  "priceFrom": 29,
+  "enrollId": "sexual-harassment"
+}

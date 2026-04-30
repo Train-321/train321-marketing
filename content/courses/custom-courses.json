@@ -1,0 +1,28 @@
+{
+  "slug": "custom-courses",
+  "title": "Custom Courses",
+  "eyebrow": "Built for your brand",
+  "tagline": "We build training courses to your SOPs, in your voice, with your logo, on our platform.",
+  "category": "food",
+  "color": "neutral",
+  "icon": "fas fa-sliders-h",
+  "image": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80",
+  "summary": "For operators with proprietary SOPs, brand-specific training, or multi-unit rollouts, we build custom courses end-to-end — scripting, voiceover, assessment design, LMS hosting. Projects typically ship in 4-6 weeks.",
+  "outcomes": [
+    "Replace your SOP binder with a modern, trackable course",
+    "Roll out consistent training across every location",
+    "Track completion at the company, location, and employee level"
+  ],
+  "priceNote": "Custom pricing — scopes start around $2,500 per course.",
+  "faqs": [
+    {
+      "q": "How does the custom course process work?",
+      "a": "We start with a scoping call, then we draft a script from your SOPs. You review, we record voiceover and build the course in our platform, you approve, and we ship. Typical timeline: 4-6 weeks."
+    },
+    {
+      "q": "Do we own the course?",
+      "a": "You own the content. Train321 hosts and delivers it on our LMS for the duration of your license."
+    }
+  ],
+  "enrollId": "food-manager"
+}

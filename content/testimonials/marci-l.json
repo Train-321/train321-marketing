@@ -1,0 +1,13 @@
+{
+  "id": "marci-l",
+  "quote": "We rolled Train321 out across 14 locations in three weeks. Certification rates went from \"whenever we remember\" to 97% inside 30 days. Inspectors noticed.",
+  "name": "Marci L.",
+  "role": "Director of Operations",
+  "company": "Coastal Hospitality Group",
+  "stat": {
+    "value": "$1,600",
+    "label": "saved per location, annually"
+  },
+  "featured": true,
+  "order": 0
+}

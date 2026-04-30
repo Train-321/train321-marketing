@@ -1,0 +1,13 @@
+{
+  "id": "adam-s",
+  "quote": "The reports alone are worth it. When our insurance carrier asked for proof of training, I pulled a CSV in 30 seconds.",
+  "name": "Adam S.",
+  "role": "HR Director",
+  "company": "The Beacon Restaurant Group",
+  "stat": {
+    "value": "10-20 hrs",
+    "label": "freed per location, per year"
+  },
+  "featured": true,
+  "order": 2
+}

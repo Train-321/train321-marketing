@@ -1,0 +1,18 @@
+{
+  "slug": "additional-courses",
+  "title": "Additional Courses",
+  "eyebrow": "Full catalog",
+  "tagline": "Can't find what you need? Here's everything else we offer — from cash handling to active-shooter response.",
+  "category": "food",
+  "color": "neutral",
+  "icon": "fas fa-plus-circle",
+  "image": "https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=800&q=80",
+  "summary": "Beyond our core compliance catalog, we offer specialized courses that operators request: cash handling, PCI basics, active-shooter response, workplace violence prevention, data privacy fundamentals, and more. If it exists on our platform and isn't in the main catalog, it's probably here.",
+  "outcomes": [
+    "Browse a growing catalog of specialized training",
+    "Bundle niche topics into a single company plan",
+    "Request a topic we haven't built yet"
+  ],
+  "priceFrom": 9,
+  "enrollId": "food-handler"
+}

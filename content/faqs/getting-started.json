@@ -1,0 +1,18 @@
+{
+  "category": "Getting started",
+  "order": 0,
+  "items": [
+    {
+      "q": "How quickly can we get our team trained?",
+      "a": "Most teams are up and running within an hour. Buy a plan, invite your team by email or CSV upload, and learners can start the same day. Courses take 1-2 hours each, so a full team can be certified within a week."
+    },
+    {
+      "q": "Do we need to install anything?",
+      "a": "No. Train321 runs entirely in the browser — desktop, tablet, or phone. Learners don't need an account beyond their training login, and managers manage everything from a dashboard."
+    },
+    {
+      "q": "Can I try it before buying?",
+      "a": "Yes. Every course has a free preview module so you can see exactly what your team will experience. You can also request a live demo with our team."
+    }
+  ]
+}

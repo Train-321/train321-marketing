@@ -1,0 +1,85 @@
+{
+  "slug": "food-handler",
+  "title": "Food Handler Certification",
+  "eyebrow": "Food safety",
+  "tagline": "ANSI-accredited food safety training that pays for itself on day one.",
+  "category": "food",
+  "color": "amber",
+  "icon": "fas fa-utensils",
+  "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80",
+  "summary": "Train321's Food Handler course teaches the fundamentals every front-of-house and back-of-house team member needs: personal hygiene, safe temperatures, allergens, and cross-contamination. Certificate delivered the moment learners pass.",
+  "hero": {
+    "stats": [
+      {
+        "value": "2 hrs",
+        "label": "Total time"
+      },
+      {
+        "value": "48k+",
+        "label": "Certified this year"
+      },
+      {
+        "value": "50 states",
+        "label": "Accepted"
+      }
+    ]
+  },
+  "outcomes": [
+    "Identify the six most common foodborne hazards and how to prevent each",
+    "Hit correct holding, cooking, and cooling temperatures every shift",
+    "Respond correctly when a guest declares a food allergy",
+    "Pass your state food-handler exam on the first attempt"
+  ],
+  "modules": [
+    {
+      "title": "Foundations of food safety",
+      "duration": "18 min"
+    },
+    {
+      "title": "Personal hygiene & illness reporting",
+      "duration": "22 min"
+    },
+    {
+      "title": "Time & temperature control",
+      "duration": "28 min"
+    },
+    {
+      "title": "Cleaning, sanitizing & cross-contact",
+      "duration": "21 min"
+    },
+    {
+      "title": "Allergens & special diets",
+      "duration": "19 min"
+    },
+    {
+      "title": "Final exam (40 questions)",
+      "duration": "33 min"
+    }
+  ],
+  "accreditations": [
+    "ANSI-accredited",
+    "ServSafe-equivalent",
+    "State-approved in 50 states"
+  ],
+  "certificate": {
+    "delivery": "Instant digital PDF",
+    "validity": "3 years (check your state)",
+    "accepted": "Every US state health department"
+  },
+  "priceFrom": 14,
+  "faqs": [
+    {
+      "q": "Is a Train321 food-handler card accepted in my state?",
+      "a": "Yes — our card is ANSI-accredited and accepted by every state health department. A handful of counties (e.g., Maricopa County, AZ) require a local card on top, and we link you to the right supplemental module inside the course."
+    },
+    {
+      "q": "How long does the course take?",
+      "a": "Most learners finish in a single sitting, about two hours end-to-end. You can pause anywhere — progress saves automatically."
+    },
+    {
+      "q": "What score do I need to pass?",
+      "a": "75% or better on the 40-question final. You get three attempts; most people pass on the first."
+    }
+  ],
+  "enrollId": "food-handler"
+}

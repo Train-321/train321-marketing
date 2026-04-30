@@ -1,0 +1,69 @@
+{
+  "siteName": "Train321",
+  "tagline": "Online Food Safety Training",
+  "phone": "561-325-7300",
+  "email": "info@train321.com",
+  "social": {
+    "facebook": "",
+    "twitter": "",
+    "linkedin": "",
+    "instagram": "",
+    "youtube": ""
+  },
+  "companyStats": [
+    {
+      "value": "500,000+",
+      "label": "Certifications issued"
+    },
+    {
+      "value": "12,400+",
+      "label": "Businesses trained"
+    },
+    {
+      "value": "6 yrs",
+      "label": "Serving hospitality"
+    },
+    {
+      "value": "4.8/5",
+      "label": "Average learner rating"
+    }
+  ],
+  "trustLogos": [
+    {
+      "name": "CRA",
+      "label": "California Restaurant Association"
+    },
+    {
+      "name": "DRA",
+      "label": "Delaware Restaurant Association"
+    },
+    {
+      "name": "MRA",
+      "label": "Massachusetts Restaurant Association"
+    },
+    {
+      "name": "ORLA",
+      "label": "Oregon Restaurant & Lodging"
+    },
+    {
+      "name": "NMRA",
+      "label": "New Mexico Restaurant Association"
+    },
+    {
+      "name": "NVRA",
+      "label": "Nevada Restaurant Association"
+    },
+    {
+      "name": "Denny's",
+      "label": "Denny's"
+    },
+    {
+      "name": "Jack in the Box",
+      "label": "Jack in the Box"
+    },
+    {
+      "name": "Taco Cabana",
+      "label": "Taco Cabana"
+    }
+  ]
+}

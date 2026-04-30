@@ -1,0 +1,40 @@
+{
+  "slug": "new-york-sexual-harassment",
+  "title": "New York Sexual Harassment Training",
+  "eyebrow": "NY · State & City",
+  "tagline": "Meets both the New York State and New York City annual training requirements.",
+  "category": "hr",
+  "color": "emerald",
+  "icon": "fas fa-map-marker-alt",
+  "image": "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=800&q=80",
+  "summary": "New York State requires annual training for every employee. New York City adds additional requirements for employers with 15+ employees. This course satisfies both — with the NYC-specific bystander intervention content included.",
+  "outcomes": [
+    "Satisfy NY State Labor Law §201-g annual training",
+    "Satisfy NYC's Stop Sexual Harassment Act (if applicable)",
+    "Know how to report to NY DOL or the NYC CCHR"
+  ],
+  "modules": [
+    {
+      "title": "NY State vs. NYC requirements",
+      "duration": "15 min"
+    },
+    {
+      "title": "New York case studies",
+      "duration": "25 min"
+    },
+    {
+      "title": "NYC bystander intervention supplement",
+      "duration": "15 min"
+    },
+    {
+      "title": "Reporting channels",
+      "duration": "15 min"
+    }
+  ],
+  "accreditations": [
+    "NY State §201-g compliant",
+    "NYC Stop Sexual Harassment Act compliant"
+  ],
+  "priceFrom": 19,
+  "enrollId": "sexual-harassment"
+}
