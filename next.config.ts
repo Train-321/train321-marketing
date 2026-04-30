@@ -6,11 +6,19 @@ const nextConfig: NextConfig = {
   // marking them external makes Node load them directly from node_modules,
   // which is what they're built for.
   serverExternalPackages: [
+    "tinacms",
     "tinacms-authjs",
     "@tinacms/datalayer",
     "tinacms-gitprovider-github",
     "mongodb-level",
-    "next-auth"
+    "next-auth",
+    "color-string",
+    "slate",
+    "slate-dom",
+    "slate-react",
+    "slate-hyperscript",
+    "@tinacms/cli",
+    "graphql"
   ],
 
   // Some pages link to legacy URLs from the old Nuxt site (/food-handler, /privacy-policy, etc).
