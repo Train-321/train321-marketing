@@ -3,19 +3,28 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "TINA_PUBLIC_IS_LOCAL=true tinacms dev -c \"next dev\"",
+    "dev:next-only": "next dev",
+    "build": "tinacms build && next build",
+    "build:local": "TINA_PUBLIC_IS_LOCAL=true tinacms build && next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
     "@tinacms/cli": "^2.2.5",
+    "@tinacms/datalayer": "^2.0.18",
     "gray-matter": "^4.0.3",
+    "mongodb-level": "^0.0.4",
     "next": "16.2.4",
+    "next-auth": "^4.24.14",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-markdown": "^10.1.0",
-    "tinacms": "^3.7.5"
+    "slate": "^0.124.1",
+    "slate-dom": "^0.124.1",
+    "tinacms": "^3.7.5",
+    "tinacms-authjs": "^21.0.5",
+    "tinacms-gitprovider-github": "^4.1.5"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -23,6 +32,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "fs-extra": "^11.3.4",
     "typescript": "^5"
   }
 }

@@ -74,25 +74,92 @@ That's it. All content lives in `content/` — no external CMS required to run t
 
 ## Editing content
 
-For now, content is edited as files in this repo. Two ways:
+### Local dev (works out of the box, no external services)
 
-1. **Locally**: edit `content/<collection>/<slug>.{json,md}` in VS Code, commit, push → Vercel rebuilds in ~30 seconds.
-2. **GitHub web**: navigate to `Train-321/train321-marketing/content/...`, click the pencil icon, edit, commit on a branch or directly to main.
+```bash
+npm run dev
+```
 
-Schemas in `tina/config.ts` document the expected fields per collection — if a JSON or Markdown file goes out of shape, the next page render will surface a TypeScript error in `lib/content.ts`.
+This runs `tinacms dev -c "next dev"` — the Tina admin and Next.js dev server boot together. Open:
 
-### Editor mode (TinaCMS visual editing) — pending
+- http://localhost:3000 → live site
+- http://localhost:3000/admin/index.html → Tina admin (no login required in local mode)
 
-The Tina schema is in place. To turn on the click-on-page editor:
+In local mode, edits made through the admin UI write directly to the `content/` files on disk. Commit them when you're happy.
 
-1. Sign up at https://app.tina.io/ (free tier covers solo/small teams).
-2. Create a project pointed at this GitHub repo. Tina will give you `NEXT_PUBLIC_TINA_CLIENT_ID` and a backend `TINA_TOKEN`.
-3. Paste both into Vercel env vars (and locally into `.env`).
-4. Add the Tina build step to package.json: `"build": "tinacms build && next build"` and `"dev": "tinacms dev -c \"next dev\""`.
-5. Add `app/admin-route/[[...slug]]/page.tsx` that statically serves the Tina admin from `public/admin/`.
-6. Wire pages to use Tina's `client.queries.*` for live preview (optional — pages currently read directly from disk via `lib/content.ts`, which works fine for SSG).
+### Edit straight in git
 
-Alternative: self-host the Tina backend on Vercel functions per https://tina.io/docs/self-hosted/. More setup, no SaaS dependency. Either works.
+Without booting Tina, you can also just edit `content/<collection>/<slug>.{json,md}` in VS Code or via the GitHub web editor → commit → push → Vercel rebuilds in ~30 seconds.
+
+Schemas in `tina/config.ts` document the expected fields per collection.
+
+---
+
+## Editor mode (self-hosted production)
+
+The Tina backend is set up to run on Vercel functions. The schema is wired,
+the API routes exist, the admin UI is built. To turn it on in production
+you need three external services. Each is free for the scale of this site.
+
+### 1. MongoDB Atlas (the data layer index)
+
+Tina uses MongoDB to index content for fast queries.
+
+1. Sign up at https://www.mongodb.com/cloud/atlas
+2. Create a project, then create an **M0 (free)** cluster
+3. **Network Access** → Add IP `0.0.0.0/0` (allow from anywhere — Vercel functions don't have static IPs on the Hobby tier; lock down later if you switch to a Pro plan)
+4. **Database Access** → Add a database user with read+write permissions
+5. **Database** → Connect → Drivers → copy the connection string. It looks like `mongodb+srv://USER:PASS@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority`. **Replace `<password>` with the user's password URL-encoded.**
+6. Paste it as `MONGODB_URI` in Vercel env vars
+
+### 2. GitHub fine-grained PAT (the git provider)
+
+Tina commits content edits to this repo via the GitHub API.
+
+1. Go to https://github.com/settings/personal-access-tokens/new
+2. **Resource owner**: `Train-321`. **Repository access**: only `train321-marketing`
+3. **Permissions** → **Repository permissions**:
+   - Contents: Read and write
+   - Metadata: Read-only (auto)
+4. Generate, copy the token, paste as `GITHUB_PERSONAL_ACCESS_TOKEN` in Vercel env vars
+5. Also set `GITHUB_OWNER=Train-321` and `GITHUB_REPO=train321-marketing`
+
+### 3. NextAuth secret (session cookies)
+
+Generate a random 32-char string:
+
+```bash
+openssl rand -base64 32
+```
+
+Paste as `NEXTAUTH_SECRET` in Vercel env vars. Also set `NEXTAUTH_URL=https://train321-marketing.vercel.app` (whatever the prod URL is).
+
+### 4. Deploy
+
+After setting all the env vars on Vercel:
+
+1. **Unset** `TINA_PUBLIC_IS_LOCAL` on Vercel (or set to `false`). Local mode disables auth and skips the production backend — you don't want that in prod.
+2. Trigger a redeploy: `vercel deploy --prod` or push any commit.
+3. The build runs `tinacms build && next build`. Tina creates the GraphQL schema, indexes content into MongoDB, and outputs the admin UI to `public/admin/`.
+
+### 5. Create the first editor user
+
+1. Visit `https://train321-marketing.vercel.app/admin/index.html`
+2. The first time, you'll see a sign-up screen (Tina detects the empty user collection and lets you register).
+3. Create your username/password. This commits a new file to `content/users/` with a hashed password.
+4. Subsequent users can be added through the same flow until you decide to lock signup down.
+
+After login, the admin UI lets you browse and edit every collection. Saving an edit commits to the GitHub repo via the PAT, which triggers a Vercel rebuild — content goes live in ~30 seconds.
+
+### Visual editing per page (optional next step)
+
+Right now pages read content via `lib/content.ts` (server filesystem). To get
+**click-on-the-page-to-edit** in production, each page needs to switch from
+`getCourse(slug)` etc. to `client.queries.course({ relativePath })` from the
+generated Tina client at `tina/__generated__/client.ts`, plus wrap the JSX in
+the `useTina` hook. This is page-by-page work; the schema and backend are
+already correct. See `tina/__generated__/client.ts` for the generated query
+helpers and https://tina.io/docs/data-fetching/overview for the pattern.
 
 ---
 

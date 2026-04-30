@@ -1,43 +1,29 @@
+// tina/config.ts
 import { defineConfig, LocalAuthProvider } from "tinacms";
 import { UsernamePasswordAuthJSProvider, TinaUserCollection } from "tinacms-authjs/dist/tinacms";
-
-// Branch detection — Vercel sets these automatically
-const branch =
-  process.env.GITHUB_BRANCH ||
-  process.env.VERCEL_GIT_COMMIT_REF ||
-  process.env.HEAD ||
-  "main";
-
-const isLocal = process.env.TINA_PUBLIC_IS_LOCAL === "true";
-
-export default defineConfig({
+var branch = process.env.GITHUB_BRANCH || process.env.VERCEL_GIT_COMMIT_REF || process.env.HEAD || "main";
+var isLocal = process.env.TINA_PUBLIC_IS_LOCAL === "true";
+var config_default = defineConfig({
   branch,
-
   // Self-hosted: contentApiUrlOverride points at our own backend.
   // No TinaCloud clientId/token needed.
   contentApiUrlOverride: "/api/tina/gql",
-
-  authProvider: isLocal
-    ? new LocalAuthProvider()
-    : new UsernamePasswordAuthJSProvider(),
-
+  authProvider: isLocal ? new LocalAuthProvider() : new UsernamePasswordAuthJSProvider(),
   build: {
     outputFolder: "admin",
     publicFolder: "public"
   },
-
   media: {
     tina: {
       mediaRoot: "img",
       publicFolder: "public"
     }
   },
-
   schema: {
     collections: [
       // Editor users (only used in production self-hosted mode).
       // Seeded via the Tina admin signup screen on first run.
-      ...(isLocal ? [] : [TinaUserCollection]),
+      ...isLocal ? [] : [TinaUserCollection],
       // ── Site Settings (singleton) ──────────────────────────────────────
       {
         name: "siteSettings",
@@ -69,7 +55,7 @@ export default defineConfig({
             name: "companyStats",
             label: "Company stats",
             list: true,
-            ui: { itemProps: (i) => ({ label: i?.value ? `${i.value} — ${i.label || ""}` : "Stat" }) },
+            ui: { itemProps: (i) => ({ label: i?.value ? `${i.value} \u2014 ${i.label || ""}` : "Stat" }) },
             fields: [
               { type: "string", name: "value", label: "Value", required: true },
               { type: "string", name: "label", label: "Label", required: true }
@@ -88,7 +74,6 @@ export default defineConfig({
           }
         ]
       },
-
       // ── Courses ────────────────────────────────────────────────────────
       {
         name: "course",
@@ -129,7 +114,7 @@ export default defineConfig({
                 name: "stats",
                 label: "Hero stats",
                 list: true,
-                ui: { itemProps: (i) => ({ label: i?.value ? `${i.value} — ${i.label || ""}` : "Stat" }) },
+                ui: { itemProps: (i) => ({ label: i?.value ? `${i.value} \u2014 ${i.label || ""}` : "Stat" }) },
                 fields: [
                   { type: "string", name: "value", label: "Value", required: true },
                   { type: "string", name: "label", label: "Label", required: true }
@@ -176,7 +161,6 @@ export default defineConfig({
           { type: "string", name: "enrollId", label: "LMS enroll ID" }
         ]
       },
-
       // ── Blog Posts ─────────────────────────────────────────────────────
       {
         name: "blogPost",
@@ -213,7 +197,6 @@ export default defineConfig({
           { type: "rich-text", name: "body", label: "Body", isBody: true }
         ]
       },
-
       // ── Legal Pages ────────────────────────────────────────────────────
       {
         name: "legalPage",
@@ -227,7 +210,6 @@ export default defineConfig({
           { type: "rich-text", name: "body", label: "Body", isBody: true }
         ]
       },
-
       // ── FAQ Groups (one file per category) ─────────────────────────────
       {
         name: "faqGroup",
@@ -250,7 +232,6 @@ export default defineConfig({
           }
         ]
       },
-
       // ── Testimonials ───────────────────────────────────────────────────
       // Note: Tina reserves the "id" field name; the JSON files have a manual
       // "id" property that pages read directly via fs (not via Tina queries),
@@ -278,7 +259,6 @@ export default defineConfig({
           { type: "number", name: "order", label: "Sort order" }
         ]
       },
-
       // ── Team Members ───────────────────────────────────────────────────
       {
         name: "teamMember",
@@ -297,3 +277,6 @@ export default defineConfig({
     ]
   }
 });
+export {
+  config_default as default
+};
