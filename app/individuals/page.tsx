@@ -3,7 +3,8 @@ import {
   getCourses,
   getTestimonials,
   getFaqGroups,
-  getSiteSettings
+  getSiteSettings,
+  getHomePage
 } from "@/lib/sanity";
 
 export const metadata = {
@@ -13,20 +14,22 @@ export const metadata = {
 };
 
 export default async function IndividualsPage() {
-  const [courses, testimonials, faqs, settings] = await Promise.all([
+  const [courses, testimonials, faqs, settings, home] = await Promise.all([
     getCourses(),
     getTestimonials(),
     getFaqGroups(),
-    getSiteSettings()
+    getSiteSettings(),
+    getHomePage()
   ]);
-  const companyStats = settings.companyStats || [];
   return (
     <HomePage
       forcedAudience="self"
       courses={courses}
       testimonials={testimonials}
       faqs={faqs}
-      companyStats={companyStats}
+      companyStats={settings.companyStats || []}
+      trustLogos={settings.trustLogos || []}
+      home={home}
     />
   );
 }

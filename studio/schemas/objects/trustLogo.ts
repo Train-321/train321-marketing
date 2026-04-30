@@ -5,9 +5,26 @@ export default defineType({
   title: 'Trust logo',
   type: 'object',
   fields: [
-    defineField({ name: 'name', type: 'string', validation: (R) => R.required() }),
-    defineField({ name: 'label', type: 'string', description: 'Long-form name, e.g. "California Restaurant Association"' }),
-    defineField({ name: 'image', type: 'image', options: { hotspot: true } })
+    defineField({ name: 'name', type: 'string', title: 'Short name', validation: (R) => R.required() }),
+    defineField({
+      name: 'label',
+      type: 'string',
+      title: 'Long name (a11y / tooltip)',
+      description: 'Long-form name, e.g. "California Restaurant Association"'
+    }),
+    defineField({
+      name: 'image',
+      type: 'image',
+      title: 'Logo',
+      options: { hotspot: true },
+      description: 'PNG or SVG. Will be color-tinted to neutral grey on the site.'
+    }),
+    defineField({
+      name: 'url',
+      type: 'url',
+      title: 'Link (optional)',
+      description: 'If set, the logo becomes a click-through link.'
+    })
   ],
   preview: { select: { title: 'name', subtitle: 'label', media: 'image' } }
 })

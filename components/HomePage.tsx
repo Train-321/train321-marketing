@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import type { Course, Testimonial, FaqGroup } from "@/lib/sanity";
+import type { Course, Testimonial, FaqGroup, TrustLogo, HomePage as HomePageDoc } from "@/lib/sanity";
+import TrustLogosCarousel from "./TrustLogosCarousel";
 import "./HomePage.css";
 
 type CompanyStat = { value: string; label: string };
@@ -164,6 +165,8 @@ type HomePageProps = {
   testimonials: Testimonial[];
   companyStats: CompanyStat[];
   faqs: FaqGroup[];
+  trustLogos?: TrustLogo[];
+  home?: HomePageDoc | null;
 };
 
 export default function HomePage({
@@ -171,7 +174,9 @@ export default function HomePage({
   courses,
   testimonials,
   companyStats,
-  faqs
+  faqs,
+  trustLogos = [],
+  home = null
 }: HomePageProps) {
   const [audience, setAudience] = useState<Audience>(forcedAudience || "team");
   const [courseIndex, setCourseIndex] = useState(0);
@@ -215,7 +220,29 @@ export default function HomePage({
   const homeFaqs = useMemo(() => faqs[0]?.items?.slice(0, 4) || [], [faqs]);
 
   const activeCourse = HERO_COURSES[courseIndex] || HERO_COURSES[0];
-  const copy = AUDIENCE_COPY[audience] || AUDIENCE_COPY.team;
+  const baseCopy = AUDIENCE_COPY[audience] || AUDIENCE_COPY.team;
+  // Sanity overrides for the hero. Currently a single block (not split by audience);
+  // when a value is set there, it wins. Phase 2 will split per-audience.
+  const copy = {
+    ...baseCopy,
+    eyebrow: home?.heroEyebrow || baseCopy.eyebrow,
+    h1Pre: home?.heroHeadline || baseCopy.h1Pre,
+    h1Em: home?.heroHeadline ? "" : baseCopy.h1Em,
+    lede: home?.heroSubcopy || baseCopy.lede,
+    ctaPrimary: home?.heroPrimaryCta?.label
+      ? {
+          label: home.heroPrimaryCta.label,
+          to: home.heroPrimaryCta.to || baseCopy.ctaPrimary.to
+        }
+      : baseCopy.ctaPrimary,
+    ctaGhost: home?.heroSecondaryCta?.label
+      ? {
+          ...baseCopy.ctaGhost,
+          label: home.heroSecondaryCta.label,
+          to: home.heroSecondaryCta.to || baseCopy.ctaGhost.to
+        }
+      : baseCopy.ctaGhost
+  };
   const showAudienceToggle = !forcedAudience;
 
   const chooseAudience = (val: Audience) => {
@@ -405,51 +432,7 @@ export default function HomePage({
 
       <section className="t321-mkt-section t321-mkt-section--tight t321-mkt-section--sunk t321-mkt-trust">
         <div className="t321-mkt-container">
-          <p className="t321-mkt-trust__label">{copy.trustLabel}</p>
-          <div className="t321-mkt-trust__logos">
-            <div className="t321-mkt-trust__logo" title="California Restaurant Association">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://www.calrest.org/sites/default/themes/dtheme/img/calrest-logo.svg" alt="California Restaurant Association" />
-            </div>
-            <div className="t321-mkt-trust__logo" title="Delaware Restaurant Association">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://dra.train321.com/img/logos/dra_logo.png" alt="Delaware Restaurant Association" />
-            </div>
-            <div className="t321-mkt-trust__logo" title="Massachusetts Restaurant Association">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://www.train321.com/images/logos/MRA.png" alt="Massachusetts Restaurant Association" />
-            </div>
-            <div className="t321-mkt-trust__logo" title="Oregon Restaurant & Lodging Association">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://www.train321.com/images/logos/orla.png" alt="Oregon Restaurant & Lodging Association" />
-            </div>
-            <div className="t321-mkt-trust__logo" title="New Mexico Restaurant Association">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://www.train321.com/images/logos/nmra.png" alt="New Mexico Restaurant Association" />
-            </div>
-            <div className="t321-mkt-trust__logo" title="Nevada Restaurant Association" aria-label="Nevada Restaurant Association">
-              <svg viewBox="0 0 180 56" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
-                <g>
-                  <polygon points="20,10 23.5,20 34,20 25.5,26 29,36 20,30 11,36 14.5,26 6,20 16.5,20" fill="#9D1F2A" />
-                  <polygon points="20,13.5 22.3,20.7 29.5,20.7 23.7,25 26,32 20,27.6 14,32 16.3,25 10.5,20.7 17.7,20.7" fill="#00CCFE" opacity="0.35" />
-                  <text x="42" y="30" fontFamily="Georgia, 'Times New Roman', serif" fontSize="24" fontWeight="700" fill="#0B437C" letterSpacing="1.2">NVRA</text>
-                  <text x="42" y="42" fontFamily="Inter, Arial, sans-serif" fontSize="6.5" fontWeight="700" fill="#5E5C57" letterSpacing="1">NEVADA RESTAURANT ASSN.</text>
-                </g>
-              </svg>
-            </div>
-            <div className="t321-mkt-trust__logo t321-mkt-trust__logo--brand" title="Denny's">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://companieslogo.com/img/orig/DENN_BIG-c9a931d8.png?t=1720244491" alt="Denny's" />
-            </div>
-            <div className="t321-mkt-trust__logo t321-mkt-trust__logo--brand" title="Jack in the Box">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://www.train321.com/images/logos/jack-in-the-box.png" alt="Jack in the Box" />
-            </div>
-            <div className="t321-mkt-trust__logo t321-mkt-trust__logo--brand" title="Taco Cabana">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://tacocabana.train321.com/taco-cabana.png" alt="Taco Cabana" />
-            </div>
-          </div>
+          <TrustLogosCarousel logos={trustLogos} label={copy.trustLabel} />
         </div>
       </section>
 

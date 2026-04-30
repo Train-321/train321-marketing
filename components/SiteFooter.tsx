@@ -3,12 +3,52 @@
 import Link from "next/link";
 import { useState } from "react";
 import { footerNav } from "@/lib/nav";
+import type { SiteSettings } from "@/lib/sanity";
 import "./SiteFooter.css";
 
-export default function SiteFooter() {
+type Props = { settings?: SiteSettings };
+
+export default function SiteFooter({ settings }: Props) {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const year = new Date().getFullYear();
+
+  const phone = settings?.phone || "561-325-7300";
+  const generalEmail = settings?.email || "info@train321.com";
+  const phoneHref = `tel:+1${phone.replace(/\D/g, "")}`;
+
+  const tagline =
+    settings?.footerTagline ||
+    "Compliance training your team will actually finish. Built for restaurants, retailers, and service businesses that need certified staff — without the hassle.";
+
+  // Footer columns: prefer Sanity-driven, fall back to legacy footerNav.
+  const columns = settings?.footerColumns?.length
+    ? settings.footerColumns
+    : [
+        { title: "Company", links: footerNav.company.map((l) => ({ label: l.label, href: l.to })) },
+        { title: "Support", links: footerNav.support.map((l) => ({ label: l.label, href: l.to })) }
+      ];
+
+  const legalLinks = settings?.footerLegalLinks?.length
+    ? settings.footerLegalLinks
+    : footerNav.legal.map((l) => ({ label: l.label, href: l.to }));
+
+  const social = settings?.social || {};
+  const socialItems: Array<{ icon: string; href?: string; label: string }> = [
+    { icon: "fab fa-facebook-f", href: social.facebook, label: "Facebook" },
+    { icon: "fab fa-twitter", href: social.twitter, label: "Twitter" },
+    { icon: "fab fa-linkedin-in", href: social.linkedin, label: "LinkedIn" },
+    { icon: "fab fa-instagram", href: social.instagram, label: "Instagram" },
+    { icon: "fab fa-youtube", href: social.youtube, label: "YouTube" }
+  ].filter((s): s is { icon: string; href: string; label: string } => Boolean(s.href));
+
+  const news = settings?.newsletter || {};
+  const newsHeading = news.heading || "Stay in the loop";
+  const newsSub =
+    news.sub || "Monthly tips on compliance deadlines, state-law changes, and training ROI.";
+  const newsPlaceholder = news.placeholder || "you@work.com";
+  const newsButton = news.buttonLabel || "Subscribe";
+  const newsSuccess = news.successText || "Thanks — you're on the list.";
 
   const onSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,48 +65,36 @@ export default function SiteFooter() {
         <div className="t321-mkt-footer__brand">
           <Link href="/" className="t321-mkt-footer__logo" aria-label="Train321 home">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/img/logos/train321_logo.png" alt="Train321" />
+            <img src="/img/logos/train321_logo.png" alt={settings?.siteName || "Train321"} />
           </Link>
-          <p className="t321-mkt-footer__tagline">
-            Compliance training your team will actually finish. Built for restaurants, retailers,
-            and service businesses that need certified staff — without the hassle.
-          </p>
-          <div className="t321-mkt-footer__social" aria-label="Social">
-            <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><i className="fab fa-facebook-f" /></a>
-            <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noopener noreferrer"><i className="fab fa-twitter" /></a>
-            <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><i className="fab fa-linkedin-in" /></a>
-            <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><i className="fab fa-instagram" /></a>
-            <a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener noreferrer"><i className="fab fa-youtube" /></a>
+          <p className="t321-mkt-footer__tagline">{tagline}</p>
+          {socialItems.length > 0 && (
+            <div className="t321-mkt-footer__social" aria-label="Social">
+              {socialItems.map((s) => (
+                <a key={s.label} href={s.href} aria-label={s.label} target="_blank" rel="noopener noreferrer">
+                  <i className={s.icon} />
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {columns.map((col) => (
+          <div key={col.title} className="t321-mkt-footer__col">
+            <h4>{col.title}</h4>
+            <ul>
+              {(col.links || []).map((l) => (
+                <li key={`${col.title}-${l.href}`}>
+                  <Link href={l.href}>{l.label}</Link>
+                </li>
+              ))}
+            </ul>
           </div>
-        </div>
-
-        <div className="t321-mkt-footer__col">
-          <h4>Company</h4>
-          <ul>
-            {footerNav.company.map((l) => (
-              <li key={l.to}>
-                <Link href={l.to}>{l.label}</Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="t321-mkt-footer__col">
-          <h4>Support</h4>
-          <ul>
-            {footerNav.support.map((l) => (
-              <li key={l.to}>
-                <Link href={l.to}>{l.label}</Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+        ))}
 
         <div className="t321-mkt-footer__col t321-mkt-footer__col--wide">
-          <h4>Stay in the loop</h4>
-          <p className="t321-mkt-footer__news-sub">
-            Monthly tips on compliance deadlines, state-law changes, and training ROI.
-          </p>
+          <h4>{newsHeading}</h4>
+          <p className="t321-mkt-footer__news-sub">{newsSub}</p>
           <form className="t321-mkt-footer__news" onSubmit={onSubscribe}>
             <label className="t321-mkt-footer__news-label" htmlFor="t321-footer-email">Email</label>
             <div className="t321-mkt-footer__news-wrap">
@@ -76,34 +104,38 @@ export default function SiteFooter() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 type="email"
-                placeholder="you@work.com"
+                placeholder={newsPlaceholder}
                 autoComplete="email"
                 required
               />
               <button type="submit" className="t321-mkt-btn t321-mkt-btn--primary">
-                {subscribed ? "Subscribed" : "Subscribe"}
+                {subscribed ? "Subscribed" : newsButton}
               </button>
             </div>
             {subscribed && (
               <p className="t321-mkt-footer__news-ok">
                 <i className="fas fa-check-circle" aria-hidden="true" />
-                Thanks — you&apos;re on the list.
+                {newsSuccess}
               </p>
             )}
           </form>
           <div className="t321-mkt-footer__contact">
-            <a href="tel:+15613257300"><i className="fas fa-phone" aria-hidden="true" /> 561-325-7300</a>
-            <a href="mailto:info@train321.com"><i className="fas fa-envelope" aria-hidden="true" /> info@train321.com</a>
+            <a href={phoneHref}>
+              <i className="fas fa-phone" aria-hidden="true" /> {phone}
+            </a>
+            <a href={`mailto:${generalEmail}`}>
+              <i className="fas fa-envelope" aria-hidden="true" /> {generalEmail}
+            </a>
           </div>
         </div>
       </div>
 
       <div className="t321-mkt-footer__meta">
         <div className="t321-mkt-container t321-mkt-footer__meta-inner">
-          <span>&copy; {year} Train321. All rights reserved.</span>
+          <span>&copy; {year} {settings?.siteName || "Train321"}. All rights reserved.</span>
           <nav className="t321-mkt-footer__meta-nav" aria-label="Legal">
-            {footerNav.legal.map((l) => (
-              <Link key={l.to} href={l.to}>{l.label}</Link>
+            {legalLinks.map((l) => (
+              <Link key={l.href} href={l.href}>{l.label}</Link>
             ))}
           </nav>
         </div>

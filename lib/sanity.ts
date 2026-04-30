@@ -78,11 +78,30 @@ export type TeamMember = {
   order?: number;
 };
 
+export type NavLink = { label: string; href: string };
+export type FooterColumn = { title: string; links: NavLink[] };
+
+export type Newsletter = {
+  heading?: string;
+  sub?: string;
+  placeholder?: string;
+  buttonLabel?: string;
+  successText?: string;
+};
+
+export type TrustLogo = {
+  name: string;
+  label?: string;
+  imageUrl?: string;
+  url?: string;
+};
+
 export type SiteSettings = {
   siteName: string;
   tagline?: string;
   phone?: string;
   email?: string;
+  supportEmail?: string;
   social?: {
     facebook?: string;
     twitter?: string;
@@ -90,8 +109,20 @@ export type SiteSettings = {
     instagram?: string;
     youtube?: string;
   };
+  footerTagline?: string;
+  footerColumns?: FooterColumn[];
+  footerLegalLinks?: NavLink[];
+  newsletter?: Newsletter;
   companyStats?: Array<{ value: string; label: string }>;
-  trustLogos?: Array<{ name: string; label: string }>;
+  trustLogos?: TrustLogo[];
+};
+
+export type HomePage = {
+  heroEyebrow?: string;
+  heroHeadline?: string;
+  heroSubcopy?: string;
+  heroPrimaryCta?: { label?: string; to?: string };
+  heroSecondaryCta?: { label?: string; to?: string };
 };
 
 // ── Client ───────────────────────────────────────────────────────────────
@@ -353,10 +384,31 @@ const SETTINGS_DEFAULT: SiteSettings = {
 export async function getSiteSettings(): Promise<SiteSettings> {
   const r: SiteSettings | null = await (await getClient()).fetch(
     `*[_id == "siteSettings"][0] {
-      siteName, tagline, phone, email, social,
+      siteName, tagline, phone, email, supportEmail, social,
+      footerTagline,
+      footerColumns[]{ title, links[]{ label, href } },
+      footerLegalLinks[]{ label, href },
+      newsletter,
       companyStats[]{ value, label },
-      trustLogos[]{ name, label }
+      trustLogos[]{
+        name,
+        label,
+        url,
+        "imageUrl": image.asset->url
+      }
     }`
   );
   return r ?? SETTINGS_DEFAULT;
+}
+
+export async function getHomePage(): Promise<HomePage | null> {
+  return (
+    (await (await getClient()).fetch(
+      `*[_id == "homePage"][0] {
+        heroEyebrow, heroHeadline, heroSubcopy,
+        "heroPrimaryCta": heroPrimaryCta{ label, "to": url },
+        "heroSecondaryCta": heroSecondaryCta{ label, "to": url }
+      }`
+    )) ?? null
+  );
 }

@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces } from "next/font/google";
 import { draftMode } from "next/headers";
-import SiteHeader from "@/components/SiteHeader";
-import SiteFooter from "@/components/SiteFooter";
+import SiteHeader from "@/components/SiteHeaderShell";
+import SiteFooter from "@/components/SiteFooterShell";
 import DisableDraftMode from "@/components/DisableDraftMode";
 import VisualEditingClient from "@/components/VisualEditingClient";
 import "./globals.css";

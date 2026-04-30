@@ -16,6 +16,8 @@ import courseFaq from './objects/courseFaq'
 import certificateInfo from './objects/certificateInfo'
 import labeledStat from './objects/labeledStat'
 import trustLogo from './objects/trustLogo'
+import footerColumn from './objects/footerColumn'
+import newsletter from './objects/newsletter'
 import legalSection from './objects/legalSection'
 import testimonialStat from './objects/testimonialStat'
 import {
@@ -46,6 +48,8 @@ export const schemaTypes = [
   certificateInfo,
   labeledStat,
   trustLogo,
+  footerColumn,
+  newsletter,
   legalSection,
   testimonialStat,
   blockParagraph,

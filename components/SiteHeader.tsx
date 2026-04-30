@@ -4,13 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { marketingNav } from "@/lib/nav";
+import type { SiteSettings } from "@/lib/sanity";
 import "./SiteHeader.css";
 
 const APP_BASE = process.env.NEXT_PUBLIC_APP_BASE || "/login";
 const LOGIN_URL = `${APP_BASE.replace(/\/$/, "")}/login`;
 const ENROLL_URL = "/enroll";
 
-export default function SiteHeader() {
+type Props = { settings?: SiteSettings };
+
+export default function SiteHeader({ settings }: Props) {
+  const phone = settings?.phone || "561-325-7300";
+  const email = settings?.email || "info@train321.com";
+  const phoneHref = `tel:+1${phone.replace(/\D/g, "")}`;
   const pathname = usePathname();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -45,11 +51,11 @@ export default function SiteHeader() {
 
       <div className="t321-mkt-header__utility">
         <div className="t321-mkt-container t321-mkt-header__utility-inner">
-          <a className="t321-mkt-header__util-link" href="tel:+15613257300">
-            <i className="fas fa-phone" aria-hidden="true" /> 561-325-7300
+          <a className="t321-mkt-header__util-link" href={phoneHref}>
+            <i className="fas fa-phone" aria-hidden="true" /> {phone}
           </a>
-          <a className="t321-mkt-header__util-link" href="mailto:info@train321.com">
-            <i className="fas fa-envelope" aria-hidden="true" /> info@train321.com
+          <a className="t321-mkt-header__util-link" href={`mailto:${email}`}>
+            <i className="fas fa-envelope" aria-hidden="true" /> {email}
           </a>
           <span className="t321-mkt-header__util-spacer" aria-hidden="true" />
           <Link href={audienceLink.to} className="t321-mkt-header__util-link t321-mkt-header__util-link--accent">
