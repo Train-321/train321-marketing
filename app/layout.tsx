@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces } from "next/font/google";
+import { draftMode } from "next/headers";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import DisableDraftMode from "@/components/DisableDraftMode";
+import VisualEditingClient from "@/components/VisualEditingClient";
 import "./globals.css";
 
 const inter = Inter({
@@ -34,7 +37,8 @@ export const viewport: Viewport = {
   themeColor: "#0b3d91"
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const { isEnabled: isDraft } = await draftMode();
   return (
     <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
       <head>
@@ -52,6 +56,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </main>
           <SiteFooter />
         </div>
+        {isDraft && (
+          <>
+            <VisualEditingClient />
+            <DisableDraftMode />
+          </>
+        )}
       </body>
     </html>
   );
