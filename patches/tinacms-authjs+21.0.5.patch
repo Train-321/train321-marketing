@@ -1,0 +1,13 @@
+diff --git a/node_modules/tinacms-authjs/dist/index.js b/node_modules/tinacms-authjs/dist/index.js
+index 13c1c4a..13269ea 100644
+--- a/node_modules/tinacms-authjs/dist/index.js
++++ b/node_modules/tinacms-authjs/dist/index.js
+@@ -1,6 +1,7 @@
+ // src/index.ts
+ import NextAuth from "next-auth";
+-import CredentialsProvider from "next-auth/providers/credentials";
++import CredentialsProviderModule from "next-auth/providers/credentials";
++const CredentialsProvider = CredentialsProviderModule.default || CredentialsProviderModule;
+ import { getServerSession } from "next-auth/next";
+ 
+ // src/tinacms.ts
