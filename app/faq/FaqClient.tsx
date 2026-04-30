@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useMemo } from "react";
-import type { FaqGroup } from "@/lib/content";
+import type { FaqGroup } from "@/lib/sanity";
 import "./faq.css";
 
 function slug(s: string) {

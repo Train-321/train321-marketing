@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTeam, getSiteSettings } from "@/lib/content";
+import { getTeam, getSiteSettings } from "@/lib/sanity";
 import "./about.css";
 
 function initials(name: string) {
@@ -16,9 +16,9 @@ export const metadata = {
   description: "The team and mission behind Train321."
 };
 
-export default function AboutPage() {
-  const team = getTeam();
-  const companyStats = getSiteSettings().companyStats || [];
+export default async function AboutPage() {
+  const [team, settings] = await Promise.all([getTeam(), getSiteSettings()]);
+  const companyStats = settings.companyStats || [];
   return (
     <div className="t321-mkt-about">
       <section className="t321-mkt-about__hero">

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
-import { getBlogPost, getBlogPosts } from "@/lib/content";
+import { getBlogPost, getBlogPosts } from "@/lib/sanity";
 import "./article.css";
 
 function initials(name: string) {
@@ -19,13 +19,14 @@ function formatDate(iso: string) {
   return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
 
-export function generateStaticParams() {
-  return getBlogPosts().map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  const posts = await getBlogPosts();
+  return posts.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = getBlogPost(slug);
+  const post = await getBlogPost(slug);
   if (!post) return { title: "Article — Train321" };
   return {
     title: `${post.title} — Train321`,
@@ -35,10 +36,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = getBlogPost(slug);
+  const post = await getBlogPost(slug);
   if (!post) notFound();
 
-  const related = getBlogPosts()
+  const allPosts = await getBlogPosts();
+  const related = allPosts
     .filter((p) => p.slug !== post.slug)
     .slice(0, 3);
 

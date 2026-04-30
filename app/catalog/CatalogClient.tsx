@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { Course } from "@/lib/content";
+import type { Course } from "@/lib/sanity";
 import "./catalog.css";
 
 const CATEGORY_DEFS = [

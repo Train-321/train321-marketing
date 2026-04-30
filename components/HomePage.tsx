@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import type { Course, Testimonial, FaqGroup } from "@/lib/content";
+import type { Course, Testimonial, FaqGroup } from "@/lib/sanity";
 import "./HomePage.css";
 
 type CompanyStat = { value: string; label: string };

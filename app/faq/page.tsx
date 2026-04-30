@@ -1,4 +1,4 @@
-import { getFaqGroups } from "@/lib/content";
+import { getFaqGroups } from "@/lib/sanity";
 import FaqClient from "./FaqClient";
 
 export const metadata = {
@@ -6,7 +6,7 @@ export const metadata = {
   description: "Answers to the questions we hear most often."
 };
 
-export default function FaqPage() {
-  const faqs = getFaqGroups();
+export default async function FaqPage() {
+  const faqs = await getFaqGroups();
   return <FaqClient faqs={faqs} />;
 }

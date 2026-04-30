@@ -1,15 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCourse, getCourses } from "@/lib/content";
+import { getCourse, getCourses } from "@/lib/sanity";
 import "./course.css";
 
-export function generateStaticParams() {
-  return getCourses().map((c) => ({ slug: c.slug }));
+export async function generateStaticParams() {
+  const courses = await getCourses();
+  return courses.map((c) => ({ slug: c.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const course = getCourse(slug);
+  const course = await getCourse(slug);
   if (!course) return { title: "Course · Train321" };
   return {
     title: `${course.title} · Train321`,
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function CoursePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const course = getCourse(slug);
+  const course = await getCourse(slug);
   if (!course) notFound();
 
   const enrollHref = course.enrollId ? `/enroll?add=${course.enrollId}&checkout=1` : "/enroll";

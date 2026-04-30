@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTestimonials, getSiteSettings } from "@/lib/content";
+import { getTestimonials, getSiteSettings } from "@/lib/sanity";
 import "./testimonials.css";
 
 function initials(name: string) {
@@ -16,9 +16,9 @@ export const metadata = {
   description: "What operators say about Train321."
 };
 
-export default function TestimonialsPage() {
-  const testimonials = getTestimonials();
-  const trustLogos = getSiteSettings().trustLogos || [];
+export default async function TestimonialsPage() {
+  const [testimonials, settings] = await Promise.all([getTestimonials(), getSiteSettings()]);
+  const trustLogos = settings.trustLogos || [];
   const featured = testimonials[0];
   const rest = testimonials.slice(1);
 

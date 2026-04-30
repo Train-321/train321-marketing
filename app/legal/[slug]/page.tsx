@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
-import { getLegalPage, getLegalPages } from "@/lib/content";
+import { getLegalPage, getLegalPages } from "@/lib/sanity";
 import "./legal.css";
 
 function formatDate(iso: string) {
@@ -31,13 +31,14 @@ function extractHeadings(body: string): Array<{ id: string; text: string }> {
   return out;
 }
 
-export function generateStaticParams() {
-  return getLegalPages().map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  const pages = await getLegalPages();
+  return pages.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const page = getLegalPage(slug);
+  const page = await getLegalPage(slug);
   if (!page) return { title: "Legal — Train321" };
   return {
     title: `${page.title} — Train321`,
@@ -47,7 +48,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function LegalPageRoute({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const page = getLegalPage(slug);
+  const page = await getLegalPage(slug);
   if (!page) notFound();
 
   const headings = extractHeadings(page.body);

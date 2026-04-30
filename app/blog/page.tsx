@@ -1,4 +1,4 @@
-import { getBlogPosts } from "@/lib/content";
+import { getBlogPosts } from "@/lib/sanity";
 import BlogClient from "./BlogClient";
 
 export const metadata = {
@@ -6,7 +6,7 @@ export const metadata = {
   description: "Compliance updates, operator playbooks, and field notes from the Train321 team."
 };
 
-export default function BlogIndexPage() {
-  const posts = getBlogPosts();
+export default async function BlogIndexPage() {
+  const posts = await getBlogPosts();
   return <BlogClient posts={posts} />;
 }

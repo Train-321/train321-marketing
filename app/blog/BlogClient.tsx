@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { BlogPost } from "@/lib/content";
+import type { BlogPost } from "@/lib/sanity";
 import "./blog.css";
 
 function formatDate(iso: string) {

@@ -4,7 +4,7 @@ import {
   getTestimonials,
   getFaqGroups,
   getSiteSettings
-} from "@/lib/content";
+} from "@/lib/sanity";
 
 export const metadata = {
   title: "Get certified in under an hour — Train321",
@@ -12,11 +12,14 @@ export const metadata = {
     "ANSI-accredited courses for food safety, alcohol service, and HR compliance. Take it on your phone, get your certificate the same day. Accepted in all 50 states."
 };
 
-export default function IndividualsPage() {
-  const courses = getCourses();
-  const testimonials = getTestimonials();
-  const faqs = getFaqGroups();
-  const companyStats = getSiteSettings().companyStats || [];
+export default async function IndividualsPage() {
+  const [courses, testimonials, faqs, settings] = await Promise.all([
+    getCourses(),
+    getTestimonials(),
+    getFaqGroups(),
+    getSiteSettings()
+  ]);
+  const companyStats = settings.companyStats || [];
   return (
     <HomePage
       forcedAudience="self"

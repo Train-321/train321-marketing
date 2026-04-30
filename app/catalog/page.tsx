@@ -1,4 +1,4 @@
-import { getCourses } from "@/lib/content";
+import { getCourses } from "@/lib/sanity";
 import CatalogClient from "./CatalogClient";
 
 export const metadata = {
@@ -6,7 +6,7 @@ export const metadata = {
   description: "Every course Train321 offers, on a single page."
 };
 
-export default function CatalogPage() {
-  const courses = getCourses();
+export default async function CatalogPage() {
+  const courses = await getCourses();
   return <CatalogClient courses={courses} />;
 }
