@@ -4,6 +4,7 @@
 import { createClient } from "@sanity/client";
 import { createImageUrlBuilder } from "@sanity/image-url";
 import type { SanityImageSource } from "@sanity/image-url";
+import { draftMode } from "next/headers";
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -104,6 +105,8 @@ const dataset =
   process.env.NEXT_PUBLIC_SANITY_DATASET ||
   "production";
 
+// Default published client — fast, CDN-cached, no auth, no stega.
+// Used for static prerender + visitors not in draft mode.
 export const sanityClient = createClient({
   projectId,
   dataset,
@@ -111,6 +114,36 @@ export const sanityClient = createClient({
   useCdn: true,
   perspective: "published"
 });
+
+// Studio URL used for stega encoding (so click-to-edit jumps to the right host).
+const STUDIO_URL =
+  process.env.SANITY_STUDIO_URL || "https://studio.train321.com";
+
+const READ_TOKEN =
+  process.env.SANITY_API_READ_TOKEN || process.env.SANITY_WRITE_TOKEN;
+
+// Returns the Sanity client to use for the current request.
+// In Next.js draft mode: drafts perspective, no CDN, stega encoding ON so
+// every rendered string carries an invisible pointer back to its field.
+// Otherwise: the cached published client.
+async function getClient() {
+  let isDraft = false;
+  try {
+    isDraft = (await draftMode()).isEnabled;
+  } catch {
+    // draftMode() throws if called outside a request (e.g. at build time).
+    // Treat that as not-draft.
+  }
+  if (isDraft && READ_TOKEN) {
+    return sanityClient.withConfig({
+      useCdn: false,
+      token: READ_TOKEN,
+      perspective: "drafts",
+      stega: { enabled: true, studioUrl: STUDIO_URL }
+    });
+  }
+  return sanityClient;
+}
 
 const builder = createImageUrlBuilder({ projectId, dataset });
 export function urlFor(source: SanityImageSource) {
@@ -175,14 +208,14 @@ const COURSE_PROJECTION = `
 `;
 
 export async function getCourses(): Promise<Course[]> {
-  return await sanityClient.fetch(
+  return await (await getClient()).fetch(
     `*[_type == "course"] | order(title asc) { ${COURSE_PROJECTION} }`
   );
 }
 
 export async function getCourse(slug: string): Promise<Course | null> {
   return (
-    (await sanityClient.fetch(
+    (await (await getClient()).fetch(
       `*[_type == "course" && slug.current == $slug][0] { ${COURSE_PROJECTION} }`,
       { slug }
     )) ?? null
@@ -199,14 +232,14 @@ const BLOG_PROJECTION = `
 type BlogPostRow = Omit<BlogPost, "body"> & { rawBody: AnyBlock[] | null };
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
-  const rows: BlogPostRow[] = await sanityClient.fetch(
+  const rows: BlogPostRow[] = await (await getClient()).fetch(
     `*[_type == "blogPost"] | order(publishedAt desc) { ${BLOG_PROJECTION} }`
   );
   return rows.map((r) => ({ ...r, body: blocksToMarkdown(r.rawBody) }));
 }
 
 export async function getBlogPost(slug: string): Promise<BlogPost | null> {
-  const r: BlogPostRow | null = await sanityClient.fetch(
+  const r: BlogPostRow | null = await (await getClient()).fetch(
     `*[_type == "blogPost" && slug.current == $slug][0] { ${BLOG_PROJECTION} }`,
     { slug }
   );
@@ -234,7 +267,7 @@ function legalSectionsToMarkdown(
 }
 
 export async function getLegalPages(): Promise<LegalPage[]> {
-  const rows: LegalRow[] = await sanityClient.fetch(
+  const rows: LegalRow[] = await (await getClient()).fetch(
     `*[_type == "legalPage"] { ${LEGAL_PROJECTION} }`
   );
   return rows.map((r) => ({
@@ -247,7 +280,7 @@ export async function getLegalPages(): Promise<LegalPage[]> {
 }
 
 export async function getLegalPage(slug: string): Promise<LegalPage | null> {
-  const r: LegalRow | null = await sanityClient.fetch(
+  const r: LegalRow | null = await (await getClient()).fetch(
     `*[_type == "legalPage" && slug.current == $slug][0] { ${LEGAL_PROJECTION} }`,
     { slug }
   );
@@ -268,7 +301,7 @@ export async function getFaqGroups(): Promise<FaqGroup[]> {
     category: string;
     categoryOrder?: number;
     order?: number;
-  }> = await sanityClient.fetch(
+  }> = await (await getClient()).fetch(
     `*[_type == "faqItem"] | order(categoryOrder asc, order asc) {
       "q": question, "a": answer, category, categoryOrder, order
     }`
@@ -290,7 +323,7 @@ export async function getFaqGroups(): Promise<FaqGroup[]> {
 }
 
 export async function getTestimonials(): Promise<Testimonial[]> {
-  return await sanityClient.fetch(
+  return await (await getClient()).fetch(
     `*[_type == "testimonial"] | order(order asc) {
       "id": _id, quote, name, role, company,
       "stat": stat{ value, label },
@@ -300,7 +333,7 @@ export async function getTestimonials(): Promise<Testimonial[]> {
 }
 
 export async function getTeam(): Promise<TeamMember[]> {
-  return await sanityClient.fetch(
+  return await (await getClient()).fetch(
     `*[_type == "teamMember"] | order(order asc) {
       name, role, bio, linkedin, twitter, order
     }`
@@ -318,7 +351,7 @@ const SETTINGS_DEFAULT: SiteSettings = {
 };
 
 export async function getSiteSettings(): Promise<SiteSettings> {
-  const r: SiteSettings | null = await sanityClient.fetch(
+  const r: SiteSettings | null = await (await getClient()).fetch(
     `*[_id == "siteSettings"][0] {
       siteName, tagline, phone, email, social,
       companyStats[]{ value, label },
