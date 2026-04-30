@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@tinacms/cli": "^2.2.5",
+    "gray-matter": "^4.0.3",
     "next": "16.2.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-markdown": "^10.1.0",
     "tinacms": "^3.7.5"
   },
   "devDependencies": {

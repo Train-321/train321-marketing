@@ -1,4 +1,10 @@
 import HomePage from "@/components/HomePage";
+import {
+  getCourses,
+  getTestimonials,
+  getFaqGroups,
+  getSiteSettings
+} from "@/lib/content";
 
 export const metadata = {
   title: "Get certified in under an hour — Train321",
@@ -7,5 +13,17 @@ export const metadata = {
 };
 
 export default function IndividualsPage() {
-  return <HomePage forcedAudience="self" />;
+  const courses = getCourses();
+  const testimonials = getTestimonials();
+  const faqs = getFaqGroups();
+  const companyStats = getSiteSettings().companyStats || [];
+  return (
+    <HomePage
+      forcedAudience="self"
+      courses={courses}
+      testimonials={testimonials}
+      faqs={faqs}
+      companyStats={companyStats}
+    />
+  );
 }

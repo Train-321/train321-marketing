@@ -1,11 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { blogPosts } from "@/assets/data/blog";
+import ReactMarkdown from "react-markdown";
+import { getBlogPost, getBlogPosts } from "@/lib/content";
 import "./article.css";
-
-type BodyBlock =
-  | { type: "p" | "h2" | "h3" | "callout" | "quote"; content: string }
-  | { type: "ul" | "ol"; content: string[] };
 
 function initials(name: string) {
   return (name || "")
@@ -22,48 +19,13 @@ function formatDate(iso: string) {
   return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
 
-function renderBlock(block: BodyBlock, i: number) {
-  switch (block.type) {
-    case "h2":
-      return <h2 key={i}>{block.content}</h2>;
-    case "h3":
-      return <h3 key={i}>{block.content}</h3>;
-    case "ul":
-      return (
-        <ul key={i}>
-          {block.content.map((item, j) => (
-            <li key={j}>{item}</li>
-          ))}
-        </ul>
-      );
-    case "ol":
-      return (
-        <ol key={i}>
-          {block.content.map((item, j) => (
-            <li key={j}>{item}</li>
-          ))}
-        </ol>
-      );
-    case "callout":
-      return (
-        <aside key={i} className="t321-mkt-article__callout">
-          {block.content}
-        </aside>
-      );
-    case "quote":
-      return <blockquote key={i}>{block.content}</blockquote>;
-    default:
-      return <p key={i}>{block.content}</p>;
-  }
-}
-
 export function generateStaticParams() {
-  return blogPosts.map((p) => ({ slug: p.slug }));
+  return getBlogPosts().map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = blogPosts.find((p) => p.slug === slug);
+  const post = getBlogPost(slug);
   if (!post) return { title: "Article — Train321" };
   return {
     title: `${post.title} — Train321`,
@@ -73,12 +35,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = blogPosts.find((p) => p.slug === slug);
+  const post = getBlogPost(slug);
   if (!post) notFound();
 
-  const related = [...blogPosts]
+  const related = getBlogPosts()
     .filter((p) => p.slug !== post.slug)
-    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
     .slice(0, 3);
 
   return (
@@ -136,8 +97,24 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
             </a>
           </aside>
 
-          <article className="t321-mkt-article__prose">
-            {(post.body as BodyBlock[]).map((block, i) => renderBlock(block, i))}
+          <article className="t321-mkt-article__prose t321-mkt-prose">
+            <ReactMarkdown
+              components={{
+                blockquote: ({ children, ...props }) => {
+                  const text = String(children).trim();
+                  if (text.startsWith("💡")) {
+                    return (
+                      <aside className="t321-mkt-article__callout">
+                        {text.replace(/^💡\s*/, "")}
+                      </aside>
+                    );
+                  }
+                  return <blockquote {...props}>{children}</blockquote>;
+                }
+              }}
+            >
+              {post.body}
+            </ReactMarkdown>
 
             <div className="t321-mkt-article__sign">
               <div className="t321-mkt-article__avatar t321-mkt-article__avatar--lg" aria-hidden="true">

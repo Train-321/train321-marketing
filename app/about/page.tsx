@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { team, companyStats } from "@/assets/data/team";
+import { getTeam, getSiteSettings } from "@/lib/content";
 import "./about.css";
 
 function initials(name: string) {
@@ -17,6 +17,8 @@ export const metadata = {
 };
 
 export default function AboutPage() {
+  const team = getTeam();
+  const companyStats = getSiteSettings().companyStats || [];
   return (
     <div className="t321-mkt-about">
       <section className="t321-mkt-about__hero">

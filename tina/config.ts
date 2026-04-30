@@ -85,10 +85,6 @@ export default defineConfig({
         label: "Courses",
         path: "content/courses",
         format: "json",
-        ui: {
-          itemProps: (item) => ({ label: item?.title || "Untitled course" }),
-          filename: { readonly: true, slugify: (v) => v.slug || "" }
-        },
         fields: [
           { type: "string", name: "slug", label: "Slug", required: true, isTitle: false, ui: { component: "text" } },
           { type: "string", name: "title", label: "Title", required: true, isTitle: true },
@@ -177,10 +173,6 @@ export default defineConfig({
         label: "Blog Posts",
         path: "content/blog",
         format: "md",
-        ui: {
-          itemProps: (item) => ({ label: item?.title || "Untitled post" }),
-          filename: { readonly: true }
-        },
         fields: [
           { type: "string", name: "title", label: "Title", required: true, isTitle: true },
           { type: "string", name: "excerpt", label: "Excerpt", ui: { component: "textarea" } },
@@ -218,10 +210,6 @@ export default defineConfig({
         label: "Legal Pages",
         path: "content/legal",
         format: "md",
-        ui: {
-          itemProps: (item) => ({ label: item?.title || "Untitled page" }),
-          filename: { readonly: true }
-        },
         fields: [
           { type: "string", name: "title", label: "Title", required: true, isTitle: true },
           { type: "datetime", name: "effectiveDate", label: "Effective date" },
@@ -236,9 +224,6 @@ export default defineConfig({
         label: "FAQ Groups",
         path: "content/faqs",
         format: "json",
-        ui: {
-          itemProps: (item) => ({ label: item?.category || "Untitled group" })
-        },
         fields: [
           { type: "string", name: "category", label: "Category", required: true, isTitle: true },
           { type: "number", name: "order", label: "Sort order" },
@@ -262,9 +247,6 @@ export default defineConfig({
         label: "Testimonials",
         path: "content/testimonials",
         format: "json",
-        ui: {
-          itemProps: (item) => ({ label: item?.name ? `${item.name} — ${item.company || ""}` : "Untitled" })
-        },
         fields: [
           { type: "string", name: "id", label: "ID (slug)", required: true },
           { type: "string", name: "quote", label: "Quote", ui: { component: "textarea" }, required: true },
@@ -291,9 +273,6 @@ export default defineConfig({
         label: "Team Members",
         path: "content/team",
         format: "json",
-        ui: {
-          itemProps: (item) => ({ label: item?.name || "Untitled" })
-        },
         fields: [
           { type: "string", name: "name", label: "Name", required: true, isTitle: true },
           { type: "string", name: "role", label: "Role" },

@@ -1,4 +1,10 @@
 import HomePage from "@/components/HomePage";
+import {
+  getCourses,
+  getTestimonials,
+  getFaqGroups,
+  getSiteSettings
+} from "@/lib/content";
 
 export const metadata = {
   title: "Train321 — Compliance training your team actually finishes",
@@ -7,5 +13,17 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <HomePage forcedAudience={null} />;
+  const courses = getCourses();
+  const testimonials = getTestimonials();
+  const faqs = getFaqGroups();
+  const companyStats = getSiteSettings().companyStats || [];
+  return (
+    <HomePage
+      forcedAudience={null}
+      courses={courses}
+      testimonials={testimonials}
+      faqs={faqs}
+      companyStats={companyStats}
+    />
+  );
 }

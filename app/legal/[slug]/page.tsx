@@ -1,11 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { legalPages, legalList } from "@/assets/data/legal";
+import ReactMarkdown from "react-markdown";
+import { getLegalPage, getLegalPages } from "@/lib/content";
 import "./legal.css";
-
-type LegalBlock =
-  | { type: "p"; content: string }
-  | { type: "ul" | "ol"; content: string[] };
 
 function formatDate(iso: string) {
   if (!iso) return "";
@@ -13,36 +10,34 @@ function formatDate(iso: string) {
   return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
 
-function renderBlock(block: LegalBlock, key: string) {
-  switch (block.type) {
-    case "ul":
-      return (
-        <ul key={key}>
-          {block.content.map((it, idx) => (
-            <li key={idx}>{it}</li>
-          ))}
-        </ul>
-      );
-    case "ol":
-      return (
-        <ol key={key}>
-          {block.content.map((it, idx) => (
-            <li key={idx}>{it}</li>
-          ))}
-        </ol>
-      );
-    default:
-      return <p key={key}>{block.content}</p>;
+function slugify(s: string) {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+// Pull out h2 headings ("## Heading") for the on-page TOC.
+function extractHeadings(body: string): Array<{ id: string; text: string }> {
+  const lines = body.split(/\r?\n/);
+  const out: Array<{ id: string; text: string }> = [];
+  for (const line of lines) {
+    const m = /^##\s+(.+?)\s*$/.exec(line);
+    if (m) {
+      const text = m[1].trim();
+      out.push({ id: slugify(text), text });
+    }
   }
+  return out;
 }
 
 export function generateStaticParams() {
-  return legalList.map((p) => ({ slug: p.slug }));
+  return getLegalPages().map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const page = legalPages[slug as keyof typeof legalPages];
+  const page = getLegalPage(slug);
   if (!page) return { title: "Legal — Train321" };
   return {
     title: `${page.title} — Train321`,
@@ -50,10 +45,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export default async function LegalPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function LegalPageRoute({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const page = legalPages[slug as keyof typeof legalPages];
+  const page = getLegalPage(slug);
   if (!page) notFound();
+
+  const headings = extractHeadings(page.body);
 
   return (
     <article className="t321-mkt-legal">
@@ -68,31 +65,43 @@ export default async function LegalPage({ params }: { params: Promise<{ slug: st
             <i className="fas fa-file-alt" aria-hidden="true" /> Policy
           </span>
           <h1 className="t321-mkt-h1">{page.title}</h1>
-          <p className="t321-mkt-legal__date">Effective {formatDate(page.effectiveDate)}</p>
+          {page.effectiveDate && (
+            <p className="t321-mkt-legal__date">Effective {formatDate(page.effectiveDate)}</p>
+          )}
           {page.intro && <p className="t321-mkt-lede">{page.intro}</p>}
         </div>
       </section>
 
       <section className="t321-mkt-section">
         <div className="t321-mkt-container t321-mkt-legal__body">
-          <aside className="t321-mkt-legal__toc" aria-label="On this page">
-            <span className="t321-mkt-legal__toc-head">On this page</span>
-            <ol>
-              {page.sections.map((s, i) => (
-                <li key={i}>
-                  <a href={`#section-${i}`}>{s.heading}</a>
-                </li>
-              ))}
-            </ol>
-          </aside>
+          {headings.length > 0 && (
+            <aside className="t321-mkt-legal__toc" aria-label="On this page">
+              <span className="t321-mkt-legal__toc-head">On this page</span>
+              <ol>
+                {headings.map((h) => (
+                  <li key={h.id}>
+                    <a href={`#${h.id}`}>{h.text}</a>
+                  </li>
+                ))}
+              </ol>
+            </aside>
+          )}
 
           <div className="t321-mkt-prose t321-mkt-legal__prose">
-            {page.sections.map((s, i) => (
-              <section key={i} id={`section-${i}`} className="t321-mkt-legal__section">
-                <h2>{s.heading}</h2>
-                {(s.blocks as LegalBlock[]).map((b, bi) => renderBlock(b, `${b.type}-${bi}`))}
-              </section>
-            ))}
+            <ReactMarkdown
+              components={{
+                h2: ({ children, ...props }) => {
+                  const text = String(children);
+                  return (
+                    <h2 id={slugify(text)} {...props}>
+                      {children}
+                    </h2>
+                  );
+                }
+              }}
+            >
+              {page.body}
+            </ReactMarkdown>
           </div>
         </div>
       </section>

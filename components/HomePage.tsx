@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { courseFamilyList } from "@/assets/data/courses";
-import { testimonials } from "@/assets/data/testimonials";
-import { companyStats } from "@/assets/data/team";
-import { faqs } from "@/assets/data/faqs";
+import type { Course, Testimonial, FaqGroup } from "@/lib/content";
 import "./HomePage.css";
+
+type CompanyStat = { value: string; label: string };
 
 const POPULAR_SLUGS = ["food-handler", "alcohol", "sexual-harassment", "food-manager"];
 
@@ -161,9 +160,19 @@ function initials(name: string) {
 
 type HomePageProps = {
   forcedAudience?: Audience | null;
+  courses: Course[];
+  testimonials: Testimonial[];
+  companyStats: CompanyStat[];
+  faqs: FaqGroup[];
 };
 
-export default function HomePage({ forcedAudience = null }: HomePageProps) {
+export default function HomePage({
+  forcedAudience = null,
+  courses,
+  testimonials,
+  companyStats,
+  faqs
+}: HomePageProps) {
   const [audience, setAudience] = useState<Audience>(forcedAudience || "team");
   const [courseIndex, setCourseIndex] = useState(0);
 
@@ -196,14 +205,14 @@ export default function HomePage({ forcedAudience = null }: HomePageProps) {
 
   const popularCourses = useMemo(
     () =>
-      POPULAR_SLUGS.map((slug) => courseFamilyList.find((c) => c.slug === slug)).filter(
-        (x): x is (typeof courseFamilyList)[number] => Boolean(x)
+      POPULAR_SLUGS.map((slug) => courses.find((c) => c.slug === slug)).filter(
+        (x): x is Course => Boolean(x)
       ),
-    []
+    [courses]
   );
 
-  const featuredTestimonials = useMemo(() => testimonials.slice(0, 3), []);
-  const homeFaqs = useMemo(() => faqs[0]?.items?.slice(0, 4) || [], []);
+  const featuredTestimonials = useMemo(() => testimonials.slice(0, 3), [testimonials]);
+  const homeFaqs = useMemo(() => faqs[0]?.items?.slice(0, 4) || [], [faqs]);
 
   const activeCourse = HERO_COURSES[courseIndex] || HERO_COURSES[0];
   const copy = AUDIENCE_COPY[audience] || AUDIENCE_COPY.team;

@@ -1,15 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { courseFamilies, courseFamilyList } from "@/assets/data/courses";
+import { getCourse, getCourses } from "@/lib/content";
 import "./course.css";
 
 export function generateStaticParams() {
-  return courseFamilyList.map((c) => ({ slug: c.slug }));
+  return getCourses().map((c) => ({ slug: c.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const course = courseFamilies[slug as keyof typeof courseFamilies];
+  const course = getCourse(slug);
   if (!course) return { title: "Course · Train321" };
   return {
     title: `${course.title} · Train321`,
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function CoursePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const course = courseFamilies[slug as keyof typeof courseFamilies];
+  const course = getCourse(slug);
   if (!course) notFound();
 
   const enrollHref = course.enrollId ? `/enroll?add=${course.enrollId}&checkout=1` : "/enroll";
