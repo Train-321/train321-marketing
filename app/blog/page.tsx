@@ -1,4 +1,4 @@
-import { getBlogPosts } from "@/lib/content";
+import { tinaBlogPostConnection } from "@/lib/tina";
 import BlogClient from "./BlogClient";
 
 export const metadata = {
@@ -6,7 +6,7 @@ export const metadata = {
   description: "Compliance updates, operator playbooks, and field notes from the Train321 team."
 };
 
-export default function BlogIndexPage() {
-  const posts = getBlogPosts();
-  return <BlogClient posts={posts} />;
+export default async function BlogIndexPage() {
+  const result = await tinaBlogPostConnection();
+  return <BlogClient {...result} />;
 }

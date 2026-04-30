@@ -2,10 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import type { Course, Testimonial, FaqGroup } from "@/lib/content";
+import { useTina } from "tinacms/dist/react";
+import type {
+  CourseConnectionQuery,
+  CourseConnectionQueryVariables,
+  TestimonialConnectionQuery,
+  TestimonialConnectionQueryVariables,
+  FaqGroupConnectionQuery,
+  FaqGroupConnectionQueryVariables,
+  SiteSettingsQuery,
+  SiteSettingsQueryVariables
+} from "@/tina/__generated__/types";
 import "./HomePage.css";
-
-type CompanyStat = { value: string; label: string };
 
 const POPULAR_SLUGS = ["food-handler", "alcohol", "sexual-harassment", "food-manager"];
 
@@ -158,21 +166,77 @@ function initials(name: string) {
     .toUpperCase();
 }
 
+type CoursesRes = {
+  data: CourseConnectionQuery;
+  query: string;
+  variables: CourseConnectionQueryVariables;
+};
+type TestimonialsRes = {
+  data: TestimonialConnectionQuery;
+  query: string;
+  variables: TestimonialConnectionQueryVariables;
+};
+type FaqsRes = {
+  data: FaqGroupConnectionQuery;
+  query: string;
+  variables: FaqGroupConnectionQueryVariables;
+};
+type SettingsRes = {
+  data: SiteSettingsQuery;
+  query: string;
+  variables: SiteSettingsQueryVariables;
+};
+
 type HomePageProps = {
   forcedAudience?: Audience | null;
-  courses: Course[];
-  testimonials: Testimonial[];
-  companyStats: CompanyStat[];
-  faqs: FaqGroup[];
+  coursesRes: CoursesRes;
+  testimonialsRes: TestimonialsRes;
+  faqsRes: FaqsRes;
+  settingsRes: SettingsRes;
 };
 
 export default function HomePage({
   forcedAudience = null,
-  courses,
-  testimonials,
-  companyStats,
-  faqs
+  coursesRes,
+  testimonialsRes,
+  faqsRes,
+  settingsRes
 }: HomePageProps) {
+  const { data: coursesData } = useTina(coursesRes);
+  const { data: testimonialsData } = useTina(testimonialsRes);
+  const { data: faqsData } = useTina(faqsRes);
+  const { data: settingsData } = useTina(settingsRes);
+
+  const courses = useMemo(
+    () =>
+      (coursesData.courseConnection.edges || [])
+        .map((e) => e?.node)
+        .filter((n): n is NonNullable<typeof n> => Boolean(n)),
+    [coursesData]
+  );
+  const testimonials = useMemo(
+    () =>
+      (testimonialsData.testimonialConnection.edges || [])
+        .map((e) => e?.node)
+        .filter((n): n is NonNullable<typeof n> => Boolean(n))
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
+    [testimonialsData]
+  );
+  const faqs = useMemo(
+    () =>
+      (faqsData.faqGroupConnection.edges || [])
+        .map((e) => e?.node)
+        .filter((n): n is NonNullable<typeof n> => Boolean(n))
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
+    [faqsData]
+  );
+  const companyStats = useMemo(
+    () =>
+      (settingsData.siteSettings.companyStats || []).filter(
+        (s): s is NonNullable<typeof s> => Boolean(s)
+      ),
+    [settingsData]
+  );
   const [audience, setAudience] = useState<Audience>(forcedAudience || "team");
   const [courseIndex, setCourseIndex] = useState(0);
 
@@ -205,14 +269,20 @@ export default function HomePage({
 
   const popularCourses = useMemo(
     () =>
-      POPULAR_SLUGS.map((slug) => courses.find((c) => c.slug === slug)).filter(
-        (x): x is Course => Boolean(x)
-      ),
+      POPULAR_SLUGS.map((slug) =>
+        courses.find((c) => c._sys.filename === slug)
+      ).filter((x): x is NonNullable<typeof x> => Boolean(x)),
     [courses]
   );
 
   const featuredTestimonials = useMemo(() => testimonials.slice(0, 3), [testimonials]);
-  const homeFaqs = useMemo(() => faqs[0]?.items?.slice(0, 4) || [], [faqs]);
+  const homeFaqs = useMemo(
+    () =>
+      ((faqs[0]?.items || []).filter(
+        (it): it is NonNullable<typeof it> => Boolean(it)
+      ) || []).slice(0, 4),
+    [faqs]
+  );
 
   const activeCourse = HERO_COURSES[courseIndex] || HERO_COURSES[0];
   const copy = AUDIENCE_COPY[audience] || AUDIENCE_COPY.team;
@@ -504,12 +574,12 @@ export default function HomePage({
           <div className="t321-mkt-popular">
             {popularCourses.map((c) => (
               <Link
-                key={c.slug}
-                href={`/courses/${c.slug}`}
+                key={c._sys.filename}
+                href={`/courses/${c._sys.filename}`}
                 className="t321-mkt-popular__card t321-mkt-card t321-mkt-card--hover"
               >
                 <div className={`t321-mkt-popular__top is-tone-${c.color || "neutral"}`}>
-                  <i className={c.icon} aria-hidden="true" />
+                  <i className={c.icon || ""} aria-hidden="true" />
                   {c.priceFrom != null && (
                     <span className="t321-mkt-popular__price">From ${c.priceFrom}</span>
                   )}
@@ -572,7 +642,7 @@ export default function HomePage({
           </div>
           <div className="t321-mkt-quotes">
             {featuredTestimonials.map((t) => (
-              <figure key={t.id} className="t321-mkt-quote t321-mkt-card">
+              <figure key={t._sys.filename} className="t321-mkt-quote t321-mkt-card">
                 <blockquote>&ldquo;{t.quote}&rdquo;</blockquote>
                 <figcaption>
                   <div className="t321-mkt-quote__avatar" aria-hidden="true">{initials(t.name)}</div>

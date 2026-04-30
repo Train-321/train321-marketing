@@ -2,15 +2,33 @@
 
 import Link from "next/link";
 import { useState, useMemo } from "react";
-import type { FaqGroup } from "@/lib/content";
+import { useTina } from "tinacms/dist/react";
+import type {
+  FaqGroupConnectionQuery,
+  FaqGroupConnectionQueryVariables
+} from "@/tina/__generated__/types";
 import "./faq.css";
 
 function slug(s: string) {
   return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-export default function FaqClient({ faqs }: { faqs: FaqGroup[] }) {
+type Props = {
+  data: FaqGroupConnectionQuery;
+  query: string;
+  variables: FaqGroupConnectionQueryVariables;
+};
+
+export default function FaqClient(props: Props) {
+  const { data } = useTina(props);
   const [query, setQuery] = useState("");
+
+  const faqs = useMemo(() => {
+    return (data.faqGroupConnection.edges || [])
+      .map((e) => e?.node)
+      .filter((n): n is NonNullable<typeof n> => Boolean(n))
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  }, [data]);
 
   const filteredCategories = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -18,7 +36,9 @@ export default function FaqClient({ faqs }: { faqs: FaqGroup[] }) {
     return faqs
       .map((cat) => ({
         ...cat,
-        items: cat.items.filter((it) => (it.q + " " + it.a).toLowerCase().includes(q))
+        items: (cat.items || [])
+          .filter((it): it is NonNullable<typeof it> => Boolean(it))
+          .filter((it) => (it.q + " " + it.a).toLowerCase().includes(q))
       }))
       .filter((cat) => cat.items.length);
   }, [query, faqs]);
@@ -58,7 +78,7 @@ export default function FaqClient({ faqs }: { faqs: FaqGroup[] }) {
             <span className="t321-mkt-faq__nav-head">Categories</span>
             {faqs.map((cat) => (
               <a
-                key={cat.category}
+                key={cat._sys.filename}
                 href={`#${slug(cat.category)}`}
                 className="t321-mkt-faq__nav-link"
               >{cat.category}</a>
@@ -66,24 +86,29 @@ export default function FaqClient({ faqs }: { faqs: FaqGroup[] }) {
           </nav>
 
           <div className="t321-mkt-faq__list">
-            {filteredCategories.map((cat) => (
-              <section
-                key={cat.category}
-                id={slug(cat.category)}
-                className="t321-mkt-faq__cat"
-              >
-                <h2 className="t321-mkt-h2">{cat.category}</h2>
-                {cat.items.map((it, i) => (
-                  <details key={i} className="t321-mkt-faq__item">
-                    <summary>
-                      <span>{it.q}</span>
-                      <i className="fas fa-plus" aria-hidden="true" />
-                    </summary>
-                    <p>{it.a}</p>
-                  </details>
-                ))}
-              </section>
-            ))}
+            {filteredCategories.map((cat) => {
+              const items = (cat.items || []).filter(
+                (it): it is NonNullable<typeof it> => Boolean(it)
+              );
+              return (
+                <section
+                  key={cat._sys.filename}
+                  id={slug(cat.category)}
+                  className="t321-mkt-faq__cat"
+                >
+                  <h2 className="t321-mkt-h2">{cat.category}</h2>
+                  {items.map((it, i) => (
+                    <details key={i} className="t321-mkt-faq__item">
+                      <summary>
+                        <span>{it.q}</span>
+                        <i className="fas fa-plus" aria-hidden="true" />
+                      </summary>
+                      <p>{it.a}</p>
+                    </details>
+                  ))}
+                </section>
+              );
+            })}
 
             {!filteredCategories.length && (
               <div className="t321-mkt-faq__empty">

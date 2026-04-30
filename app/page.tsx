@@ -1,10 +1,10 @@
 import HomePage from "@/components/HomePage";
 import {
-  getCourses,
-  getTestimonials,
-  getFaqGroups,
-  getSiteSettings
-} from "@/lib/content";
+  tinaCourseConnection,
+  tinaTestimonialConnection,
+  tinaFaqGroupConnection,
+  tinaSiteSettings
+} from "@/lib/tina";
 
 export const metadata = {
   title: "Train321 — Compliance training your team actually finishes",
@@ -12,18 +12,20 @@ export const metadata = {
     "ANSI-accredited courses for food safety, alcohol service, and HR compliance. Rolled out across your team in under an hour. Accepted in all 50 states."
 };
 
-export default function Page() {
-  const courses = getCourses();
-  const testimonials = getTestimonials();
-  const faqs = getFaqGroups();
-  const companyStats = getSiteSettings().companyStats || [];
+export default async function Page() {
+  const [coursesRes, testimonialsRes, faqsRes, settingsRes] = await Promise.all([
+    tinaCourseConnection(),
+    tinaTestimonialConnection(),
+    tinaFaqGroupConnection(),
+    tinaSiteSettings()
+  ]);
   return (
     <HomePage
       forcedAudience={null}
-      courses={courses}
-      testimonials={testimonials}
-      faqs={faqs}
-      companyStats={companyStats}
+      coursesRes={coursesRes}
+      testimonialsRes={testimonialsRes}
+      faqsRes={faqsRes}
+      settingsRes={settingsRes}
     />
   );
 }

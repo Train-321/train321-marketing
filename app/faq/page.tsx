@@ -1,4 +1,4 @@
-import { getFaqGroups } from "@/lib/content";
+import { tinaFaqGroupConnection } from "@/lib/tina";
 import FaqClient from "./FaqClient";
 
 export const metadata = {
@@ -6,7 +6,7 @@ export const metadata = {
   description: "Answers to the questions we hear most often."
 };
 
-export default function FaqPage() {
-  const faqs = getFaqGroups();
-  return <FaqClient faqs={faqs} />;
+export default async function FaqPage() {
+  const result = await tinaFaqGroupConnection();
+  return <FaqClient {...result} />;
 }
