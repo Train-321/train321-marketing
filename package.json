@@ -3,39 +3,26 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env TINA_PUBLIC_IS_LOCAL=true tinacms dev -c \"next dev\"",
-    "dev:next-only": "next dev",
-    "build": "tinacms build && next build",
-    "build:local": "cross-env TINA_PUBLIC_IS_LOCAL=true tinacms build && next build",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "postinstall": "patch-package"
+    "lint": "eslint"
   },
   "dependencies": {
-    "@tinacms/cli": "^2.2.5",
-    "@tinacms/datalayer": "^2.0.18",
+    "@sanity/client": "^7.22.0",
+    "@sanity/image-url": "^2.1.1",
     "gray-matter": "^4.0.3",
-    "mongodb-level": "^0.0.4",
     "next": "^15.3.9",
-    "next-auth": "^4.24.14",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-markdown": "^10.1.0",
-    "slate": "^0.124.1",
-    "slate-dom": "^0.124.1",
-    "tinacms": "^3.7.5",
-    "tinacms-authjs": "^21.0.5",
-    "tinacms-gitprovider-github": "^4.1.5"
+    "react-markdown": "^10.1.0"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "^15.3.9",
-    "fs-extra": "^11.3.4",
-    "patch-package": "^8.0.1",
     "typescript": "^5"
   }
 }

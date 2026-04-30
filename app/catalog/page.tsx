@@ -1,4 +1,4 @@
-import { tinaCourseConnection } from "@/lib/tina";
+import { getCourses } from "@/lib/content";
 import CatalogClient from "./CatalogClient";
 
 export const metadata = {
@@ -6,7 +6,7 @@ export const metadata = {
   description: "Every course Train321 offers, on a single page."
 };
 
-export default async function CatalogPage() {
-  const result = await tinaCourseConnection();
-  return <CatalogClient {...result} />;
+export default function CatalogPage() {
+  const courses = getCourses();
+  return <CatalogClient courses={courses} />;
 }

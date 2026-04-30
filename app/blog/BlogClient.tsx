@@ -2,11 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { useTina } from "tinacms/dist/react";
-import type {
-  BlogPostConnectionQuery,
-  BlogPostConnectionQueryVariables
-} from "@/tina/__generated__/types";
+import type { BlogPost } from "@/lib/content";
 import "./blog.css";
 
 function formatDate(iso: string) {
@@ -15,34 +11,17 @@ function formatDate(iso: string) {
   return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }
 
-type Props = {
-  data: BlogPostConnectionQuery;
-  query: string;
-  variables: BlogPostConnectionQueryVariables;
-};
-
-export default function BlogClient(props: Props) {
-  const { data } = useTina(props);
+export default function BlogClient({ posts }: { posts: BlogPost[] }) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
-  const sortedPosts = useMemo(() => {
-    return (data.blogPostConnection.edges || [])
-      .map((e) => e?.node)
-      .filter((n): n is NonNullable<typeof n> => Boolean(n))
-      .sort(
-        (a, b) =>
-          new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-      );
-  }, [data]);
+  const sortedPosts = posts;
 
   const categories = useMemo(() => {
-    const cats = new Set(
-      sortedPosts.map((p) => p.category).filter((c): c is string => Boolean(c))
-    );
-    return ["All", ...Array.from(cats)];
+    const cats = new Set(sortedPosts.map((p) => p.category).filter(Boolean));
+    return ["All", ...Array.from(cats)] as string[];
   }, [sortedPosts]);
 
   const filtered = useMemo(() => {
@@ -50,9 +29,7 @@ export default function BlogClient(props: Props) {
     return sortedPosts.filter((p) => {
       if (activeCategory !== "All" && p.category !== activeCategory) return false;
       if (!q) return true;
-      return (p.title + " " + (p.excerpt || "") + " " + (p.category || ""))
-        .toLowerCase()
-        .includes(q);
+      return (p.title + " " + (p.excerpt || "") + " " + (p.category || "")).toLowerCase().includes(q);
     });
   }, [query, activeCategory, sortedPosts]);
 
@@ -61,7 +38,7 @@ export default function BlogClient(props: Props) {
 
   const filteredRest = useMemo(() => {
     if (showFeatured && featured) {
-      return filtered.filter((p) => p._sys.filename !== featured._sys.filename);
+      return filtered.filter((p) => p.slug !== featured.slug);
     }
     return filtered;
   }, [filtered, showFeatured, featured]);
@@ -117,9 +94,9 @@ export default function BlogClient(props: Props) {
       {showFeatured && featured && (
         <section className="t321-mkt-section">
           <div className="t321-mkt-container">
-            <Link href={`/blog/${featured._sys.filename}`} className="t321-mkt-blog__featured">
+            <Link href={`/blog/${featured.slug}`} className="t321-mkt-blog__featured">
               <div className={`t321-mkt-blog__featured-art is-tone-${featured.heroTone}`}>
-                <i className={featured.heroIcon || ""} aria-hidden="true" />
+                <i className={featured.heroIcon} aria-hidden="true" />
               </div>
               <div>
                 <span className="t321-mkt-eyebrow">{featured.category} · Latest</span>
@@ -130,7 +107,7 @@ export default function BlogClient(props: Props) {
                   <span>·</span>
                   <span>{featured.readMinutes} min read</span>
                   <span>·</span>
-                  <span>{featured.author?.name}</span>
+                  <span>{featured.author.name}</span>
                 </div>
                 <span className="t321-mkt-blog__featured-link">
                   Read the article <i className="fas fa-arrow-right" />
@@ -154,12 +131,12 @@ export default function BlogClient(props: Props) {
             <div className="t321-mkt-blog__grid">
               {filteredRest.map((p) => (
                 <Link
-                  key={p._sys.filename}
-                  href={`/blog/${p._sys.filename}`}
+                  key={p.slug}
+                  href={`/blog/${p.slug}`}
                   className="t321-mkt-blog__card t321-mkt-card t321-mkt-card--hover"
                 >
                   <div className={`t321-mkt-blog__card-art is-tone-${p.heroTone}`}>
-                    <i className={p.heroIcon || ""} aria-hidden="true" />
+                    <i className={p.heroIcon} aria-hidden="true" />
                   </div>
                   <span className="t321-mkt-blog__card-cat">{p.category}</span>
                   <h3 className="t321-mkt-h3">{p.title}</h3>

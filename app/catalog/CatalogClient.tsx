@@ -2,11 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { useTina } from "tinacms/dist/react";
-import type {
-  CourseConnectionQuery,
-  CourseConnectionQueryVariables
-} from "@/tina/__generated__/types";
+import type { Course } from "@/lib/content";
 import "./catalog.css";
 
 const CATEGORY_DEFS = [
@@ -18,23 +14,7 @@ const CATEGORY_DEFS = [
 
 type SortMode = "alpha" | "price-asc" | "price-desc";
 
-type Props = {
-  data: CourseConnectionQuery;
-  query: string;
-  variables: CourseConnectionQueryVariables;
-};
-
-export default function CatalogClient(props: Props) {
-  const { data } = useTina(props);
-
-  const courses = useMemo(
-    () =>
-      (data.courseConnection.edges || [])
-        .map((e) => e?.node)
-        .filter((n): n is NonNullable<typeof n> => Boolean(n)),
-    [data]
-  );
-
+export default function CatalogClient({ courses }: { courses: Course[] }) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [sortMode, setSortMode] = useState<SortMode>("alpha");
@@ -68,7 +48,7 @@ export default function CatalogClient(props: Props) {
           c.summary,
           c.tagline,
           c.eyebrow,
-          (c.accreditations || []).filter(Boolean).join(" ")
+          (c.accreditations || []).join(" ")
         ]
           .filter(Boolean)
           .join(" ")
@@ -167,80 +147,71 @@ export default function CatalogClient(props: Props) {
 
           {filteredCourses.length ? (
             <div className="t321-mkt-catalog__grid">
-              {filteredCourses.map((c) => {
-                const slug = c._sys.filename;
-                const accreditations = (c.accreditations || []).filter(
-                  (a): a is string => Boolean(a)
-                );
-                const modules = (c.modules || []).filter(
-                  (m): m is NonNullable<typeof m> => Boolean(m)
-                );
-                return (
-                  <article key={slug} className="t321-mkt-catalog__card t321-mkt-card">
-                    <div className={`t321-mkt-catalog__card-top${c.image ? " has-image" : ""} is-tone-${c.color || "accent"}`}>
-                      {c.image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          className="t321-mkt-catalog__card-img"
-                          src={c.image}
-                          alt={c.title}
-                          loading="lazy"
-                        />
-                      ) : (
-                        <i className={c.icon || "fas fa-graduation-cap"} aria-hidden="true" />
+              {filteredCourses.map((c) => (
+                <article key={c.slug} className="t321-mkt-catalog__card t321-mkt-card">
+                  <div className={`t321-mkt-catalog__card-top${c.image ? " has-image" : ""} is-tone-${c.color || "accent"}`}>
+                    {c.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        className="t321-mkt-catalog__card-img"
+                        src={c.image}
+                        alt={c.title}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <i className={c.icon || "fas fa-graduation-cap"} aria-hidden="true" />
+                    )}
+                  </div>
+                  <div className="t321-mkt-catalog__card-body">
+                    <span className="t321-mkt-catalog__card-eyebrow">{c.eyebrow}</span>
+                    <h3 className="t321-mkt-h3">{c.title}</h3>
+                    <p>{c.tagline}</p>
+
+                    <div className="t321-mkt-catalog__card-meta">
+                      {c.modules && (
+                        <span>
+                          <i className="fas fa-clock" aria-hidden="true" />
+                          {c.modules.length} modules
+                        </span>
+                      )}
+                      {c.accreditations && c.accreditations.length > 0 && (
+                        <span>
+                          <i className="fas fa-check-circle" aria-hidden="true" />
+                          {c.accreditations[0]}
+                        </span>
                       )}
                     </div>
-                    <div className="t321-mkt-catalog__card-body">
-                      <span className="t321-mkt-catalog__card-eyebrow">{c.eyebrow}</span>
-                      <h3 className="t321-mkt-h3">{c.title}</h3>
-                      <p>{c.tagline}</p>
 
-                      <div className="t321-mkt-catalog__card-meta">
-                        {modules.length > 0 && (
-                          <span>
-                            <i className="fas fa-clock" aria-hidden="true" />
-                            {modules.length} modules
+                    <div className="t321-mkt-catalog__card-foot">
+                      <div>
+                        {c.priceFrom != null ? (
+                          <span className="t321-mkt-catalog__card-price">
+                            <span>From</span>
+                            <strong>${c.priceFrom}</strong>
+                            <span>/ seat</span>
                           </span>
-                        )}
-                        {accreditations.length > 0 && (
-                          <span>
-                            <i className="fas fa-check-circle" aria-hidden="true" />
-                            {accreditations[0]}
+                        ) : (
+                          <span className="t321-mkt-catalog__card-price">
+                            <strong>Custom</strong>
                           </span>
                         )}
                       </div>
-
-                      <div className="t321-mkt-catalog__card-foot">
-                        <div>
-                          {c.priceFrom != null ? (
-                            <span className="t321-mkt-catalog__card-price">
-                              <span>From</span>
-                              <strong>${c.priceFrom}</strong>
-                              <span>/ seat</span>
-                            </span>
-                          ) : (
-                            <span className="t321-mkt-catalog__card-price">
-                              <strong>Custom</strong>
-                            </span>
-                          )}
-                        </div>
-                        <div className="t321-mkt-catalog__card-actions">
-                          <Link href={`/courses/${slug}`} className="t321-mkt-btn t321-mkt-btn--subtle">
-                            Details
-                          </Link>
-                          <Link
-                            href={`/enroll?add=${c.enrollId || ""}`}
-                            className="t321-mkt-btn t321-mkt-btn--primary"
-                          >
-                            Enroll
-                            <i className="fas fa-arrow-right" aria-hidden="true" />
-                          </Link>
-                        </div>
+                      <div className="t321-mkt-catalog__card-actions">
+                        <Link href={`/courses/${c.slug}`} className="t321-mkt-btn t321-mkt-btn--subtle">
+                          Details
+                        </Link>
+                        <Link
+                          href={`/enroll?add=${c.enrollId}`}
+                          className="t321-mkt-btn t321-mkt-btn--primary"
+                        >
+                          Enroll
+                          <i className="fas fa-arrow-right" aria-hidden="true" />
+                        </Link>
                       </div>
                     </div>
-                  </article>
-                );
-              })}
+                  </div>
+                </article>
+              ))}
             </div>
           ) : (
             <div className="t321-mkt-catalog__empty">
