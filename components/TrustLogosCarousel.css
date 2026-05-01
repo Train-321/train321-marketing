@@ -61,10 +61,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 56px;
-  min-width: 130px;
-  /* Half-gap on each side so adjacent items have 56px between them. */
-  padding: 0 28px;
+  height: 64px;
+  min-width: 180px;
+  /* Half-gap on each side so adjacent items have ~96px between them. */
+  padding: 0 48px;
   opacity: 0.55;
   transition: opacity 0.2s ease, transform 0.2s ease;
   filter: grayscale(1) contrast(0.85);
