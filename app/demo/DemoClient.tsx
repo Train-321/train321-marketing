@@ -324,7 +324,10 @@ export default function DemoClient({ page }: Props) {
                 {interests.map((opt) => (
                   <label key={opt} className="t321-mkt-demo__chip">
                     <input type="checkbox" value={opt} checked={form.interests.includes(opt)} onChange={() => toggleInterest(opt)} />
-                    <span>{opt}</span>
+                    <span className="t321-mkt-demo__chip-check" aria-hidden="true">
+                      <i className="fas fa-check" />
+                    </span>
+                    <span className="t321-mkt-demo__chip-label">{opt}</span>
                   </label>
                 ))}
               </div>
