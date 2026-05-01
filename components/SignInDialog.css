@@ -1,0 +1,178 @@
+.t321-mkt-signin {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(8, 12, 24, 0.7);
+  backdrop-filter: blur(6px);
+  animation: t321-mkt-signin-fade 160ms ease-out;
+}
+.t321-mkt-signin__panel {
+  position: relative;
+  width: min(440px, 100%);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  padding: 1.75rem 1.5rem 1.5rem;
+  animation: t321-mkt-signin-pop 200ms ease-out;
+}
+.t321-mkt-signin__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: #5E5C57;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.t321-mkt-signin__close:hover { background: #F2F0EA; color: #0F0F0E; }
+.t321-mkt-signin__close:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+.t321-mkt-signin__head { margin-bottom: 1.1rem; }
+.t321-mkt-signin__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--t321-mkt-ink, #0F0F0E);
+}
+.t321-mkt-signin__sub {
+  margin: 0;
+  color: var(--t321-mkt-ink-muted, #5E5C57);
+  font-size: 0.92rem;
+}
+
+.t321-mkt-signin__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.t321-mkt-signin__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.t321-mkt-signin__label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--t321-mkt-ink, #0F0F0E);
+}
+.t321-mkt-signin__forgot {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #4f46e5;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+.t321-mkt-signin__forgot:hover { text-decoration: underline; }
+.t321-mkt-signin__forgot:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+.t321-mkt-signin__input {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--t321-mkt-line, #E8E4DB);
+  border-radius: 9px;
+  font-size: 0.95rem;
+  background: #fff;
+  color: var(--t321-mkt-ink, #0F0F0E);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.t321-mkt-signin__input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+.t321-mkt-signin__submit {
+  margin-top: 0.35rem;
+  justify-content: center;
+}
+
+.t321-mkt-signin__divider {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 1.1rem 0 0.85rem;
+  color: var(--t321-mkt-ink-muted, #5E5C57);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.t321-mkt-signin__divider::before,
+.t321-mkt-signin__divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--t321-mkt-line, #E8E4DB);
+}
+
+.t321-mkt-signin__sso {
+  width: 100%;
+  justify-content: center;
+}
+
+.t321-mkt-signin__foot {
+  margin: 1rem 0 0;
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--t321-mkt-ink-muted, #5E5C57);
+}
+.t321-mkt-signin__foot a {
+  color: #4f46e5;
+  font-weight: 600;
+  text-decoration: none;
+}
+.t321-mkt-signin__foot a:hover { text-decoration: underline; }
+.t321-mkt-signin__link-btn {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: #4f46e5;
+  font-weight: 600;
+  cursor: pointer;
+}
+.t321-mkt-signin__link-btn:hover { text-decoration: underline; }
+.t321-mkt-signin__link-btn:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+@keyframes t321-mkt-signin-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes t321-mkt-signin-pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 520px) {
+  .t321-mkt-signin { padding: 0.75rem; align-items: flex-end; }
+  .t321-mkt-signin__panel {
+    border-radius: 14px 14px 0 0;
+    padding: 1.4rem 1.1rem 1.2rem;
+  }
+}

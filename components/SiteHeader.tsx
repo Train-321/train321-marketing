@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { marketingNav } from "@/lib/nav";
 import type { SiteSettings } from "@/lib/sanity";
+import SignInDialog from "./SignInDialog";
 import "./SiteHeader.css";
 
 const APP_BASE = process.env.NEXT_PUBLIC_APP_BASE || "/login";
@@ -22,6 +23,7 @@ export default function SiteHeader({ settings }: Props) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [signInOpen, setSignInOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -76,14 +78,15 @@ export default function SiteHeader({ settings }: Props) {
             <i className="fas fa-user-friends" aria-hidden="true" />
             <span>{audienceLink.label}</span>
           </Link>
-          <a
-            href={LOGIN_URL}
+          <button
+            type="button"
             className="t321-mkt-header__util-link t321-mkt-header__util-link--btn"
             aria-label="Sign in"
+            onClick={() => setSignInOpen(true)}
           >
             <i className="fas fa-sign-in-alt" aria-hidden="true" />
             <span>Sign in</span>
-          </a>
+          </button>
         </div>
       </div>
 
@@ -239,13 +242,26 @@ export default function SiteHeader({ settings }: Props) {
               >
                 Enroll now <i className="fas fa-arrow-right" aria-hidden="true" />
               </a>
-              <a href={LOGIN_URL} className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--block">
+              <button
+                type="button"
+                className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--block"
+                onClick={() => {
+                  setDrawerOpen(false);
+                  setSignInOpen(true);
+                }}
+              >
                 Sign in
-              </a>
+              </button>
             </div>
           </aside>
         </div>
       )}
+
+      <SignInDialog
+        open={signInOpen}
+        onClose={() => setSignInOpen(false)}
+        loginUrl={LOGIN_URL}
+      />
     </header>
   );
 }
