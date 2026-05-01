@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Course, Testimonial, FaqGroup, TrustLogo, HomePage as HomePageDoc } from "@/lib/sanity";
 import TrustLogosCarousel from "./TrustLogosCarousel";
+import VideoModal from "./VideoModal";
 import "./HomePage.css";
 
 type CompanyStat = { value: string; label: string };
@@ -195,21 +196,6 @@ export default function HomePage({
       /* localStorage unavailable */
     }
   }, [forcedAudience]);
-
-  // Close video dialog on Escape and lock body scroll while open.
-  useEffect(() => {
-    if (!videoOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setVideoOpen(false);
-    };
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [videoOpen]);
 
   // Course-cycle timer (skipped when reduced motion is preferred).
   useEffect(() => {
@@ -679,35 +665,11 @@ export default function HomePage({
         </div>
       </section>
 
-      {videoOpen && (
-        <div
-          className="t321-mkt-video-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Product walkthrough video"
-          onClick={() => setVideoOpen(false)}
-        >
-          <div className="t321-mkt-video-modal__panel" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="t321-mkt-video-modal__close"
-              aria-label="Close video"
-              onClick={() => setVideoOpen(false)}
-            >
-              <i className="fas fa-times" aria-hidden="true" />
-            </button>
-            <div className="t321-mkt-video-modal__frame">
-              <iframe
-                src="https://player.vimeo.com/video/508994861?autoplay=1&title=0&byline=0&portrait=0"
-                title="Train321 walkthrough"
-                frameBorder="0"
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-          </div>
-        </div>
-      )}
+      <VideoModal
+        vimeoId={videoOpen ? "508994861" : null}
+        title="Train321 walkthrough"
+        onClose={() => setVideoOpen(false)}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import type { DemoPage } from "@/lib/sanity";
 import CustomSelect from "@/components/CustomSelect";
+import VideoModal from "@/components/VideoModal";
 import "./demo.css";
 
 const FALLBACK_INTERESTS = [
@@ -67,7 +68,7 @@ const EMPTY_FORM: FormState = {
   notes: ""
 };
 
-type VideoItem = { id: string; name: string; thumbnail: string | null; playing: boolean };
+type VideoItem = { id: string; name: string; thumbnail: string | null };
 
 type Props = { page: DemoPage | null };
 
@@ -76,6 +77,7 @@ export default function DemoClient({ page }: Props) {
   const [sent, setSent] = useState(false);
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [videosLoading, setVideosLoading] = useState(true);
+  const [activeVideo, setActiveVideo] = useState<VideoItem | null>(null);
 
   const heroEyebrow = page?.heroEyebrow || "Book a walkthrough";
   const heroHeading = page?.heroHeading || "See Train321 with your courses already loaded.";
@@ -136,7 +138,7 @@ export default function DemoClient({ page }: Props) {
             } catch {
               /* fall back to gradient */
             }
-            return { id, name: v.name || "Walkthrough", thumbnail, playing: false };
+            return { id, name: v.name || "Walkthrough", thumbnail };
           })
         );
         if (!cancelled) setVideos(items);
@@ -157,9 +159,6 @@ export default function DemoClient({ page }: Props) {
         ? prev.interests.filter((i) => i !== opt)
         : [...prev.interests, opt]
     }));
-  };
-  const playVideo = (id: string) => {
-    setVideos((prev) => prev.map((v) => (v.id === id ? { ...v, playing: true } : v)));
   };
 
   const successFilled = successText.replace("{name}", form.name.split(" ")[0] || "");
@@ -273,19 +272,15 @@ export default function DemoClient({ page }: Props) {
                 {videos.map((v) => (
                   <article key={v.id} className="t321-mkt-demo__video-card t321-mkt-card">
                     <div className="t321-mkt-demo__video-frame">
-                      {!v.playing ? (
-                        <button
-                          type="button"
-                          className={`t321-mkt-demo__video-poster${v.thumbnail ? " has-thumb" : ""}`}
-                          aria-label={`Play ${v.name}`}
-                          onClick={() => playVideo(v.id)}
-                          style={v.thumbnail ? { backgroundImage: `url(${v.thumbnail})` } : undefined}
-                        >
-                          <span className="t321-mkt-demo__video-play" aria-hidden="true"><i className="fas fa-play" /></span>
-                        </button>
-                      ) : (
-                        <iframe src={`https://player.vimeo.com/video/${v.id}?autoplay=1&title=0&byline=0&portrait=0`} title={v.name} frameBorder="0" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen loading="lazy" />
-                      )}
+                      <button
+                        type="button"
+                        className={`t321-mkt-demo__video-poster${v.thumbnail ? " has-thumb" : ""}`}
+                        aria-label={`Play ${v.name}`}
+                        onClick={() => setActiveVideo(v)}
+                        style={v.thumbnail ? { backgroundImage: `url(${v.thumbnail})` } : undefined}
+                      >
+                        <span className="t321-mkt-demo__video-play" aria-hidden="true"><i className="fas fa-play" /></span>
+                      </button>
                     </div>
                     <div className="t321-mkt-demo__video-body">
                       <h3 className="t321-mkt-h3">{v.name}</h3>
@@ -354,6 +349,12 @@ export default function DemoClient({ page }: Props) {
           </div>
         </div>
       </section>
+
+      <VideoModal
+        vimeoId={activeVideo?.id || null}
+        title={activeVideo?.name}
+        onClose={() => setActiveVideo(null)}
+      />
     </div>
   );
 }
