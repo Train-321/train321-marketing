@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { ContactPage, SiteSettings } from "@/lib/sanity";
+import CustomSelect from "@/components/CustomSelect";
 import "./contact.css";
 
 const FALLBACK_TILES = [
@@ -141,12 +142,13 @@ export default function ContactClient({ page, settings }: Props) {
               </label>
               <label className="t321-mkt-contact__field">
                 <span>How can we help?</span>
-                <select value={form.topic} onChange={update("topic")} required>
-                  <option value="" disabled>Pick a topic</option>
-                  {topics.map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
+                <CustomSelect
+                  value={form.topic}
+                  options={topics}
+                  placeholder="Pick a topic"
+                  ariaLabel="How can we help?"
+                  onChange={(v) => setForm((prev) => ({ ...prev, topic: v }))}
+                />
               </label>
             </div>
 
