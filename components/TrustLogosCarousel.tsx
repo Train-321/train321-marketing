@@ -31,6 +31,7 @@ export default function TrustLogosCarousel({ logos, label }: Props) {
                     alt={logo.label || logo.name}
                     title={logo.label || logo.name}
                     loading="lazy"
+                    decoding="async"
                   />
                 ) : (
                   <span className="t321-mkt-logos__name">{logo.name}</span>

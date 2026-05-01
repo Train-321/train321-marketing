@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { footerNav } from "@/lib/nav";
 import type { SiteSettings } from "@/lib/sanity";
@@ -64,8 +65,12 @@ export default function SiteFooter({ settings }: Props) {
       <div className="t321-mkt-container t321-mkt-footer__inner">
         <div className="t321-mkt-footer__brand">
           <Link href="/" className="t321-mkt-footer__logo" aria-label="Train321 home">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/img/logos/train321_logo.png" alt={settings?.siteName || "Train321"} />
+            <Image
+              src="/img/logos/train321_logo.png"
+              alt={settings?.siteName || "Train321"}
+              width={272}
+              height={154}
+            />
           </Link>
           <p className="t321-mkt-footer__tagline">{tagline}</p>
           {socialItems.length > 0 && (

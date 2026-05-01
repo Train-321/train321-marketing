@@ -1,11 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces } from "next/font/google";
 import { draftMode } from "next/headers";
+import dynamic from "next/dynamic";
 import SiteHeader from "@/components/SiteHeaderShell";
 import SiteFooter from "@/components/SiteFooterShell";
 import DisableDraftMode from "@/components/DisableDraftMode";
-import VisualEditingClient from "@/components/VisualEditingClient";
 import "./globals.css";
+
+// Lazy-load visual editing — only pulled into the bundle when draft mode is on.
+// Saves ~120 KiB on the main JS bundle for the 99% of visitors who aren't editors.
+const VisualEditingClient = dynamic(() => import("@/components/VisualEditingClient"));
 
 const inter = Inter({
   subsets: ["latin"],
@@ -37,16 +41,45 @@ export const viewport: Viewport = {
   themeColor: "#0b3d91"
 };
 
+const FA_HREF =
+  "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css";
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled: isDraft } = await draftMode();
   return (
     <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
       <head>
+        {/* Connection warmup for the two third-party origins we always hit. */}
+        <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
+
         <link rel="icon" type="image/png" href="/img/logos/train321_logo.png" />
+
+        {/*
+          Font Awesome — non-render-blocking load.
+          Loaded with media="print" so the browser fetches without blocking
+          first paint. Inline script flips it to media="all" once the
+          stylesheet has finished downloading. <noscript> fallback keeps
+          icons visible if JS is disabled.
+        */}
         <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+          rel="preload"
+          href={FA_HREF}
+          as="style"
+          // @ts-expect-error — fetchpriority is a valid HTML hint not yet typed
+          fetchpriority="high"
         />
+        <link rel="stylesheet" href={FA_HREF} media="print" id="t321-fa" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){var l=document.getElementById('t321-fa');if(!l)return;var swap=function(){l.media='all'};if(l.sheet){swap()}else{l.addEventListener('load',swap,{once:true})}})();"
+          }}
+        />
+        <noscript>
+          {/* eslint-disable-next-line @next/next/no-css-tags */}
+          <link rel="stylesheet" href={FA_HREF} />
+        </noscript>
       </head>
       <body>
         <div className="t321-mkt-page">

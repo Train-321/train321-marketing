@@ -625,7 +625,9 @@ export async function getSiteSettings(): Promise<SiteSettings> {
         name,
         label,
         url,
-        "imageUrl": image.asset->url
+        // ?w=400&auto=format gets a 2x-retina-sized image in webp/avif when
+        // the browser supports it. ~70% smaller than the original 512px PNG.
+        "imageUrl": image.asset->url + "?w=400&auto=format"
       }
     }`
   );

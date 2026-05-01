@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { marketingNav } from "@/lib/nav";
@@ -69,8 +70,14 @@ export default function SiteHeader({ settings }: Props) {
 
       <div className="t321-mkt-container t321-mkt-header__bar">
         <Link href="/" className="t321-mkt-brand" aria-label="Train 321 home">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/img/logos/train321_logo.png" alt="Train321" className="t321-mkt-brand__logo" />
+          <Image
+            src="/img/logos/train321_logo.png"
+            alt="Train321"
+            width={272}
+            height={154}
+            priority
+            className="t321-mkt-brand__logo"
+          />
         </Link>
 
         <nav className="t321-mkt-nav" aria-label="Primary">
@@ -154,8 +161,13 @@ export default function SiteHeader({ settings }: Props) {
           />
           <aside className="t321-mkt-drawer__panel">
             <div className="t321-mkt-drawer__head">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/img/logos/train321_logo.png" alt="Train321" className="t321-mkt-brand__logo t321-mkt-brand__logo--sm" />
+              <Image
+                src="/img/logos/train321_logo.png"
+                alt="Train321"
+                width={200}
+                height={114}
+                className="t321-mkt-brand__logo t321-mkt-brand__logo--sm"
+              />
               <button
                 type="button"
                 className="t321-mkt-drawer__close"
