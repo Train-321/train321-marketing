@@ -180,6 +180,7 @@ export default function HomePage({
 }: HomePageProps) {
   const [audience, setAudience] = useState<Audience>(forcedAudience || "team");
   const [courseIndex, setCourseIndex] = useState(0);
+  const [videoOpen, setVideoOpen] = useState(false);
 
   // Hydrate audience from localStorage when not pinned by prop.
   useEffect(() => {
@@ -194,6 +195,21 @@ export default function HomePage({
       /* localStorage unavailable */
     }
   }, [forcedAudience]);
+
+  // Close video dialog on Escape and lock body scroll while open.
+  useEffect(() => {
+    if (!videoOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setVideoOpen(false);
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [videoOpen]);
 
   // Course-cycle timer (skipped when reduced motion is preferred).
   useEffect(() => {
@@ -331,10 +347,14 @@ export default function HomePage({
                 {copy.ctaPrimary.label}
                 <i className="fas fa-arrow-right" aria-hidden="true" />
               </Link>
-              <Link href={copy.ctaGhost.to} className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
+              <button
+                type="button"
+                onClick={() => setVideoOpen(true)}
+                className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg"
+              >
                 <i className={copy.ctaGhost.icon} aria-hidden="true" />
                 {copy.ctaGhost.label}
-              </Link>
+              </button>
             </div>
             <ul className="t321-mkt-hero__trust">
               {(home?.heroTrustPills?.length
@@ -658,6 +678,36 @@ export default function HomePage({
           </div>
         </div>
       </section>
+
+      {videoOpen && (
+        <div
+          className="t321-mkt-video-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Product walkthrough video"
+          onClick={() => setVideoOpen(false)}
+        >
+          <div className="t321-mkt-video-modal__panel" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="t321-mkt-video-modal__close"
+              aria-label="Close video"
+              onClick={() => setVideoOpen(false)}
+            >
+              <i className="fas fa-times" aria-hidden="true" />
+            </button>
+            <div className="t321-mkt-video-modal__frame">
+              <iframe
+                src="https://player.vimeo.com/video/508994861?autoplay=1&title=0&byline=0&portrait=0"
+                title="Train321 walkthrough"
+                frameBorder="0"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
