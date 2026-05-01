@@ -1,9 +1,118 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { DemoPage } from "@/lib/sanity";
 import "./demo.css";
+
+type CustomSelectProps = {
+  value: string;
+  options: string[];
+  placeholder: string;
+  onChange: (val: string) => void;
+  ariaLabel?: string;
+};
+
+function CustomSelect({ value, options, placeholder, onChange, ariaLabel }: CustomSelectProps) {
+  const [open, setOpen] = useState(false);
+  const [highlight, setHighlight] = useState(-1);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const listRef = useRef<HTMLUListElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      setHighlight(Math.max(0, options.indexOf(value)));
+      listRef.current?.focus();
+    }
+  }, [open, options, value]);
+
+  const onButtonKey = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setOpen(true);
+    }
+  };
+
+  const onListKey = (e: React.KeyboardEvent<HTMLUListElement>) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlight((i) => (i + 1) % options.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlight((i) => (i - 1 + options.length) % options.length);
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      setHighlight(0);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      setHighlight(options.length - 1);
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      if (highlight >= 0 && highlight < options.length) {
+        onChange(options[highlight]);
+        setOpen(false);
+      }
+    } else if (e.key === "Tab") {
+      setOpen(false);
+    }
+  };
+
+  return (
+    <div className={`t321-mkt-select${open ? " is-open" : ""}`} ref={wrapRef}>
+      <button
+        type="button"
+        className={`t321-mkt-select__btn${value ? " has-value" : ""}`}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={ariaLabel}
+        onClick={() => setOpen((o) => !o)}
+        onKeyDown={onButtonKey}
+      >
+        <span className="t321-mkt-select__label">{value || placeholder}</span>
+        <i className="fas fa-chevron-down" aria-hidden="true" />
+      </button>
+      {open && (
+        <ul
+          ref={listRef}
+          role="listbox"
+          tabIndex={-1}
+          className="t321-mkt-select__menu"
+          onKeyDown={onListKey}
+        >
+          {options.map((opt, i) => (
+            <li
+              key={opt}
+              role="option"
+              aria-selected={value === opt}
+              className={`t321-mkt-select__opt${highlight === i ? " is-active" : ""}${value === opt ? " is-selected" : ""}`}
+              onMouseEnter={() => setHighlight(i)}
+              onClick={() => { onChange(opt); setOpen(false); }}
+            >
+              <span>{opt}</span>
+              {value === opt && <i className="fas fa-check" aria-hidden="true" />}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 const FALLBACK_INTERESTS = [
   "Food Handler",
@@ -66,7 +175,7 @@ const EMPTY_FORM: FormState = {
   notes: ""
 };
 
-type VideoItem = { id: string; name: string; playing: boolean };
+type VideoItem = { id: string; name: string; thumbnail: string | null; playing: boolean };
 
 type Props = { page: DemoPage | null };
 
@@ -117,18 +226,28 @@ export default function DemoClient({ page }: Props) {
     let cancelled = false;
     fetch("https://api.train321.com/tour/demovideos")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status))))
-      .then((rows) => {
+      .then(async (rows) => {
         if (cancelled) return;
-        const list = Array.isArray(rows) ? rows : [];
-        setVideos(
-          list
-            .filter((v) => v && v.vimeo_video_id)
-            .map((v) => ({
-              id: String(v.vimeo_video_id),
-              name: v.name || "Walkthrough",
-              playing: false
-            }))
+        const list = (Array.isArray(rows) ? rows : []).filter((v) => v && v.vimeo_video_id);
+        const items = await Promise.all(
+          list.map(async (v: { vimeo_video_id: string | number; name?: string }) => {
+            const id = String(v.vimeo_video_id);
+            let thumbnail: string | null = null;
+            try {
+              const oe = await fetch(
+                `https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}&width=640`
+              );
+              if (oe.ok) {
+                const data = await oe.json();
+                thumbnail = data?.thumbnail_url || null;
+              }
+            } catch {
+              /* fall back to gradient */
+            }
+            return { id, name: v.name || "Walkthrough", thumbnail, playing: false };
+          })
         );
+        if (!cancelled) setVideos(items);
       })
       .catch(() => { if (!cancelled) setVideos([]); })
       .finally(() => { if (!cancelled) setVideosLoading(false); });
@@ -189,10 +308,13 @@ export default function DemoClient({ page }: Props) {
               </label>
               <label className="t321-mkt-demo__field">
                 <span>Team size</span>
-                <select value={form.seats} onChange={update("seats")} required>
-                  <option value="" disabled>Pick a range</option>
-                  {teamSizes.map((s) => (<option key={s}>{s}</option>))}
-                </select>
+                <CustomSelect
+                  value={form.seats}
+                  options={teamSizes}
+                  placeholder="Pick a range"
+                  ariaLabel="Team size"
+                  onChange={(v) => setForm((prev) => ({ ...prev, seats: v }))}
+                />
               </label>
             </div>
 
@@ -210,10 +332,13 @@ export default function DemoClient({ page }: Props) {
 
             <label className="t321-mkt-demo__field">
               <span>Best time to meet</span>
-              <select value={form.timeslot} onChange={update("timeslot")} required>
-                <option value="" disabled>Choose a window</option>
-                {timeslots.map((t) => (<option key={t}>{t}</option>))}
-              </select>
+              <CustomSelect
+                value={form.timeslot}
+                options={timeslots}
+                placeholder="Choose a window"
+                ariaLabel="Best time to meet"
+                onChange={(v) => setForm((prev) => ({ ...prev, timeslot: v }))}
+              />
             </label>
 
             <label className="t321-mkt-demo__field">
@@ -257,9 +382,14 @@ export default function DemoClient({ page }: Props) {
                   <article key={v.id} className="t321-mkt-demo__video-card t321-mkt-card">
                     <div className="t321-mkt-demo__video-frame">
                       {!v.playing ? (
-                        <button type="button" className="t321-mkt-demo__video-poster" aria-label={`Play ${v.name}`} onClick={() => playVideo(v.id)}>
+                        <button
+                          type="button"
+                          className={`t321-mkt-demo__video-poster${v.thumbnail ? " has-thumb" : ""}`}
+                          aria-label={`Play ${v.name}`}
+                          onClick={() => playVideo(v.id)}
+                          style={v.thumbnail ? { backgroundImage: `url(${v.thumbnail})` } : undefined}
+                        >
                           <span className="t321-mkt-demo__video-play" aria-hidden="true"><i className="fas fa-play" /></span>
-                          <span className="t321-mkt-demo__video-tag" aria-hidden="true">Demo</span>
                         </button>
                       ) : (
                         <iframe src={`https://player.vimeo.com/video/${v.id}?autoplay=1&title=0&byline=0&portrait=0`} title={v.name} frameBorder="0" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen loading="lazy" />
