@@ -223,37 +223,40 @@ export default function HomePage({
   const activeCourse = HERO_COURSES[courseIndex] || HERO_COURSES[0];
   const baseCopy = AUDIENCE_COPY[audience] || AUDIENCE_COPY.team;
   const sanityAudience = audience === "team" ? home?.audienceTeam : home?.audienceSelf;
-  // Per-audience Sanity copy wins over the per-audience hardcoded copy. The
-  // legacy single hero fields (heroEyebrow/heroHeadline/etc.) act as a final
-  // override on top of that.
+  // Resolution order, highest -> lowest priority:
+  //   1. Per-audience Sanity copy (audienceTeam / audienceSelf) — must win
+  //      so the in-page audience toggle actually changes content.
+  //   2. Legacy single-hero Sanity overrides (heroEyebrow/heroHeadline/etc.)
+  //      — only kick in when the per-audience block hasn't set that field.
+  //   3. Hardcoded per-audience defaults.
   const copy = {
     ...baseCopy,
-    eyebrow: home?.heroEyebrow || sanityAudience?.eyebrow || baseCopy.eyebrow,
-    h1Pre: home?.heroHeadline || sanityAudience?.h1Pre || baseCopy.h1Pre,
-    h1Em: home?.heroHeadline ? "" : sanityAudience?.h1Em || baseCopy.h1Em,
-    lede: home?.heroSubcopy || sanityAudience?.lede || baseCopy.lede,
-    ctaPrimary: home?.heroPrimaryCta?.label
+    eyebrow: sanityAudience?.eyebrow || home?.heroEyebrow || baseCopy.eyebrow,
+    h1Pre: sanityAudience?.h1Pre || home?.heroHeadline || baseCopy.h1Pre,
+    h1Em: sanityAudience?.h1Em || (sanityAudience?.h1Pre || home?.heroHeadline ? "" : baseCopy.h1Em),
+    lede: sanityAudience?.lede || home?.heroSubcopy || baseCopy.lede,
+    ctaPrimary: sanityAudience?.ctaPrimary?.label
       ? {
-          label: home.heroPrimaryCta.label,
-          to: home.heroPrimaryCta.to || baseCopy.ctaPrimary.to
+          label: sanityAudience.ctaPrimary.label,
+          to: sanityAudience.ctaPrimary.to || baseCopy.ctaPrimary.to
         }
-      : sanityAudience?.ctaPrimary?.label
+      : home?.heroPrimaryCta?.label
         ? {
-            label: sanityAudience.ctaPrimary.label,
-            to: sanityAudience.ctaPrimary.to || baseCopy.ctaPrimary.to
+            label: home.heroPrimaryCta.label,
+            to: home.heroPrimaryCta.to || baseCopy.ctaPrimary.to
           }
         : baseCopy.ctaPrimary,
-    ctaGhost: home?.heroSecondaryCta?.label
+    ctaGhost: sanityAudience?.ctaGhost?.label
       ? {
           ...baseCopy.ctaGhost,
-          label: home.heroSecondaryCta.label,
-          to: home.heroSecondaryCta.to || baseCopy.ctaGhost.to
+          label: sanityAudience.ctaGhost.label,
+          to: sanityAudience.ctaGhost.to || baseCopy.ctaGhost.to
         }
-      : sanityAudience?.ctaGhost?.label
+      : home?.heroSecondaryCta?.label
         ? {
             ...baseCopy.ctaGhost,
-            label: sanityAudience.ctaGhost.label,
-            to: sanityAudience.ctaGhost.to || baseCopy.ctaGhost.to
+            label: home.heroSecondaryCta.label,
+            to: home.heroSecondaryCta.to || baseCopy.ctaGhost.to
           }
         : baseCopy.ctaGhost,
     trustLabel: sanityAudience?.trustLabel || baseCopy.trustLabel,

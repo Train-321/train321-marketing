@@ -27,15 +27,29 @@
     transparent 100%);
 }
 
+/*
+ * Marquee implementation note:
+ * We render the logo list TWICE inside the track (see the carousel component).
+ * The track animates from translateX(0) -> translateX(-50%), so when the
+ * animation reaches 100% it has moved exactly one full copy of the list,
+ * making the loop seamless.
+ *
+ * IMPORTANT: don't use `gap` on the flex container. With gap, the boundary
+ * between the two copies has a gap too, but the -50% offset lands at the
+ * MIDDLE of total width, which falls inside one of those gaps -> visual jerk.
+ * Instead each item carries its own horizontal padding, so 50% of total
+ * width always lands precisely on an item boundary.
+ */
 .t321-mkt-logos__track {
   display: flex;
   align-items: center;
-  gap: 56px;
   list-style: none;
   margin: 0;
   padding: 0;
   width: max-content;
   animation: t321-mkt-marquee 38s linear infinite;
+  /* will-change keeps the GPU compositor on this layer; smoother on mobile */
+  will-change: transform;
 }
 
 .t321-mkt-logos__viewport:hover .t321-mkt-logos__track {
@@ -49,6 +63,8 @@
   justify-content: center;
   height: 56px;
   min-width: 130px;
+  /* Half-gap on each side so adjacent items have 56px between them. */
+  padding: 0 28px;
   opacity: 0.55;
   transition: opacity 0.2s ease, transform 0.2s ease;
   filter: grayscale(1) contrast(0.85);
@@ -83,8 +99,8 @@
 }
 
 @keyframes t321-mkt-marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
