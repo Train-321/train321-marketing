@@ -52,18 +52,37 @@ export default function SiteHeader({ settings }: Props) {
 
       <div className="t321-mkt-header__utility">
         <div className="t321-mkt-container t321-mkt-header__utility-inner">
-          <a className="t321-mkt-header__util-link" href={phoneHref}>
-            <i className="fas fa-phone" aria-hidden="true" /> {phone}
+          <a
+            className="t321-mkt-header__util-link"
+            href={phoneHref}
+            aria-label={`Call ${phone}`}
+          >
+            <i className="fas fa-phone" aria-hidden="true" />
+            <span>{phone}</span>
           </a>
-          <a className="t321-mkt-header__util-link" href={`mailto:${email}`}>
-            <i className="fas fa-envelope" aria-hidden="true" /> {email}
+          <a
+            className="t321-mkt-header__util-link t321-mkt-header__util-link--secondary"
+            href={`mailto:${email}`}
+            aria-label={`Email ${email}`}
+          >
+            <i className="fas fa-envelope" aria-hidden="true" />
+            <span>{email}</span>
           </a>
           <span className="t321-mkt-header__util-spacer" aria-hidden="true" />
-          <Link href={audienceLink.to} className="t321-mkt-header__util-link t321-mkt-header__util-link--accent">
-            <i className="fas fa-user-friends" aria-hidden="true" /> {audienceLink.label}
+          <Link
+            href={audienceLink.to}
+            className="t321-mkt-header__util-link t321-mkt-header__util-link--accent t321-mkt-header__util-link--secondary"
+          >
+            <i className="fas fa-user-friends" aria-hidden="true" />
+            <span>{audienceLink.label}</span>
           </Link>
-          <a href={LOGIN_URL} className="t321-mkt-header__util-link t321-mkt-header__util-link--btn">
-            <i className="fas fa-sign-in-alt" aria-hidden="true" /> Sign in
+          <a
+            href={LOGIN_URL}
+            className="t321-mkt-header__util-link t321-mkt-header__util-link--btn"
+            aria-label="Sign in"
+          >
+            <i className="fas fa-sign-in-alt" aria-hidden="true" />
+            <span>Sign in</span>
           </a>
         </div>
       </div>
