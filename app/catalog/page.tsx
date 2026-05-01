@@ -1,4 +1,4 @@
-import { getCourses } from "@/lib/sanity";
+import { getCourses, getCatalogPage } from "@/lib/sanity";
 import CatalogClient from "./CatalogClient";
 
 export const metadata = {
@@ -7,6 +7,6 @@ export const metadata = {
 };
 
 export default async function CatalogPage() {
-  const courses = await getCourses();
-  return <CatalogClient courses={courses} />;
+  const [courses, page] = await Promise.all([getCourses(), getCatalogPage()]);
+  return <CatalogClient courses={courses} page={page} />;
 }

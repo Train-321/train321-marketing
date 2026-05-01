@@ -15,24 +15,26 @@ export default defineConfig({
 
   plugins: [
     structureTool({
-      structure: (S) =>
-        S.list()
+      structure: (S) => {
+        const single = (id: string, type: string, title: string) =>
+          S.listItem()
+            .title(title)
+            .child(S.document().schemaType(type).documentId(id))
+        return S.list()
           .title('Content')
           .items([
-            S.listItem()
-              .title('Site Settings')
-              .child(
-                S.document()
-                  .schemaType('siteSettings')
-                  .documentId('siteSettings')
-              ),
-            S.listItem()
-              .title('Home Page')
-              .child(
-                S.document()
-                  .schemaType('homePage')
-                  .documentId('homePage')
-              ),
+            single('siteSettings', 'siteSettings', 'Site Settings'),
+            S.divider(),
+            single('homePage', 'homePage', 'Home Page'),
+            single('contactPage', 'contactPage', 'Contact Page'),
+            single('demoPage', 'demoPage', 'Demo Page'),
+            single('servicesPage', 'servicesPage', 'Services / Pricing Page'),
+            single('aboutPage', 'aboutPage', 'About Page'),
+            single('blogIndexPage', 'blogIndexPage', 'Blog Index'),
+            single('faqPage', 'faqPage', 'FAQ Page'),
+            single('catalogPage', 'catalogPage', 'Catalog Page'),
+            single('testimonialsPage', 'testimonialsPage', 'Testimonials Page'),
+            single('detailPagesCopy', 'detailPagesCopy', 'Detail Pages (chrome)'),
             S.divider(),
             S.documentTypeListItem('course').title('Courses'),
             S.documentTypeListItem('blogPost').title('Blog Posts'),
@@ -42,6 +44,7 @@ export default defineConfig({
             S.documentTypeListItem('legalPage').title('Legal Pages'),
             S.documentTypeListItem('teamMember').title('Team Members')
           ])
+      }
     }),
     presentationTool({
       previewUrl: {

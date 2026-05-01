@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCourse, getCourses } from "@/lib/sanity";
+import { getCourse, getCourses, getDetailPagesCopy } from "@/lib/sanity";
 import "./course.css";
 
 export async function generateStaticParams() {
@@ -20,10 +20,49 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function CoursePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const course = await getCourse(slug);
+  const [course, copy] = await Promise.all([getCourse(slug), getDetailPagesCopy()]);
   if (!course) notFound();
 
   const enrollHref = course.enrollId ? `/enroll?add=${course.enrollId}&checkout=1` : "/enroll";
+
+  // Chrome copy with fallbacks.
+  const crumbHome = copy?.courseCrumbHome || "Home";
+  const crumbCourses = copy?.courseCrumbCourses || "Courses";
+  const enrollLabel = copy?.courseEnrollLabel || "Enroll now";
+  const browseLabel = copy?.courseBrowseLabel || "Browse all courses";
+  const getStartedLabel = copy?.courseGetStartedLabel || "Get started";
+  const priceFromLabel = copy?.coursePriceFromLabel || "From";
+  const priceUnitLabel = copy?.coursePriceUnitLabel || "per seat";
+  const priceCustomAmt = copy?.coursePriceCustomAmt || "Custom";
+  const priceCustomUnit = copy?.coursePriceCustomUnit || "pricing";
+  const guarantee = copy?.courseGuarantee || "60-day money-back guarantee on unused seats";
+  const overviewEyebrow = copy?.courseOverviewEyebrow || "Course overview";
+  const overviewHeading = copy?.courseOverviewHeading || "What you'll get";
+  const outcomesHeading = copy?.courseOutcomesHeading || "By the end, you'll be able to";
+  const curriculumEyebrow = copy?.courseCurriculumEyebrow || "Curriculum";
+  const curriculumHeading = copy?.courseCurriculumHeading || "Inside the course";
+  const curriculumLedeTpl =
+    copy?.courseCurriculumLedeTpl || "{n} modules — self-paced, with progress that saves automatically.";
+  const curriculumLede = curriculumLedeTpl.replace("{n}", String(course.modules?.length || 0));
+  const certEyebrow = copy?.courseCertEyebrow || "Your certificate";
+  const certHeading = copy?.courseCertHeading || "Official, instant, accepted";
+  const certVisualHead = copy?.courseCertVisualHead || "Certificate of Completion";
+  const certVisualMeta = copy?.courseCertVisualMeta || "Train321 · ANSI-accredited";
+  const certDeliveryLabel = copy?.courseCertDeliveryLabel || "Delivery";
+  const certValidityLabel = copy?.courseCertValidityLabel || "Validity";
+  const certAcceptedLabel = copy?.courseCertAcceptedLabel || "Accepted by";
+  const faqEyebrow = copy?.courseFaqEyebrow || "FAQ";
+  const faqHeading = copy?.courseFaqHeading || "Common questions";
+
+  const cta = copy?.courseBottomCta;
+  const ctaHeading = cta?.heading || "Ready to get your team certified?";
+  const ctaLede =
+    cta?.lede ||
+    "Buy seats in under a minute. Invite learners by email or CSV. Track completion from a single dashboard.";
+  const ctaPrimaryLabel = cta?.primaryCta?.label || "Enroll now";
+  const ctaPrimaryHref = cta?.primaryCta?.to || enrollHref;
+  const ctaSecondaryLabel = cta?.secondaryCta?.label || "See a demo";
+  const ctaSecondaryHref = cta?.secondaryCta?.to || "/demo";
 
   return (
     <article className="t321-mkt-course">
@@ -31,9 +70,9 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
         <div className="t321-mkt-container t321-mkt-course__hero-grid">
           <div className="t321-mkt-course__hero-body">
             <div className="t321-mkt-course__crumbs">
-              <Link href="/">Home</Link>
+              <Link href="/">{crumbHome}</Link>
               <i className="fas fa-angle-right" aria-hidden="true" />
-              <Link href="/catalog">Courses</Link>
+              <Link href="/catalog">{crumbCourses}</Link>
               <i className="fas fa-angle-right" aria-hidden="true" />
               <span>{course.title}</span>
             </div>
@@ -45,11 +84,11 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             <p className="t321-mkt-lede">{course.tagline}</p>
             <div className="t321-mkt-course__cta">
               <Link href={enrollHref} className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg">
-                Enroll now
+                {enrollLabel}
                 <i className="fas fa-arrow-right" aria-hidden="true" />
               </Link>
               <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
-                Browse all courses
+                {browseLabel}
               </Link>
             </div>
             {course.accreditations && course.accreditations.length > 0 && (
@@ -71,14 +110,14 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             <div className="t321-mkt-course__hero-card-body">
               {course.priceFrom != null ? (
                 <div className="t321-mkt-course__price">
-                  <span className="t321-mkt-course__price-from">From</span>
+                  <span className="t321-mkt-course__price-from">{priceFromLabel}</span>
                   <span className="t321-mkt-course__price-amt">${course.priceFrom}</span>
-                  <span className="t321-mkt-course__price-unit">per seat</span>
+                  <span className="t321-mkt-course__price-unit">{priceUnitLabel}</span>
                 </div>
               ) : (
                 <div className="t321-mkt-course__price t321-mkt-course__price--custom">
-                  <span className="t321-mkt-course__price-amt">Custom</span>
-                  <span className="t321-mkt-course__price-unit">pricing</span>
+                  <span className="t321-mkt-course__price-amt">{priceCustomAmt}</span>
+                  <span className="t321-mkt-course__price-unit">{priceCustomUnit}</span>
                 </div>
               )}
               {course.priceNote && <p className="t321-mkt-course__price-note">{course.priceNote}</p>}
@@ -93,12 +132,12 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                 </ul>
               )}
               <Link href={enrollHref} className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block">
-                Get started
+                {getStartedLabel}
                 <i className="fas fa-arrow-right" aria-hidden="true" />
               </Link>
               <p className="t321-mkt-course__card-foot">
                 <i className="fas fa-shield-alt" aria-hidden="true" />
-                60-day money-back guarantee on unused seats
+                {guarantee}
               </p>
             </div>
           </aside>
@@ -108,13 +147,13 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       <section className="t321-mkt-section">
         <div className="t321-mkt-container t321-mkt-course__two">
           <div>
-            <span className="t321-mkt-eyebrow">Course overview</span>
-            <h2 className="t321-mkt-h2">What you&apos;ll get</h2>
+            <span className="t321-mkt-eyebrow">{overviewEyebrow}</span>
+            <h2 className="t321-mkt-h2">{overviewHeading}</h2>
             <p className="t321-mkt-course__summary">{course.summary}</p>
           </div>
           {course.outcomes && (
             <div className="t321-mkt-course__outcomes">
-              <h3 className="t321-mkt-h3">By the end, you&apos;ll be able to</h3>
+              <h3 className="t321-mkt-h3">{outcomesHeading}</h3>
               <ul>
                 {course.outcomes.map((o, i) => (
                   <li key={i}>
@@ -132,11 +171,9 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
         <section className="t321-mkt-section t321-mkt-section--sunk">
           <div className="t321-mkt-container">
             <div className="t321-mkt-section__head">
-              <span className="t321-mkt-eyebrow">Curriculum</span>
-              <h2 className="t321-mkt-h2">Inside the course</h2>
-              <p className="t321-mkt-lede">
-                {course.modules.length} modules — self-paced, with progress that saves automatically.
-              </p>
+              <span className="t321-mkt-eyebrow">{curriculumEyebrow}</span>
+              <h2 className="t321-mkt-h2">{curriculumHeading}</h2>
+              <p className="t321-mkt-lede">{curriculumLede}</p>
             </div>
             <ol className="t321-mkt-course__modules">
               {course.modules.map((m, i) => (
@@ -159,19 +196,19 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
           <div className="t321-mkt-container t321-mkt-course__cert">
             <div className="t321-mkt-course__cert-visual" aria-hidden="true">
               <div className="t321-mkt-course__cert-card">
-                <span className="t321-mkt-course__cert-head">Certificate of Completion</span>
+                <span className="t321-mkt-course__cert-head">{certVisualHead}</span>
                 <span className="t321-mkt-course__cert-name">{course.title}</span>
                 <span className="t321-mkt-course__cert-seal"><i className="fas fa-medal" /></span>
-                <span className="t321-mkt-course__cert-meta">Train321 · ANSI-accredited</span>
+                <span className="t321-mkt-course__cert-meta">{certVisualMeta}</span>
               </div>
             </div>
             <div>
-              <span className="t321-mkt-eyebrow">Your certificate</span>
-              <h2 className="t321-mkt-h2">Official, instant, accepted</h2>
+              <span className="t321-mkt-eyebrow">{certEyebrow}</span>
+              <h2 className="t321-mkt-h2">{certHeading}</h2>
               <dl className="t321-mkt-course__cert-dl">
-                <div><dt>Delivery</dt><dd>{course.certificate.delivery}</dd></div>
-                <div><dt>Validity</dt><dd>{course.certificate.validity}</dd></div>
-                <div><dt>Accepted by</dt><dd>{course.certificate.accepted}</dd></div>
+                <div><dt>{certDeliveryLabel}</dt><dd>{course.certificate.delivery}</dd></div>
+                <div><dt>{certValidityLabel}</dt><dd>{course.certificate.validity}</dd></div>
+                <div><dt>{certAcceptedLabel}</dt><dd>{course.certificate.accepted}</dd></div>
               </dl>
             </div>
           </div>
@@ -182,8 +219,8 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
         <section className="t321-mkt-section t321-mkt-section--sunk">
           <div className="t321-mkt-container t321-mkt-course__faqs">
             <div className="t321-mkt-section__head">
-              <span className="t321-mkt-eyebrow">FAQ</span>
-              <h2 className="t321-mkt-h2">Common questions</h2>
+              <span className="t321-mkt-eyebrow">{faqEyebrow}</span>
+              <h2 className="t321-mkt-h2">{faqHeading}</h2>
             </div>
             {course.faqs.map((f, i) => (
               <details key={i} className="t321-mkt-course__faq">
@@ -201,18 +238,16 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       <section className="t321-mkt-section t321-mkt-section--ink">
         <div className="t321-mkt-container t321-mkt-course__cta-band">
           <div>
-            <h2 className="t321-mkt-h2">Ready to get your team certified?</h2>
-            <p className="t321-mkt-lede">
-              Buy seats in under a minute. Invite learners by email or CSV. Track completion from a single dashboard.
-            </p>
+            <h2 className="t321-mkt-h2">{ctaHeading}</h2>
+            <p className="t321-mkt-lede">{ctaLede}</p>
           </div>
           <div className="t321-mkt-course__cta-band-actions">
-            <Link href={enrollHref} className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg">
-              Enroll now
+            <Link href={ctaPrimaryHref} className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg">
+              {ctaPrimaryLabel}
               <i className="fas fa-arrow-right" aria-hidden="true" />
             </Link>
-            <Link href="/demo" className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
-              See a demo
+            <Link href={ctaSecondaryHref} className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
+              {ctaSecondaryLabel}
             </Link>
           </div>
         </div>

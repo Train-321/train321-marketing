@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
-import { getBlogPost, getBlogPosts } from "@/lib/sanity";
+import { getBlogPost, getBlogPosts, getDetailPagesCopy } from "@/lib/sanity";
 import "./article.css";
 
 function initials(name: string) {
@@ -36,20 +36,40 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = await getBlogPost(slug);
+  const [post, allPosts, copy] = await Promise.all([
+    getBlogPost(slug),
+    getBlogPosts(),
+    getDetailPagesCopy()
+  ]);
   if (!post) notFound();
 
-  const allPosts = await getBlogPosts();
-  const related = allPosts
-    .filter((p) => p.slug !== post.slug)
-    .slice(0, 3);
+  const related = allPosts.filter((p) => p.slug !== post.slug).slice(0, 3);
+
+  const crumbJournal = copy?.blogCrumbJournal || "Journal";
+  const shareLabel = copy?.blogShareLabel || "Share";
+  const readingMinSuffix = copy?.blogReadingMinSuffix || "min read";
+  const orgSuffix = copy?.blogAuthorOrgSuffix || "Train321";
+
+  const relatedEyebrow = copy?.blogRelatedHead?.eyebrow || "Keep reading";
+  const relatedHeading = copy?.blogRelatedHead?.heading || "More in the journal";
+  const relatedReadLabel = copy?.blogRelatedReadLabel || "Read article";
+
+  const cta = copy?.blogBottomCta;
+  const ctaHeading = cta?.heading || "Ready to see the platform?";
+  const ctaLede =
+    cta?.lede ||
+    "Book a 20-minute walkthrough with a real human. No slides, no pressure.";
+  const ctaPrimaryLabel = cta?.primaryCta?.label || "Book a demo";
+  const ctaPrimaryHref = cta?.primaryCta?.to || "/demo";
+  const ctaSecondaryLabel = cta?.secondaryCta?.label || "Browse courses";
+  const ctaSecondaryHref = cta?.secondaryCta?.to || "/catalog";
 
   return (
     <div className="t321-mkt-article">
       <header className={`t321-mkt-article__hero is-tone-${post.heroTone}`}>
         <div className="t321-mkt-container">
           <nav className="t321-mkt-article__crumbs" aria-label="Breadcrumb">
-            <Link href="/blog">Journal</Link>
+            <Link href="/blog">{crumbJournal}</Link>
             <span aria-hidden="true">/</span>
             <span>{post.category}</span>
           </nav>
@@ -68,7 +88,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
             <div className="t321-mkt-article__dot" aria-hidden="true" />
             <div className="t321-mkt-article__dates">
               <strong>{formatDate(post.publishedAt)}</strong>
-              <span>{post.readMinutes} min read</span>
+              <span>{post.readMinutes} {readingMinSuffix}</span>
             </div>
           </div>
         </div>
@@ -76,8 +96,8 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
 
       <section className="t321-mkt-section">
         <div className="t321-mkt-container t321-mkt-article__body">
-          <aside className="t321-mkt-article__share" aria-label="Share">
-            <span>Share</span>
+          <aside className="t321-mkt-article__share" aria-label={shareLabel}>
+            <span>{shareLabel}</span>
             <a href={`/blog/${post.slug}`} aria-label="Copy link">
               <i className="fas fa-link" />
             </a>
@@ -124,7 +144,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
               </div>
               <div>
                 <strong>{post.author.name}</strong>
-                <span>{post.author.role} · Train321</span>
+                <span>{post.author.role} · {orgSuffix}</span>
               </div>
             </div>
           </article>
@@ -135,8 +155,8 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
         <section className="t321-mkt-section t321-mkt-section--sunk">
           <div className="t321-mkt-container">
             <div className="t321-mkt-section__head">
-              <span className="t321-mkt-eyebrow">Keep reading</span>
-              <h2 className="t321-mkt-h2">More in the journal</h2>
+              <span className="t321-mkt-eyebrow">{relatedEyebrow}</span>
+              <h2 className="t321-mkt-h2">{relatedHeading}</h2>
             </div>
             <div className="t321-mkt-article__related">
               {related.map((p) => (
@@ -152,7 +172,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
                   <h3 className="t321-mkt-h3">{p.title}</h3>
                   <p>{p.excerpt}</p>
                   <span className="t321-mkt-article__related-link">
-                    Read article <i className="fas fa-arrow-right" />
+                    {relatedReadLabel} <i className="fas fa-arrow-right" />
                   </span>
                 </Link>
               ))}
@@ -164,18 +184,16 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
       <section className="t321-mkt-section t321-mkt-section--ink">
         <div className="t321-mkt-container t321-mkt-article__cta">
           <div>
-            <h2 className="t321-mkt-h2">Ready to see the platform?</h2>
-            <p className="t321-mkt-lede">
-              Book a 20-minute walkthrough with a real human. No slides, no pressure.
-            </p>
+            <h2 className="t321-mkt-h2">{ctaHeading}</h2>
+            <p className="t321-mkt-lede">{ctaLede}</p>
           </div>
           <div className="t321-mkt-article__cta-actions">
-            <Link href="/demo" className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg">
-              Book a demo
+            <Link href={ctaPrimaryHref} className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg">
+              {ctaPrimaryLabel}
               <i className="fas fa-arrow-right" aria-hidden="true" />
             </Link>
-            <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
-              Browse courses
+            <Link href={ctaSecondaryHref} className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
+              {ctaSecondaryLabel}
             </Link>
           </div>
         </div>

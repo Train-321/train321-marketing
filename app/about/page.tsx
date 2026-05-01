@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTeam, getSiteSettings } from "@/lib/sanity";
+import { getTeam, getSiteSettings, getAboutPage } from "@/lib/sanity";
 import "./about.css";
 
 function initials(name: string) {
@@ -17,42 +17,90 @@ export const metadata = {
 };
 
 export default async function AboutPage() {
-  const [team, settings] = await Promise.all([getTeam(), getSiteSettings()]);
+  const [team, settings, page] = await Promise.all([
+    getTeam(),
+    getSiteSettings(),
+    getAboutPage()
+  ]);
   const companyStats = settings.companyStats || [];
+
+  // Hardcoded fallbacks for first render before the doc exists.
+  const heroEyebrow = page?.heroEyebrow || "Our story";
+  const heroHeading = page?.heroHeading || "Compliance training shouldn't feel like a tax.";
+  const heroLede =
+    page?.heroLede ||
+    "We started Train321 in 2018 because the alternatives felt built for lawyers, not for line cooks. Six years later, we've issued over 500,000 certificates to teams who actually finished the course.";
+
+  const storyEyebrow = page?.storyHead?.eyebrow || "The mission";
+  const storyHeading = page?.storyHead?.heading || "Make training so good, teams finish it";
+  const storyParagraphs = page?.storyParagraphs?.length
+    ? page.storyParagraphs
+    : [
+        "The hospitality industry spends billions of dollars a year on compliance training that nobody watches. Vendors produce 1997-era slideshows, teams click through on autopilot, and the paperwork gets filed. Then an inspector shows up, and the only thing that's actually changed is a folder full of certificates.",
+        "We're building the other thing. Short, direct, written by people who worked the line. Mobile-first because our learners are taking it on their phone between a prep shift and a dinner rush. Updated the day a law changes — not the quarter after.",
+        "That's our whole thesis. If we can make training so good that people actually learn from it, compliance takes care of itself."
+      ];
+
+  const pillarsEyebrow = page?.pillarsHead?.eyebrow || "What we believe";
+  const pillarsHeading =
+    page?.pillarsHead?.heading || "Three things we refuse to compromise on";
+  const pillars = page?.pillars?.length
+    ? page.pillars
+    : [
+        {
+          icon: "fas fa-microscope",
+          tone: "accent",
+          title: "Content accuracy",
+          body: "Every course is written by a subject-matter expert and reviewed annually. When laws change, our courses change the same week. No ghost-written freelance copy; no auto-translated modules."
+        },
+        {
+          icon: "fas fa-mobile-alt",
+          tone: "warn",
+          title: "Learner experience",
+          body: "If a cook can't finish a course on their phone during prep, we've failed. Every course is playable in 15-minute chunks, saves progress automatically, and works on a $80 Android with a cracked screen."
+        },
+        {
+          icon: "fas fa-dollar-sign",
+          tone: "positive",
+          title: "Pricing transparency",
+          body: "No \"contact us for pricing.\" No per-feature upsells. You see the price on every course page, volume discounts apply automatically, and unused seats are refundable for 60 days."
+        }
+      ];
+
+  const teamEyebrow = page?.teamHead?.eyebrow || "The team";
+  const teamHeading = page?.teamHead?.heading || "People behind the platform";
+  const teamLede =
+    page?.teamHead?.lede ||
+    "A small team — around 30 of us — split between curriculum, customer success, and engineering. Most of us have worked the line.";
+
+  const cta = page?.bottomCta;
+  const ctaHeading = cta?.heading || "Want to see how we work?";
+  const ctaLede =
+    cta?.lede ||
+    "Book a 20-minute demo. We'll show you the platform with your courses already loaded.";
+  const ctaPrimaryLabel = cta?.primaryCta?.label || "Book a demo";
+  const ctaPrimaryHref = cta?.primaryCta?.to || "/demo";
+  const ctaSecondaryLabel = cta?.secondaryCta?.label || "Contact us";
+  const ctaSecondaryHref = cta?.secondaryCta?.to || "/contact";
+
   return (
     <div className="t321-mkt-about">
       <section className="t321-mkt-about__hero">
         <div className="t321-mkt-container">
-          <span className="t321-mkt-eyebrow"><i className="fas fa-users" /> Our story</span>
-          <h1 className="t321-mkt-h1">Compliance training shouldn&apos;t feel like a tax.</h1>
-          <p className="t321-mkt-lede">
-            We started Train321 in 2018 because the alternatives felt built for lawyers,
-            not for line cooks. Six years later, we&apos;ve issued over 500,000 certificates
-            to teams who actually finished the course.
-          </p>
+          <span className="t321-mkt-eyebrow"><i className="fas fa-users" /> {heroEyebrow}</span>
+          <h1 className="t321-mkt-h1">{heroHeading}</h1>
+          <p className="t321-mkt-lede">{heroLede}</p>
         </div>
       </section>
 
       <section className="t321-mkt-section">
         <div className="t321-mkt-container t321-mkt-about__story">
           <div className="t321-mkt-about__story-body">
-            <span className="t321-mkt-eyebrow">The mission</span>
-            <h2 className="t321-mkt-h2">Make training so good, teams finish it</h2>
-            <p>
-              The hospitality industry spends billions of dollars a year on compliance training
-              that nobody watches. Vendors produce 1997-era slideshows, teams click through on
-              autopilot, and the paperwork gets filed. Then an inspector shows up, and the only
-              thing that&apos;s actually changed is a folder full of certificates.
-            </p>
-            <p>
-              We&apos;re building the other thing. Short, direct, written by people who worked the
-              line. Mobile-first because our learners are taking it on their phone between a prep
-              shift and a dinner rush. Updated the day a law changes — not the quarter after.
-            </p>
-            <p>
-              That&apos;s our whole thesis. If we can make training so good that people actually learn
-              from it, compliance takes care of itself.
-            </p>
+            <span className="t321-mkt-eyebrow">{storyEyebrow}</span>
+            <h2 className="t321-mkt-h2">{storyHeading}</h2>
+            {storyParagraphs.map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
           </div>
           <aside className="t321-mkt-about__stats" aria-label="Company stats">
             {companyStats.map((s) => (
@@ -68,43 +116,19 @@ export default async function AboutPage() {
       <section className="t321-mkt-section t321-mkt-section--sunk">
         <div className="t321-mkt-container">
           <div className="t321-mkt-section__head">
-            <span className="t321-mkt-eyebrow"><i className="fas fa-compass" /> What we believe</span>
-            <h2 className="t321-mkt-h2">Three things we refuse to compromise on</h2>
+            <span className="t321-mkt-eyebrow"><i className={page?.pillarsHead?.icon || "fas fa-compass"} /> {pillarsEyebrow}</span>
+            <h2 className="t321-mkt-h2">{pillarsHeading}</h2>
           </div>
           <div className="t321-mkt-about__pillars">
-            <article className="t321-mkt-about__pillar t321-mkt-card">
-              <span className="t321-mkt-about__pillar-icon t321-mkt-about__pillar-icon--accent">
-                <i className="fas fa-microscope" />
-              </span>
-              <h3 className="t321-mkt-h3">Content accuracy</h3>
-              <p>
-                Every course is written by a subject-matter expert and reviewed annually. When laws
-                change, our courses change the same week. No ghost-written freelance copy; no
-                auto-translated modules.
-              </p>
-            </article>
-            <article className="t321-mkt-about__pillar t321-mkt-card">
-              <span className="t321-mkt-about__pillar-icon t321-mkt-about__pillar-icon--warn">
-                <i className="fas fa-mobile-alt" />
-              </span>
-              <h3 className="t321-mkt-h3">Learner experience</h3>
-              <p>
-                If a cook can&apos;t finish a course on their phone during prep, we&apos;ve failed. Every
-                course is playable in 15-minute chunks, saves progress automatically, and works on
-                a $80 Android with a cracked screen.
-              </p>
-            </article>
-            <article className="t321-mkt-about__pillar t321-mkt-card">
-              <span className="t321-mkt-about__pillar-icon t321-mkt-about__pillar-icon--positive">
-                <i className="fas fa-dollar-sign" />
-              </span>
-              <h3 className="t321-mkt-h3">Pricing transparency</h3>
-              <p>
-                No &ldquo;contact us for pricing.&rdquo; No per-feature upsells. You see the
-                price on every course page, volume discounts apply automatically, and unused
-                seats are refundable for 60 days.
-              </p>
-            </article>
+            {pillars.map((p, i) => (
+              <article key={i} className="t321-mkt-about__pillar t321-mkt-card">
+                <span className={`t321-mkt-about__pillar-icon t321-mkt-about__pillar-icon--${p.tone || "accent"}`}>
+                  <i className={p.icon || "fas fa-check-circle"} />
+                </span>
+                <h3 className="t321-mkt-h3">{p.title}</h3>
+                <p>{p.body}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
@@ -112,12 +136,9 @@ export default async function AboutPage() {
       <section className="t321-mkt-section">
         <div className="t321-mkt-container">
           <div className="t321-mkt-section__head">
-            <span className="t321-mkt-eyebrow"><i className="fas fa-user-friends" /> The team</span>
-            <h2 className="t321-mkt-h2">People behind the platform</h2>
-            <p className="t321-mkt-lede">
-              A small team — around 30 of us — split between curriculum, customer success, and
-              engineering. Most of us have worked the line.
-            </p>
+            <span className="t321-mkt-eyebrow"><i className={page?.teamHead?.icon || "fas fa-user-friends"} /> {teamEyebrow}</span>
+            <h2 className="t321-mkt-h2">{teamHeading}</h2>
+            <p className="t321-mkt-lede">{teamLede}</p>
           </div>
           <div className="t321-mkt-about__team">
             {team.map((m) => (
@@ -139,17 +160,15 @@ export default async function AboutPage() {
       <section className="t321-mkt-section t321-mkt-section--ink">
         <div className="t321-mkt-container t321-mkt-about__cta">
           <div>
-            <h2 className="t321-mkt-h2">Want to see how we work?</h2>
-            <p className="t321-mkt-lede">
-              Book a 20-minute demo. We&apos;ll show you the platform with your courses already loaded.
-            </p>
+            <h2 className="t321-mkt-h2">{ctaHeading}</h2>
+            <p className="t321-mkt-lede">{ctaLede}</p>
           </div>
           <div className="t321-mkt-about__cta-actions">
-            <Link href="/demo" className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg">
-              Book a demo
+            <Link href={ctaPrimaryHref} className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg">
+              {ctaPrimaryLabel}
             </Link>
-            <Link href="/contact" className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
-              Contact us
+            <Link href={ctaSecondaryHref} className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
+              {ctaSecondaryLabel}
             </Link>
           </div>
         </div>

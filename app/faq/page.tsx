@@ -1,4 +1,4 @@
-import { getFaqGroups } from "@/lib/sanity";
+import { getFaqGroups, getFaqPage, getSiteSettings } from "@/lib/sanity";
 import FaqClient from "./FaqClient";
 
 export const metadata = {
@@ -7,6 +7,10 @@ export const metadata = {
 };
 
 export default async function FaqPage() {
-  const faqs = await getFaqGroups();
-  return <FaqClient faqs={faqs} />;
+  const [faqs, page, settings] = await Promise.all([
+    getFaqGroups(),
+    getFaqPage(),
+    getSiteSettings()
+  ]);
+  return <FaqClient faqs={faqs} page={page} settings={settings} />;
 }

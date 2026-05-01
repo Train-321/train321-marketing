@@ -117,12 +117,243 @@ export type SiteSettings = {
   trustLogos?: TrustLogo[];
 };
 
+// ── Reusable shapes used across page documents ──────────────────────────
+
+export type Cta = { label?: string; to?: string };
+
+export type CtaBlock = {
+  eyebrow?: string;
+  heading?: string;
+  lede?: string;
+  primaryCta?: Cta;
+  secondaryCta?: Cta;
+};
+
+export type SectionHead = {
+  eyebrow?: string;
+  heading?: string;
+  lede?: string;
+  icon?: string;
+};
+
+export type PillarCard = {
+  icon?: string;
+  tone?: string;
+  title?: string;
+  body?: string;
+  linkLabel?: string;
+  linkHref?: string;
+};
+
+export type HowItWorksStep = { title?: string; body?: string };
+export type QuickFaq = { q?: string; a?: string };
+export type LabeledTile = {
+  icon?: string;
+  title?: string;
+  sub?: string;
+  linkLabel?: string;
+  linkHref?: string;
+};
+
+// ── Page singletons ──────────────────────────────────────────────────────
+
+export type AudienceCopyDoc = {
+  eyebrow?: string;
+  h1Pre?: string;
+  h1Em?: string;
+  lede?: string;
+  ctaPrimary?: Cta;
+  ctaGhost?: Cta & { icon?: string };
+  trustLabel?: string;
+  stepsTitle?: string;
+  stepsLede?: string;
+  steps?: HowItWorksStep[];
+  bottomTitle?: string;
+  bottomLede?: string;
+  bottomCtaSecondary?: Cta;
+};
+
 export type HomePage = {
+  // Legacy single-hero overrides
   heroEyebrow?: string;
   heroHeadline?: string;
   heroSubcopy?: string;
-  heroPrimaryCta?: { label?: string; to?: string };
-  heroSecondaryCta?: { label?: string; to?: string };
+  heroPrimaryCta?: Cta;
+  heroSecondaryCta?: Cta;
+  heroTrustPills?: Array<{ icon?: string; label?: string }>;
+  // Per-audience copy
+  audienceTeam?: AudienceCopyDoc;
+  audienceSelf?: AudienceCopyDoc;
+  // Sections
+  pillarsHead?: SectionHead;
+  pillars?: PillarCard[];
+  popularHead?: SectionHead;
+  popularCtaLabel?: string;
+  popularSlugs?: string[];
+  howHead?: SectionHead;
+  opinionsHead?: SectionHead;
+  opinionsLinkLabel?: string;
+  faqTeaserHead?: SectionHead;
+  faqTeaserCtaLabel?: string;
+  bottomCta?: CtaBlock;
+};
+
+export type ContactPage = {
+  heroEyebrow?: string;
+  heroHeading?: string;
+  heroLede?: string;
+  tiles?: LabeledTile[];
+  formHeading?: string;
+  formLede?: string;
+  topicOptions?: string[];
+  submitLabel?: string;
+  submitSendingLabel?: string;
+  successText?: string;
+  quickFaqsHead?: SectionHead;
+  quickFaqs?: QuickFaq[];
+  bottomCta?: CtaBlock;
+};
+
+export type DemoPage = {
+  heroEyebrow?: string;
+  heroHeading?: string;
+  heroLede?: string;
+  heroBullets?: string[];
+  formHeading?: string;
+  teamSizeOptions?: string[];
+  timeslotOptions?: string[];
+  interestOptions?: string[];
+  submitLabel?: string;
+  submitSendingLabel?: string;
+  successText?: string;
+  disclaimer?: string;
+  agendaHead?: SectionHead;
+  agenda?: Array<{ time?: string; title?: string; desc?: string }>;
+  faqHead?: SectionHead;
+  faqs?: QuickFaq[];
+  bottomCta?: CtaBlock;
+};
+
+export type ServicesTier = {
+  name?: string;
+  audience?: string;
+  price?: string;
+  priceSub?: string;
+  featured?: boolean;
+  features?: string[];
+  ctaLabel?: string;
+  ctaTo?: string;
+};
+
+export type ServicesPage = {
+  heroEyebrow?: string;
+  heroHeading?: string;
+  heroLede?: string;
+  tiers?: ServicesTier[];
+  addonsHead?: SectionHead;
+  addons?: PillarCard[];
+  bottomCta?: CtaBlock;
+};
+
+export type AboutPage = {
+  heroEyebrow?: string;
+  heroHeading?: string;
+  heroLede?: string;
+  storyHead?: SectionHead;
+  storyParagraphs?: string[];
+  pillarsHead?: SectionHead;
+  pillars?: PillarCard[];
+  teamHead?: SectionHead;
+  bottomCta?: CtaBlock;
+};
+
+export type BlogIndexPage = {
+  heroEyebrow?: string;
+  heroHeading?: string;
+  heroLede?: string;
+  searchPlaceholder?: string;
+  allCategoryLabel?: string;
+  emptyText?: string;
+  recentHead?: SectionHead;
+  newsletter?: { heading?: string; lede?: string; placeholder?: string; buttonLabel?: string };
+};
+
+export type FaqPage = {
+  heroEyebrow?: string;
+  heroHeading?: string;
+  heroLede?: string;
+  searchPlaceholder?: string;
+  categoriesLabel?: string;
+  emptyText?: string;
+  bottomCta?: CtaBlock;
+};
+
+export type CatalogCategoryDef = { id?: string; label?: string; icon?: string };
+
+export type CatalogPage = {
+  heroEyebrow?: string;
+  heroHeading?: string;
+  heroLede?: string;
+  searchPlaceholder?: string;
+  categories?: CatalogCategoryDef[];
+  sortOptions?: string[];
+  emptyText?: string;
+  clearFiltersLabel?: string;
+  bottomCta?: CtaBlock;
+};
+
+export type TestimonialsPage = {
+  heroEyebrow?: string;
+  heroHeading?: string;
+  heroLede?: string;
+  heroStats?: Array<{ value: string; label: string }>;
+  featuredHead?: SectionHead;
+  moreHead?: SectionHead;
+  trustHead?: SectionHead;
+  bottomCta?: CtaBlock;
+};
+
+export type DetailPagesCopy = {
+  // course
+  courseCrumbHome?: string;
+  courseCrumbCourses?: string;
+  courseEnrollLabel?: string;
+  courseBrowseLabel?: string;
+  courseGetStartedLabel?: string;
+  coursePriceFromLabel?: string;
+  coursePriceUnitLabel?: string;
+  coursePriceCustomAmt?: string;
+  coursePriceCustomUnit?: string;
+  courseGuarantee?: string;
+  courseOverviewEyebrow?: string;
+  courseOverviewHeading?: string;
+  courseOutcomesHeading?: string;
+  courseCurriculumEyebrow?: string;
+  courseCurriculumHeading?: string;
+  courseCurriculumLedeTpl?: string;
+  courseCertEyebrow?: string;
+  courseCertHeading?: string;
+  courseCertVisualHead?: string;
+  courseCertVisualMeta?: string;
+  courseCertDeliveryLabel?: string;
+  courseCertValidityLabel?: string;
+  courseCertAcceptedLabel?: string;
+  courseFaqEyebrow?: string;
+  courseFaqHeading?: string;
+  courseBottomCta?: CtaBlock;
+  // blog
+  blogCrumbJournal?: string;
+  blogShareLabel?: string;
+  blogReadingMinSuffix?: string;
+  blogAuthorOrgSuffix?: string;
+  blogRelatedHead?: SectionHead;
+  blogRelatedReadLabel?: string;
+  blogBottomCta?: CtaBlock;
+  // legal
+  legalCrumbHome?: string;
+  legalEyebrow?: string;
+  legalEffectivePrefix?: string;
+  legalTocLabel?: string;
 };
 
 // ── Client ───────────────────────────────────────────────────────────────
@@ -401,13 +632,191 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   return r ?? SETTINGS_DEFAULT;
 }
 
+// ── Page singletons ─────────────────────────────────────────────────────
+
+const CTA_PROJ = `{ label, "to": url }`;
+const CTA_BLOCK_PROJ = `{
+  eyebrow, heading, lede,
+  "primaryCta": primaryCta${CTA_PROJ},
+  "secondaryCta": secondaryCta${CTA_PROJ}
+}`;
+const SECTION_HEAD_PROJ = `{ eyebrow, heading, lede, icon }`;
+const PILLAR_PROJ = `{ icon, tone, title, body, linkLabel, linkHref }`;
+const STEP_PROJ = `{ title, body }`;
+const QFAQ_PROJ = `{ q, a }`;
+const TILE_PROJ = `{ icon, title, sub, linkLabel, linkHref }`;
+
+const AUDIENCE_PROJ = `{
+  eyebrow, h1Pre, h1Em, lede,
+  "ctaPrimary": ctaPrimary${CTA_PROJ},
+  "ctaGhost": ctaGhost{ label, "to": url, "icon": coalesce(style, "") },
+  trustLabel, stepsTitle, stepsLede,
+  steps[]${STEP_PROJ},
+  bottomTitle, bottomLede,
+  "bottomCtaSecondary": bottomCtaSecondary${CTA_PROJ}
+}`;
+
 export async function getHomePage(): Promise<HomePage | null> {
   return (
     (await (await getClient()).fetch(
       `*[_id == "homePage"][0] {
         heroEyebrow, heroHeadline, heroSubcopy,
-        "heroPrimaryCta": heroPrimaryCta{ label, "to": url },
-        "heroSecondaryCta": heroSecondaryCta{ label, "to": url }
+        "heroPrimaryCta": heroPrimaryCta${CTA_PROJ},
+        "heroSecondaryCta": heroSecondaryCta${CTA_PROJ},
+        heroTrustPills[]{ icon, label },
+        "audienceTeam": audienceTeam${AUDIENCE_PROJ},
+        "audienceSelf": audienceSelf${AUDIENCE_PROJ},
+        "pillarsHead": pillarsHead${SECTION_HEAD_PROJ},
+        pillars[]${PILLAR_PROJ},
+        "popularHead": popularHead${SECTION_HEAD_PROJ},
+        popularCtaLabel,
+        popularSlugs,
+        "howHead": howHead${SECTION_HEAD_PROJ},
+        "opinionsHead": opinionsHead${SECTION_HEAD_PROJ},
+        opinionsLinkLabel,
+        "faqTeaserHead": faqTeaserHead${SECTION_HEAD_PROJ},
+        faqTeaserCtaLabel,
+        "bottomCta": bottomCta${CTA_BLOCK_PROJ}
+      }`
+    )) ?? null
+  );
+}
+
+export async function getContactPage(): Promise<ContactPage | null> {
+  return (
+    (await (await getClient()).fetch(
+      `*[_id == "contactPage"][0] {
+        heroEyebrow, heroHeading, heroLede,
+        tiles[]${TILE_PROJ},
+        formHeading, formLede, topicOptions,
+        submitLabel, submitSendingLabel, successText,
+        "quickFaqsHead": quickFaqsHead${SECTION_HEAD_PROJ},
+        quickFaqs[]${QFAQ_PROJ},
+        "bottomCta": bottomCta${CTA_BLOCK_PROJ}
+      }`
+    )) ?? null
+  );
+}
+
+export async function getDemoPage(): Promise<DemoPage | null> {
+  return (
+    (await (await getClient()).fetch(
+      `*[_id == "demoPage"][0] {
+        heroEyebrow, heroHeading, heroLede, heroBullets,
+        formHeading, teamSizeOptions, timeslotOptions, interestOptions,
+        submitLabel, submitSendingLabel, successText, disclaimer,
+        "agendaHead": agendaHead${SECTION_HEAD_PROJ},
+        agenda[]{ time, title, desc },
+        "faqHead": faqHead${SECTION_HEAD_PROJ},
+        faqs[]${QFAQ_PROJ},
+        "bottomCta": bottomCta${CTA_BLOCK_PROJ}
+      }`
+    )) ?? null
+  );
+}
+
+export async function getServicesPage(): Promise<ServicesPage | null> {
+  return (
+    (await (await getClient()).fetch(
+      `*[_id == "servicesPage"][0] {
+        heroEyebrow, heroHeading, heroLede,
+        tiers[]{ name, audience, price, priceSub, featured, features, ctaLabel, ctaTo },
+        "addonsHead": addonsHead${SECTION_HEAD_PROJ},
+        addons[]${PILLAR_PROJ},
+        "bottomCta": bottomCta${CTA_BLOCK_PROJ}
+      }`
+    )) ?? null
+  );
+}
+
+export async function getAboutPage(): Promise<AboutPage | null> {
+  return (
+    (await (await getClient()).fetch(
+      `*[_id == "aboutPage"][0] {
+        heroEyebrow, heroHeading, heroLede,
+        "storyHead": storyHead${SECTION_HEAD_PROJ},
+        storyParagraphs,
+        "pillarsHead": pillarsHead${SECTION_HEAD_PROJ},
+        pillars[]${PILLAR_PROJ},
+        "teamHead": teamHead${SECTION_HEAD_PROJ},
+        "bottomCta": bottomCta${CTA_BLOCK_PROJ}
+      }`
+    )) ?? null
+  );
+}
+
+export async function getBlogIndexPage(): Promise<BlogIndexPage | null> {
+  return (
+    (await (await getClient()).fetch(
+      `*[_id == "blogIndexPage"][0] {
+        heroEyebrow, heroHeading, heroLede,
+        searchPlaceholder, allCategoryLabel, emptyText,
+        "recentHead": recentHead${SECTION_HEAD_PROJ},
+        newsletter
+      }`
+    )) ?? null
+  );
+}
+
+export async function getFaqPage(): Promise<FaqPage | null> {
+  return (
+    (await (await getClient()).fetch(
+      `*[_id == "faqPage"][0] {
+        heroEyebrow, heroHeading, heroLede,
+        searchPlaceholder, categoriesLabel, emptyText,
+        "bottomCta": bottomCta${CTA_BLOCK_PROJ}
+      }`
+    )) ?? null
+  );
+}
+
+export async function getCatalogPage(): Promise<CatalogPage | null> {
+  return (
+    (await (await getClient()).fetch(
+      `*[_id == "catalogPage"][0] {
+        heroEyebrow, heroHeading, heroLede,
+        searchPlaceholder,
+        categories[]{ id, label, icon },
+        sortOptions, emptyText, clearFiltersLabel,
+        "bottomCta": bottomCta${CTA_BLOCK_PROJ}
+      }`
+    )) ?? null
+  );
+}
+
+export async function getTestimonialsPage(): Promise<TestimonialsPage | null> {
+  return (
+    (await (await getClient()).fetch(
+      `*[_id == "testimonialsPage"][0] {
+        heroEyebrow, heroHeading, heroLede,
+        heroStats[]{ value, label },
+        "featuredHead": featuredHead${SECTION_HEAD_PROJ},
+        "moreHead": moreHead${SECTION_HEAD_PROJ},
+        "trustHead": trustHead${SECTION_HEAD_PROJ},
+        "bottomCta": bottomCta${CTA_BLOCK_PROJ}
+      }`
+    )) ?? null
+  );
+}
+
+export async function getDetailPagesCopy(): Promise<DetailPagesCopy | null> {
+  return (
+    (await (await getClient()).fetch(
+      `*[_id == "detailPagesCopy"][0] {
+        courseCrumbHome, courseCrumbCourses, courseEnrollLabel, courseBrowseLabel,
+        courseGetStartedLabel, coursePriceFromLabel, coursePriceUnitLabel,
+        coursePriceCustomAmt, coursePriceCustomUnit, courseGuarantee,
+        courseOverviewEyebrow, courseOverviewHeading, courseOutcomesHeading,
+        courseCurriculumEyebrow, courseCurriculumHeading, courseCurriculumLedeTpl,
+        courseCertEyebrow, courseCertHeading, courseCertVisualHead, courseCertVisualMeta,
+        courseCertDeliveryLabel, courseCertValidityLabel, courseCertAcceptedLabel,
+        courseFaqEyebrow, courseFaqHeading,
+        "courseBottomCta": courseBottomCta${CTA_BLOCK_PROJ},
+        blogCrumbJournal, blogShareLabel, blogReadingMinSuffix, blogAuthorOrgSuffix,
+        "blogRelatedHead": blogRelatedHead${SECTION_HEAD_PROJ},
+        blogRelatedReadLabel,
+        "blogBottomCta": blogBottomCta${CTA_BLOCK_PROJ},
+        legalCrumbHome, legalEyebrow, legalEffectivePrefix, legalTocLabel
       }`
     )) ?? null
   );

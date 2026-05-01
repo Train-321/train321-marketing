@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
-import { getLegalPage, getLegalPages } from "@/lib/sanity";
+import { getLegalPage, getLegalPages, getDetailPagesCopy } from "@/lib/sanity";
 import "./legal.css";
 
 function formatDate(iso: string) {
@@ -48,26 +48,30 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function LegalPageRoute({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const page = await getLegalPage(slug);
+  const [page, copy] = await Promise.all([getLegalPage(slug), getDetailPagesCopy()]);
   if (!page) notFound();
 
   const headings = extractHeadings(page.body);
+  const homeLabel = copy?.legalCrumbHome || "Home";
+  const eyebrowLabel = copy?.legalEyebrow || "Policy";
+  const effectivePrefix = copy?.legalEffectivePrefix || "Effective";
+  const tocLabel = copy?.legalTocLabel || "On this page";
 
   return (
     <article className="t321-mkt-legal">
       <section className="t321-mkt-legal__hero">
         <div className="t321-mkt-container">
           <div className="t321-mkt-legal__crumbs">
-            <Link href="/">Home</Link>
+            <Link href="/">{homeLabel}</Link>
             <i className="fas fa-angle-right" aria-hidden="true" />
             <span>{page.title}</span>
           </div>
           <span className="t321-mkt-eyebrow">
-            <i className="fas fa-file-alt" aria-hidden="true" /> Policy
+            <i className="fas fa-file-alt" aria-hidden="true" /> {eyebrowLabel}
           </span>
           <h1 className="t321-mkt-h1">{page.title}</h1>
           {page.effectiveDate && (
-            <p className="t321-mkt-legal__date">Effective {formatDate(page.effectiveDate)}</p>
+            <p className="t321-mkt-legal__date">{effectivePrefix} {formatDate(page.effectiveDate)}</p>
           )}
           {page.intro && <p className="t321-mkt-lede">{page.intro}</p>}
         </div>
@@ -76,8 +80,8 @@ export default async function LegalPageRoute({ params }: { params: Promise<{ slu
       <section className="t321-mkt-section">
         <div className="t321-mkt-container t321-mkt-legal__body">
           {headings.length > 0 && (
-            <aside className="t321-mkt-legal__toc" aria-label="On this page">
-              <span className="t321-mkt-legal__toc-head">On this page</span>
+            <aside className="t321-mkt-legal__toc" aria-label={tocLabel}>
+              <span className="t321-mkt-legal__toc-head">{tocLabel}</span>
               <ol>
                 {headings.map((h) => (
                   <li key={h.id}>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { BlogPost } from "@/lib/sanity";
+import type { BlogPost, BlogIndexPage } from "@/lib/sanity";
 import "./blog.css";
 
 function formatDate(iso: string) {
@@ -11,30 +11,49 @@ function formatDate(iso: string) {
   return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }
 
-export default function BlogClient({ posts }: { posts: BlogPost[] }) {
+type Props = { posts: BlogPost[]; page?: BlogIndexPage | null };
+
+export default function BlogClient({ posts, page }: Props) {
   const [query, setQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [activeCategory, setActiveCategory] = useState<string>(page?.allCategoryLabel || "All");
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
   const sortedPosts = posts;
 
+  const heroEyebrow = page?.heroEyebrow || "Field notes";
+  const heroHeading = page?.heroHeading || "The Train321 journal.";
+  const heroLede =
+    page?.heroLede ||
+    "Compliance updates, operator playbooks, and the lessons we collect from thousands of rollouts — written by the people who run the platform.";
+  const searchPlaceholder = page?.searchPlaceholder || "Search articles…";
+  const allLabel = page?.allCategoryLabel || "All";
+  const emptyText = page?.emptyText || "No articles match your filters.";
+  const recentEyebrow = page?.recentHead?.eyebrow || "Recent";
+  const recentHeading = page?.recentHead?.heading || "More from the journal";
+  const newsHeading = page?.newsletter?.heading || "One email a month. No fluff.";
+  const newsLede =
+    page?.newsletter?.lede ||
+    "Compliance updates, operator interviews, and things we learned the hard way. Unsubscribe any time.";
+  const newsPlaceholder = page?.newsletter?.placeholder || "you@work.com";
+  const newsButton = page?.newsletter?.buttonLabel || "Subscribe";
+
   const categories = useMemo(() => {
     const cats = new Set(sortedPosts.map((p) => p.category).filter(Boolean));
-    return ["All", ...Array.from(cats)] as string[];
-  }, [sortedPosts]);
+    return [allLabel, ...Array.from(cats)] as string[];
+  }, [sortedPosts, allLabel]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return sortedPosts.filter((p) => {
-      if (activeCategory !== "All" && p.category !== activeCategory) return false;
+      if (activeCategory !== allLabel && p.category !== activeCategory) return false;
       if (!q) return true;
       return (p.title + " " + (p.excerpt || "") + " " + (p.category || "")).toLowerCase().includes(q);
     });
   }, [query, activeCategory, sortedPosts]);
 
   const featured = sortedPosts[0];
-  const showFeatured = !query && activeCategory === "All" && Boolean(featured);
+  const showFeatured = !query && activeCategory === allLabel && Boolean(featured);
 
   const filteredRest = useMemo(() => {
     if (showFeatured && featured) {
@@ -45,7 +64,7 @@ export default function BlogClient({ posts }: { posts: BlogPost[] }) {
 
   const resetFilters = () => {
     setQuery("");
-    setActiveCategory("All");
+    setActiveCategory(allLabel);
   };
 
   const onSubscribe = (e: React.FormEvent) => {
@@ -57,12 +76,9 @@ export default function BlogClient({ posts }: { posts: BlogPost[] }) {
     <div className="t321-mkt-blog">
       <section className="t321-mkt-blog__hero">
         <div className="t321-mkt-container">
-          <span className="t321-mkt-eyebrow"><i className="fas fa-feather-alt" /> Field notes</span>
-          <h1 className="t321-mkt-h1">The Train321 journal.</h1>
-          <p className="t321-mkt-lede">
-            Compliance updates, operator playbooks, and the lessons we collect from
-            thousands of rollouts — written by the people who run the platform.
-          </p>
+          <span className="t321-mkt-eyebrow"><i className="fas fa-feather-alt" /> {heroEyebrow}</span>
+          <h1 className="t321-mkt-h1">{heroHeading}</h1>
+          <p className="t321-mkt-lede">{heroLede}</p>
 
           <div className="t321-mkt-blog__filters">
             <div className="t321-mkt-blog__search">
@@ -71,7 +87,7 @@ export default function BlogClient({ posts }: { posts: BlogPost[] }) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 type="search"
-                placeholder="Search articles…"
+                placeholder={searchPlaceholder}
                 aria-label="Search articles"
               />
             </div>
@@ -122,8 +138,8 @@ export default function BlogClient({ posts }: { posts: BlogPost[] }) {
         <div className="t321-mkt-container">
           {showFeatured && (
             <div className="t321-mkt-section__head">
-              <span className="t321-mkt-eyebrow">Recent</span>
-              <h2 className="t321-mkt-h2">More from the journal</h2>
+              <span className="t321-mkt-eyebrow">{recentEyebrow}</span>
+              <h2 className="t321-mkt-h2">{recentHeading}</h2>
             </div>
           )}
 
@@ -152,7 +168,7 @@ export default function BlogClient({ posts }: { posts: BlogPost[] }) {
           ) : (
             <div className="t321-mkt-blog__empty">
               <i className="fas fa-search" />
-              <h3>No articles match your filters.</h3>
+              <h3>{emptyText}</h3>
               <p>
                 Try a different search term or{" "}
                 <button type="button" onClick={resetFilters}>clear filters</button>.
@@ -165,11 +181,8 @@ export default function BlogClient({ posts }: { posts: BlogPost[] }) {
       <section className="t321-mkt-section t321-mkt-section--ink">
         <div className="t321-mkt-container t321-mkt-blog__cta">
           <div>
-            <h2 className="t321-mkt-h2">One email a month. No fluff.</h2>
-            <p className="t321-mkt-lede">
-              Compliance updates, operator interviews, and things we learned the hard way.
-              Unsubscribe any time.
-            </p>
+            <h2 className="t321-mkt-h2">{newsHeading}</h2>
+            <p className="t321-mkt-lede">{newsLede}</p>
           </div>
           <form className="t321-mkt-blog__news" onSubmit={onSubscribe}>
             <input
@@ -177,11 +190,11 @@ export default function BlogClient({ posts }: { posts: BlogPost[] }) {
               onChange={(e) => setEmail(e.target.value)}
               type="email"
               required
-              placeholder="you@work.com"
+              placeholder={newsPlaceholder}
               aria-label="Email"
             />
             <button type="submit" className="t321-mkt-btn t321-mkt-btn--accent" disabled={subscribed}>
-              {subscribed ? "Subscribed" : "Subscribe"}
+              {subscribed ? "Subscribed" : newsButton}
               <i className="fas fa-arrow-right" aria-hidden="true" />
             </button>
           </form>

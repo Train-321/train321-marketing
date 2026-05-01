@@ -1,4 +1,4 @@
-import { getBlogPosts } from "@/lib/sanity";
+import { getBlogPosts, getBlogIndexPage } from "@/lib/sanity";
 import BlogClient from "./BlogClient";
 
 export const metadata = {
@@ -7,6 +7,6 @@ export const metadata = {
 };
 
 export default async function BlogIndexPage() {
-  const posts = await getBlogPosts();
-  return <BlogClient posts={posts} />;
+  const [posts, page] = await Promise.all([getBlogPosts(), getBlogIndexPage()]);
+  return <BlogClient posts={posts} page={page} />;
 }

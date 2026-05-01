@@ -208,12 +208,13 @@ export default function HomePage({
     return () => window.clearInterval(id);
   }, []);
 
+  const popularSlugsResolved = home?.popularSlugs?.length ? home.popularSlugs : POPULAR_SLUGS;
   const popularCourses = useMemo(
     () =>
-      POPULAR_SLUGS.map((slug) => courses.find((c) => c.slug === slug)).filter(
+      popularSlugsResolved.map((slug) => courses.find((c) => c.slug === slug)).filter(
         (x): x is Course => Boolean(x)
       ),
-    [courses]
+    [courses, popularSlugsResolved]
   );
 
   const featuredTestimonials = useMemo(() => testimonials.slice(0, 3), [testimonials]);
@@ -221,27 +222,54 @@ export default function HomePage({
 
   const activeCourse = HERO_COURSES[courseIndex] || HERO_COURSES[0];
   const baseCopy = AUDIENCE_COPY[audience] || AUDIENCE_COPY.team;
-  // Sanity overrides for the hero. Currently a single block (not split by audience);
-  // when a value is set there, it wins. Phase 2 will split per-audience.
+  const sanityAudience = audience === "team" ? home?.audienceTeam : home?.audienceSelf;
+  // Per-audience Sanity copy wins over the per-audience hardcoded copy. The
+  // legacy single hero fields (heroEyebrow/heroHeadline/etc.) act as a final
+  // override on top of that.
   const copy = {
     ...baseCopy,
-    eyebrow: home?.heroEyebrow || baseCopy.eyebrow,
-    h1Pre: home?.heroHeadline || baseCopy.h1Pre,
-    h1Em: home?.heroHeadline ? "" : baseCopy.h1Em,
-    lede: home?.heroSubcopy || baseCopy.lede,
+    eyebrow: home?.heroEyebrow || sanityAudience?.eyebrow || baseCopy.eyebrow,
+    h1Pre: home?.heroHeadline || sanityAudience?.h1Pre || baseCopy.h1Pre,
+    h1Em: home?.heroHeadline ? "" : sanityAudience?.h1Em || baseCopy.h1Em,
+    lede: home?.heroSubcopy || sanityAudience?.lede || baseCopy.lede,
     ctaPrimary: home?.heroPrimaryCta?.label
       ? {
           label: home.heroPrimaryCta.label,
           to: home.heroPrimaryCta.to || baseCopy.ctaPrimary.to
         }
-      : baseCopy.ctaPrimary,
+      : sanityAudience?.ctaPrimary?.label
+        ? {
+            label: sanityAudience.ctaPrimary.label,
+            to: sanityAudience.ctaPrimary.to || baseCopy.ctaPrimary.to
+          }
+        : baseCopy.ctaPrimary,
     ctaGhost: home?.heroSecondaryCta?.label
       ? {
           ...baseCopy.ctaGhost,
           label: home.heroSecondaryCta.label,
           to: home.heroSecondaryCta.to || baseCopy.ctaGhost.to
         }
-      : baseCopy.ctaGhost
+      : sanityAudience?.ctaGhost?.label
+        ? {
+            ...baseCopy.ctaGhost,
+            label: sanityAudience.ctaGhost.label,
+            to: sanityAudience.ctaGhost.to || baseCopy.ctaGhost.to
+          }
+        : baseCopy.ctaGhost,
+    trustLabel: sanityAudience?.trustLabel || baseCopy.trustLabel,
+    stepsTitle: sanityAudience?.stepsTitle || baseCopy.stepsTitle,
+    stepsLede: sanityAudience?.stepsLede || baseCopy.stepsLede,
+    steps: sanityAudience?.steps?.length
+      ? sanityAudience.steps.map((s) => ({ title: s.title || "", body: s.body || "" }))
+      : baseCopy.steps,
+    bottomTitle: sanityAudience?.bottomTitle || baseCopy.bottomTitle,
+    bottomLede: sanityAudience?.bottomLede || baseCopy.bottomLede,
+    bottomCtaSecondary: sanityAudience?.bottomCtaSecondary?.label
+      ? {
+          label: sanityAudience.bottomCtaSecondary.label,
+          to: sanityAudience.bottomCtaSecondary.to || baseCopy.bottomCtaSecondary.to
+        }
+      : baseCopy.bottomCtaSecondary
   };
   const showAudienceToggle = !forcedAudience;
 
@@ -306,9 +334,19 @@ export default function HomePage({
               </Link>
             </div>
             <ul className="t321-mkt-hero__trust">
-              <li><i className="fas fa-shield-alt" aria-hidden="true" />ANSI-accredited</li>
-              <li><i className="fas fa-flag-usa" aria-hidden="true" />Accepted in 50 states</li>
-              <li><i className="fas fa-bolt" aria-hidden="true" />Instant certificate</li>
+              {(home?.heroTrustPills?.length
+                ? home.heroTrustPills
+                : [
+                    { icon: "fas fa-shield-alt", label: "ANSI-accredited" },
+                    { icon: "fas fa-flag-usa", label: "Accepted in 50 states" },
+                    { icon: "fas fa-bolt", label: "Instant certificate" }
+                  ]
+              ).map((p, i) => (
+                <li key={i}>
+                  <i className={p.icon || "fas fa-check"} aria-hidden="true" />
+                  {p.label}
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -439,38 +477,30 @@ export default function HomePage({
       <section className="t321-mkt-section">
         <div className="t321-mkt-container">
           <div className="t321-mkt-section__head">
-            <span className="t321-mkt-eyebrow"><i className="fas fa-tag" /> What we do</span>
-            <h2 className="t321-mkt-h2">Three categories. One platform.</h2>
+            <span className="t321-mkt-eyebrow"><i className={home?.pillarsHead?.icon || "fas fa-tag"} /> {home?.pillarsHead?.eyebrow || "What we do"}</span>
+            <h2 className="t321-mkt-h2">{home?.pillarsHead?.heading || "Three categories. One platform."}</h2>
             <p className="t321-mkt-lede">
-              Everything compliance-sensitive in the hospitality and service industries —
-              under one login, one dashboard, one invoice.
+              {home?.pillarsHead?.lede || "Everything compliance-sensitive in the hospitality and service industries — under one login, one dashboard, one invoice."}
             </p>
           </div>
           <div className="t321-mkt-pillars">
-            <Link href="/food-handler" className="t321-mkt-pillar t321-mkt-card t321-mkt-card--hover">
-              <span className="t321-mkt-pillar__icon t321-mkt-pillar__icon--amber">
-                <i className="fas fa-utensils" />
-              </span>
-              <h3 className="t321-mkt-h3">Food safety</h3>
-              <p>Food Handler, Food Manager, accredited variants. Accepted by every state health department.</p>
-              <span className="t321-mkt-pillar__link">Browse food safety <i className="fas fa-arrow-right" /></span>
-            </Link>
-            <Link href="/alcohol" className="t321-mkt-pillar t321-mkt-card t321-mkt-card--hover">
-              <span className="t321-mkt-pillar__icon t321-mkt-pillar__icon--plum">
-                <i className="fas fa-wine-glass-alt" />
-              </span>
-              <h3 className="t321-mkt-h3">Alcohol &amp; service</h3>
-              <p>TIPS-equivalent alcohol server training plus bar basics, service basics, and security host.</p>
-              <span className="t321-mkt-pillar__link">Browse alcohol &amp; service <i className="fas fa-arrow-right" /></span>
-            </Link>
-            <Link href="/human-resources" className="t321-mkt-pillar t321-mkt-card t321-mkt-card--hover">
-              <span className="t321-mkt-pillar__icon t321-mkt-pillar__icon--emerald">
-                <i className="fas fa-users-cog" />
-              </span>
-              <h3 className="t321-mkt-h3">HR &amp; compliance</h3>
-              <p>Sexual harassment (state-specific), human trafficking, and practical HR for managers.</p>
-              <span className="t321-mkt-pillar__link">Browse HR &amp; compliance <i className="fas fa-arrow-right" /></span>
-            </Link>
+            {(home?.pillars?.length
+              ? home.pillars
+              : [
+                  { icon: "fas fa-utensils", tone: "amber", title: "Food safety", body: "Food Handler, Food Manager, accredited variants. Accepted by every state health department.", linkLabel: "Browse food safety", linkHref: "/food-handler" },
+                  { icon: "fas fa-wine-glass-alt", tone: "plum", title: "Alcohol & service", body: "TIPS-equivalent alcohol server training plus bar basics, service basics, and security host.", linkLabel: "Browse alcohol & service", linkHref: "/alcohol" },
+                  { icon: "fas fa-users-cog", tone: "emerald", title: "HR & compliance", body: "Sexual harassment (state-specific), human trafficking, and practical HR for managers.", linkLabel: "Browse HR & compliance", linkHref: "/human-resources" }
+                ]
+            ).map((p, i) => (
+              <Link key={i} href={p.linkHref || "#"} className="t321-mkt-pillar t321-mkt-card t321-mkt-card--hover">
+                <span className={`t321-mkt-pillar__icon t321-mkt-pillar__icon--${p.tone || "amber"}`}>
+                  <i className={p.icon || "fas fa-circle"} />
+                </span>
+                <h3 className="t321-mkt-h3">{p.title}</h3>
+                <p>{p.body}</p>
+                <span className="t321-mkt-pillar__link">{p.linkLabel || "Learn more"} <i className="fas fa-arrow-right" /></span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -478,11 +508,9 @@ export default function HomePage({
       <section className="t321-mkt-section t321-mkt-section--sunk">
         <div className="t321-mkt-container">
           <div className="t321-mkt-section__head">
-            <span className="t321-mkt-eyebrow"><i className="fas fa-fire" /> Most enrolled</span>
-            <h2 className="t321-mkt-h2">Popular courses</h2>
-            <p className="t321-mkt-lede">
-              The courses most operators start with. Click any to see details or enroll now.
-            </p>
+            <span className="t321-mkt-eyebrow"><i className={home?.popularHead?.icon || "fas fa-fire"} /> {home?.popularHead?.eyebrow || "Most enrolled"}</span>
+            <h2 className="t321-mkt-h2">{home?.popularHead?.heading || "Popular courses"}</h2>
+            <p className="t321-mkt-lede">{home?.popularHead?.lede || "The courses most operators start with. Click any to see details or enroll now."}</p>
           </div>
           <div className="t321-mkt-popular">
             {popularCourses.map((c) => (
@@ -510,7 +538,7 @@ export default function HomePage({
           </div>
           <div className="t321-mkt-popular__foot">
             <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg">
-              Browse the full catalog
+              {home?.popularCtaLabel || "Browse the full catalog"}
               <i className="fas fa-arrow-right" aria-hidden="true" />
             </Link>
           </div>
@@ -520,7 +548,7 @@ export default function HomePage({
       <section className="t321-mkt-section">
         <div className="t321-mkt-container">
           <div className="t321-mkt-section__head">
-            <span className="t321-mkt-eyebrow"><i className="fas fa-magic" /> How it works</span>
+            <span className="t321-mkt-eyebrow"><i className={home?.howHead?.icon || "fas fa-magic"} /> {home?.howHead?.eyebrow || "How it works"}</span>
             <h2 className="t321-mkt-h2">{copy.stepsTitle}</h2>
             <p className="t321-mkt-lede">{copy.stepsLede}</p>
           </div>
@@ -550,8 +578,8 @@ export default function HomePage({
       <section className="t321-mkt-section t321-mkt-section--sunk">
         <div className="t321-mkt-container">
           <div className="t321-mkt-section__head">
-            <span className="t321-mkt-eyebrow"><i className="fas fa-quote-right" /> What operators say</span>
-            <h2 className="t321-mkt-h2">Real quotes from real customers</h2>
+            <span className="t321-mkt-eyebrow"><i className={home?.opinionsHead?.icon || "fas fa-quote-right"} /> {home?.opinionsHead?.eyebrow || "What operators say"}</span>
+            <h2 className="t321-mkt-h2">{home?.opinionsHead?.heading || "Real quotes from real customers"}</h2>
           </div>
           <div className="t321-mkt-quotes">
             {featuredTestimonials.map((t) => (
@@ -574,7 +602,7 @@ export default function HomePage({
           </div>
           <div className="t321-mkt-quotes__foot">
             <Link href="/testimonials" className="t321-mkt-btn t321-mkt-btn--subtle">
-              Read more stories <i className="fas fa-arrow-right" />
+              {home?.opinionsLinkLabel || "Read more stories"} <i className="fas fa-arrow-right" />
             </Link>
           </div>
         </div>
@@ -583,13 +611,11 @@ export default function HomePage({
       <section className="t321-mkt-section">
         <div className="t321-mkt-container t321-mkt-faq-teaser">
           <div>
-            <span className="t321-mkt-eyebrow"><i className="fas fa-question-circle" /> Frequently asked</span>
-            <h2 className="t321-mkt-h2">Questions we hear a lot</h2>
-            <p className="t321-mkt-lede">
-              Quick answers to the things most buyers ask us. More detail on our FAQ page.
-            </p>
+            <span className="t321-mkt-eyebrow"><i className={home?.faqTeaserHead?.icon || "fas fa-question-circle"} /> {home?.faqTeaserHead?.eyebrow || "Frequently asked"}</span>
+            <h2 className="t321-mkt-h2">{home?.faqTeaserHead?.heading || "Questions we hear a lot"}</h2>
+            <p className="t321-mkt-lede">{home?.faqTeaserHead?.lede || "Quick answers to the things most buyers ask us. More detail on our FAQ page."}</p>
             <Link href="/faq" className="t321-mkt-btn t321-mkt-btn--ghost">
-              See all questions <i className="fas fa-arrow-right" />
+              {home?.faqTeaserCtaLabel || "See all questions"} <i className="fas fa-arrow-right" />
             </Link>
           </div>
           <div className="t321-mkt-faq-teaser__list">
@@ -609,16 +635,22 @@ export default function HomePage({
       <section className="t321-mkt-section t321-mkt-section--ink">
         <div className="t321-mkt-container t321-mkt-cta">
           <div>
-            <h2 className="t321-mkt-h2">{copy.bottomTitle}</h2>
-            <p className="t321-mkt-lede">{copy.bottomLede}</p>
+            <h2 className="t321-mkt-h2">{home?.bottomCta?.heading || copy.bottomTitle}</h2>
+            <p className="t321-mkt-lede">{home?.bottomCta?.lede || copy.bottomLede}</p>
           </div>
           <div className="t321-mkt-cta__actions">
-            <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg">
-              Browse courses
+            <Link
+              href={home?.bottomCta?.primaryCta?.to || "/catalog"}
+              className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg"
+            >
+              {home?.bottomCta?.primaryCta?.label || "Browse courses"}
               <i className="fas fa-arrow-right" aria-hidden="true" />
             </Link>
-            <Link href={copy.bottomCtaSecondary.to} className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
-              {copy.bottomCtaSecondary.label}
+            <Link
+              href={home?.bottomCta?.secondaryCta?.to || copy.bottomCtaSecondary.to}
+              className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg"
+            >
+              {home?.bottomCta?.secondaryCta?.label || copy.bottomCtaSecondary.label}
             </Link>
           </div>
         </div>
