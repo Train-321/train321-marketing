@@ -4,6 +4,7 @@ import { draftMode } from "next/headers";
 import dynamic from "next/dynamic";
 import SiteHeader from "@/components/SiteHeaderShell";
 import SiteFooter from "@/components/SiteFooterShell";
+import ChatWidget from "@/components/ChatWidgetShell";
 import DisableDraftMode from "@/components/DisableDraftMode";
 import "./globals.css";
 
@@ -89,6 +90,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </main>
           <SiteFooter />
         </div>
+        <ChatWidget />
         {isDraft && (
           <>
             <VisualEditingClient />
