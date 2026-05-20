@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b3d91"
+  themeColor: "#0B1F33"
 };
 
 const FA_HREF =

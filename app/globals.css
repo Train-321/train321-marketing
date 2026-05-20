@@ -2,26 +2,26 @@
    Ported from Nuxt assets/css/marketing-base.css */
 
 :root {
-  --t321-mkt-paper: #FAF9F6;
-  --t321-mkt-paper-sunk: #F2F0EA;
-  --t321-mkt-ink: #0F0F0E;
-  --t321-mkt-ink-muted: #5E5C57;
-  --t321-mkt-line: #E8E4DB;
-  --t321-mkt-line-strong: #D7D1C4;
-  --t321-mkt-accent: #0B437C;
-  --t321-mkt-accent-hover: #083362;
-  --t321-mkt-accent-bright: #00CCFE;
-  --t321-mkt-accent-wash: #E3F7FD;
-  --t321-mkt-accent-ink: #0B437C;
-  --t321-mkt-cyan: #00CCFE;
-  --t321-mkt-cyan-wash: #D9F6FD;
+  --t321-mkt-paper: #FFFFFF;
+  --t321-mkt-paper-sunk: #F3F5F7;
+  --t321-mkt-ink: #0B1F33;
+  --t321-mkt-ink-muted: #4A5568;
+  --t321-mkt-line: #E2E8EF;
+  --t321-mkt-line-strong: #C8D4DE;
+  --t321-mkt-accent: #0B1F33;
+  --t321-mkt-accent-hover: #061524;
+  --t321-mkt-accent-bright: #00B4DB;
+  --t321-mkt-accent-wash: #E0F7FC;
+  --t321-mkt-accent-ink: #0B1F33;
+  --t321-mkt-cyan: #00B4DB;
+  --t321-mkt-cyan-wash: #D0F0FA;
   --t321-mkt-positive: #2D6A4F;
   --t321-mkt-positive-wash: #E3EFE8;
   --t321-mkt-warn: #9D6200;
   --t321-mkt-warn-wash: #FCEFD7;
   --t321-mkt-critical: #9D1F2A;
-  --t321-mkt-purple: #6B3A8A;
-  --t321-mkt-purple-wash: #ECE5F3;
+  --t321-mkt-purple: #6C5CE7;
+  --t321-mkt-purple-wash: #ECEAFC;
   color-scheme: light;
 }
 
@@ -82,7 +82,7 @@ a { color: inherit; }
   color: #ffffff;
   border-color: var(--t321-mkt-ink);
 }
-.t321-mkt-btn--primary:hover { background: #1d1d1b; border-color: #1d1d1b; }
+.t321-mkt-btn--primary:hover { background: #061524; border-color: #061524; }
 
 .t321-mkt-btn--accent {
   background: var(--t321-mkt-accent);
@@ -116,7 +116,7 @@ a { color: inherit; }
 .t321-mkt-section { padding: 4rem 0; }
 .t321-mkt-section--tight { padding: 2.5rem 0; }
 .t321-mkt-section--sunk { background: var(--t321-mkt-paper-sunk); }
-.t321-mkt-section--ink { background: var(--t321-mkt-ink); color: #F2F0EA; }
+.t321-mkt-section--ink { background: var(--t321-mkt-ink); color: #F3F5F7; }
 
 .t321-mkt-eyebrow {
   display: inline-flex;
@@ -130,7 +130,7 @@ a { color: inherit; }
   margin-bottom: 0.75rem;
 }
 .t321-mkt-eyebrow i { font-size: 0.7rem; }
-.t321-mkt-section--ink .t321-mkt-eyebrow { color: #74B5F2; }
+.t321-mkt-section--ink .t321-mkt-eyebrow { color: #00B4DB; }
 
 .t321-mkt-h1 {
   font-family: var(--font-fraunces), Georgia, serif;
@@ -168,7 +168,7 @@ a { color: inherit; }
   margin: 0 0 1.5rem;
   max-width: 62ch;
 }
-.t321-mkt-section--ink .t321-mkt-lede { color: #C4BEB5; }
+.t321-mkt-section--ink .t321-mkt-lede { color: #A8BFD0; }
 
 .t321-mkt-section__head {
   text-align: center;
@@ -224,7 +224,7 @@ a { color: inherit; }
 .t321-mkt-section--ink .t321-mkt-card {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(255, 255, 255, 0.08);
-  color: #F2F0EA;
+  color: #F3F5F7;
 }
 
 @media (prefers-reduced-motion: reduce) {

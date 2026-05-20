@@ -180,7 +180,7 @@
 .t321-mkt-demo__video-frame {
   position: relative;
   aspect-ratio: 16 / 9;
-  background: linear-gradient(135deg, #0B437C 0%, #0B437C 45%, #00CCFE 130%);
+  background: linear-gradient(135deg, #0B1F33 0%, #0B1F33 45%, #00B4DB 130%);
   overflow: hidden;
 }
 .t321-mkt-demo__video-frame iframe {
@@ -201,7 +201,7 @@
   padding: 0;
   background:
     radial-gradient(420px 220px at 65% 30%, rgba(255, 255, 255, 0.18), transparent 70%),
-    linear-gradient(135deg, #0B437C 0%, #0B437C 45%, #00CCFE 130%);
+    linear-gradient(135deg, #0B1F33 0%, #0B1F33 45%, #00B4DB 130%);
   color: #ffffff;
   display: flex;
   align-items: center;

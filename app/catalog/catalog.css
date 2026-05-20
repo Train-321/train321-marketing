@@ -151,7 +151,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #0A427B, #1579D1);
+  background: linear-gradient(135deg, #0B1F33, #00B4DB);
   position: relative;
 }
 .t321-mkt-catalog__card-top { cursor: pointer; }
@@ -188,7 +188,7 @@
   background: linear-gradient(135deg, #9D6200, #C08A2E);
 }
 .t321-mkt-catalog__card-top.is-tone-plum {
-  background: linear-gradient(135deg, #6B3A8A, #8C57AE);
+  background: linear-gradient(135deg, #6C5CE7, #8B7EF0);
 }
 .t321-mkt-catalog__card-top.is-tone-emerald {
   background: linear-gradient(135deg, #2D6A4F, #3E8E68);

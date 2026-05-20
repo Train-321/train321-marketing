@@ -126,7 +126,7 @@
   gap: 6px;
   padding: 0.55rem 0.85rem;
   border-bottom: 1px solid var(--t321-mkt-line);
-  background: linear-gradient(180deg, #fafaf7, #f4f3ee);
+  background: linear-gradient(180deg, #FFFFFF, #F3F5F7);
 }
 .t321-mkt-hero__dot { width: 9px; height: 9px; border-radius: 50%; background: #e4d9b3; }
 .t321-mkt-hero__dot:nth-child(2) { background: #cfe1c9; }
@@ -787,14 +787,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #0B437C, #00CCFE);
+  background: linear-gradient(135deg, #0B1F33, #00B4DB);
 }
 .t321-mkt-popular__top i { font-size: 1.5rem; }
 .t321-mkt-popular__top.is-tone-amber {
   background: linear-gradient(135deg, #9D6200, #C08A2E);
 }
 .t321-mkt-popular__top.is-tone-plum {
-  background: linear-gradient(135deg, #6B3A8A, #8C57AE);
+  background: linear-gradient(135deg, #6C5CE7, #8B7EF0);
 }
 .t321-mkt-popular__top.is-tone-emerald {
   background: linear-gradient(135deg, #2D6A4F, #3E8E68);

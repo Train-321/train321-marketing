@@ -1,9 +1,9 @@
 /* ── Tokens (scoped to widget) ──────────────────────────────────── */
 .t321-chat-fab,
 .t321-chat-panel {
-  --t321c-brand: #0b3d91;
-  --t321c-brand-soft: #1e56b8;
-  --t321c-brand-tint: #eaf0fb;
+  --t321c-brand: #0B1F33;
+  --t321c-brand-soft: #00B4DB;
+  --t321c-brand-tint: #E0F7FC;
   --t321c-accent: #ffd166;
   --t321c-online: #22c55e;
   --t321c-ink: #0f172a;
