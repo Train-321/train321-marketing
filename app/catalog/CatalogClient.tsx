@@ -16,9 +16,9 @@ const FALLBACK_SORT = ["A-Z", "Z-A", "Price: low to high", "Price: high to low"]
 
 type SortMode = "alpha" | "alpha-desc" | "price-asc" | "price-desc";
 
-type Props = { courses: Course[]; page?: CatalogPage | null };
+type Props = { courses: Course[]; page?: CatalogPage | null; enrollBaseUrl: string };
 
-export default function CatalogClient({ courses, page }: Props) {
+export default function CatalogClient({ courses, page, enrollBaseUrl }: Props) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [sortMode, setSortMode] = useState<SortMode>("alpha");
@@ -170,17 +170,19 @@ export default function CatalogClient({ courses, page }: Props) {
             <div className="t321-mkt-catalog__grid">
               {filteredCourses.map((c) => (
                 <article key={c.slug} className="t321-mkt-catalog__card t321-mkt-card">
-                  <div className={`t321-mkt-catalog__card-top${c.image ? " has-image" : ""} is-tone-${c.color || "accent"}`}>
+                  <Link href={`/courses/${c.slug}`} className={`t321-mkt-catalog__card-top${c.image ? " has-image" : ""} is-tone-${c.color || "accent"}`} tabIndex={-1} aria-hidden="true">
                     {c.image ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img className="t321-mkt-catalog__card-img" src={c.image} alt={c.title} loading="lazy" />
                     ) : (
                       <i className={c.icon || "fas fa-graduation-cap"} aria-hidden="true" />
                     )}
-                  </div>
+                  </Link>
                   <div className="t321-mkt-catalog__card-body">
                     <span className="t321-mkt-catalog__card-eyebrow">{c.eyebrow}</span>
-                    <h3 className="t321-mkt-h3">{c.title}</h3>
+                    <h3 className="t321-mkt-h3">
+                      <Link href={`/courses/${c.slug}`} className="t321-mkt-catalog__card-title-link">{c.title}</Link>
+                    </h3>
                     <p>{c.tagline}</p>
 
                     <div className="t321-mkt-catalog__card-meta">
@@ -214,7 +216,7 @@ export default function CatalogClient({ courses, page }: Props) {
                       </div>
                       <div className="t321-mkt-catalog__card-actions">
                         <Link href={`/courses/${c.slug}`} className="t321-mkt-btn t321-mkt-btn--subtle">Details</Link>
-                        <Link href={`/enroll?add=${c.enrollId}`} className="t321-mkt-btn t321-mkt-btn--primary">
+                        <Link href={`${enrollBaseUrl}?add=${c.enrollId}`} className="t321-mkt-btn t321-mkt-btn--primary">
                           Enroll
                           <i className="fas fa-arrow-right" aria-hidden="true" />
                         </Link>

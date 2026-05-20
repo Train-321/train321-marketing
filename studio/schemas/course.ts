@@ -4,19 +4,26 @@ export default defineType({
   name: 'course',
   title: 'Course',
   type: 'document',
+  groups: [
+    { name: 'content', title: 'Content', default: true },
+    { name: 'enroll', title: 'Enrollment' },
+    { name: 'seo', title: 'SEO' }
+  ],
   fields: [
-    defineField({ name: 'title', type: 'string', validation: (R) => R.required() }),
+    defineField({ name: 'title', type: 'string', validation: (R) => R.required(), group: 'content' }),
     defineField({
       name: 'slug',
       type: 'slug',
       options: { source: 'title', maxLength: 96 },
-      validation: (R) => R.required()
+      validation: (R) => R.required(),
+      group: 'content'
     }),
-    defineField({ name: 'eyebrow', type: 'string', description: 'Small line above the headline' }),
-    defineField({ name: 'tagline', type: 'text', rows: 2 }),
+    defineField({ name: 'eyebrow', type: 'string', description: 'Small line above the headline', group: 'content' }),
+    defineField({ name: 'tagline', type: 'text', rows: 2, group: 'content' }),
     defineField({
       name: 'category',
       type: 'string',
+      group: 'content',
       options: {
         list: [
           { title: 'Food', value: 'food' },
@@ -29,6 +36,7 @@ export default defineType({
       name: 'color',
       type: 'string',
       description: 'Card accent color',
+      group: 'content',
       options: {
         list: [
           { title: 'Amber', value: 'amber' },
@@ -38,49 +46,69 @@ export default defineType({
         ]
       }
     }),
-    defineField({ name: 'icon', type: 'string', description: 'Font Awesome class, e.g. fas fa-utensils' }),
-    defineField({ name: 'imageUrl', type: 'url', title: 'Image URL', description: 'Use this for external image URLs (e.g. Unsplash). Leave blank if uploading via the field below.' }),
-    defineField({ name: 'image', type: 'image', title: 'Image (uploaded)', options: { hotspot: true } }),
-    defineField({ name: 'summary', type: 'text', rows: 4 }),
+    defineField({ name: 'icon', type: 'string', description: 'Font Awesome class, e.g. fas fa-utensils', group: 'content' }),
+    defineField({ name: 'imageUrl', type: 'url', title: 'Image URL', description: 'Use this for external image URLs (e.g. Unsplash). Leave blank if uploading via the field below.', group: 'content' }),
+    defineField({ name: 'image', type: 'image', title: 'Image (uploaded)', options: { hotspot: true }, group: 'content' }),
+    defineField({ name: 'summary', type: 'text', rows: 4, group: 'content' }),
     defineField({
       name: 'heroStats',
       title: 'Hero stats',
       type: 'array',
       of: [{ type: 'heroStat' }],
-      validation: (R) => R.max(4)
+      validation: (R) => R.max(4),
+      group: 'content'
     }),
     defineField({
       name: 'outcomes',
       title: 'Learning outcomes',
       type: 'array',
-      of: [{ type: 'string' }]
+      of: [{ type: 'string' }],
+      group: 'content'
     }),
     defineField({
       name: 'modules',
       type: 'array',
-      of: [{ type: 'courseModule' }]
+      of: [{ type: 'courseModule' }],
+      group: 'content'
     }),
     defineField({
       name: 'accreditations',
       type: 'array',
-      of: [{ type: 'string' }]
+      of: [{ type: 'string' }],
+      group: 'content'
     }),
     defineField({
       name: 'certificate',
       type: 'certificateInfo',
-      title: 'Certificate'
+      title: 'Certificate',
+      group: 'content'
     }),
-    defineField({ name: 'priceFrom', type: 'number', title: 'Price from (USD)', description: 'Display price; leave blank for "contact us" pricing' }),
-    defineField({ name: 'priceNote', type: 'string', description: 'Replaces price when no priceFrom is set, or supplements it' }),
+    defineField({ name: 'priceFrom', type: 'number', title: 'Price from (USD)', description: 'Display price; leave blank for "contact us" pricing', group: 'content' }),
+    defineField({ name: 'priceNote', type: 'string', description: 'Replaces price when no priceFrom is set, or supplements it', group: 'content' }),
     defineField({
       name: 'faqs',
       title: 'Course-specific FAQs',
       type: 'array',
-      of: [{ type: 'courseFaq' }]
+      of: [{ type: 'courseFaq' }],
+      group: 'content'
     }),
-    defineField({ name: 'enrollId', type: 'string', description: 'Identifier passed to the LMS enroll URL' }),
-    defineField({ name: 'enrollUrl', type: 'url', description: 'Override enroll URL (otherwise built from enrollId)' }),
-    defineField({ name: 'seo', type: 'seo' })
+
+    defineField({
+      name: 'enrollId',
+      title: 'Course ID',
+      type: 'string',
+      group: 'enroll',
+      description: 'The course ID from your LMS. Appended as ?add=<id>&checkout=1 on every Enroll Now button for this course.'
+    }),
+    defineField({
+      name: 'enrollUrl',
+      title: 'Override enroll URL',
+      type: 'url',
+      group: 'enroll',
+      description: 'Optional. If set, Enroll Now buttons link directly here instead of building the URL from Course ID above.'
+    }),
+
+    defineField({ name: 'seo', type: 'seo', group: 'seo' })
   ],
   preview: {
     select: { title: 'title', subtitle: 'category', media: 'image' }

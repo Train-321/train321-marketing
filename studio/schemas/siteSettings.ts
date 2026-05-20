@@ -85,6 +85,14 @@ export default defineType({
       of: [{ type: 'trustLogo' }],
       description: 'Used by the home-page logo carousel and the testimonials page.'
     }),
+    defineField({
+      name: 'enrollBaseUrl',
+      type: 'url',
+      title: 'Enroll base URL',
+      group: 'misc',
+      initialValue: 'http://new-features.train321.com/#/enroll',
+      description: 'Base URL for all "Enroll now" buttons. Query params like ?add=<id>&checkout=1 are appended automatically.'
+    }),
     defineField({ name: 'defaultSeo', type: 'seo', title: 'Default SEO', group: 'misc' })
   ]
 })

@@ -154,6 +154,7 @@
   background: linear-gradient(135deg, #0A427B, #1579D1);
   position: relative;
 }
+.t321-mkt-catalog__card-top { cursor: pointer; }
 .t321-mkt-catalog__card-top i { font-size: 1.4rem; }
 .t321-mkt-catalog__card-top.has-image {
   padding: 0;
@@ -165,6 +166,18 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.25s ease;
+}
+.t321-mkt-catalog__card-top:hover .t321-mkt-catalog__card-img {
+  transform: scale(1.04);
+}
+.t321-mkt-catalog__card-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+.t321-mkt-catalog__card-title-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .t321-mkt-catalog__card-top.has-image .t321-mkt-badge {
   position: absolute;

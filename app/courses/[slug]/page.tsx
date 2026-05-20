@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCourse, getCourses, getDetailPagesCopy } from "@/lib/sanity";
+import { getCourse, getCourses, getDetailPagesCopy, getSiteSettings } from "@/lib/sanity";
 import "./course.css";
 
 export async function generateStaticParams() {
@@ -20,10 +20,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function CoursePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [course, copy] = await Promise.all([getCourse(slug), getDetailPagesCopy()]);
+  const [course, copy, settings] = await Promise.all([getCourse(slug), getDetailPagesCopy(), getSiteSettings()]);
   if (!course) notFound();
 
-  const enrollHref = course.enrollId ? `/enroll?add=${course.enrollId}&checkout=1` : "/enroll";
+  const enrollBase = settings.enrollBaseUrl || "http://new-features.train321.com/#/enroll";
+  const enrollHref = course.enrollUrl
+    || (course.enrollId ? `${enrollBase}?add=${course.enrollId}&checkout=1` : enrollBase);
 
   // Chrome copy with fallbacks.
   const crumbHome = copy?.courseCrumbHome || "Home";

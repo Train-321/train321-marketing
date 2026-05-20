@@ -27,6 +27,7 @@ export type Course = {
   priceNote?: string;
   faqs?: Array<{ q: string; a: string }>;
   enrollId?: string;
+  enrollUrl?: string;
 };
 
 export type BlogPost = {
@@ -115,6 +116,7 @@ export type SiteSettings = {
   newsletter?: Newsletter;
   companyStats?: Array<{ value: string; label: string }>;
   trustLogos?: TrustLogo[];
+  enrollBaseUrl?: string;
 };
 
 // ── Reusable shapes used across page documents ──────────────────────────
@@ -466,7 +468,7 @@ const COURSE_PROJECTION = `
   certificate{ delivery, validity, accepted },
   priceFrom, priceNote,
   faqs[]{ q, a },
-  enrollId
+  enrollId, enrollUrl
 `;
 
 export async function getCourses(): Promise<Course[]> {
@@ -628,7 +630,8 @@ export async function getSiteSettings(): Promise<SiteSettings> {
         // ?w=400&auto=format gets a 2x-retina-sized image in webp/avif when
         // the browser supports it. ~70% smaller than the original 512px PNG.
         "imageUrl": image.asset->url + "?w=400&auto=format"
-      }
+      },
+      enrollBaseUrl
     }`
   );
   return r ?? SETTINGS_DEFAULT;
