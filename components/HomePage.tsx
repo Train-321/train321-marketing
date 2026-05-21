@@ -179,7 +179,7 @@ export default function HomePage({
   trustLogos = [],
   home = null
 }: HomePageProps) {
-  const [audience, setAudience] = useState<Audience>(forcedAudience || "team");
+  const [audience, setAudience] = useState<Audience>(forcedAudience || "self");
   const [courseIndex, setCourseIndex] = useState(0);
   const [videoOpen, setVideoOpen] = useState(false);
 
