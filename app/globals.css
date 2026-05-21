@@ -8,11 +8,11 @@
   --t321-mkt-ink-muted: #4A5568;
   --t321-mkt-line: #E2E8EF;
   --t321-mkt-line-strong: #C8D4DE;
-  --t321-mkt-accent: #0B1F33;
-  --t321-mkt-accent-hover: #061524;
+  --t321-mkt-accent: #00B4DB;
+  --t321-mkt-accent-hover: #0097BA;
   --t321-mkt-accent-bright: #00B4DB;
   --t321-mkt-accent-wash: #E0F7FC;
-  --t321-mkt-accent-ink: #0B1F33;
+  --t321-mkt-accent-ink: #006B8A;
   --t321-mkt-cyan: #00B4DB;
   --t321-mkt-cyan-wash: #D0F0FA;
   --t321-mkt-positive: #2D6A4F;
@@ -78,20 +78,21 @@ a { color: inherit; }
 .t321-mkt-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .t321-mkt-btn--primary {
-  background: var(--t321-mkt-ink);
+  background: #0B1F33;
   color: #ffffff;
-  border-color: var(--t321-mkt-ink);
+  border-color: #0B1F33;
+  font-weight: 600;
 }
 .t321-mkt-btn--primary:hover { background: #061524; border-color: #061524; }
 
 .t321-mkt-btn--accent {
-  background: var(--t321-mkt-accent);
+  background: #6C5CE7;
   color: #ffffff;
-  border-color: var(--t321-mkt-accent);
+  border-color: #6C5CE7;
 }
 .t321-mkt-btn--accent:hover {
-  background: var(--t321-mkt-accent-hover);
-  border-color: var(--t321-mkt-accent-hover);
+  background: #5648C8;
+  border-color: #5648C8;
 }
 
 .t321-mkt-btn--ghost {
@@ -200,7 +201,7 @@ a { color: inherit; }
 .t321-mkt-prose h2 { font-family: var(--font-fraunces), Georgia, serif; font-weight: 500; font-size: 1.5rem; line-height: 1.2; letter-spacing: -0.015em; margin-top: 2.25rem; }
 .t321-mkt-prose h3 { font-family: var(--font-fraunces), Georgia, serif; font-weight: 500; font-size: 1.2rem; margin-top: 1.75rem; }
 .t321-mkt-prose ul, .t321-mkt-prose ol { padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; }
-.t321-mkt-prose a { color: var(--t321-mkt-accent); text-decoration: underline; text-underline-offset: 2px; }
+.t321-mkt-prose a { color: var(--t321-mkt-accent-ink); text-decoration: underline; text-underline-offset: 2px; }
 .t321-mkt-prose a:hover { color: var(--t321-mkt-accent-hover); }
 .t321-mkt-prose strong { font-weight: 600; }
 .t321-mkt-prose blockquote { border-left: 3px solid var(--t321-mkt-accent); padding: 0.25rem 0 0.25rem 1rem; font-family: var(--font-fraunces), Georgia, serif; font-size: 1.15rem; color: var(--t321-mkt-ink); margin: 1.25rem 0; }

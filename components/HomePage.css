@@ -1,7 +1,7 @@
 .t321-mkt-hero {
   padding: 4.5rem 0 5.5rem;
   background:
-    radial-gradient(1200px 500px at 15% 10%, var(--t321-mkt-accent-wash) 0%, transparent 60%),
+    radial-gradient(1000px 450px at 15% 10%, rgba(0, 180, 219, 0.05) 0%, transparent 55%),
     var(--t321-mkt-paper);
   border-bottom: 1px solid var(--t321-mkt-line);
 }
@@ -82,8 +82,8 @@
   position: absolute;
   inset: -40px;
   background:
-    radial-gradient(420px 300px at 70% 30%, rgba(0, 204, 254, 0.22), transparent 65%),
-    radial-gradient(360px 260px at 25% 75%, rgba(11, 67, 124, 0.16), transparent 60%);
+    radial-gradient(420px 300px at 70% 30%, rgba(0, 180, 219, 0.12), transparent 65%),
+    radial-gradient(360px 260px at 25% 75%, rgba(108, 92, 231, 0.10), transparent 60%);
   filter: blur(10px);
   z-index: 0;
   pointer-events: none;
@@ -93,7 +93,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background-image: radial-gradient(circle, rgba(11, 67, 124, 0.14) 1px, transparent 1.6px);
+  background-image: radial-gradient(circle, rgba(11, 31, 51, 0.10) 1px, transparent 1.6px);
   background-size: 22px 22px;
   mask-image: radial-gradient(ellipse at 55% 50%, #000 30%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse at 55% 50%, #000 30%, transparent 75%);
