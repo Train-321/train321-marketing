@@ -1,10 +1,10 @@
 // Sanity client + GROQ queries.
 // Replaces the filesystem-based lib/content.ts. Pages await these helpers.
 
-import { createClient } from "@sanity/client";
+import { createClient } from "next-sanity";
+import { defineLive } from "next-sanity/live";
 import { createImageUrlBuilder } from "@sanity/image-url";
 import type { SanityImageSource } from "@sanity/image-url";
-import { draftMode } from "next/headers";
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -369,44 +369,68 @@ const dataset =
   process.env.NEXT_PUBLIC_SANITY_DATASET ||
   "production";
 
-// Default published client — fast, CDN-cached, no auth, no stega.
-// Used for static prerender + visitors not in draft mode.
+// Studio URL used for stega encoding (so click-to-edit jumps to the right host).
+const STUDIO_URL =
+  process.env.SANITY_STUDIO_URL || "https://studio.train321.com";
+
+// Server-side token (never sent to the browser): read token preferred,
+// write token as fallback.
+const SERVER_TOKEN =
+  process.env.SANITY_API_READ_TOKEN || process.env.SANITY_WRITE_TOKEN;
+
+// Browser token IS exposed to the client during preview, so it must be a
+// low-privilege Viewer token only — never the write token. If unset, live
+// draft streaming falls back to server-side refetch.
+const BROWSER_TOKEN = process.env.SANITY_API_READ_TOKEN;
+
+// Default published client — used by the draft route + image URL builder.
+// stega.studioUrl lets the Live API encode click-to-edit pointers in preview.
 export const sanityClient = createClient({
   projectId,
   dataset,
   apiVersion: "2025-01-01",
   useCdn: true,
-  perspective: "published"
+  perspective: "published",
+  stega: { studioUrl: STUDIO_URL }
 });
 
-// Studio URL used for stega encoding (so click-to-edit jumps to the right host).
-const STUDIO_URL =
-  process.env.SANITY_STUDIO_URL || "https://studio.train321.com";
+// Live Content API. sanityFetch streams real-time updates to the browser
+// (including unpublished draft edits in the Presentation tool) and switches
+// to the drafts perspective automatically when Next.js draft mode is on.
+// <SanityLive /> (mounted in the layout) opens the live connection.
+export const { sanityFetch, SanityLive } = defineLive({
+  client: sanityClient.withConfig({ useCdn: false }),
+  serverToken: SERVER_TOKEN,
+  browserToken: BROWSER_TOKEN
+});
 
-const READ_TOKEN =
-  process.env.SANITY_API_READ_TOKEN || process.env.SANITY_WRITE_TOKEN;
-
-// Returns the Sanity client to use for the current request.
-// In Next.js draft mode: drafts perspective, no CDN, stega encoding ON so
-// every rendered string carries an invisible pointer back to its field.
-// Otherwise: the cached published client.
+// Back-compat shim. Every helper below calls (await getClient()).fetch(query,
+// params); we route those through sanityFetch so they all get live updates
+// and automatic draft/published perspective without rewriting each one.
 async function getClient() {
-  let isDraft = false;
-  try {
-    isDraft = (await draftMode()).isEnabled;
-  } catch {
-    // draftMode() throws if called outside a request (e.g. at build time).
-    // Treat that as not-draft.
-  }
-  if (isDraft && READ_TOKEN) {
-    return sanityClient.withConfig({
-      useCdn: false,
-      token: READ_TOKEN,
-      perspective: "drafts",
-      stega: { enabled: true, studioUrl: STUDIO_URL }
-    });
-  }
-  return sanityClient;
+  return {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fetch: async <T = any>(
+      query: string,
+      params: Record<string, unknown> = {}
+    ): Promise<T> => {
+      try {
+        const { data } = await sanityFetch({ query, params });
+        return data as T;
+      } catch (err) {
+        // sanityFetch calls draftMode(), which throws when invoked outside a
+        // request scope — e.g. generateStaticParams at build time. Fall back
+        // to a direct published fetch there (no live/draft needed for params).
+        if (
+          err instanceof Error &&
+          /draftMode|request scope/i.test(err.message)
+        ) {
+          return await sanityClient.fetch<T>(query, params);
+        }
+        throw err;
+      }
+    }
+  };
 }
 
 const builder = createImageUrlBuilder({ projectId, dataset });

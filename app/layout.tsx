@@ -6,6 +6,7 @@ import SiteHeader from "@/components/SiteHeaderShell";
 import SiteFooter from "@/components/SiteFooterShell";
 import ChatWidget from "@/components/ChatWidgetShell";
 import DisableDraftMode from "@/components/DisableDraftMode";
+import { SanityLive } from "@/lib/sanity";
 import "./globals.css";
 
 // Lazy-load visual editing — only pulled into the bundle when draft mode is on.
@@ -93,6 +94,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ChatWidget />
         {isDraft && (
           <>
+            <SanityLive />
             <VisualEditingClient />
             <DisableDraftMode />
           </>
