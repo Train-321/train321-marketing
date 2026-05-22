@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity'
+import CoursePickerInput from '../components/CoursePickerInput'
 
 export default defineType({
   name: 'course',
@@ -83,7 +84,7 @@ export default defineType({
       title: 'Certificate',
       group: 'content'
     }),
-    defineField({ name: 'priceFrom', type: 'number', title: 'Price from (USD)', description: 'Display price; leave blank for "contact us" pricing', group: 'content' }),
+    defineField({ name: 'priceFrom', type: 'number', title: 'Price from (USD)', description: 'Fallback price only. When a Course ID is linked (Enrollment tab), the live LMS price is used automatically and this value is ignored. Leave blank for "contact us" pricing.', group: 'content' }),
     defineField({ name: 'priceNote', type: 'string', description: 'Replaces price when no priceFrom is set, or supplements it', group: 'content' }),
     defineField({
       name: 'faqs',
@@ -98,7 +99,8 @@ export default defineType({
       title: 'Course ID',
       type: 'string',
       group: 'enroll',
-      description: 'The course ID from your LMS. Appended as ?add=<id>&checkout=1 on every Enroll Now button for this course.'
+      description: 'Search the live Train321 storefront and pick a course. Its ID is stored here and appended as ?add=<id>&checkout=1 on every Enroll Now button.',
+      components: { input: CoursePickerInput }
     }),
     defineField({
       name: 'enrollUrl',

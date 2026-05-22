@@ -471,19 +471,63 @@ const COURSE_PROJECTION = `
   enrollId, enrollUrl
 `;
 
+// ── LMS storefront pricing ───────────────────────────────────────────────
+// Live per-seat prices from the Train321 API, keyed by course id (enrollId).
+// Cached for 5 minutes via Next's fetch cache. Falls back silently if the API
+// is unreachable so the marketing site never breaks on an LMS outage.
+
+const LMS_COURSE_LIST_URL =
+  "https://new-features-api.train321.com/course/public-list";
+
+async function getLmsPriceMap(): Promise<Map<string, number>> {
+  try {
+    const res = await fetch(LMS_COURSE_LIST_URL, { next: { revalidate: 300 } });
+    if (!res.ok) return new Map();
+    const rows: Array<{ id: number | string; price?: number }> = await res.json();
+    const map = new Map<string, number>();
+    for (const r of rows) {
+      if (r && r.id != null && typeof r.price === "number") {
+        map.set(String(r.id), r.price);
+      }
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
+// Override the displayed price with the live LMS cost when the course is
+// linked (has an enrollId) and the LMS reports a positive price. A cost of 0
+// in the LMS is treated as "custom/contact us" — we leave the Sanity value.
+function applyLmsPrice(course: Course, prices: Map<string, number>): Course {
+  if (!course.enrollId) return course;
+  const lms = prices.get(course.enrollId);
+  if (lms != null && lms > 0) {
+    return { ...course, priceFrom: lms };
+  }
+  return course;
+}
+
 export async function getCourses(): Promise<Course[]> {
-  return await (await getClient()).fetch(
-    `*[_type == "course"] | order(title asc) { ${COURSE_PROJECTION} }`
-  );
+  const [courses, prices] = await Promise.all([
+    (await getClient()).fetch<Course[]>(
+      `*[_type == "course"] | order(title asc) { ${COURSE_PROJECTION} }`
+    ),
+    getLmsPriceMap()
+  ]);
+  return courses.map((c) => applyLmsPrice(c, prices));
 }
 
 export async function getCourse(slug: string): Promise<Course | null> {
-  return (
-    (await (await getClient()).fetch(
+  const [course, prices] = await Promise.all([
+    (await getClient()).fetch<Course | null>(
       `*[_type == "course" && slug.current == $slug][0] { ${COURSE_PROJECTION} }`,
       { slug }
-    )) ?? null
-  );
+    ),
+    getLmsPriceMap()
+  ]);
+  if (!course) return null;
+  return applyLmsPrice(course, prices);
 }
 
 const BLOG_PROJECTION = `
