@@ -1,4 +1,4 @@
-import { defineType, defineField } from 'sanity'
+import { defineType, defineField, defineArrayMember } from 'sanity'
 import CoursePickerInput from '../components/CoursePickerInput'
 
 export default defineType({
@@ -108,6 +108,42 @@ export default defineType({
       type: 'url',
       group: 'enroll',
       description: 'Optional. If set, Enroll Now buttons link directly here instead of building the URL from Course ID above.'
+    }),
+
+    defineField({
+      name: 'stateVariants',
+      title: 'State / regional versions',
+      type: 'array',
+      group: 'enroll',
+      description:
+        'Turn this course into a group. When one or more rows are set, the Enroll buttons on this course open a state picker; choosing a state sends the learner straight to that version’s enrollment (using the linked course’s Course ID / enroll URL). Leave empty for a normal single-enroll course.',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'stateVariant',
+          title: 'State version',
+          fields: [
+            defineField({
+              name: 'state',
+              title: 'State / label',
+              type: 'string',
+              description: 'Shown in the picker, e.g. "California" or "All other states".',
+              validation: (R) => R.required()
+            }),
+            defineField({
+              name: 'course',
+              title: 'Links to course',
+              type: 'reference',
+              to: [{ type: 'course' }],
+              description: 'The course this state enrolls into. Its Course ID / enroll URL is used.',
+              validation: (R) => R.required()
+            })
+          ],
+          preview: {
+            select: { title: 'state', subtitle: 'course.title' }
+          }
+        })
+      ]
     }),
 
     defineField({ name: 'seo', type: 'seo', group: 'seo' })

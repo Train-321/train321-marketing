@@ -78,6 +78,47 @@
   height: 400px;
   perspective: 1400px;
 }
+
+/* Individuals view: a person using a laptop, framed by the floating cards.
+   The figure is intentionally taller than the visual box and pushed below it
+   so it reaches down toward the bottom of the hero and fills the space. */
+.t321-mkt-hero__figure {
+  position: absolute;
+  bottom: -76px;
+  left: 50%;
+  height: 122%;
+  width: auto;
+  max-width: 86%;
+  object-fit: contain;
+  object-position: bottom center;
+  z-index: 4;
+  filter: drop-shadow(0 26px 42px rgba(15, 15, 14, 0.20));
+  animation: t321Hero-figIn 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) 0.05s both;
+}
+@keyframes t321Hero-figIn {
+  from { opacity: 0; transform: translate(-50%, 16px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+/* Depth: both cards sit BEHIND the person for a layered 3D look — the
+   reviews card peeks past her right shoulder, the certificate past her left.
+   She overlaps the inner edge of each. */
+.t321-mkt-hero__visual--figure .t321-mkt-hero__rating {
+  z-index: 3;
+}
+.t321-mkt-hero__visual--figure .t321-mkt-hero__cert {
+  top: 22%;
+  bottom: auto;
+  left: -10px;
+  right: auto;
+  z-index: 3;
+}
+@media (prefers-reduced-motion: reduce) {
+  .t321-mkt-hero__figure {
+    animation: none;
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+}
 .t321-mkt-hero__glow {
   position: absolute;
   inset: -40px;

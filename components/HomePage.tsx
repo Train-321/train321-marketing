@@ -359,10 +359,22 @@ export default function HomePage({
             </ul>
           </div>
 
-          <aside className="t321-mkt-hero__visual" aria-hidden="true">
+          <aside
+            className={`t321-mkt-hero__visual${audience === "self" ? " t321-mkt-hero__visual--figure" : ""}`}
+            aria-hidden="true"
+          >
             <span className="t321-mkt-hero__glow" />
             <span className="t321-mkt-hero__grid" />
 
+            {audience === "self" ? (
+              <img
+                src="/img/hero-individual-v2.png"
+                alt=""
+                width={1024}
+                height={1536}
+                className="t321-mkt-hero__figure"
+              />
+            ) : (
             <div className="t321-mkt-hero__stage t321-mkt-hero__float--a">
               <div className="t321-mkt-hero__stage-chrome">
                 <span className="t321-mkt-hero__dot" />
@@ -422,6 +434,7 @@ export default function HomePage({
                 </div>
               </div>
             </div>
+            )}
 
             <div className="t321-mkt-hero__cert t321-mkt-hero__float--b">
               <div className="t321-mkt-hero__cert-seal">

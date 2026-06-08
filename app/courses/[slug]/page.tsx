@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCourse, getCourses, getDetailPagesCopy, getSiteSettings } from "@/lib/sanity";
+import EnrollButton from "@/components/EnrollButton";
 import "./course.css";
 
 export async function generateStaticParams() {
@@ -26,6 +27,16 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   const enrollBase = settings.enrollBaseUrl || "http://new-features.train321.com/#/enroll";
   const enrollHref = course.enrollUrl
     || (course.enrollId ? `${enrollBase}?add=${course.enrollId}&checkout=1` : enrollBase);
+
+  // Course group: when state versions are set, the Enroll buttons open a state
+  // picker; each option links straight to that version's enrollment.
+  const stateOptions = (course.stateVariants || [])
+    .map((v) => ({
+      state: v.state,
+      title: v.title,
+      href: v.enrollUrl || (v.enrollId ? `${enrollBase}?add=${v.enrollId}&checkout=1` : "")
+    }))
+    .filter((o) => o.state && o.href);
 
   // Chrome copy with fallbacks.
   const crumbHome = copy?.courseCrumbHome || "Home";
@@ -85,10 +96,12 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             <h1 className="t321-mkt-h1">{course.title}</h1>
             <p className="t321-mkt-lede">{course.tagline}</p>
             <div className="t321-mkt-course__cta">
-              <Link href={enrollHref} className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg">
-                {enrollLabel}
-                <i className="fas fa-arrow-right" aria-hidden="true" />
-              </Link>
+              <EnrollButton
+                href={enrollHref}
+                label={enrollLabel}
+                className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg"
+                options={stateOptions}
+              />
               <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
                 {browseLabel}
               </Link>
@@ -133,10 +146,12 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                   ))}
                 </ul>
               )}
-              <Link href={enrollHref} className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block">
-                {getStartedLabel}
-                <i className="fas fa-arrow-right" aria-hidden="true" />
-              </Link>
+              <EnrollButton
+                href={enrollHref}
+                label={getStartedLabel}
+                className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block"
+                options={stateOptions}
+              />
               <p className="t321-mkt-course__card-foot">
                 <i className="fas fa-shield-alt" aria-hidden="true" />
                 {guarantee}
@@ -244,10 +259,12 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             <p className="t321-mkt-lede">{ctaLede}</p>
           </div>
           <div className="t321-mkt-course__cta-band-actions">
-            <Link href={ctaPrimaryHref} className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg">
-              {ctaPrimaryLabel}
-              <i className="fas fa-arrow-right" aria-hidden="true" />
-            </Link>
+            <EnrollButton
+              href={ctaPrimaryHref}
+              label={ctaPrimaryLabel}
+              className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg"
+              options={stateOptions}
+            />
             <Link href={ctaSecondaryHref} className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
               {ctaSecondaryLabel}
             </Link>

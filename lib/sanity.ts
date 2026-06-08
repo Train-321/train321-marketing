@@ -28,6 +28,15 @@ export type Course = {
   faqs?: Array<{ q: string; a: string }>;
   enrollId?: string;
   enrollUrl?: string;
+  // Course group: when set, this course is a parent that enrolls into
+  // per-state versions. Each entry resolves the linked course's enroll target.
+  stateVariants?: Array<{
+    state: string;
+    title?: string;
+    slug?: string;
+    enrollId?: string;
+    enrollUrl?: string;
+  }>;
 };
 
 export type BlogPost = {
@@ -492,7 +501,14 @@ const COURSE_PROJECTION = `
   certificate{ delivery, validity, accepted },
   priceFrom, priceNote,
   faqs[]{ q, a },
-  enrollId, enrollUrl
+  enrollId, enrollUrl,
+  "stateVariants": stateVariants[]{
+    state,
+    "title": course->title,
+    "slug": course->slug.current,
+    "enrollId": course->enrollId,
+    "enrollUrl": course->enrollUrl
+  }
 `;
 
 // ── LMS storefront pricing ───────────────────────────────────────────────
