@@ -56,7 +56,7 @@ const docs = [
       { _key: "call", _type: "labeledTile", icon: "fas fa-phone", title: "Call us", sub: "Mon-Fri · 7am-7pm CT", linkLabel: "PHONE", linkHref: "PHONE" },
       { _key: "email", _type: "labeledTile", icon: "fas fa-envelope", title: "Email us", sub: "Typical reply · under 2 hrs", linkLabel: "EMAIL", linkHref: "EMAIL" },
       { _key: "chat", _type: "labeledTile", icon: "fas fa-comment-dots", title: "Live chat", sub: "Avg wait · 42 sec", linkLabel: "Start a conversation", linkHref: "#" },
-      { _key: "faq", _type: "labeledTile", icon: "fas fa-book-open", title: "Browse FAQs", sub: "Certificates, refunds, billing", linkLabel: "50+ answers", linkHref: "/faq" }
+      { _key: "faq", _type: "labeledTile", icon: "fas fa-book-open", title: "Browse FAQs", sub: "Certificates and billing", linkLabel: "50+ answers", linkHref: "/faq" }
     ],
     formHeading: "Send us a message",
     formLede: "Fill out the form below and the right person on our team will pick it up.",
@@ -156,7 +156,7 @@ const docs = [
     pillars: [
       { _key: "p1", _type: "pillarCard", icon: "fas fa-microscope", tone: "accent", title: "Content accuracy", body: "Every course is written by a subject-matter expert and reviewed annually. When laws change, our courses change the same week. No ghost-written freelance copy; no auto-translated modules." },
       { _key: "p2", _type: "pillarCard", icon: "fas fa-mobile-alt", tone: "warn", title: "Learner experience", body: "If a cook can't finish a course on their phone during prep, we've failed. Every course is playable in 15-minute chunks, saves progress automatically, and works on a $80 Android with a cracked screen." },
-      { _key: "p3", _type: "pillarCard", icon: "fas fa-dollar-sign", tone: "positive", title: "Pricing transparency", body: "No \"contact us for pricing.\" No per-feature upsells. You see the price on every course page, volume discounts apply automatically, and unused seats are refundable for 60 days." }
+      { _key: "p3", _type: "pillarCard", icon: "fas fa-dollar-sign", tone: "positive", title: "Pricing transparency", body: "No \"contact us for pricing.\" No per-feature upsells. You see the price on every course page, and volume discounts apply automatically." }
     ],
     teamHead: head("The team", "People behind the platform", "A small team — around 30 of us — split between curriculum, customer success, and engineering. Most of us have worked the line.", "fas fa-user-friends"),
     bottomCta: ctaBlock(
@@ -266,7 +266,6 @@ const docs = [
     coursePriceUnitLabel: "per seat",
     coursePriceCustomAmt: "Custom",
     coursePriceCustomUnit: "pricing",
-    courseGuarantee: "60-day money-back guarantee on unused seats",
     courseOverviewEyebrow: "Course overview",
     courseOverviewHeading: "What you'll get",
     courseOutcomesHeading: "By the end, you'll be able to",

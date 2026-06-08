@@ -144,7 +144,6 @@ async function main() {
     footerLegalLinks: [
       { _key: "terms", _type: "navLink", label: "Terms", href: "/legal/terms" },
       { _key: "privacy", _type: "navLink", label: "Privacy", href: "/legal/privacy" },
-      { _key: "refund", _type: "navLink", label: "Refunds", href: "/legal/refund-policy" },
       { _key: "accessibility", _type: "navLink", label: "Accessibility", href: "/legal/accessibility" }
     ],
     newsletter: {

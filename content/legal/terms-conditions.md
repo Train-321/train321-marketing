@@ -12,9 +12,9 @@ You are responsible for the accuracy of the information you provide, for maintai
 
 When you enroll, you receive a non-transferable, revocable license to access the course and associated materials for personal or work-related training. You may not redistribute our content, record screen content for public use, or use our materials to train individuals outside your enrolled organization.
 
-## 3. Payment & refunds
+## 3. Payment
 
-All fees are charged at the time of purchase. Unused seats are refundable per our Refund Policy. Completed courses are non-refundable because the certificate has been issued.
+All fees are charged at the time of purchase.
 
 ## 4. Certificates
 
@@ -22,7 +22,7 @@ Certificates are issued based on your passing the required assessment. Certifica
 
 ## 5. Acceptable use
 
-You agree not to: (a) share your account with others, (b) use automated tools to complete assessments, (c) redistribute course content, or (d) use our platform for any unlawful purpose. Violations may result in account termination without refund.
+You agree not to: (a) share your account with others, (b) use automated tools to complete assessments, (c) redistribute course content, or (d) use our platform for any unlawful purpose. Violations may result in account termination.
 
 ## 6. Limitation of liability
 

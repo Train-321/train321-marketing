@@ -11,10 +11,6 @@
       "a": "Yes. Add seats any time from your dashboard. Volume pricing adjusts retroactively so you never pay more per seat than your total volume deserves."
     },
     {
-      "q": "Do you offer refunds?",
-      "a": "Yes. Unused seats are fully refundable within 60 days. Completed courses are not refundable because the certificate has been issued — but you can transfer unused seats between employees free of charge."
-    },
-    {
       "q": "Can I buy seats for my whole team?",
       "a": "Yes — most of our customers do. Add learners one at a time or via CSV. Managers see completion status per learner in the dashboard."
     }

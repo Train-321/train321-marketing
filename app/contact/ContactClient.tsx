@@ -10,7 +10,7 @@ const FALLBACK_TILES = [
   { icon: "fas fa-phone", title: "Call us", sub: "Mon-Fri · 7am-7pm CT", linkLabel: "PHONE", linkHref: "tel:+15613257300" },
   { icon: "fas fa-envelope", title: "Email us", sub: "Typical reply · under 2 hrs", linkLabel: "EMAIL", linkHref: "mailto:info@train321.com" },
   { icon: "fas fa-comment-dots", title: "Live chat", sub: "Avg wait · 42 sec", linkLabel: "Start a conversation", linkHref: "#" },
-  { icon: "fas fa-book-open", title: "Browse FAQs", sub: "Certificates, refunds, billing", linkLabel: "50+ answers", linkHref: "/faq" }
+  { icon: "fas fa-book-open", title: "Browse FAQs", sub: "Certificates and billing", linkLabel: "50+ answers", linkHref: "/faq" }
 ];
 
 const FALLBACK_TOPICS = [
