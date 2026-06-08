@@ -335,7 +335,6 @@ export type DetailPagesCopy = {
   coursePriceUnitLabel?: string;
   coursePriceCustomAmt?: string;
   coursePriceCustomUnit?: string;
-  courseGuarantee?: string;
   courseOverviewEyebrow?: string;
   courseOverviewHeading?: string;
   courseOutcomesHeading?: string;
@@ -894,7 +893,7 @@ export async function getDetailPagesCopy(): Promise<DetailPagesCopy | null> {
       `*[_id == "detailPagesCopy"][0] {
         courseCrumbHome, courseCrumbCourses, courseEnrollLabel, courseBrowseLabel,
         courseGetStartedLabel, coursePriceFromLabel, coursePriceUnitLabel,
-        coursePriceCustomAmt, coursePriceCustomUnit, courseGuarantee,
+        coursePriceCustomAmt, coursePriceCustomUnit,
         courseOverviewEyebrow, courseOverviewHeading, courseOutcomesHeading,
         courseCurriculumEyebrow, courseCurriculumHeading, courseCurriculumLedeTpl,
         courseCertEyebrow, courseCertHeading, courseCertVisualHead, courseCertVisualMeta,

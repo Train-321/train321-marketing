@@ -63,7 +63,7 @@ export default async function AboutPage() {
           icon: "fas fa-dollar-sign",
           tone: "positive",
           title: "Pricing transparency",
-          body: "No \"contact us for pricing.\" No per-feature upsells. You see the price on every course page, volume discounts apply automatically, and unused seats are refundable for 60 days."
+          body: "No \"contact us for pricing.\" No per-feature upsells. You see the price on every course page, and volume discounts apply automatically."
         }
       ];
 

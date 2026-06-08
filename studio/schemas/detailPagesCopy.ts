@@ -24,7 +24,6 @@ export default defineType({
     defineField({ name: 'coursePriceUnitLabel', type: 'string', initialValue: 'per seat', group: 'course' }),
     defineField({ name: 'coursePriceCustomAmt', type: 'string', initialValue: 'Custom', group: 'course' }),
     defineField({ name: 'coursePriceCustomUnit', type: 'string', initialValue: 'pricing', group: 'course' }),
-    defineField({ name: 'courseGuarantee', type: 'string', title: 'Money-back guarantee line', initialValue: '60-day money-back guarantee on unused seats', group: 'course' }),
     defineField({ name: 'courseOverviewEyebrow', type: 'string', initialValue: 'Course overview', group: 'course' }),
     defineField({ name: 'courseOverviewHeading', type: 'string', initialValue: "What you'll get", group: 'course' }),
     defineField({ name: 'courseOutcomesHeading', type: 'string', initialValue: "By the end, you'll be able to", group: 'course' }),

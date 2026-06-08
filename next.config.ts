@@ -47,7 +47,6 @@ const nextConfig: NextConfig = {
       ...[
         "privacy-policy",
         "terms-conditions",
-        "refund-policy",
         "accessibility",
         "non-discrimination",
         "complaints-appeals"

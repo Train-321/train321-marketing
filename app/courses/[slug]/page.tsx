@@ -48,7 +48,6 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   const priceUnitLabel = copy?.coursePriceUnitLabel || "per seat";
   const priceCustomAmt = copy?.coursePriceCustomAmt || "Custom";
   const priceCustomUnit = copy?.coursePriceCustomUnit || "pricing";
-  const guarantee = copy?.courseGuarantee || "60-day money-back guarantee on unused seats";
   const overviewEyebrow = copy?.courseOverviewEyebrow || "Course overview";
   const overviewHeading = copy?.courseOverviewHeading || "What you'll get";
   const outcomesHeading = copy?.courseOutcomesHeading || "By the end, you'll be able to";
@@ -152,10 +151,6 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                 className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block"
                 options={stateOptions}
               />
-              <p className="t321-mkt-course__card-foot">
-                <i className="fas fa-shield-alt" aria-hidden="true" />
-                {guarantee}
-              </p>
             </div>
           </aside>
         </div>
