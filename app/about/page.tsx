@@ -1,15 +1,6 @@
 import Link from "next/link";
-import { getTeam, getSiteSettings, getAboutPage } from "@/lib/sanity";
+import { getSiteSettings, getAboutPage } from "@/lib/sanity";
 import "./about.css";
-
-function initials(name: string) {
-  return (name || "")
-    .split(" ")
-    .map((p) => p[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 export const metadata = {
   title: "About — Train321",
@@ -17,8 +8,7 @@ export const metadata = {
 };
 
 export default async function AboutPage() {
-  const [team, settings, page] = await Promise.all([
-    getTeam(),
+  const [settings, page] = await Promise.all([
     getSiteSettings(),
     getAboutPage()
   ]);
@@ -66,12 +56,6 @@ export default async function AboutPage() {
           body: "No \"contact us for pricing.\" No per-feature upsells. You see the price on every course page, and volume discounts apply automatically."
         }
       ];
-
-  const teamEyebrow = page?.teamHead?.eyebrow || "The team";
-  const teamHeading = page?.teamHead?.heading || "People behind the platform";
-  const teamLede =
-    page?.teamHead?.lede ||
-    "A small team — around 30 of us — split between curriculum, customer success, and engineering. Most of us have worked the line.";
 
   const cta = page?.bottomCta;
   const ctaHeading = cta?.heading || "Want to see how we work?";
@@ -127,30 +111,6 @@ export default async function AboutPage() {
                 </span>
                 <h3 className="t321-mkt-h3">{p.title}</h3>
                 <p>{p.body}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="t321-mkt-section">
-        <div className="t321-mkt-container">
-          <div className="t321-mkt-section__head">
-            <span className="t321-mkt-eyebrow"><i className={page?.teamHead?.icon || "fas fa-user-friends"} /> {teamEyebrow}</span>
-            <h2 className="t321-mkt-h2">{teamHeading}</h2>
-            <p className="t321-mkt-lede">{teamLede}</p>
-          </div>
-          <div className="t321-mkt-about__team">
-            {team.map((m) => (
-              <article key={m.name} className="t321-mkt-about__team-card t321-mkt-card">
-                <div className="t321-mkt-about__avatar" aria-hidden="true">{initials(m.name)}</div>
-                <h3 className="t321-mkt-h3">{m.name}</h3>
-                <span className="t321-mkt-about__team-role">{m.role}</span>
-                <p>{m.bio}</p>
-                <div className="t321-mkt-about__socials">
-                  {m.linkedin && <a href={m.linkedin} aria-label="LinkedIn"><i className="fab fa-linkedin-in" /></a>}
-                  {m.twitter && <a href={m.twitter} aria-label="Twitter"><i className="fab fa-twitter" /></a>}
-                </div>
               </article>
             ))}
           </div>
