@@ -368,11 +368,11 @@ export default function HomePage({
 
             {audience === "self" ? (
               <img
-                src="/img/hero-individual-v2.png"
+                src="/img/hero-restaurant.png"
                 alt=""
-                width={1024}
-                height={1536}
-                className="t321-mkt-hero__figure"
+                width={1537}
+                height={1023}
+                className="t321-mkt-hero__photo"
               />
             ) : (
             <div className="t321-mkt-hero__stage t321-mkt-hero__float--a">
@@ -445,7 +445,7 @@ export default function HomePage({
               </div>
               <div className="t321-mkt-hero__cert-body">
                 <span className="t321-mkt-hero__cert-eyebrow">Certificate issued</span>
-                <strong>ANSI Food Handler</strong>
+                <strong>Food Handler Certificate</strong>
                 <span className="t321-mkt-hero__cert-sub">Valid through 2029 · #FH-384201</span>
               </div>
             </div>
