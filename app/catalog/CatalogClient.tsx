@@ -1,48 +1,60 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import type { Course, CatalogPage } from "@/lib/sanity";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { CatalogPage } from "@/lib/sanity";
+import type { MarketplaceCourse, MarketplaceCategory, MarketplaceCatalog } from "@/lib/newFeatures";
+import { COURSE_PLACEHOLDER_IMAGE, CATALOG_PAGE_SIZE } from "@/lib/newFeatures";
 import "./catalog.css";
 
-const FALLBACK_CATEGORIES = [
-  { id: "all", label: "All", icon: "fas fa-th" },
-  { id: "food", label: "Food safety", icon: "fas fa-utensils" },
-  { id: "alcohol", label: "Alcohol", icon: "fas fa-wine-glass-alt" },
-  { id: "hr", label: "HR & compliance", icon: "fas fa-users-cog" }
-];
+type Props = {
+  initialCourses: MarketplaceCourse[];
+  categories: MarketplaceCategory[];
+  initialTotal: number;
+  page?: CatalogPage | null;
+  enrollBaseUrl: string;
+};
 
-const FALLBACK_SORT = ["A-Z", "Z-A", "Price: low to high", "Price: high to low"];
+// The backend `description` is rich HTML. Strip tags + decode the handful of
+// entities the LMS editor emits, then trim to a short card-sized blurb.
+function toBlurb(html: string, max = 160): string {
+  const text = html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&rsquo;|&lsquo;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (text.length <= max) return text;
+  return text.slice(0, max).replace(/\s+\S*$/, "") + "…";
+}
 
-type SortMode = "alpha" | "alpha-desc" | "price-asc" | "price-desc";
-
-type Props = { courses: Course[]; page?: CatalogPage | null; enrollBaseUrl: string };
-
-export default function CatalogClient({ courses, page, enrollBaseUrl }: Props) {
+export default function CatalogClient({
+  initialCourses,
+  categories,
+  initialTotal,
+  page,
+  enrollBaseUrl
+}: Props) {
   const [query, setQuery] = useState("");
+  // activeCategory holds a marketplace category id (as string) or "all".
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [sortMode, setSortMode] = useState<SortMode>("alpha");
 
-  const totalCount = courses.length;
+  const [courses, setCourses] = useState<MarketplaceCourse[]>(initialCourses);
+  const [total, setTotal] = useState(initialTotal);
+  const [pageNum, setPageNum] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const heroEyebrow = page?.heroEyebrow || "Course library";
   const heroHeading = page?.heroHeading || "Every course, one page.";
   const heroLede =
     page?.heroLede ||
-    `Browse our full catalog — ${totalCount} courses across food safety, alcohol service, HR compliance, and specialized training.`;
+    `Browse our full catalog — ${initialTotal} courses across food safety, alcohol service, HR compliance, and specialized training.`;
   const searchPlaceholder = page?.searchPlaceholder || "Search courses…";
   const emptyText = page?.emptyText || "No courses match your search.";
   const clearLabel = page?.clearFiltersLabel || "Clear search & filters";
-
-  const categoryDefs = page?.categories?.length
-    ? page.categories.map((c) => ({
-        id: c.id || "",
-        label: c.label || "",
-        icon: c.icon || "fas fa-circle"
-      }))
-    : FALLBACK_CATEGORIES;
-
-  const sortLabels = page?.sortOptions?.length ? page.sortOptions : FALLBACK_SORT;
 
   const cta = page?.bottomCta;
   const ctaHeading = cta?.heading || "Need something we don't offer?";
@@ -52,53 +64,51 @@ export default function CatalogClient({ courses, page, enrollBaseUrl }: Props) {
   const ctaLabel = cta?.primaryCta?.label || "Talk to us";
   const ctaHref = cta?.primaryCta?.to || "/contact";
 
-  const categoryChips = useMemo(
-    () =>
-      categoryDefs.map((c) => ({
-        ...c,
-        count:
-          c.id === "all"
-            ? courses.length
-            : courses.filter((x) => x.category === c.id).length
-      })),
-    [courses, categoryDefs]
+  const categoryChips = [
+    { id: "all", label: "All" },
+    ...categories.map((c) => ({ id: String(c.id), label: c.name }))
+  ];
+
+  const hasMore = courses.length < total;
+
+  // Fetch a page from the proxy route. page 1 replaces the list (used on
+  // search / category change); higher pages append (infinite scroll).
+  const fetchPage = useCallback(
+    async (nextPage: number, search: string, category: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams({ page: String(nextPage) });
+        if (search.trim()) params.set("search", search.trim());
+        if (category !== "all") params.set("categoryId", category);
+
+        const res = await fetch(`/api/catalog?${params.toString()}`);
+        if (!res.ok) throw new Error(`Request failed (${res.status})`);
+        const data = (await res.json()) as MarketplaceCatalog;
+
+        setTotal(data.total);
+        setPageNum(nextPage);
+        setCourses((prev) => (nextPage === 1 ? data.courses : [...prev, ...data.courses]));
+      } catch {
+        setError("We couldn't load courses. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
   );
 
-  const filteredCourses = useMemo(() => {
-    let list = courses.slice();
-
-    if (activeCategory !== "all") {
-      list = list.filter((c) => c.category === activeCategory);
+  // Debounced reload from page 1 whenever the search query or category changes.
+  // Skips the very first render so we reuse the server-rendered first page.
+  const firstRender = useRef(true);
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
     }
-
-    const q = query.trim().toLowerCase();
-    if (q) {
-      list = list.filter((c) => {
-        const hay = [c.title, c.summary, c.tagline, c.eyebrow, (c.accreditations || []).join(" ")]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-        return hay.includes(q);
-      });
-    }
-
-    switch (sortMode) {
-      case "alpha-desc":
-        list.sort((a, b) => b.title.localeCompare(a.title));
-        break;
-      case "price-asc":
-        list.sort((a, b) => (a.priceFrom ?? 1e9) - (b.priceFrom ?? 1e9));
-        break;
-      case "price-desc":
-        list.sort((a, b) => (b.priceFrom ?? 0) - (a.priceFrom ?? 0));
-        break;
-      case "alpha":
-      default:
-        list.sort((a, b) => a.title.localeCompare(b.title));
-    }
-
-    return list;
-  }, [query, activeCategory, sortMode, courses]);
+    const t = setTimeout(() => fetchPage(1, query, activeCategory), 300);
+    return () => clearTimeout(t);
+  }, [query, activeCategory, fetchPage]);
 
   const resetFilters = () => {
     setQuery("");
@@ -139,9 +149,7 @@ export default function CatalogClient({ courses, page, enrollBaseUrl }: Props) {
                 aria-selected={activeCategory === c.id}
                 onClick={() => setActiveCategory(c.id)}
               >
-                <i className={c.icon} aria-hidden="true" />
                 {c.label}
-                <span className="t321-mkt-catalog__chip-count">{c.count}</span>
               </button>
             ))}
           </div>
@@ -152,80 +160,89 @@ export default function CatalogClient({ courses, page, enrollBaseUrl }: Props) {
         <div className="t321-mkt-container">
           <div className="t321-mkt-catalog__toolbar">
             <p className="t321-mkt-catalog__count">
-              Showing <strong>{filteredCourses.length}</strong> of {totalCount} courses
+              Showing <strong>{courses.length}</strong> of {total} courses
               {query && <span> matching &ldquo;{query}&rdquo;</span>}
             </p>
-            <label className="t321-mkt-catalog__sort">
-              <span>Sort</span>
-              <select value={sortMode} onChange={(e) => setSortMode(e.target.value as SortMode)}>
-                <option value="alpha">{sortLabels[0]}</option>
-                <option value="alpha-desc">{sortLabels[1] || "Z-A"}</option>
-                <option value="price-asc">{sortLabels[2] || "Price: low to high"}</option>
-                <option value="price-desc">{sortLabels[3] || "Price: high to low"}</option>
-              </select>
-            </label>
           </div>
 
-          {filteredCourses.length ? (
-            <div className="t321-mkt-catalog__grid">
-              {filteredCourses.map((c) => (
-                <article key={c.slug} className="t321-mkt-catalog__card t321-mkt-card">
-                  <Link href={`/courses/${c.slug}`} className={`t321-mkt-catalog__card-top${c.image ? " has-image" : ""} is-tone-${c.color || "accent"}`} tabIndex={-1} aria-hidden="true">
-                    {c.image ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img className="t321-mkt-catalog__card-img" src={c.image} alt={c.title} loading="lazy" />
+          {courses.length ? (
+            <>
+              <div className="t321-mkt-catalog__grid">
+                {courses.map((c) => (
+                  <article key={c.id} className="t321-mkt-catalog__card t321-mkt-card">
+                    <div className="t321-mkt-catalog__card-top has-image is-tone-accent">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        className="t321-mkt-catalog__card-img"
+                        src={c.image || COURSE_PLACEHOLDER_IMAGE}
+                        alt={c.name}
+                        loading="lazy"
+                        onError={(e) => {
+                          const img = e.currentTarget;
+                          if (img.src.indexOf(COURSE_PLACEHOLDER_IMAGE) === -1) {
+                            img.src = COURSE_PLACEHOLDER_IMAGE;
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="t321-mkt-catalog__card-body">
+                      <h3 className="t321-mkt-h3">{c.name}</h3>
+                      {c.description && <p>{toBlurb(c.description)}</p>}
+
+                      <div className="t321-mkt-catalog__card-foot">
+                        <div>
+                          {c.price > 0 ? (
+                            <span className="t321-mkt-catalog__card-price">
+                              <span>From</span>
+                              <strong>${c.price}</strong>
+                              <span>/ seat</span>
+                            </span>
+                          ) : (
+                            <span className="t321-mkt-catalog__card-price">
+                              <strong>Custom</strong>
+                            </span>
+                          )}
+                        </div>
+                        <div className="t321-mkt-catalog__card-actions">
+                          <a
+                            href={`${enrollBaseUrl}?add=${c.id}`}
+                            className="t321-mkt-btn t321-mkt-btn--primary"
+                          >
+                            Enroll
+                            <i className="fas fa-arrow-right" aria-hidden="true" />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              {error && <p className="t321-mkt-catalog__loadmore-error">{error}</p>}
+
+              {hasMore && (
+                <div className="t321-mkt-catalog__loadmore">
+                  <button
+                    type="button"
+                    className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg"
+                    onClick={() => fetchPage(pageNum + 1, query, activeCategory)}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <i className="fas fa-spinner fa-spin" aria-hidden="true" /> Loading…
+                      </>
                     ) : (
-                      <i className={c.icon || "fas fa-graduation-cap"} aria-hidden="true" />
+                      <>Load more courses</>
                     )}
-                  </Link>
-                  <div className="t321-mkt-catalog__card-body">
-                    <span className="t321-mkt-catalog__card-eyebrow">{c.eyebrow}</span>
-                    <h3 className="t321-mkt-h3">
-                      <Link href={`/courses/${c.slug}`} className="t321-mkt-catalog__card-title-link">{c.title}</Link>
-                    </h3>
-                    <p>{c.tagline}</p>
-
-                    <div className="t321-mkt-catalog__card-meta">
-                      {c.modules && (
-                        <span>
-                          <i className="fas fa-clock" aria-hidden="true" />
-                          {c.modules.length} modules
-                        </span>
-                      )}
-                      {c.accreditations && c.accreditations.length > 0 && (
-                        <span>
-                          <i className="fas fa-check-circle" aria-hidden="true" />
-                          {c.accreditations[0]}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="t321-mkt-catalog__card-foot">
-                      <div>
-                        {c.priceFrom != null ? (
-                          <span className="t321-mkt-catalog__card-price">
-                            <span>From</span>
-                            <strong>${c.priceFrom}</strong>
-                            <span>/ seat</span>
-                          </span>
-                        ) : (
-                          <span className="t321-mkt-catalog__card-price">
-                            <strong>Custom</strong>
-                          </span>
-                        )}
-                      </div>
-                      <div className="t321-mkt-catalog__card-actions">
-                        <Link href={`/courses/${c.slug}`} className="t321-mkt-btn t321-mkt-btn--subtle">Details</Link>
-                        <Link href={`${enrollBaseUrl}?add=${c.enrollId}`} className="t321-mkt-btn t321-mkt-btn--primary">
-                          Enroll
-                          <i className="fas fa-arrow-right" aria-hidden="true" />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+                  </button>
+                </div>
+              )}
+            </>
+          ) : loading ? (
+            <p className="t321-mkt-catalog__loading">
+              <i className="fas fa-spinner fa-spin" aria-hidden="true" /> Loading courses…
+            </p>
           ) : (
             <div className="t321-mkt-catalog__empty">
               <i className="fas fa-search" aria-hidden="true" />

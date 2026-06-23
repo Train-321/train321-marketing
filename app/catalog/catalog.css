@@ -316,3 +316,24 @@
   .t321-mkt-catalog__grid { grid-template-columns: 1fr; }
   .t321-mkt-catalog__cta { grid-template-columns: 1fr; }
 }
+
+/* Pagination: initial loading + "Load more" button */
+.t321-mkt-catalog__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.75rem 0;
+  color: var(--t321-mkt-muted, #64748b);
+  font-weight: 600;
+}
+.t321-mkt-catalog__loadmore {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0 0.5rem;
+}
+.t321-mkt-catalog__loadmore-error {
+  text-align: center;
+  color: #b91c1c;
+  padding: 1rem 0 0;
+}

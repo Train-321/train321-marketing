@@ -1,4 +1,5 @@
-import { getCourses, getCatalogPage, getSiteSettings } from "@/lib/sanity";
+import { getCatalogPage } from "@/lib/sanity";
+import { getMarketplaceCatalog, ENROLL_BASE } from "@/lib/newFeatures";
 import CatalogClient from "./CatalogClient";
 
 export const metadata = {
@@ -6,8 +7,22 @@ export const metadata = {
   description: "Every course Train321 offers, on a single page."
 };
 
+// Catalog data (courses, categories, search corpus) comes from the new-features
+// LMS backend marketplace — not Sanity. The Sanity catalog page doc still
+// supplies the editorial hero copy + bottom CTA.
 export default async function CatalogPage() {
-  const [courses, page, settings] = await Promise.all([getCourses(), getCatalogPage(), getSiteSettings()]);
-  const enrollBaseUrl = settings.enrollBaseUrl || "http://new-features.train321.com/#/enroll";
-  return <CatalogClient courses={courses} page={page} enrollBaseUrl={enrollBaseUrl} />;
+  const [{ courses, categories, total }, page] = await Promise.all([
+    getMarketplaceCatalog(),
+    getCatalogPage()
+  ]);
+
+  return (
+    <CatalogClient
+      initialCourses={courses}
+      categories={categories}
+      initialTotal={total}
+      page={page}
+      enrollBaseUrl={ENROLL_BASE}
+    />
+  );
 }
