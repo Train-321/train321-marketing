@@ -49,7 +49,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   const priceCustomAmt = copy?.coursePriceCustomAmt || "Custom";
   const priceCustomUnit = copy?.coursePriceCustomUnit || "pricing";
   const overviewEyebrow = copy?.courseOverviewEyebrow || "Course overview";
-  const overviewHeading = copy?.courseOverviewHeading || "What you'll get";
+  const overviewHeading = course.overviewHeading || copy?.courseOverviewHeading || "What you'll get";
   const outcomesHeading = copy?.courseOutcomesHeading || "By the end, you'll be able to";
   const curriculumEyebrow = copy?.courseCurriculumEyebrow || "Curriculum";
   const curriculumHeading = copy?.courseCurriculumHeading || "Inside the course";

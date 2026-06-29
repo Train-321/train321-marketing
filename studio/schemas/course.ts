@@ -50,6 +50,7 @@ export default defineType({
     defineField({ name: 'icon', type: 'string', description: 'Font Awesome class, e.g. fas fa-utensils', group: 'content' }),
     defineField({ name: 'imageUrl', type: 'url', title: 'Image URL', description: 'Use this for external image URLs (e.g. Unsplash). Leave blank if uploading via the field below.', group: 'content' }),
     defineField({ name: 'image', type: 'image', title: 'Image (uploaded)', options: { hotspot: true }, group: 'content' }),
+    defineField({ name: 'overviewHeading', title: 'Overview heading', type: 'string', description: 'Optional. Heading above the Course Overview summary on this course only. Leave blank to use the shared default from Detail Pages (chrome copy).', group: 'content' }),
     defineField({ name: 'summary', type: 'text', rows: 4, group: 'content' }),
     defineField({
       name: 'heroStats',

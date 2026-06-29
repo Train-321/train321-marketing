@@ -17,6 +17,7 @@ export type Course = {
   color?: "amber" | "plum" | "emerald" | "neutral";
   icon?: string;
   image?: string; // URL string
+  overviewHeading?: string;
   summary?: string;
   hero?: { stats?: Array<{ value: string; label: string }> };
   outcomes?: string[];
@@ -492,6 +493,7 @@ const COURSE_PROJECTION = `
   "slug": slug.current,
   title, eyebrow, tagline, category, color, icon,
   "image": imageUrl,
+  overviewHeading,
   summary,
   "hero": { "stats": heroStats[]{ value, label } },
   outcomes,
