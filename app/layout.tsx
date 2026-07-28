@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Fraunces } from "next/font/google";
+import { Inter, Fraunces, Montserrat } from "next/font/google";
 import { draftMode } from "next/headers";
 import dynamic from "next/dynamic";
 import SiteHeader from "@/components/SiteHeaderShell";
@@ -22,6 +22,13 @@ const fraunces = Fraunces({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-fraunces",
+  display: "swap"
+});
+// Certificate preview only — matches the font used by the issued PDF.
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-montserrat",
   display: "swap"
 });
 
@@ -49,7 +56,7 @@ const FA_HREF =
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled: isDraft } = await draftMode();
   return (
-    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
+    <html lang="en" className={`${inter.variable} ${fraunces.variable} ${montserrat.variable}`}>
       <head>
         {/* Connection warmup for the two third-party origins we always hit. */}
         <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="anonymous" />

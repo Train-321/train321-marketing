@@ -1,0 +1,165 @@
+/* Certificate preview — 1:1 port of the production PDF template
+   (backend/resources/views/templates/generic.blade.php).
+
+   The original is rendered by DomPDF at US Letter landscape (1056 x 818px) with
+   hard-coded pixel sizes. To keep those proportions at any width, the page is a
+   container and every size below is expressed in `em`, where 1em = 10px at the
+   original 1056px page width. So 40px in the blade file == 4em here. */
+
+.t321-cert {
+  container-type: inline-size;
+  width: 100%;
+}
+
+.t321-cert__page {
+  font-size: 0.947cqw; /* 10px at a 1056px-wide page */
+  aspect-ratio: 1056 / 816;
+  padding: 4.5em;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  background: #ffffff url("/img/certificate/certificate-bg.png") no-repeat top center;
+  background-size: 100% 100%;
+
+  color: #01154f;
+  font-family: var(--font-montserrat), "Montserrat", -apple-system, sans-serif;
+  text-align: center;
+
+  /* Fixed, not em-based, so the corners read the same as the site's other cards
+     instead of shrinking with the certificate. */
+  border-radius: 12px;
+  box-shadow: 0 20px 48px rgba(15, 15, 14, 0.18);
+}
+
+.t321-cert__logo {
+  width: 23%;
+  height: auto;
+  margin-top: 2em;
+}
+
+/* "CERTIFICATE", flanked by the two 50px rules from the original. */
+.t321-cert__title {
+  margin: 2em 0 0; /* 40px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6em;
+  font-size: 2em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.t321-cert__title-rule {
+  width: 2.5em; /* 50px at the em scale of this 20px line */
+  height: 0.05em;
+  background: #000000;
+}
+
+.t321-cert__subtitle {
+  margin: 0;
+  font-size: 1.5em;
+  letter-spacing: 0.3em;
+  line-height: 2.7;
+}
+
+.t321-cert__ack {
+  margin: 5em 0 0.6em; /* 80px / 10px */
+  font-size: 1.6em;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+}
+
+.t321-cert__name {
+  margin: 0.05em auto 0; /* 2px */
+  padding-bottom: 0.1em;
+  width: 60%;
+  border-bottom: 0.05em solid #000000;
+  font-size: 4em;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.t321-cert__completed {
+  margin: 1.2em 0 0;
+  font-size: 1.6em;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+}
+
+.t321-cert__course {
+  margin: 0.5em 0 0; /* 15px */
+  font-size: 3em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+}
+
+/* Footer strip: issue meta · seal · signature, at the original 30/40/30 split. */
+.t321-cert__foot {
+  width: 90%;
+  margin: 0 auto;
+  padding-top: 5.8em;
+  display: grid;
+  grid-template-columns: 30% 40% 30%;
+  align-items: start;
+}
+
+.t321-cert__meta {
+  border-bottom: 0.05em solid #000000;
+  font-size: 1.3em;
+  letter-spacing: 0.05em;
+}
+.t321-cert__meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  line-height: 1.35;
+}
+.t321-cert__meta-row--strong {
+  font-weight: 600;
+}
+
+.t321-cert__seal img {
+  width: 11.5em;
+  height: auto;
+}
+
+.t321-cert__sign {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.t321-cert__sign-script {
+  font-family: "Segoe Script", "Bradley Hand", "Snell Roundhand", "Lucida Handwriting", cursive;
+  font-size: 1.6em;
+  line-height: 1.2;
+  padding-bottom: 0.1em;
+  border-bottom: 0.05em solid #000000;
+  color: #01154f;
+}
+.t321-cert__sign-title {
+  padding-top: 0.7em;
+  text-wrap: balance;
+  font-size: 1.1em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.3;
+}
+
+.t321-cert__legal {
+  margin: 2em auto 0;
+  width: 90%;
+  color: #000000;
+  font-size: 0.9em;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: justify;
+}
+
+/* Below the two-column breakpoint the card goes full width, which would blow the
+   type up past the surrounding page; cap it at the desktop rendered size. */
+@media (max-width: 991.98px) {
+  .t321-cert {
+    max-width: 560px;
+    margin: 0 auto;
+  }
+}

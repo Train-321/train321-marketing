@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCourse, getCourses, getDetailPagesCopy, getSiteSettings } from "@/lib/sanity";
 import EnrollButton from "@/components/EnrollButton";
+import CourseCertificate from "@/components/CourseCertificate";
 import "./course.css";
 
 export async function generateStaticParams() {
@@ -58,8 +59,6 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   const curriculumLede = curriculumLedeTpl.replace("{n}", String(course.modules?.length || 0));
   const certEyebrow = copy?.courseCertEyebrow || "Your certificate";
   const certHeading = copy?.courseCertHeading || "Official, instant, accepted";
-  const certVisualHead = copy?.courseCertVisualHead || "Certificate of Completion";
-  const certVisualMeta = copy?.courseCertVisualMeta || "Train321 · ANSI-accredited";
   const certDeliveryLabel = copy?.courseCertDeliveryLabel || "Delivery";
   const certValidityLabel = copy?.courseCertValidityLabel || "Validity";
   const certAcceptedLabel = copy?.courseCertAcceptedLabel || "Accepted by";
@@ -206,13 +205,8 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       {course.certificate && (
         <section className="t321-mkt-section">
           <div className="t321-mkt-container t321-mkt-course__cert">
-            <div className="t321-mkt-course__cert-visual" aria-hidden="true">
-              <div className="t321-mkt-course__cert-card">
-                <span className="t321-mkt-course__cert-head">{certVisualHead}</span>
-                <span className="t321-mkt-course__cert-name">{course.title}</span>
-                <span className="t321-mkt-course__cert-seal"><i className="fas fa-medal" /></span>
-                <span className="t321-mkt-course__cert-meta">{certVisualMeta}</span>
-              </div>
+            <div className="t321-mkt-course__cert-visual">
+              <CourseCertificate courseTitle={course.title} />
             </div>
             <div>
               <span className="t321-mkt-eyebrow">{certEyebrow}</span>

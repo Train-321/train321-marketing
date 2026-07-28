@@ -267,62 +267,6 @@
   display: flex;
   justify-content: center;
 }
-.t321-mkt-course__cert-card {
-  width: 100%;
-  max-width: 360px;
-  aspect-ratio: 4 / 3;
-  background: linear-gradient(135deg, #fffbf2, #f6ecdb);
-  border: 1px solid #e6d9be;
-  border-radius: 12px;
-  padding: 2rem;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto 1fr auto;
-  gap: 0.5rem;
-  box-shadow: 0 20px 48px rgba(15, 15, 14, 0.15);
-  transform: rotate(-1.5deg);
-  position: relative;
-}
-.t321-mkt-course__cert-head {
-  grid-column: 1 / 2;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #9D6200;
-}
-.t321-mkt-course__cert-name {
-  grid-column: 1 / 2;
-  align-self: center;
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-size: 1.3rem;
-  line-height: 1.2;
-  color: #5A3F14;
-  font-weight: 500;
-}
-.t321-mkt-course__cert-seal {
-  grid-column: 2 / 3;
-  grid-row: 1 / 3;
-  align-self: center;
-  justify-self: end;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #d9a847, #a47914);
-  color: #fffbf2;
-  font-size: 1.6rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: inset 0 -4px 6px rgba(0, 0, 0, 0.15);
-}
-.t321-mkt-course__cert-meta {
-  grid-column: 1 / 3;
-  font-size: 0.72rem;
-  color: #9D6200;
-  padding-top: 0.5rem;
-  border-top: 1px solid #e6d9be;
-}
 .t321-mkt-course__cert-dl {
   margin: 1.25rem 0 0;
   display: grid;
