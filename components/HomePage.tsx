@@ -449,43 +449,6 @@ export default function HomePage({
                 <span className="t321-mkt-hero__cert-sub">Valid through 2029 · #FH-384201</span>
               </div>
             </div>
-
-            <div className="t321-mkt-hero__rating t321-mkt-hero__float--e">
-              <div className="t321-mkt-hero__rating-top">
-                <strong className="t321-mkt-hero__rating-score">4.9</strong>
-                <div className="t321-mkt-hero__rating-top-meta">
-                  <div className="t321-mkt-hero__rating-stars" aria-label="4.9 out of 5">
-                    <i className="fas fa-star" />
-                    <i className="fas fa-star" />
-                    <i className="fas fa-star" />
-                    <i className="fas fa-star" />
-                    <i className="fas fa-star" />
-                  </div>
-                  <span className="t321-mkt-hero__rating-total">284,912 reviews</span>
-                </div>
-              </div>
-              <div className="t321-mkt-hero__rating-bars">
-                <div className="t321-mkt-hero__rating-bar">
-                  <span>5</span>
-                  <div className="t321-mkt-hero__rating-track"><span style={{ width: "94%" }} /></div>
-                  <em>94%</em>
-                </div>
-                <div className="t321-mkt-hero__rating-bar">
-                  <span>4</span>
-                  <div className="t321-mkt-hero__rating-track"><span style={{ width: "4%" }} /></div>
-                  <em>4%</em>
-                </div>
-                <div className="t321-mkt-hero__rating-bar">
-                  <span>3</span>
-                  <div className="t321-mkt-hero__rating-track"><span style={{ width: "1%" }} /></div>
-                  <em>1%</em>
-                </div>
-              </div>
-              <div className="t321-mkt-hero__rating-foot">
-                <i className="fas fa-quote-left" />
-                <span>&ldquo;Finished in an hour, certificate issued instantly.&rdquo;</span>
-              </div>
-            </div>
           </aside>
         </div>
       </section>
@@ -621,11 +584,6 @@ export default function HomePage({
                 )}
               </figure>
             ))}
-          </div>
-          <div className="t321-mkt-quotes__foot">
-            <Link href="/testimonials" className="t321-mkt-btn t321-mkt-btn--subtle">
-              {home?.opinionsLinkLabel || "Read more stories"} <i className="fas fa-arrow-right" />
-            </Link>
           </div>
         </div>
       </section>

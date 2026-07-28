@@ -179,7 +179,6 @@ helpers and https://tina.io/docs/data-fetching/overview for the pattern.
 | `/demo` | client | inline |
 | `/services` | server | inline (3 tiers) |
 | `/faq` | client (data SSR'd) | `content/faqs/*.json` |
-| `/testimonials` | server | `content/testimonials/*.json` |
 
 Plus 24 `/<legacy-slug>` → `/courses/<slug>` or `/legal/<slug>` permanent redirects in `next.config.ts`.
 

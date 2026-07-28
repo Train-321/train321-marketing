@@ -46,7 +46,6 @@ export async function POST(req: NextRequest) {
       touch("/");
       break;
     case "testimonial":
-      touch("/testimonials");
       touch("/");
       break;
     case "teamMember":
@@ -78,9 +77,6 @@ export async function POST(req: NextRequest) {
       break;
     case "catalogPage":
       touch("/catalog");
-      break;
-    case "testimonialsPage":
-      touch("/testimonials");
       break;
     case "detailPagesCopy":
       touch("/courses/[slug]", "page");

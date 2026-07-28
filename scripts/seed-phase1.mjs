@@ -124,7 +124,6 @@ async function main() {
         title: "Company",
         links: [
           { _key: "about", _type: "navLink", label: "About", href: "/about" },
-          { _key: "testimonials", _type: "navLink", label: "Testimonials", href: "/testimonials" },
           { _key: "blog", _type: "navLink", label: "Journal", href: "/blog" },
           { _key: "contact", _type: "navLink", label: "Contact", href: "/contact" }
         ]

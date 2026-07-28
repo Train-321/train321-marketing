@@ -45,7 +45,6 @@ export const marketingNav: NavItem[] = [
   },
   { label: "Services", to: "/services" },
   { label: "Demos", to: "/demo" },
-  { label: "Testimonials", to: "/testimonials" },
   { label: "Blog", to: "/blog" },
   { label: "FAQ", to: "/faq" },
   { label: "Contact", to: "/contact" }
@@ -55,7 +54,6 @@ export const footerNav = {
   company: [
     { label: "About Us", to: "/about" },
     { label: "Services", to: "/services" },
-    { label: "Testimonials", to: "/testimonials" },
     { label: "Blog", to: "/blog" },
     { label: "Contact", to: "/contact" }
   ],

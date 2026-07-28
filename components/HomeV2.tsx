@@ -426,11 +426,6 @@ export default function HomeV2({
                 </figure>
               ))}
             </div>
-            <div className="t321-v2-quotes__foot">
-              <Link href="/testimonials" className="t321-mkt-btn t321-mkt-btn--subtle">
-                Read more stories <i className="fas fa-arrow-right" />
-              </Link>
-            </div>
           </div>
         </section>
       )}
