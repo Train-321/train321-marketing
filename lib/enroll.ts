@@ -243,6 +243,97 @@ export async function resolveEnrollCourse(enrollId?: string | null): Promise<Car
   return getCartCourse(id);
 }
 
+/** One row in the course page's state picker. */
+export type StatePickerOption = {
+  /** Display label — the variant's state tag, e.g. "Florida" or "All states". */
+  state: string;
+  /** The variant course's public name, shown muted beside the state. */
+  title?: string;
+  /** Outbound link for states served by an external provider; "" otherwise. */
+  href: string;
+  /** Cart-ready course for inline purchase; null when the state redirects out. */
+  course: CartCourse | null;
+};
+
+/**
+ * Build state-picker options from the LMS's own course groups.
+ *
+ * The new-features backend models state/regional versions as course groups
+ * (tbl_course_group): each member course carries a state_label and optional
+ * state_redirect_url. When the given course id belongs to a group with 2+
+ * variants, the group IS the state picker — managed by LMS admins, no Sanity
+ * editing involved. Returns null when the course isn't grouped (callers fall
+ * back to the Sanity-managed stateVariants).
+ *
+ * The group payload doesn't include variant names, so each variant is
+ * resolved through the course endpoint — which also gives us the canonical
+ * price/image/seat flags for the cart. Variants that no longer resolve are
+ * dropped rather than rendered as dead options.
+ */
+export async function getGroupStateOptions(
+  enrollId?: string | null
+): Promise<StatePickerOption[] | null> {
+  const id = Number(enrollId);
+  if (!Number.isInteger(id) || id <= 0) return null;
+
+  type RawVariant = {
+    id: number;
+    state_label?: string | null;
+    state_redirect_url?: string | null;
+    price?: number;
+  };
+  type RawEntry = { entry_type?: string; variants?: RawVariant[] };
+
+  let entries: RawEntry[];
+  try {
+    // POST fetches aren't cached by Next's data cache, but this runs inside
+    // ISR page generation (5-minute revalidate on course pages), so the
+    // backend sees one call per regeneration, not one per visitor.
+    const res = await fetch(`${API_BASE}/api/list/enroll-courses`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ per_page: 500, page: 1, type: "all" })
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { courses?: RawEntry[] };
+    entries = data.courses || [];
+  } catch {
+    return null;
+  }
+
+  const group = entries.find(
+    (e) => e.entry_type === "group" && (e.variants || []).some((v) => v.id === id)
+  );
+  // A 1-variant "group" isn't a choice — treat it as a normal course.
+  if (!group || (group.variants || []).length < 2) return null;
+
+  const variants = [...(group.variants || [])].sort((a, b) =>
+    String(a.state_label || "").localeCompare(String(b.state_label || ""))
+  );
+
+  const resolved = await Promise.all(variants.map((v) => getCartCourse(v.id)));
+
+  const label = (v: RawVariant): string => {
+    const raw = String(v.state_label || "").trim();
+    if (!raw || raw.toUpperCase() === "ALL") return "All states";
+    return raw;
+  };
+
+  const options: StatePickerOption[] = [];
+  for (let i = 0; i < variants.length; i++) {
+    const v = variants[i];
+    const c = resolved[i];
+    if (v.state_redirect_url) {
+      // External-provider state — link out, never add to cart.
+      options.push({ state: label(v), title: c?.name, href: v.state_redirect_url, course: null });
+    } else if (c) {
+      options.push({ state: label(v), title: c.name, href: "", course: c });
+    }
+  }
+
+  return options.length >= 2 ? options : null;
+}
+
 /**
  * Split the cart into the two buckets the backend expects and ask it to price
  * them. This is the ONLY source of truth for what the buyer sees — we never
