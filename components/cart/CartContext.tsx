@@ -16,6 +16,7 @@ import type {
   EnrollQuote,
   InvoiceCadence
 } from "@/lib/enroll";
+import "./AudienceSwitchConfirm.css";
 
 const STORAGE_KEY = "t321.cart.v1";
 const PROMO_KEY = "t321.cart.promo.v1";
@@ -96,6 +97,12 @@ type CartContextValue = {
   /** Who's buying — drives quote shape and the checkout form. */
   buyer: BuyerState;
   setAudience: (a: BuyerAudience) => void;
+  /**
+   * Preferred way to switch audience from UI. Applies immediately when the
+   * cart is empty; otherwise pops a confirm dialog ("switching clears your
+   * cart") and only applies — clearing the cart — if the buyer agrees.
+   */
+  requestAudienceChange: (a: BuyerAudience) => void;
   setEmployees: (n: number) => void;
   setLocations: (n: number) => void;
   setCadence: (c: InvoiceCadence) => void;
@@ -188,6 +195,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       /* ignore */
     }
   }, [promoCode]);
+
+  // A cart emptied item-by-item drops its promo too — otherwise the code
+  // silently re-applies to whatever the buyer adds next.
+  useEffect(() => {
+    if (!hydrated.current) return;
+    if (items.length === 0) {
+      setPromoCode("");
+      setPromoError(null);
+    }
+  }, [items.length]);
 
   useEffect(() => {
     if (!hydrated.current) return;
@@ -388,6 +405,31 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     (audience: BuyerAudience) => setBuyer((b) => ({ ...b, audience })),
     []
   );
+
+  // Audience switch with a cart-clearing warning. `pendingAudience` non-null
+  // means the confirm dialog is up, waiting on the buyer's decision.
+  const [pendingAudience, setPendingAudience] = useState<BuyerAudience | null>(null);
+  const requestAudienceChange = useCallback(
+    (audience: BuyerAudience) => {
+      if (audience === buyer.audience) return;
+      if (items.length === 0) {
+        setBuyer((b) => ({ ...b, audience }));
+        return;
+      }
+      setPendingAudience(audience);
+    },
+    [buyer.audience, items.length]
+  );
+  const cancelAudienceChange = useCallback(() => setPendingAudience(null), []);
+  const confirmAudienceChange = useCallback(() => {
+    if (pendingAudience) {
+      // clear() resets the buyer to defaults; re-apply the chosen audience on
+      // top so the switch the buyer just confirmed sticks.
+      clear();
+      setBuyer({ ...DEFAULT_BUYER, audience: pendingAudience });
+    }
+    setPendingAudience(null);
+  }, [pendingAudience, clear]);
   const setEmployees = useCallback(
     (n: number) =>
       setBuyer((b) => ({ ...b, employees: Math.min(9999, Math.max(1, Math.floor(n) || 1)) })),
@@ -433,6 +475,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       closeDrawer,
       buyer,
       setAudience,
+      requestAudienceChange,
       setEmployees,
       setLocations,
       setCadence,
@@ -444,8 +487,52 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       has,
       toApiLines
     }),
-    [lines, quote, loading, ready, promoError, promoCode, drawerOpen, openDrawer, closeDrawer, buyer, setAudience, setEmployees, setLocations, setCadence, add, remove, setUsers, clear, applyPromo, has, toApiLines]
+    [lines, quote, loading, ready, promoError, promoCode, drawerOpen, openDrawer, closeDrawer, buyer, setAudience, requestAudienceChange, setEmployees, setLocations, setCadence, add, remove, setUsers, clear, applyPromo, has, toApiLines]
   );
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  const pendingIsCompany = pendingAudience === "company";
+  const itemCount = items.length;
+
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+      {pendingAudience && (
+        <div
+          className="t321-cart-switch"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="t321-cart-switch-title"
+        >
+          <div className="t321-cart-switch__backdrop" onClick={cancelAudienceChange} />
+          <div className="t321-cart-switch__panel">
+            <h3 id="t321-cart-switch-title" className="t321-cart-switch__title">
+              {pendingIsCompany ? "Switch to team pricing?" : "Switch to individual pricing?"}
+            </h3>
+            <p className="t321-cart-switch__body">
+              {pendingIsCompany
+                ? "Team accounts are priced per employee, so your current cart will be cleared."
+                : "Individual pricing is a one-time payment, so your current cart will be cleared."}{" "}
+              You have {itemCount} course{itemCount === 1 ? "" : "s"} in the cart.
+            </p>
+            <div className="t321-cart-switch__actions">
+              <button
+                type="button"
+                className="t321-cart-switch__btn"
+                onClick={cancelAudienceChange}
+              >
+                Keep my cart
+              </button>
+              <button
+                type="button"
+                className="t321-cart-switch__btn t321-cart-switch__btn--primary"
+                onClick={confirmAudienceChange}
+              >
+                Switch &amp; clear cart
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </CartContext.Provider>
+  );
 }

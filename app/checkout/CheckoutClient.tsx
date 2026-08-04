@@ -45,10 +45,31 @@ type FieldErrors = Partial<
     | "company_name"
     | "billing_first_name"
     | "billing_last_name"
-    | "billing_email",
+    | "billing_email"
+    | "phone"
+    | "billing_phone",
     string
   >
 >;
+
+/**
+ * Progressive US phone mask: "(555) 123-4567". Non-digits are stripped, a
+ * leading country "1" on a full number is dropped, and input caps at 10
+ * digits — so pasted values like "+1 555-123-4567" still land correctly.
+ */
+function formatUsPhone(raw: string): string {
+  const d = raw.replace(/\D/g, "").replace(/^1(?=\d{10})/, "").slice(0, 10);
+  if (!d) return "";
+  if (d.length < 4) return `(${d}`;
+  if (d.length < 7) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
+  return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+}
+
+/** A masked phone is valid when empty (optional field) or fully 10 digits. */
+function phoneIsValid(v: string): boolean {
+  const digits = v.replace(/\D/g, "").length;
+  return digits === 0 || digits === 10;
+}
 
 function CheckoutForm() {
   const {
@@ -64,7 +85,7 @@ function CheckoutForm() {
     clear,
     toApiLines,
     buyer,
-    setAudience,
+    requestAudienceChange,
     setEmployees,
     setLocations,
     setCadence
@@ -127,6 +148,25 @@ function CheckoutForm() {
       setErrors((prev) => ({ ...prev, [`billing_${key}`]: undefined }));
     };
 
+  // Phone fields run through the mask instead of the plain setters.
+  const setPhone = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = formatUsPhone(e.target.value);
+    setForm((f) => ({ ...f, phone: value }));
+    setErrors((prev) => ({ ...prev, phone: undefined }));
+  };
+  const setBillPhone = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = formatUsPhone(e.target.value);
+    setBilling((b) => ({ ...b, phone: value }));
+    setErrors((prev) => ({ ...prev, billing_phone: undefined }));
+  };
+
+  const onBillingEmailBlur = () => {
+    const email = billing.email.trim();
+    if (email && !/^\S+@\S+\.\S+$/.test(email)) {
+      setErrors((prev) => ({ ...prev, billing_email: "Enter a valid email address." }));
+    }
+  };
+
   /**
    * Ask the backend whether this email already has an account, so the buyer
    * finds out here rather than after entering a card. Silent on failure — the
@@ -134,7 +174,13 @@ function CheckoutForm() {
    */
   const onEmailBlur = async () => {
     const email = form.email.trim();
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) return;
+    // Flag a malformed address as soon as the buyer leaves the field —
+    // same message submit-time validation would show.
+    if (email && !/^\S+@\S+\.\S+$/.test(email)) {
+      setErrors((prev) => ({ ...prev, email: "Enter a valid email address." }));
+      return;
+    }
+    if (!email) return;
     try {
       const res = await fetch("/api/enroll/check-email", {
         method: "POST",
@@ -154,15 +200,21 @@ function CheckoutForm() {
     if (!form.first_name.trim()) next.first_name = "Enter your first name.";
     if (!form.last_name.trim()) next.last_name = "Enter your last name.";
     if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) next.email = "Enter a valid email address.";
-    if (form.password.length < 8) next.password = "Use at least 8 characters.";
+    if (form.password.length !== 8) next.password = "Password must be exactly 8 characters.";
     if (isCompany && !form.company_name.trim()) {
       next.company_name = "Enter your company name.";
+    }
+    if (!phoneIsValid(form.phone)) {
+      next.phone = "Enter a 10-digit phone number like (555) 123-4567.";
     }
     if (isCompany && billingDifferent) {
       if (!billing.first_name.trim()) next.billing_first_name = "Enter a first name.";
       if (!billing.last_name.trim()) next.billing_last_name = "Enter a last name.";
       if (!/^\S+@\S+\.\S+$/.test(billing.email.trim()))
         next.billing_email = "Enter a valid email address.";
+      if (!phoneIsValid(billing.phone)) {
+        next.billing_phone = "Enter a 10-digit phone number like (555) 123-4567.";
+      }
     }
     if (!isFree && !cardComplete) next.card = "Enter your card details.";
     setErrors(next);
@@ -310,7 +362,7 @@ function CheckoutForm() {
                   role="radio"
                   aria-checked={!isCompany}
                   className={`t321-mkt-checkout__aud-card${!isCompany ? " is-active" : ""}`}
-                  onClick={() => setAudience("individual")}
+                  onClick={() => requestAudienceChange("individual")}
                 >
                   <i className="fas fa-user" aria-hidden="true" />
                   <strong>Just me</strong>
@@ -321,7 +373,7 @@ function CheckoutForm() {
                   role="radio"
                   aria-checked={isCompany}
                   className={`t321-mkt-checkout__aud-card${isCompany ? " is-active" : ""}`}
-                  onClick={() => setAudience("company")}
+                  onClick={() => requestAudienceChange("company")}
                 >
                   <i className="fas fa-users" aria-hidden="true" />
                   <strong>My team</strong>
@@ -454,24 +506,27 @@ function CheckoutForm() {
               <Field
                 label="Password"
                 error={errors.password}
-                hint="At least 8 characters."
+                hint="Exactly 8 characters."
                 required
               >
                 <input
                   type="password"
                   autoComplete="new-password"
+                  maxLength={8}
                   value={form.password}
                   onChange={set("password")}
                 />
               </Field>
 
               <div className="t321-mkt-checkout__row">
-                <Field label="Phone" hint="Optional">
+                <Field label="Phone" error={errors.phone} hint="Optional">
                   <input
                     type="tel"
                     autoComplete="tel"
+                    placeholder="(555) 123-4567"
+                    maxLength={14}
                     value={form.phone}
-                    onChange={set("phone")}
+                    onChange={setPhone}
                   />
                 </Field>
                 <Field label="State" hint="Optional">
@@ -519,10 +574,21 @@ function CheckoutForm() {
                       </div>
                       <div className="t321-mkt-checkout__row">
                         <Field label="Billing email" error={errors.billing_email} required>
-                          <input type="email" value={billing.email} onChange={setBill("email")} />
+                          <input
+                            type="email"
+                            value={billing.email}
+                            onChange={setBill("email")}
+                            onBlur={onBillingEmailBlur}
+                          />
                         </Field>
-                        <Field label="Billing phone" hint="Optional">
-                          <input type="tel" value={billing.phone} onChange={setBill("phone")} />
+                        <Field label="Billing phone" error={errors.billing_phone} hint="Optional">
+                          <input
+                            type="tel"
+                            placeholder="(555) 123-4567"
+                            maxLength={14}
+                            value={billing.phone}
+                            onChange={setBillPhone}
+                          />
                         </Field>
                       </div>
                     </div>
@@ -694,6 +760,16 @@ function CheckoutForm() {
               <p className="t321-mkt-checkout__promo-ok">
                 <i className="fas fa-check" aria-hidden="true" /> {quote.promo.name} applied
                 {isCompany && needsSubscription ? " to your first invoice" : ""}
+                <button
+                  type="button"
+                  className="t321-mkt-checkout__promo-remove"
+                  onClick={() => {
+                    applyPromo("");
+                    setPromoDraft("");
+                  }}
+                >
+                  Remove
+                </button>
               </p>
             )}
 
@@ -774,7 +850,7 @@ function CheckoutForm() {
 
             <p className="t321-mkt-checkout__terms">
               By enrolling you agree to our{" "}
-              <Link href="/legal/terms-of-service">Terms of Service</Link> and{" "}
+              <Link href="/legal/terms-conditions">Terms &amp; Conditions</Link> and{" "}
               <Link href="/legal/privacy-policy">Privacy Policy</Link>.
             </p>
           </aside>

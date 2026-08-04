@@ -289,6 +289,64 @@
   font-size: 0.92rem;
   color: var(--t321-mkt-ink);
 }
+.t321-mkt-field select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.25rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%23425466' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  cursor: pointer;
+}
+.t321-mkt-field select:has(option[value=""]:checked) {
+  color: var(--t321-mkt-ink-muted);
+}
+.t321-mkt-field select option {
+  color: var(--t321-mkt-ink);
+}
+
+/* Styled open dropdown — browsers with customizable-select support
+   (Chrome 135+) render the picker themselves so CSS applies; anything
+   older silently keeps the native OS popup with identical behavior. */
+@supports (appearance: base-select) {
+  .t321-mkt-field select {
+    appearance: base-select;
+  }
+  /* base-select draws its own arrow on the closed control — hide it,
+     we already paint a chevron via background-image. The checkmark on
+     the selected option stays, restyled to the brand accent. */
+  .t321-mkt-field select::picker-icon {
+    display: none;
+  }
+  .t321-mkt-field select option::checkmark {
+    color: var(--t321-mkt-accent);
+    font-weight: 700;
+  }
+  .t321-mkt-field select::picker(select) {
+    appearance: base-select;
+    margin-top: 4px;
+    padding: 0.3rem;
+    border: 1px solid var(--t321-mkt-line-strong);
+    border-radius: 10px;
+    background: var(--t321-mkt-paper);
+    box-shadow: 0 12px 32px rgba(11, 31, 51, 0.16);
+    max-height: 17rem;
+  }
+  .t321-mkt-field select option {
+    padding: 0.5rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.92rem;
+    cursor: pointer;
+  }
+  .t321-mkt-field select option:hover,
+  .t321-mkt-field select option:focus-visible {
+    background: var(--t321-mkt-paper-sunk);
+  }
+  .t321-mkt-field select option:checked {
+    font-weight: 600;
+    color: var(--t321-mkt-accent);
+  }
+}
 .t321-mkt-field input:focus-visible,
 .t321-mkt-field select:focus-visible {
   outline: 2px solid var(--t321-mkt-accent);
@@ -509,6 +567,19 @@
   font-weight: 600;
   color: var(--t321-mkt-positive);
 }
+.t321-mkt-checkout__promo-remove {
+  margin-left: 0.35rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--t321-mkt-ink-muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.t321-mkt-checkout__promo-remove:hover { color: var(--t321-mkt-critical); }
 
 .t321-mkt-checkout__totals { margin: 1rem 0; }
 .t321-mkt-checkout__totals > div {

@@ -20,11 +20,10 @@
   text-decoration: none;
 }
 .t321-mkt-footer__logo img {
-  height: 44px;
+  height: 50px;
   width: auto;
   display: block;
   object-fit: contain;
-  filter: brightness(0) invert(1);
   opacity: 0.95;
   transition: opacity 140ms ease;
 }

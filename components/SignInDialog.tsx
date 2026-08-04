@@ -7,14 +7,61 @@ type Props = {
   open: boolean;
   onClose: () => void;
   loginUrl: string;
+  /** Called with the signed-in user's display name after a successful login. */
+  onSignedIn?: (user: { name: string; role: string; id: number }) => void;
 };
 
 type Mode = "signin" | "forgot";
 
-export default function SignInDialog({ open, onClose, loginUrl }: Props) {
+export default function SignInDialog({ open, onClose, loginUrl, onSignedIn }: Props) {
   const emailRef = useRef<HTMLInputElement>(null);
   const forgotEmailRef = useRef<HTMLInputElement>(null);
   const [mode, setMode] = useState<Mode>("signin");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  /**
+   * Credentials go to our own /api/auth/login, which forwards them to the
+   * Train321 API and keeps the returned bearer token in an httpOnly cookie.
+   * Posting the form straight at the LMS (the old behaviour) left the browser
+   * on whatever that host returned — including its 500 page.
+   */
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (submitting) return;
+    const form = new FormData(e.currentTarget);
+    const email = String(form.get("email") || "").trim();
+    const password = String(form.get("password") || "");
+    if (!email || !password) return;
+
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = (await res.json().catch(() => null)) as
+        | { role?: string; fullName?: string; userId?: number; message?: string }
+        | null;
+
+      if (!res.ok) {
+        setError(data?.message || "Email or password did not match, try again.");
+        return;
+      }
+      onSignedIn?.({
+        name: data?.fullName || email,
+        role: data?.role || "",
+        id: Number(data?.userId) || 0
+      });
+      onClose();
+    } catch {
+      setError("We couldn't reach the sign-in service. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -31,7 +78,11 @@ export default function SignInDialog({ open, onClose, loginUrl }: Props) {
   }, [open, onClose]);
 
   useEffect(() => {
-    if (open) setMode("signin");
+    if (open) {
+      setMode("signin");
+      setError(null);
+      setSubmitting(false);
+    }
   }, [open]);
 
   useEffect(() => {
@@ -72,7 +123,7 @@ export default function SignInDialog({ open, onClose, loginUrl }: Props) {
               <p className="t321-mkt-signin__sub">Welcome back. Continue to your Train 321 account.</p>
             </div>
 
-            <form className="t321-mkt-signin__form" method="post" action={loginUrl}>
+            <form className="t321-mkt-signin__form" onSubmit={onSubmit} noValidate>
               <label className="t321-mkt-signin__field">
                 <span className="t321-mkt-signin__label">Email</span>
                 <input
@@ -107,8 +158,26 @@ export default function SignInDialog({ open, onClose, loginUrl }: Props) {
                 />
               </label>
 
-              <button type="submit" className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-signin__submit">
-                Sign in <i className="fas fa-arrow-right" aria-hidden="true" />
+              {error && (
+                <p className="t321-mkt-signin__error" role="alert">
+                  <i className="fas fa-circle-exclamation" aria-hidden="true" /> {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-signin__submit"
+              >
+                {submitting ? (
+                  <>
+                    Signing in <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+                  </>
+                ) : (
+                  <>
+                    Sign in <i className="fas fa-arrow-right" aria-hidden="true" />
+                  </>
+                )}
               </button>
             </form>
 

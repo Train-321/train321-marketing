@@ -73,14 +73,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           stylesheet has finished downloading. <noscript> fallback keeps
           icons visible if JS is disabled.
         */}
-        <link
-          rel="preload"
-          href={FA_HREF}
-          as="style"
-          // @ts-expect-error — fetchpriority is a valid HTML hint not yet typed
-          fetchpriority="high"
-        />
-        <link rel="stylesheet" href={FA_HREF} media="print" id="t321-fa" />
+        <link rel="preload" href={FA_HREF} as="style" fetchPriority="high" />
+        {/* suppressHydrationWarning: the inline script below flips media to
+            "all" before React hydrates, which is expected — not a bug. */}
+        <link rel="stylesheet" href={FA_HREF} media="print" id="t321-fa" suppressHydrationWarning />
         <script
           dangerouslySetInnerHTML={{
             __html:

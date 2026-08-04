@@ -108,6 +108,24 @@
   margin-top: 0.35rem;
   justify-content: center;
 }
+.t321-mkt-signin__submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.t321-mkt-signin__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0.15rem 0 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  background: rgba(197, 48, 48, 0.08);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #c53030;
+}
+.t321-mkt-signin__error i { margin-top: 0.15rem; font-size: 0.8rem; }
 
 .t321-mkt-signin__divider {
   display: flex;

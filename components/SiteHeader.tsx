@@ -8,6 +8,7 @@ import { marketingNav } from "@/lib/nav";
 import type { SiteSettings } from "@/lib/sanity";
 import SignInDialog from "./SignInDialog";
 import CartButton from "./cart/CartButton";
+import { useCart } from "./cart/CartContext";
 import "./SiteHeader.css";
 
 const APP_BASE = process.env.NEXT_PUBLIC_APP_BASE || "/login";
@@ -25,6 +26,30 @@ export default function SiteHeader({ settings }: Props) {
   const [drawerClosing, setDrawerClosing] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
+  const [user, setUser] = useState<{ name: string; role: string; id: number } | null>(null);
+
+  // The token lives in an httpOnly cookie we can't read; this companion cookie
+  // holds display info only, so the header can show who's signed in.
+  useEffect(() => {
+    try {
+      const raw = document.cookie
+        .split("; ")
+        .find((c) => c.startsWith("t321_user="))
+        ?.slice("t321_user=".length);
+      if (raw) setUser(JSON.parse(decodeURIComponent(raw)));
+    } catch {
+      /* malformed cookie — stay signed out */
+    }
+  }, []);
+
+  const signOut = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      /* clearing locally is what matters */
+    }
+    setUser(null);
+  };
 
   // Keep in sync with the exit animation duration in SiteHeader.css.
   const NAV_DRAWER_EXIT_MS = 220;
@@ -57,8 +82,20 @@ export default function SiteHeader({ settings }: Props) {
     setOpenMenu(null);
   }, [pathname]);
 
+  // The utility link always offers the OPPOSITE of the buyer's current mode:
+  // individual mode → "For teams", team mode → "For individuals". Clicking it
+  // switches the mode too, so the cart, checkout, and homepage hero follow.
+  const { buyer, count, requestAudienceChange } = useCart();
   const audienceLink =
-    pathname === "/individuals" ? { to: "/", label: "For teams" } : { to: "/individuals", label: "For individuals" };
+    buyer.audience === "company"
+      ? { to: "/individuals", label: "For individuals", audience: "individual" as const }
+      : { to: "/", label: "For teams", audience: "company" as const };
+  const onAudienceClick = (e: React.MouseEvent) => {
+    // A non-empty cart means requestAudienceChange will show a confirm dialog
+    // instead of switching right away — stay on this page while it's up.
+    if (count > 0) e.preventDefault();
+    requestAudienceChange(audienceLink.audience);
+  };
 
   const isActive = (to?: string) => {
     if (!to) return false;
@@ -92,20 +129,38 @@ export default function SiteHeader({ settings }: Props) {
           <span className="t321-mkt-header__util-spacer" aria-hidden="true" />
           <Link
             href={audienceLink.to}
+            onClick={onAudienceClick}
             className="t321-mkt-header__util-link t321-mkt-header__util-link--accent t321-mkt-header__util-link--secondary"
           >
             <i className="fas fa-user-friends" aria-hidden="true" />
             <span>{audienceLink.label}</span>
           </Link>
-          <button
-            type="button"
-            className="t321-mkt-header__util-link t321-mkt-header__util-link--btn"
-            aria-label="Sign in"
-            onClick={() => setSignInOpen(true)}
-          >
-            <i className="fas fa-sign-in-alt" aria-hidden="true" />
-            <span>Sign in</span>
-          </button>
+          {user ? (
+            <>
+              <span className="t321-mkt-header__util-link t321-mkt-header__util-link--user">
+                <i className="fas fa-user-circle" aria-hidden="true" />
+                <span>{user.name}</span>
+              </span>
+              <button
+                type="button"
+                className="t321-mkt-header__util-link t321-mkt-header__util-link--btn"
+                onClick={signOut}
+              >
+                <i className="fas fa-sign-out-alt" aria-hidden="true" />
+                <span>Sign out</span>
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="t321-mkt-header__util-link t321-mkt-header__util-link--btn"
+              aria-label="Sign in"
+              onClick={() => setSignInOpen(true)}
+            >
+              <i className="fas fa-sign-in-alt" aria-hidden="true" />
+              <span>Sign in</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -285,6 +340,7 @@ export default function SiteHeader({ settings }: Props) {
         open={signInOpen}
         onClose={() => setSignInOpen(false)}
         loginUrl={LOGIN_URL}
+        onSignedIn={setUser}
       />
     </header>
   );

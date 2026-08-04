@@ -33,7 +33,7 @@ export default function CartDrawer() {
     remove,
     setUsers,
     buyer,
-    setAudience
+    requestAudienceChange
   } = useCart();
 
   // Which numbers to show: individual = one-time totals; company = the
@@ -229,6 +229,10 @@ export default function CartDrawer() {
           <footer className="t321-mkt-cart__foot">
             <div className="t321-mkt-cart__promo">
               <input
+                // Uncontrolled on purpose (apply happens on blur/Enter); the
+                // key remounts it whenever the applied code changes so
+                // removing the promo visibly empties the field.
+                key={promoCode}
                 type="text"
                 placeholder="Promo code"
                 aria-label="Promo code"
@@ -248,7 +252,20 @@ export default function CartDrawer() {
               </div>
               {quote && shownDiscount > 0 && (
                 <div className="is-discount">
-                  <dt>Discount{quote.promo ? ` (${quote.promo.name})` : ""}</dt>
+                  <dt>
+                    Discount{quote.promo ? ` (${quote.promo.name})` : ""}
+                    {quote.promo && (
+                      <button
+                        type="button"
+                        className="t321-mkt-cart__promo-remove"
+                        aria-label="Remove promo code"
+                        title="Remove promo code"
+                        onClick={() => applyPromo("")}
+                      >
+                        <i className="fas fa-times" aria-hidden="true" />
+                      </button>
+                    )}
+                  </dt>
                   <dd>−{money(shownDiscount)}</dd>
                 </div>
               )}
@@ -286,13 +303,24 @@ export default function CartDrawer() {
               <i className="fas fa-shield-halved" aria-hidden="true" />
               Secure checkout — payments powered by Stripe
             </p>
+            <p className="t321-mkt-cart__terms">
+              By checking out you agree to our{" "}
+              <Link href="/legal/terms-conditions" onClick={closeDrawer}>
+                Terms &amp; Conditions
+              </Link>{" "}
+              and{" "}
+              <Link href="/legal/privacy-policy" onClick={closeDrawer}>
+                Privacy Policy
+              </Link>
+              .
+            </p>
 
             {/* Audience switch, in the buyer's own words. Prices above
                 re-quote immediately; the details live at checkout. */}
             <button
               type="button"
               className="t321-mkt-cart__team"
-              onClick={() => setAudience(isCompany ? "individual" : "company")}
+              onClick={() => requestAudienceChange(isCompany ? "individual" : "company")}
             >
               {isCompany ? (
                 <>

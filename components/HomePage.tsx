@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Course, Testimonial, FaqGroup, TrustLogo, HomePage as HomePageDoc } from "@/lib/sanity";
 import TrustLogosCarousel from "./TrustLogosCarousel";
 import VideoModal from "./VideoModal";
+import { useCart } from "./cart/CartContext";
 import "./HomePage.css";
 
 type CompanyStat = { value: string; label: string };
@@ -182,6 +183,7 @@ export default function HomePage({
   const [audience, setAudience] = useState<Audience>(forcedAudience || "self");
   const [courseIndex, setCourseIndex] = useState(0);
   const [videoOpen, setVideoOpen] = useState(false);
+  const { requestAudienceChange, buyer, ready: cartReady } = useCart();
 
   // Hydrate audience from localStorage when not pinned by prop.
   useEffect(() => {
@@ -196,6 +198,20 @@ export default function HomePage({
       /* localStorage unavailable */
     }
   }, [forcedAudience]);
+
+  // The cart's buyer mode is the source of truth once it has hydrated — the
+  // header's audience link and checkout's step-1 cards can both change it,
+  // and the hero pills should follow rather than show a stale choice.
+  useEffect(() => {
+    if (forcedAudience || !cartReady) return;
+    const val: Audience = buyer.audience === "company" ? "team" : "self";
+    setAudience(val);
+    try {
+      window.localStorage.setItem("t321-audience", val);
+    } catch {
+      /* ignore */
+    }
+  }, [buyer.audience, cartReady, forcedAudience]);
 
   // Course-cycle timer (skipped when reduced motion is preferred).
   useEffect(() => {
@@ -280,12 +296,10 @@ export default function HomePage({
 
   const chooseAudience = (val: Audience) => {
     if (forcedAudience) return;
-    setAudience(val);
-    try {
-      window.localStorage.setItem("t321-audience", val);
-    } catch {
-      /* ignore */
-    }
+    // Route through the cart so a non-empty cart gets the "this clears your
+    // cart" confirm first. The pill and localStorage follow via the
+    // buyer-sync effect above — only after the switch actually applies.
+    requestAudienceChange(val === "team" ? "company" : "individual");
   };
 
   const setCourse = (i: number) => setCourseIndex(i);
