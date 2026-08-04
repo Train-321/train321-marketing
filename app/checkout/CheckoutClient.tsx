@@ -28,7 +28,18 @@ export default function CheckoutClient() {
 }
 
 type FieldErrors = Partial<
-  Record<"first_name" | "last_name" | "email" | "password" | "card", string>
+  Record<
+    | "first_name"
+    | "last_name"
+    | "email"
+    | "password"
+    | "card"
+    | "company_name"
+    | "billing_first_name"
+    | "billing_last_name"
+    | "billing_email",
+    string
+  >
 >;
 
 function CheckoutForm() {
@@ -43,7 +54,12 @@ function CheckoutForm() {
     remove,
     setUsers,
     clear,
-    toApiLines
+    toApiLines,
+    buyer,
+    setAudience,
+    setEmployees,
+    setLocations,
+    setCadence
   } = useCart();
   const stripe = useStripe();
   const elements = useElements();
@@ -54,7 +70,15 @@ function CheckoutForm() {
     email: "",
     password: "",
     phone: "",
-    state: ""
+    state: "",
+    company_name: ""
+  });
+  const [billingDifferent, setBillingDifferent] = useState(false);
+  const [billing, setBilling] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: ""
   });
   const [errors, setErrors] = useState<FieldErrors>({});
   const [emailTaken, setEmailTaken] = useState(false);
@@ -64,20 +88,36 @@ function CheckoutForm() {
   const [result, setResult] = useState<CheckoutResult | null>(null);
   const [promoDraft, setPromoDraft] = useState(promoCode);
 
-  const dueToday = quote?.dueToday ?? 0;
-  // A 100%-off promo produces a $0 cart, which the backend accepts as a free
-  // enrollment with no card at all. Hide the card fields in that case rather
-  // than asking for a card we'll never charge.
-  const isFree = Boolean(quote) && dueToday <= 0;
+  // ── Which numbers apply ────────────────────────────────────────────────
+  // Individual: one-time totals. Company: the chosen cadence's subscription
+  // view — first invoice due today, renewals at the full ongoing rate.
+  const isCompany = buyer.audience === "company";
+  const cq = quote ? (buyer.cadence === "yearly" ? quote.yearly : quote.monthly) : null;
+  const dueToday = (isCompany ? cq?.dueToday : quote?.dueToday) ?? 0;
+  const shownSubtotal = (isCompany ? cq?.subtotal : quote?.subtotal) ?? 0;
+  const shownDiscount = (isCompany ? cq?.discount : quote?.discount) ?? 0;
+  const cadenceUnit = buyer.cadence === "yearly" ? "yr" : "mo";
 
-  // Same shape the cart already prices against, so what we charge can't drift
-  // from what the summary shows.
+  // A company cart with compliance courses becomes a Stripe subscription,
+  // which always needs a card on file — so a $0 first invoice can't be a
+  // free order there. Individual (and company seat-only) $0 carts can.
+  const hasCompliance = lines.some((l) => !l.isSeatBased);
+  const needsSubscription = isCompany && hasCompliance;
+  const isFree = Boolean(quote) && dueToday <= 0 && !needsSubscription;
+
   const apiLines = toApiLines();
 
-  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm((f) => ({ ...f, [key]: e.target.value }));
-    setErrors((prev) => ({ ...prev, [key]: undefined }));
-  };
+  const set =
+    (key: keyof typeof form) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      setForm((f) => ({ ...f, [key]: e.target.value }));
+      setErrors((prev) => ({ ...prev, [key]: undefined }));
+    };
+  const setBill =
+    (key: keyof typeof billing) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setBilling((b) => ({ ...b, [key]: e.target.value }));
+      setErrors((prev) => ({ ...prev, [`billing_${key}`]: undefined }));
+    };
 
   /**
    * Ask the backend whether this email already has an account, so the buyer
@@ -107,6 +147,15 @@ function CheckoutForm() {
     if (!form.last_name.trim()) next.last_name = "Enter your last name.";
     if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) next.email = "Enter a valid email address.";
     if (form.password.length < 8) next.password = "Use at least 8 characters.";
+    if (isCompany && !form.company_name.trim()) {
+      next.company_name = "Enter your company name.";
+    }
+    if (isCompany && billingDifferent) {
+      if (!billing.first_name.trim()) next.billing_first_name = "Enter a first name.";
+      if (!billing.last_name.trim()) next.billing_last_name = "Enter a last name.";
+      if (!/^\S+@\S+\.\S+$/.test(billing.email.trim()))
+        next.billing_email = "Enter a valid email address.";
+    }
     if (!isFree && !cardComplete) next.card = "Enter your card details.";
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -155,6 +204,12 @@ function CheckoutForm() {
           promoCode,
           stripeTokenId: tokenId,
           cardholderName: `${form.first_name} ${form.last_name}`.trim(),
+          audience: buyer.audience,
+          employees: buyer.employees,
+          locations: buyer.locations,
+          cadence: buyer.cadence,
+          companyName: form.company_name.trim(),
+          billing: isCompany && billingDifferent ? billing : null,
           details: {
             email: form.email.trim(),
             password: form.password,
@@ -235,9 +290,116 @@ function CheckoutForm() {
 
         <form className="t321-mkt-checkout__grid" onSubmit={onSubmit} noValidate>
           <div className="t321-mkt-checkout__main">
+            {/* ── 1 · Audience ─────────────────────────────────────────── */}
             <section className="t321-mkt-checkout__card">
               <h2 className="t321-mkt-checkout__step">
-                <span className="t321-mkt-checkout__step-num">1</span> Your details
+                <span className="t321-mkt-checkout__step-num">1</span> Who is this training for?
+              </h2>
+
+              <div className="t321-mkt-checkout__aud" role="radiogroup" aria-label="Buyer type">
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={!isCompany}
+                  className={`t321-mkt-checkout__aud-card${!isCompany ? " is-active" : ""}`}
+                  onClick={() => setAudience("individual")}
+                >
+                  <i className="fas fa-user" aria-hidden="true" />
+                  <strong>Just me</strong>
+                  <span>One-time payment, instant access</span>
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={isCompany}
+                  className={`t321-mkt-checkout__aud-card${isCompany ? " is-active" : ""}`}
+                  onClick={() => setAudience("company")}
+                >
+                  <i className="fas fa-users" aria-hidden="true" />
+                  <strong>My team</strong>
+                  <span>Company account, priced per employee</span>
+                </button>
+              </div>
+
+              {isCompany && (
+                <div className="t321-mkt-checkout__company">
+                  <Field label="Company name" error={errors.company_name} required>
+                    <input
+                      type="text"
+                      autoComplete="organization"
+                      value={form.company_name}
+                      onChange={set("company_name")}
+                    />
+                  </Field>
+
+                  <div className="t321-mkt-checkout__row">
+                    <Field
+                      label="Employees"
+                      hint="People taking the compliance courses."
+                      required
+                    >
+                      <Stepper
+                        value={buyer.employees}
+                        min={1}
+                        max={9999}
+                        onChange={setEmployees}
+                        ariaLabel="Number of employees"
+                      />
+                    </Field>
+                    <Field label="Locations" hint="Up to 50." required>
+                      <Stepper
+                        value={buyer.locations}
+                        min={1}
+                        max={50}
+                        onChange={setLocations}
+                        ariaLabel="Number of locations"
+                      />
+                    </Field>
+                  </div>
+
+                  <div
+                    className="t321-mkt-checkout__cadence"
+                    role="radiogroup"
+                    aria-label="Billing cadence"
+                  >
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={buyer.cadence === "yearly"}
+                      className={buyer.cadence === "yearly" ? "is-active" : ""}
+                      onClick={() => setCadence("yearly")}
+                    >
+                      Yearly <em>Save 10%</em>
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={buyer.cadence === "monthly"}
+                      className={buyer.cadence === "monthly" ? "is-active" : ""}
+                      onClick={() => setCadence("monthly")}
+                    >
+                      Monthly
+                    </button>
+                  </div>
+
+                  {/* The one company-pricing surprise, said plainly: compliance
+                      pricing scales on the employee count above, NOT on the
+                      per-course seat steppers (those only apply to seat-based
+                      courses, which bill once). */}
+                  <p className="t321-mkt-checkout__company-note">
+                    <i className="fas fa-circle-info" aria-hidden="true" />
+                    Compliance courses are priced by your employee count and renew{" "}
+                    {buyer.cadence}. Seat-based courses are billed once for the seats you chose.
+                  </p>
+                </div>
+              )}
+            </section>
+
+            {/* ── 2 · Details ──────────────────────────────────────────── */}
+            <section className="t321-mkt-checkout__card">
+              <h2 className="t321-mkt-checkout__step">
+                <span className="t321-mkt-checkout__step-num">2</span>
+                {isCompany ? "Admin account" : "Your details"}
               </h2>
 
               <div className="t321-mkt-checkout__row">
@@ -262,7 +424,11 @@ function CheckoutForm() {
               <Field
                 label="Email"
                 error={errors.email || (emailTaken ? "An account with that email already exists." : undefined)}
-                hint="This is the email you'll sign in with."
+                hint={
+                  isCompany
+                    ? "This becomes the company admin sign-in."
+                    : "This is the email you'll sign in with."
+                }
                 required
               >
                 <input
@@ -311,11 +477,56 @@ function CheckoutForm() {
                   </select>
                 </Field>
               </div>
+
+              {/* Separate billing contact — collapsed by default; the backend
+                  only requires the extra fields when the mode is "different". */}
+              {isCompany && (
+                <>
+                  <label className="t321-mkt-checkout__billing-toggle">
+                    <input
+                      type="checkbox"
+                      checked={billingDifferent}
+                      onChange={(e) => setBillingDifferent(e.target.checked)}
+                    />
+                    Billing contact is someone else
+                  </label>
+
+                  {billingDifferent && (
+                    <div className="t321-mkt-checkout__billing">
+                      <div className="t321-mkt-checkout__row">
+                        <Field label="Billing first name" error={errors.billing_first_name} required>
+                          <input
+                            type="text"
+                            value={billing.first_name}
+                            onChange={setBill("first_name")}
+                          />
+                        </Field>
+                        <Field label="Billing last name" error={errors.billing_last_name} required>
+                          <input
+                            type="text"
+                            value={billing.last_name}
+                            onChange={setBill("last_name")}
+                          />
+                        </Field>
+                      </div>
+                      <div className="t321-mkt-checkout__row">
+                        <Field label="Billing email" error={errors.billing_email} required>
+                          <input type="email" value={billing.email} onChange={setBill("email")} />
+                        </Field>
+                        <Field label="Billing phone" hint="Optional">
+                          <input type="tel" value={billing.phone} onChange={setBill("phone")} />
+                        </Field>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </section>
 
+            {/* ── 3 · Payment ──────────────────────────────────────────── */}
             <section className="t321-mkt-checkout__card">
               <h2 className="t321-mkt-checkout__step">
-                <span className="t321-mkt-checkout__step-num">2</span> Payment
+                <span className="t321-mkt-checkout__step-num">3</span> Payment
               </h2>
 
               {isFree ? (
@@ -409,8 +620,11 @@ function CheckoutForm() {
                   <div>
                     <p className="t321-mkt-checkout__line-name">{line.name}</p>
                     <p className="t321-mkt-checkout__line-meta">
-                      {money(line.price)}
-                      {line.isSeatBased && ` × ${line.users} seats`}
+                      {line.isSeatBased
+                        ? `${money(line.price)} × ${line.users} seats · one-time`
+                        : isCompany
+                          ? `${money(line.price)} / employee base`
+                          : money(line.price)}
                     </p>
                     {line.isSeatBased && (
                       <div className="t321-mkt-checkout__qty">
@@ -471,18 +685,19 @@ function CheckoutForm() {
             {quote?.promo && (
               <p className="t321-mkt-checkout__promo-ok">
                 <i className="fas fa-check" aria-hidden="true" /> {quote.promo.name} applied
+                {isCompany && needsSubscription ? " to your first invoice" : ""}
               </p>
             )}
 
             <dl className="t321-mkt-checkout__totals">
               <div>
-                <dt>Subtotal</dt>
-                <dd>{quote ? money(quote.subtotal) : "—"}</dd>
+                <dt>{isCompany ? `First ${buyer.cadence} invoice` : "Subtotal"}</dt>
+                <dd>{quote ? money(shownSubtotal) : "—"}</dd>
               </div>
-              {quote && quote.discount > 0 && (
+              {quote && shownDiscount > 0 && (
                 <div className="is-discount">
                   <dt>Discount</dt>
-                  <dd>−{money(quote.discount)}</dd>
+                  <dd>−{money(shownDiscount)}</dd>
                 </div>
               )}
               <div className="is-total">
@@ -497,6 +712,23 @@ function CheckoutForm() {
               </div>
             </dl>
 
+            {/* Subscription terms, stated before the buyer commits: what
+                renews, at what rate, and the per-location floor made visible
+                so the math never looks arbitrary. */}
+            {isCompany && needsSubscription && quote && (cq?.ongoing ?? 0) > 0 && (
+              <div className="t321-mkt-checkout__ongoing">
+                <p>
+                  <i className="fas fa-rotate" aria-hidden="true" />
+                  Then <strong>{money(cq!.ongoing)}/{cadenceUnit}</strong> ongoing
+                </p>
+                <span>
+                  {money(cq!.perLocation)}/{cadenceUnit} × {buyer.locations}{" "}
+                  {buyer.locations === 1 ? "location" : "locations"} · {buyer.employees}{" "}
+                  {buyer.employees === 1 ? "employee" : "employees"} · cancel anytime
+                </span>
+              </div>
+            )}
+
             <button
               type="submit"
               className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block t321-mkt-btn--lg"
@@ -508,6 +740,8 @@ function CheckoutForm() {
                 </>
               ) : isFree ? (
                 <>Complete enrollment</>
+              ) : isCompany && needsSubscription ? (
+                <>Pay {money(dueToday)} today</>
               ) : (
                 <>Pay {money(dueToday)}</>
               )}
@@ -572,6 +806,50 @@ function Field({
   );
 }
 
+/** Numeric stepper — same interaction as the cart's seat control. */
+function Stepper({
+  value,
+  min,
+  max,
+  onChange,
+  ariaLabel
+}: {
+  value: number;
+  min: number;
+  max: number;
+  onChange: (n: number) => void;
+  ariaLabel: string;
+}) {
+  return (
+    <div className="t321-mkt-checkout__stepper">
+      <button
+        type="button"
+        aria-label={`Decrease ${ariaLabel}`}
+        onClick={() => onChange(value - 1)}
+        disabled={value <= min}
+      >
+        <i className="fas fa-minus" aria-hidden="true" />
+      </button>
+      <input
+        type="number"
+        min={min}
+        max={max}
+        value={value}
+        aria-label={ariaLabel}
+        onChange={(e) => onChange(Number(e.target.value))}
+      />
+      <button
+        type="button"
+        aria-label={`Increase ${ariaLabel}`}
+        onClick={() => onChange(value + 1)}
+        disabled={value >= max}
+      >
+        <i className="fas fa-plus" aria-hidden="true" />
+      </button>
+    </div>
+  );
+}
+
 /**
  * Post-purchase confirmation. The account already exists at this point, so the
  * only thing left is to send the buyer to the LMS to sign in — `loginUrl`
@@ -579,22 +857,42 @@ function Field({
  * across staging and production.
  */
 function SuccessPanel({ result }: { result: CheckoutResult }) {
+  const sub = result.subscription;
+  const nextBilling =
+    sub?.periodEnd != null
+      ? new Date(sub.periodEnd * 1000).toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric"
+        })
+      : null;
+
   return (
     <div className="t321-mkt-checkout">
       <div className="t321-mkt-container t321-mkt-checkout__success">
         <div className="t321-mkt-checkout__success-icon">
           <i className="fas fa-check" aria-hidden="true" />
         </div>
-        <span className="t321-mkt-eyebrow">Enrollment complete</span>
+        <span className="t321-mkt-eyebrow">
+          {sub ? "Subscription active" : "Enrollment complete"}
+        </span>
         <h1 className="t321-mkt-h1">You&rsquo;re all set, {result.employee.first_name}.</h1>
         <p className="t321-mkt-lede">
           We&rsquo;ve created your account for <strong>{result.employee.email}</strong> and sent a
-          welcome email with your details. Sign in to start your training.
+          welcome email with your details. Sign in to start{" "}
+          {sub ? "setting up your team" : "your training"}.
         </p>
 
         {result.amount > 0 && (
           <p className="t321-mkt-checkout__success-amt">
             Charged <strong>{money(result.amount)}</strong>
+            {sub && (
+              <>
+                {" "}
+                · renews {sub.cadence}
+                {nextBilling ? ` on ${nextBilling}` : ""}
+              </>
+            )}
           </p>
         )}
 
@@ -617,10 +915,14 @@ function SuccessPanel({ result }: { result: CheckoutResult }) {
           )}
         </div>
 
-        {result.receiptUrl && (
+        {(result.receiptUrl || sub?.hostedInvoiceUrl) && (
           <p className="t321-mkt-checkout__success-receipt">
-            <a href={result.receiptUrl} target="_blank" rel="noopener noreferrer">
-              View Stripe receipt
+            <a
+              href={result.receiptUrl || sub!.hostedInvoiceUrl!}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {result.receiptUrl ? "View Stripe receipt" : "View first invoice on Stripe"}
             </a>
           </p>
         )}

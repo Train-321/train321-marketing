@@ -35,16 +35,57 @@ export type CartCourse = {
   stateLabel: string | null;
 };
 
-/** What the checkout UI renders. Prices are recomputed by the backend. */
-export type EnrollQuote = {
-  complianceSubtotal: number;
-  seatOneTimeTotal: number;
-  /** Sum before any promo is applied. */
+export type BuyerAudience = "individual" | "company";
+export type InvoiceCadence = "monthly" | "yearly";
+
+/**
+ * One cadence's view of a company subscription quote. `dueToday` covers the
+ * first invoice (recurring share net of promo + one-time seat charges);
+ * `ongoing` is what every renewal bills — always at the FULL rate, because a
+ * promo only ever discounts the first invoice.
+ */
+export type CadenceQuote = {
   subtotal: number;
   discount: number;
-  /** The single amount the card is charged. */
   dueToday: number;
+  ongoing: number;
+  perLocation: number;
+};
+
+/** What the checkout UI renders. Prices are recomputed by the backend. */
+export type EnrollQuote = {
+  audience: BuyerAudience;
+  employees: number;
+  locations: number;
+  complianceSubtotal: number;
+  seatOneTimeTotal: number;
+
+  /** Individual view — a single one-time charge. */
+  subtotal: number;
+  discount: number;
+  dueToday: number;
+
+  /**
+   * Company view — subscription figures per cadence. Both are always
+   * returned so the monthly/yearly toggle can flip without a re-quote.
+   * Zero-filled when audience is "individual".
+   */
+  monthly: CadenceQuote;
+  yearly: CadenceQuote;
+  /** True when the cart holds compliance courses (the recurring part). */
+  hasRecurring: boolean;
+
   promo: { name: string; discountType: string; discount: number } | null;
+};
+
+export type QuoteInput = {
+  lines: EnrollCartLine[];
+  audience?: BuyerAudience;
+  /** Company only — how many people will take the compliance courses. */
+  employees?: number;
+  /** Company only — how many locations (backend caps at 50). */
+  locations?: number;
+  promoCode?: string;
 };
 
 export type EnrollCartLine = { id: number; users: number; isSeatBased: boolean };
@@ -58,6 +99,14 @@ export type CheckoutDetails = {
   state?: string;
 };
 
+/** Separate billing contact — only sent when the buyer picks "different". */
+export type BillingContact = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+};
+
 export type CheckoutResult = {
   employee: { id: number; first_name: string; last_name: string; email: string };
   chargeId: string | null;
@@ -65,6 +114,15 @@ export type CheckoutResult = {
   invoiceUrl: string | null;
   loginUrl: string;
   amount: number;
+  /** Populated for company subscription purchases; null for one-time buys. */
+  subscription: {
+    id: string | null;
+    status: string | null;
+    cadence: InvoiceCadence;
+    /** Unix seconds — when the first period ends / next invoice bills. */
+    periodEnd: number | null;
+    hostedInvoiceUrl: string | null;
+  } | null;
 };
 
 /** Raised when the backend answers with a non-2xx. `status` is passed through. */
@@ -191,38 +249,72 @@ export async function resolveEnrollCourse(enrollId?: string | null): Promise<Car
  * total the cart client-side, because `enroll-checkout` recomputes the same
  * figure server-side and would reject a tampered total anyway.
  */
-export async function getQuote(
-  lines: EnrollCartLine[],
-  promoCode?: string
-): Promise<EnrollQuote> {
-  const { courseIds, specialCourses } = splitLines(lines);
+export async function getQuote(input: QuoteInput): Promise<EnrollQuote> {
+  const { courseIds, specialCourses } = splitLines(input.lines);
+  const audience: BuyerAudience = input.audience === "company" ? "company" : "individual";
+  const employees = Math.max(1, input.employees || 1);
+  const locations = Math.min(50, Math.max(1, input.locations || 1));
 
   const raw = await post<{
+    audience?: string;
+    employees?: number;
+    locations?: number;
     compliance_subtotal?: number;
     seat_one_time_total?: number;
+    compliance_monthly?: number;
+    compliance_yearly?: number;
+    per_location_monthly?: number;
+    per_location_yearly?: number;
     due_today_monthly?: number;
+    due_today_yearly?: number;
+    ongoing_monthly?: number;
+    ongoing_yearly?: number;
     monthly_discount?: number;
+    yearly_discount?: number;
+    has_recurring?: boolean;
     promo_applied?: { name: string; discount_type: string; discount: number } | null;
   }>("/api/list/enroll-quote", {
-    audience: "individual",
+    audience,
     course_ids: courseIds,
     special_courses: specialCourses,
-    promo_code: promoCode || ""
+    number_of_employees: employees,
+    number_of_locations: locations,
+    promo_code: input.promoCode || ""
   });
 
-  // For an individual the backend's "monthly" figures ARE the one-time totals
-  // (see EnrollQuoteController: due_today_monthly = compliance + seats − promo).
-  // The yearly variants are a company-subscription concept and never apply here.
   const compliance = Number(raw.compliance_subtotal ?? 0);
   const seats = Number(raw.seat_one_time_total ?? 0);
-  const discount = Number(raw.monthly_discount ?? 0);
+
+  // Company: subscription math per cadence, straight off the response — the
+  // employee ×1.5 multiplier, the $29/location floor, and the 10% yearly
+  // discount all live server-side (EnrollQuoteController).
+  const cadence = (key: "monthly" | "yearly"): CadenceQuote =>
+    audience === "company"
+      ? {
+          subtotal:
+            Number(raw[`compliance_${key}`] ?? 0) + seats,
+          discount: Number(raw[`${key}_discount`] ?? 0),
+          dueToday: Number(raw[`due_today_${key}`] ?? 0),
+          ongoing: Number(raw[`ongoing_${key}`] ?? 0),
+          perLocation: Number(raw[`per_location_${key}`] ?? 0)
+        }
+      : { subtotal: 0, discount: 0, dueToday: 0, ongoing: 0, perLocation: 0 };
 
   return {
+    audience,
+    employees: Number(raw.employees ?? employees),
+    locations: Number(raw.locations ?? locations),
     complianceSubtotal: compliance,
     seatOneTimeTotal: seats,
+    // Individual: the backend's "monthly" figures ARE the one-time totals
+    // (due_today_monthly = compliance + seats − promo). The yearly variants
+    // are a subscription concept and never apply to an individual cart.
     subtotal: compliance + seats,
-    discount,
+    discount: Number(raw.monthly_discount ?? 0),
     dueToday: Number(raw.due_today_monthly ?? 0),
+    monthly: cadence("monthly"),
+    yearly: cadence("yearly"),
+    hasRecurring: Boolean(raw.has_recurring ?? compliance > 0),
     promo: raw.promo_applied
       ? {
           name: raw.promo_applied.name,
@@ -252,8 +344,18 @@ export async function checkout(input: {
   promoCode?: string;
   stripeTokenId: string | null;
   cardholderName?: string;
+  /** Defaults to "individual" (one-time charge). */
+  audience?: BuyerAudience;
+  /** Company only. */
+  employees?: number;
+  locations?: number;
+  cadence?: InvoiceCadence;
+  companyName?: string;
+  billing?: BillingContact | null;
 }): Promise<CheckoutResult> {
   const { courseIds, specialCourses } = splitLines(input.lines);
+  const audience: BuyerAudience = input.audience === "company" ? "company" : "individual";
+  const cadence: InvoiceCadence = input.cadence === "yearly" ? "yearly" : "monthly";
 
   // `pay.name` is `required_if:pay.method,card` on the backend, so an empty
   // string is a hard 422. Fall back to the buyer's own name rather than
@@ -267,18 +369,44 @@ export async function checkout(input: {
     ? { method: "card", token: { id: input.stripeTokenId }, name: cardholder }
     : { method: "free" };
 
+  // Company checkouts carry the company + optional separate billing contact
+  // inside `details`, matching EnrollPurchaseController's validation shape.
+  const details: Record<string, unknown> = { ...input.details };
+  if (audience === "company") {
+    details.company_name = input.companyName || "";
+    if (input.billing) {
+      details.billing_mode = "different";
+      details.billing_first_name = input.billing.first_name;
+      details.billing_last_name = input.billing.last_name;
+      details.billing_email = input.billing.email;
+      details.billing_phone = input.billing.phone || "";
+    } else {
+      details.billing_mode = "same";
+    }
+  }
+
   const raw = await post<{
     employee: { id: number; first_name: string; last_name: string; email: string };
     charge: { id?: string; amount?: number; receipt?: string } | null;
+    subscription: {
+      id?: string;
+      status?: string;
+      cadence?: string;
+      period_end?: number;
+      invoice?: { hosted_invoice_url?: string } | null;
+    } | null;
     pricing: { due_today?: number };
     invoice_url: string | null;
     login_url: string;
   }>("/api/list/enroll-checkout", {
-    audience: "individual",
+    audience,
     course_ids: courseIds,
     special_courses: specialCourses,
+    number_of_employees: Math.max(1, input.employees || 1),
+    number_of_locations: Math.min(50, Math.max(1, input.locations || 1)),
+    invoice_cadence: cadence,
     promo_code: input.promoCode || "",
-    details: input.details,
+    details,
     pay
   });
 
@@ -288,7 +416,16 @@ export async function checkout(input: {
     receiptUrl: raw.charge?.receipt ?? null,
     invoiceUrl: raw.invoice_url ?? null,
     loginUrl: raw.login_url,
-    amount: Number(raw.pricing?.due_today ?? 0)
+    amount: Number(raw.pricing?.due_today ?? 0),
+    subscription: raw.subscription
+      ? {
+          id: raw.subscription.id ?? null,
+          status: raw.subscription.status ?? null,
+          cadence: raw.subscription.cadence === "yearly" ? "yearly" : "monthly",
+          periodEnd: raw.subscription.period_end ?? null,
+          hostedInvoiceUrl: raw.subscription.invoice?.hosted_invoice_url ?? null
+        }
+      : null
   };
 }
 

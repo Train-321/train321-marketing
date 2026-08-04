@@ -350,6 +350,43 @@
   color: var(--t321-mkt-ink);
 }
 
+/* "Then $X/mo" subscription line for company carts. */
+.t321-mkt-cart__ongoing {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: -0.4rem 0 0.9rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  background: var(--t321-mkt-accent-wash);
+  color: var(--t321-mkt-accent-ink);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.t321-mkt-cart__ongoing i { font-size: 0.72rem; }
+
+/* Audience switch link. */
+.t321-mkt-cart__team {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+  margin-top: 0.65rem;
+  padding: 0.5rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--t321-mkt-accent-ink);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+.t321-mkt-cart__team:hover { background: var(--t321-mkt-accent-wash); }
+.t321-mkt-cart__team i { font-size: 0.75rem; }
+
 /* Small reassurance strip under the checkout CTA — same trust language as
    the checkout page, kept to one quiet line. */
 .t321-mkt-cart__secure {

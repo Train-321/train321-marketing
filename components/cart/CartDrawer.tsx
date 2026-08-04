@@ -31,8 +31,19 @@ export default function CartDrawer() {
     drawerOpen,
     closeDrawer,
     remove,
-    setUsers
+    setUsers,
+    buyer,
+    setAudience
   } = useCart();
+
+  // Which numbers to show: individual = one-time totals; company = the
+  // chosen cadence's subscription view (first invoice + ongoing rate).
+  const isCompany = buyer.audience === "company";
+  const cq = quote ? (buyer.cadence === "yearly" ? quote.yearly : quote.monthly) : null;
+  const shownSubtotal = isCompany ? cq?.subtotal : quote?.subtotal;
+  const shownDiscount = isCompany ? cq?.discount ?? 0 : quote?.discount ?? 0;
+  const shownTotal = isCompany ? cq?.dueToday : quote?.dueToday;
+  const cadenceUnit = buyer.cadence === "yearly" ? "yr" : "mo";
 
   const pathname = usePathname();
   const panelRef = useRef<HTMLElement | null>(null);
@@ -232,26 +243,37 @@ export default function CartDrawer() {
 
             <dl className="t321-mkt-cart__totals">
               <div>
-                <dt>Subtotal</dt>
-                <dd>{quote ? money(quote.subtotal) : "—"}</dd>
+                <dt>{isCompany ? `Subtotal (first ${buyer.cadence} invoice)` : "Subtotal"}</dt>
+                <dd>{quote ? money(shownSubtotal ?? 0) : "—"}</dd>
               </div>
-              {quote && quote.discount > 0 && (
+              {quote && shownDiscount > 0 && (
                 <div className="is-discount">
                   <dt>Discount{quote.promo ? ` (${quote.promo.name})` : ""}</dt>
-                  <dd>−{money(quote.discount)}</dd>
+                  <dd>−{money(shownDiscount)}</dd>
                 </div>
               )}
               <div className="is-total">
-                <dt>Total</dt>
+                <dt>{isCompany ? "Due today" : "Total"}</dt>
                 <dd>
                   {loading && !quote ? (
                     <i className="fas fa-spinner fa-spin" aria-hidden="true" />
                   ) : (
-                    money(quote?.dueToday ?? 0)
+                    money(shownTotal ?? 0)
                   )}
                 </dd>
               </div>
             </dl>
+
+            {/* Company = subscription: renewals bill the FULL rate (a promo
+                only discounts the first invoice), so say so up front. */}
+            {isCompany && quote?.hasRecurring && (cq?.ongoing ?? 0) > 0 && (
+              <p className="t321-mkt-cart__ongoing">
+                <i className="fas fa-rotate" aria-hidden="true" />
+                Then {money(cq!.ongoing)}/{cadenceUnit} · {buyer.employees}{" "}
+                {buyer.employees === 1 ? "employee" : "employees"} ·{" "}
+                {buyer.locations} {buyer.locations === 1 ? "location" : "locations"}
+              </p>
+            )}
 
             <Link
               href="/checkout"
@@ -264,6 +286,26 @@ export default function CartDrawer() {
               <i className="fas fa-shield-halved" aria-hidden="true" />
               Secure checkout — payments powered by Stripe
             </p>
+
+            {/* Audience switch, in the buyer's own words. Prices above
+                re-quote immediately; the details live at checkout. */}
+            <button
+              type="button"
+              className="t321-mkt-cart__team"
+              onClick={() => setAudience(isCompany ? "individual" : "company")}
+            >
+              {isCompany ? (
+                <>
+                  <i className="fas fa-user" aria-hidden="true" /> Switch to individual pricing
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-users" aria-hidden="true" /> Buying for a team? See team
+                  pricing
+                </>
+              )}
+            </button>
+
             <Link href="/catalog" className="t321-mkt-cart__keep" onClick={closeDrawer}>
               Keep browsing
             </Link>

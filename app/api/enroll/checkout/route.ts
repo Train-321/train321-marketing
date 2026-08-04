@@ -1,9 +1,18 @@
 import { NextResponse } from "next/server";
-import { checkout, EnrollApiError, type CheckoutDetails, type EnrollCartLine } from "@/lib/enroll";
+import {
+  checkout,
+  EnrollApiError,
+  type BillingContact,
+  type BuyerAudience,
+  type CheckoutDetails,
+  type EnrollCartLine,
+  type InvoiceCadence
+} from "@/lib/enroll";
 
 // Creates the account + takes the payment. The card was already tokenised in
 // the browser by Stripe.js, so the only payment data crossing this route is an
-// opaque token id — no PAN, no CVC, ever.
+// opaque token id — no PAN, no CVC, ever. Individual carts become a one-time
+// charge; company carts with compliance courses become a Stripe subscription.
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {
@@ -12,6 +21,12 @@ export async function POST(request: Request) {
       promoCode?: string;
       stripeTokenId?: string | null;
       cardholderName?: string;
+      audience?: BuyerAudience;
+      employees?: number;
+      locations?: number;
+      cadence?: InvoiceCadence;
+      companyName?: string;
+      billing?: BillingContact | null;
     };
 
     const lines = Array.isArray(body.lines) ? body.lines : [];
@@ -24,13 +39,22 @@ export async function POST(request: Request) {
     if (!body.details) {
       return NextResponse.json({ message: "Your details are missing." }, { status: 422 });
     }
+    if (body.audience === "company" && !body.companyName?.trim()) {
+      return NextResponse.json({ message: "Please enter your company name." }, { status: 422 });
+    }
 
     const result = await checkout({
       lines,
       details: body.details,
       promoCode: body.promoCode,
       stripeTokenId: body.stripeTokenId ?? null,
-      cardholderName: body.cardholderName
+      cardholderName: body.cardholderName,
+      audience: body.audience,
+      employees: body.employees,
+      locations: body.locations,
+      cadence: body.cadence,
+      companyName: body.companyName,
+      billing: body.billing ?? null
     });
 
     return NextResponse.json(result);

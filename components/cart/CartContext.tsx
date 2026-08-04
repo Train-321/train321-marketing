@@ -9,10 +9,54 @@ import {
   useRef,
   useState
 } from "react";
-import type { CartCourse, EnrollCartLine, EnrollQuote } from "@/lib/enroll";
+import type {
+  BuyerAudience,
+  CartCourse,
+  EnrollCartLine,
+  EnrollQuote,
+  InvoiceCadence
+} from "@/lib/enroll";
 
 const STORAGE_KEY = "t321.cart.v1";
 const PROMO_KEY = "t321.cart.promo.v1";
+const BUYER_KEY = "t321.cart.buyer.v1";
+
+/**
+ * Who's buying. Individual is the default; switching to company changes the
+ * quote (subscription math keyed on employees × locations) and unlocks the
+ * company fields at checkout. Persisted so the choice survives navigation.
+ */
+export type BuyerState = {
+  audience: BuyerAudience;
+  employees: number;
+  locations: number;
+  cadence: InvoiceCadence;
+};
+
+// Yearly is the default cadence — it carries the built-in 10% discount, and
+// the toggle at checkout makes switching to monthly a one-click move.
+const DEFAULT_BUYER: BuyerState = {
+  audience: "individual",
+  employees: 5,
+  locations: 1,
+  cadence: "yearly"
+};
+
+function readStoredBuyer(): BuyerState {
+  try {
+    const raw = window.localStorage.getItem(BUYER_KEY);
+    if (!raw) return DEFAULT_BUYER;
+    const p = JSON.parse(raw) as Partial<BuyerState>;
+    return {
+      audience: p.audience === "company" ? "company" : "individual",
+      employees: Math.max(1, Number(p.employees) || DEFAULT_BUYER.employees),
+      locations: Math.min(50, Math.max(1, Number(p.locations) || 1)),
+      cadence: p.cadence === "monthly" ? "monthly" : "yearly"
+    };
+  } catch {
+    return DEFAULT_BUYER;
+  }
+}
 
 /**
  * What we persist. Deliberately ids + seat counts ONLY — never names or
@@ -48,6 +92,13 @@ type CartContextValue = {
   drawerOpen: boolean;
   openDrawer: () => void;
   closeDrawer: () => void;
+
+  /** Who's buying — drives quote shape and the checkout form. */
+  buyer: BuyerState;
+  setAudience: (a: BuyerAudience) => void;
+  setEmployees: (n: number) => void;
+  setLocations: (n: number) => void;
+  setCadence: (c: InvoiceCadence) => void;
 
   /** Add a course. Adding one already in the cart bumps its seats instead. */
   add: (course: CartCourse, users?: number) => void;
@@ -97,6 +148,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [promoCode, setPromoCode] = useState("");
   const [promoError, setPromoError] = useState<string | null>(null);
+  const [buyer, setBuyer] = useState<BuyerState>(DEFAULT_BUYER);
 
   // Nothing is read from storage during render — that would desync the server
   // and client HTML and trip a hydration mismatch. We load on mount instead,
@@ -105,6 +157,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const stored = readStoredItems();
     setItems(stored);
+    setBuyer(readStoredBuyer());
     try {
       setPromoCode(window.localStorage.getItem(PROMO_KEY) || "");
     } catch {
@@ -135,6 +188,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       /* ignore */
     }
   }, [promoCode]);
+
+  useEffect(() => {
+    if (!hydrated.current) return;
+    try {
+      window.localStorage.setItem(BUYER_KEY, JSON.stringify(buyer));
+    } catch {
+      /* ignore */
+    }
+  }, [buyer]);
 
   // ── Resolve stored ids → full course rows ──────────────────────────────
   // Keyed on the id list only: changing seat counts doesn't need a re-fetch.
@@ -222,6 +284,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [apiLines]
   );
 
+  // Cadence is deliberately NOT part of the key — one quote returns both
+  // monthly and yearly figures, so flipping the toggle re-renders for free.
+  const buyerKey = `${buyer.audience}:${buyer.employees}:${buyer.locations}`;
+
   useEffect(() => {
     if (!apiLinesKey) {
       setQuote(null);
@@ -235,7 +301,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const res = await fetch("/api/enroll/quote", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lines: apiLines, promoCode })
+          body: JSON.stringify({
+            lines: apiLines,
+            promoCode,
+            audience: buyer.audience,
+            employees: buyer.employees,
+            locations: buyer.locations
+          })
         });
         const data = await res.json();
         if (cancelled) return;
@@ -264,7 +336,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       clearTimeout(timer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiLinesKey, promoCode]);
+  }, [apiLinesKey, promoCode, buyerKey]);
 
   // ── Mutations ──────────────────────────────────────────────────────────
 
@@ -307,7 +379,30 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setQuote(null);
     setPromoCode("");
     setPromoError(null);
+    // Reset who's buying too — a completed company purchase shouldn't leave
+    // the NEXT visit quoting subscription prices for a fresh cart.
+    setBuyer(DEFAULT_BUYER);
   }, []);
+
+  const setAudience = useCallback(
+    (audience: BuyerAudience) => setBuyer((b) => ({ ...b, audience })),
+    []
+  );
+  const setEmployees = useCallback(
+    (n: number) =>
+      setBuyer((b) => ({ ...b, employees: Math.min(9999, Math.max(1, Math.floor(n) || 1)) })),
+    []
+  );
+  const setLocations = useCallback(
+    (n: number) =>
+      // Backend validation caps locations at 50.
+      setBuyer((b) => ({ ...b, locations: Math.min(50, Math.max(1, Math.floor(n) || 1)) })),
+    []
+  );
+  const setCadence = useCallback(
+    (cadence: InvoiceCadence) => setBuyer((b) => ({ ...b, cadence })),
+    []
+  );
 
   const applyPromo = useCallback((code: string) => {
     setPromoCode(code.trim());
@@ -336,6 +431,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       drawerOpen,
       openDrawer,
       closeDrawer,
+      buyer,
+      setAudience,
+      setEmployees,
+      setLocations,
+      setCadence,
       add,
       remove,
       setUsers,
@@ -344,7 +444,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       has,
       toApiLines
     }),
-    [lines, quote, loading, ready, promoError, promoCode, drawerOpen, openDrawer, closeDrawer, add, remove, setUsers, clear, applyPromo, has, toApiLines]
+    [lines, quote, loading, ready, promoError, promoCode, drawerOpen, openDrawer, closeDrawer, buyer, setAudience, setEmployees, setLocations, setCadence, add, remove, setUsers, clear, applyPromo, has, toApiLines]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
