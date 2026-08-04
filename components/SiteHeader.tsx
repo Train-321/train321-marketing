@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { marketingNav } from "@/lib/nav";
 import type { SiteSettings } from "@/lib/sanity";
 import SignInDialog from "./SignInDialog";
+import CartButton from "./cart/CartButton";
 import "./SiteHeader.css";
 
 const APP_BASE = process.env.NEXT_PUBLIC_APP_BASE || "/login";
@@ -17,13 +18,29 @@ type Props = { settings?: SiteSettings };
 export default function SiteHeader({ settings }: Props) {
   const phone = settings?.phone || "561-325-7300";
   const email = settings?.email || "info@train321.com";
-  const enrollUrl = settings?.enrollBaseUrl || "http://new-features.train321.com/#/enroll";
   const phoneHref = `tel:+1${phone.replace(/\D/g, "")}`;
   const pathname = usePathname();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerClosing, setDrawerClosing] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
+
+  // Keep in sync with the exit animation duration in SiteHeader.css.
+  const NAV_DRAWER_EXIT_MS = 220;
+
+  /**
+   * Close with a slide-out. The drawer stays mounted with an `is-closing`
+   * class until the exit animation finishes — unmounting immediately would
+   * make it vanish with no transition.
+   */
+  const closeNavDrawer = () => {
+    setDrawerClosing(true);
+    setTimeout(() => {
+      setDrawerOpen(false);
+      setDrawerClosing(false);
+    }, NAV_DRAWER_EXIT_MS);
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -32,9 +49,11 @@ export default function SiteHeader({ settings }: Props) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close menus when route changes
+  // Close menus when route changes. Instant (no exit animation) — the page
+  // under the drawer has already changed, so a lingering panel looks stale.
   useEffect(() => {
     setDrawerOpen(false);
+    setDrawerClosing(false);
     setOpenMenu(null);
   }, [pathname]);
 
@@ -157,10 +176,12 @@ export default function SiteHeader({ settings }: Props) {
 
         <div className="t321-mkt-header__cta">
           <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--ghost">Browse courses</Link>
-          <a href={enrollUrl} className="t321-mkt-btn t321-mkt-btn--primary">
-            Enroll now <i className="fas fa-arrow-right" aria-hidden="true" />
-          </a>
         </div>
+
+        {/* Sits outside __cta because that whole group is hidden below the nav
+            breakpoint — the cart has to survive on mobile. Enrollment happens
+            on-site now, so this replaced the old outbound "Enroll now" CTA. */}
+        <CartButton />
 
         <button
           type="button"
@@ -174,12 +195,12 @@ export default function SiteHeader({ settings }: Props) {
       </div>
 
       {drawerOpen && (
-        <div className="t321-mkt-drawer" role="dialog" aria-modal="true" aria-label="Menu">
+        <div className={`t321-mkt-drawer${drawerClosing ? " is-closing" : ""}`} role="dialog" aria-modal="true" aria-label="Menu">
           <button
             type="button"
             className="t321-mkt-drawer__scrim"
             aria-label="Close menu"
-            onClick={() => setDrawerOpen(false)}
+            onClick={closeNavDrawer}
           />
           <aside className="t321-mkt-drawer__panel">
             <div className="t321-mkt-drawer__head">
@@ -194,7 +215,7 @@ export default function SiteHeader({ settings }: Props) {
                 type="button"
                 className="t321-mkt-drawer__close"
                 aria-label="Close"
-                onClick={() => setDrawerOpen(false)}
+                onClick={closeNavDrawer}
               >
                 <i className="fas fa-times" aria-hidden="true" />
               </button>
@@ -206,7 +227,7 @@ export default function SiteHeader({ settings }: Props) {
                     key={item.label}
                     href={item.to}
                     className="t321-mkt-drawer__link"
-                    onClick={() => setDrawerOpen(false)}
+                    onClick={closeNavDrawer}
                   >
                     {item.label}
                   </Link>
@@ -222,7 +243,7 @@ export default function SiteHeader({ settings }: Props) {
                               key={link.to}
                               href={link.to}
                               className="t321-mkt-drawer__sublink"
-                              onClick={() => setDrawerOpen(false)}
+                              onClick={closeNavDrawer}
                             >
                               {link.label}
                             </Link>
@@ -235,18 +256,21 @@ export default function SiteHeader({ settings }: Props) {
               )}
             </div>
             <div className="t321-mkt-drawer__foot">
-              <a
-                href={enrollUrl}
+              {/* "Browse courses" lives in __cta, which is hidden at this
+                  breakpoint — so it surfaces here instead. The cart itself is
+                  in the header bar, always reachable. */}
+              <Link
+                href="/catalog"
                 className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block"
-                onClick={() => setDrawerOpen(false)}
+                onClick={closeNavDrawer}
               >
-                Enroll now <i className="fas fa-arrow-right" aria-hidden="true" />
-              </a>
+                Browse courses <i className="fas fa-arrow-right" aria-hidden="true" />
+              </Link>
               <button
                 type="button"
                 className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--block"
                 onClick={() => {
-                  setDrawerOpen(false);
+                  closeNavDrawer();
                   setSignInOpen(true);
                 }}
               >

@@ -1,23 +1,53 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import type { CartCourse } from "@/lib/enroll";
+import { useCart } from "./cart/CartContext";
 import "./EnrollButton.css";
 
-export type StateOption = { state: string; href: string; title?: string };
+export type StateOption = {
+  state: string;
+  href: string;
+  title?: string;
+  /**
+   * Set when this state version resolved to a real marketplace course. Null
+   * means the Sanity doc still holds a legacy slug rather than a course id, so
+   * the option keeps linking out to the /enroll SPA.
+   */
+  course?: CartCourse | null;
+};
 
 type Props = {
-  /** Fallback single-enroll link, used when there are no state options. */
+  /** Outbound fallback, used whenever `course` is null. */
   href: string;
   label: string;
   /** Button/link classes (e.g. the t321-mkt-btn variants). */
   className: string;
   showArrow?: boolean;
-  /** When non-empty, the button opens a state picker instead of linking out. */
+  /** When non-empty, the button opens a state picker instead of acting directly. */
   options?: StateOption[];
   pickerTitle?: string;
   pickerLede?: string;
+  /**
+   * The marketplace course this button sells. When present the button buys
+   * inline instead of navigating to the external enroll page.
+   */
+  course?: CartCourse | null;
+  /** "buy" adds and goes to checkout; "add" adds and opens the cart drawer. */
+  mode?: "buy" | "add";
 };
 
+/**
+ * The Enroll CTA on course pages. It has three shapes, in priority order:
+ *
+ *   1. state options present  → open a picker, then act on the chosen version
+ *   2. `course` resolved      → add to the cart (inline purchase)
+ *   3. neither                → plain link to the external /enroll page
+ *
+ * Shape 3 is the pre-existing behaviour and is what still runs for the course
+ * documents whose `enrollId` hasn't been re-linked to a marketplace id yet.
+ */
 export default function EnrollButton({
   href,
   label,
@@ -25,9 +55,15 @@ export default function EnrollButton({
   showArrow = true,
   options,
   pickerTitle = "Choose your state",
-  pickerLede = "Requirements vary by state. Pick yours and we’ll take you straight to the right version."
+  pickerLede = "Requirements vary by state. Pick yours and we’ll take you straight to the right version.",
+  course = null,
+  mode = "buy"
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [added, setAdded] = useState(false);
+  const { add, has, openDrawer } = useCart();
+  const router = useRouter();
+
   const hasOptions = Array.isArray(options) && options.length > 0;
 
   useEffect(() => {
@@ -44,8 +80,20 @@ export default function EnrollButton({
     };
   }, [open]);
 
-  // No grouping → behave exactly like the original enroll link.
-  if (!hasOptions) {
+  /** Drop a resolved course in the cart and go wherever `mode` says. */
+  const buy = (target: CartCourse) => {
+    add(target);
+    if (mode === "buy") {
+      router.push("/checkout");
+      return;
+    }
+    openDrawer();
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1600);
+  };
+
+  // ── 3. Not purchasable inline → original outbound link ─────────────────
+  if (!hasOptions && !course) {
     return (
       <a href={href} className={className}>
         {label}
@@ -54,6 +102,36 @@ export default function EnrollButton({
     );
   }
 
+  // ── 2. Single course, buyable inline ───────────────────────────────────
+  if (!hasOptions && course) {
+    // In "add" mode a compliance course already in the cart has nothing more
+    // to add, so the button becomes a way back into the drawer.
+    const settled = mode === "add" && has(course.id) && !course.isSeatBased;
+    return (
+      <button
+        type="button"
+        className={className}
+        onClick={() => (settled ? openDrawer() : buy(course))}
+      >
+        {added ? (
+          <>
+            <i className="fas fa-check" aria-hidden="true" /> Added
+          </>
+        ) : settled ? (
+          <>
+            <i className="fas fa-check" aria-hidden="true" /> In cart
+          </>
+        ) : (
+          <>
+            {label}
+            {showArrow && <i className="fas fa-arrow-right" aria-hidden="true" />}
+          </>
+        )}
+      </button>
+    );
+  }
+
+  // ── 1. State picker ────────────────────────────────────────────────────
   return (
     <>
       <button
@@ -94,17 +172,38 @@ export default function EnrollButton({
             </div>
 
             <ul className="t321-mkt-enroll__list">
-              {options!.map((o) => (
-                <li key={o.state}>
-                  <a href={o.href} className="t321-mkt-enroll__option">
-                    <span className="t321-mkt-enroll__option-state">{o.state}</span>
-                    {o.title && o.title !== o.state && (
-                      <span className="t321-mkt-enroll__option-course">{o.title}</span>
-                    )}
-                    <i className="fas fa-arrow-right" aria-hidden="true" />
-                  </a>
-                </li>
-              ))}
+              {options!.map((o) =>
+                o.course ? (
+                  // Resolved to a real course — buy it inline.
+                  <li key={o.state}>
+                    <button
+                      type="button"
+                      className="t321-mkt-enroll__option"
+                      onClick={() => {
+                        setOpen(false);
+                        buy(o.course!);
+                      }}
+                    >
+                      <span className="t321-mkt-enroll__option-state">{o.state}</span>
+                      {o.title && o.title !== o.state && (
+                        <span className="t321-mkt-enroll__option-course">{o.title}</span>
+                      )}
+                      <i className="fas fa-arrow-right" aria-hidden="true" />
+                    </button>
+                  </li>
+                ) : (
+                  // Not linked to a marketplace id yet — keep the old link.
+                  <li key={o.state}>
+                    <a href={o.href} className="t321-mkt-enroll__option">
+                      <span className="t321-mkt-enroll__option-state">{o.state}</span>
+                      {o.title && o.title !== o.state && (
+                        <span className="t321-mkt-enroll__option-course">{o.title}</span>
+                      )}
+                      <i className="fas fa-arrow-right" aria-hidden="true" />
+                    </a>
+                  </li>
+                )
+              )}
             </ul>
           </div>
         </div>

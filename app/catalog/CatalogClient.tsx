@@ -5,6 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { CatalogPage } from "@/lib/sanity";
 import type { MarketplaceCourse, MarketplaceCategory, MarketplaceCatalog } from "@/lib/newFeatures";
 import { COURSE_PLACEHOLDER_IMAGE, CATALOG_PAGE_SIZE } from "@/lib/newFeatures";
+import AddToCartButton from "@/components/cart/AddToCartButton";
+import type { CartCourse } from "@/lib/enroll";
 import "./catalog.css";
 
 type Props = {
@@ -12,8 +14,19 @@ type Props = {
   categories: MarketplaceCategory[];
   initialTotal: number;
   page?: CatalogPage | null;
-  enrollBaseUrl: string;
 };
+
+/** Narrow a catalog row to just what the cart stores. */
+function toCartCourse(c: MarketplaceCourse): CartCourse {
+  return {
+    id: c.id,
+    name: c.name,
+    price: c.price,
+    image: c.image,
+    isSeatBased: c.isSeatBased,
+    stateLabel: c.stateLabel
+  };
+}
 
 // The backend `description` is rich HTML. Strip tags + decode the handful of
 // entities the LMS editor emits, then trim to a short card-sized blurb.
@@ -34,8 +47,7 @@ export default function CatalogClient({
   initialCourses,
   categories,
   initialTotal,
-  page,
-  enrollBaseUrl
+  page
 }: Props) {
   const [query, setQuery] = useState("");
   // activeCategory holds a marketplace category id (as string) or "all".
@@ -204,13 +216,14 @@ export default function CatalogClient({
                           )}
                         </div>
                         <div className="t321-mkt-catalog__card-actions">
-                          <a
-                            href={`${enrollBaseUrl}?add=${c.id}`}
+                          {/* One action per card. Adding opens the drawer,
+                              which carries the "continue to checkout" path —
+                              so a separate Enroll button would be redundant. */}
+                          <AddToCartButton
+                            course={toCartCourse(c)}
+                            mode="add"
                             className="t321-mkt-btn t321-mkt-btn--primary"
-                          >
-                            Enroll
-                            <i className="fas fa-arrow-right" aria-hidden="true" />
-                          </a>
+                          />
                         </div>
                       </div>
                     </div>

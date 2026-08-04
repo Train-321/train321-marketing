@@ -1,5 +1,5 @@
 import { getCatalogPage } from "@/lib/sanity";
-import { getMarketplaceCatalog, ENROLL_BASE } from "@/lib/newFeatures";
+import { getMarketplaceCatalog } from "@/lib/newFeatures";
 import CatalogClient from "./CatalogClient";
 
 export const metadata = {
@@ -22,7 +22,6 @@ export default async function CatalogPage() {
       categories={categories}
       initialTotal={total}
       page={page}
-      enrollBaseUrl={ENROLL_BASE}
     />
   );
 }

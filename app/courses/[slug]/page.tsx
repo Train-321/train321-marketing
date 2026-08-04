@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getCourse, getCourses, getDetailPagesCopy, getSiteSettings } from "@/lib/sanity";
 import EnrollButton from "@/components/EnrollButton";
 import CourseCertificate from "@/components/CourseCertificate";
+import { resolveEnrollCourse } from "@/lib/enroll";
 import "./course.css";
 
 export async function generateStaticParams() {
@@ -30,14 +31,31 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
     || (course.enrollId ? `${enrollBase}?add=${course.enrollId}&checkout=1` : enrollBase);
 
   // Course group: when state versions are set, the Enroll buttons open a state
-  // picker; each option links straight to that version's enrollment.
-  const stateOptions = (course.stateVariants || [])
-    .map((v) => ({
+  // picker; each option either adds that version to the cart (when its
+  // enrollId resolves to a marketplace course) or links out as before.
+  const variants = (course.stateVariants || []).filter((v) => v.state);
+
+  // Resolve every purchasable id in one pass. `resolveEnrollCourse` returns
+  // null for the legacy slug-style enrollIds and for anything the LMS no
+  // longer serves, which is what keeps the outbound fallback in play.
+  // An explicit `enrollUrl` override always wins — that's an editor saying
+  // "send buyers here", so we don't second-guess it with an inline purchase.
+  const [cartCourse, variantCourses] = await Promise.all([
+    course.enrollUrl ? Promise.resolve(null) : resolveEnrollCourse(course.enrollId),
+    Promise.all(
+      variants.map((v) => (v.enrollUrl ? Promise.resolve(null) : resolveEnrollCourse(v.enrollId)))
+    )
+  ]);
+
+  const stateOptions = variants
+    .map((v, i) => ({
       state: v.state,
       title: v.title,
-      href: v.enrollUrl || (v.enrollId ? `${enrollBase}?add=${v.enrollId}&checkout=1` : "")
+      href: v.enrollUrl || (v.enrollId ? `${enrollBase}?add=${v.enrollId}&checkout=1` : ""),
+      course: variantCourses[i]
     }))
-    .filter((o) => o.state && o.href);
+    // Keep an option if it can be bought inline OR still has somewhere to go.
+    .filter((o) => o.course || o.href);
 
   // Chrome copy with fallbacks.
   const crumbHome = copy?.courseCrumbHome || "Home";
@@ -99,6 +117,8 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                 label={enrollLabel}
                 className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg"
                 options={stateOptions}
+                course={cartCourse}
+                mode="buy"
               />
               <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
                 {browseLabel}
@@ -144,11 +164,16 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                   ))}
                 </ul>
               )}
+              {/* The aside is the "considering it" spot, so this one adds to
+                  the cart and opens the drawer rather than jumping to checkout. */}
               <EnrollButton
                 href={enrollHref}
-                label={getStartedLabel}
+                label={cartCourse || stateOptions.some((o) => o.course) ? "Add to cart" : getStartedLabel}
                 className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block"
                 options={stateOptions}
+                course={cartCourse}
+                mode="add"
+                showArrow={false}
               />
             </div>
           </aside>
@@ -253,6 +278,8 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
               label={ctaPrimaryLabel}
               className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg"
               options={stateOptions}
+              course={cartCourse}
+              mode="buy"
             />
             <Link href={ctaSecondaryHref} className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
               {ctaSecondaryLabel}
