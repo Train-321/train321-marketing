@@ -29,15 +29,18 @@ export default function AddToCartButton({
   className = "t321-mkt-btn t321-mkt-btn--primary",
   showArrow = true
 }: Props) {
-  const { add, has, openDrawer, notifyAdded } = useCart();
+  const { add, has, openDrawer, notifyAdded, buyer } = useCart();
   const router = useRouter();
   const [justAdded, setJustAdded] = useState(false);
 
   const inCart = has(course.id);
 
-  // A compliance course is one seat for the buyer, so once it's in the cart
-  // there's nothing to add — the button becomes a way back into the drawer.
-  const alreadyMaxed = inCart && !course.isSeatBased;
+  // Once in the cart there's usually nothing more to add — the button becomes
+  // a way back into the drawer. The exception is a seat-based course in TEAM
+  // mode, where re-adding bumps the seat count; individuals always buy
+  // exactly one seat of everything.
+  const alreadyMaxed =
+    inCart && (!course.isSeatBased || buyer.audience !== "company");
 
   const text =
     label ?? (mode === "buy" ? "Enroll now" : alreadyMaxed ? "In cart" : "Add to cart");

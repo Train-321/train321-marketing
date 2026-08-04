@@ -285,9 +285,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // ── Price the cart ─────────────────────────────────────────────────────
   // Debounced so dragging a seat stepper doesn't fire a request per click.
+  // Individuals buy one seat of everything (the training is for themselves),
+  // so seat quantities only exist for team purchases. Forcing users to 1 here
+  // keeps BOTH the quote and the charge single-seat even if a team-mode seat
+  // count is still sitting in storage from an earlier audience switch.
   const apiLines = useMemo<EnrollCartLine[]>(
-    () => lines.map((l) => ({ id: l.id, users: l.users, isSeatBased: l.isSeatBased })),
-    [lines]
+    () =>
+      lines.map((l) => ({
+        id: l.id,
+        users: buyer.audience === "company" ? l.users : 1,
+        isSeatBased: l.isSeatBased
+      })),
+    [lines, buyer.audience]
   );
   const apiLinesKey = useMemo(
     () => apiLines.map((l) => `${l.id}:${l.users}:${l.isSeatBased ? 1 : 0}`).join("|"),
@@ -350,28 +359,33 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // ── Mutations ──────────────────────────────────────────────────────────
 
-  const add = useCallback((course: CartCourse, users = 1) => {
-    setItems((prev) => {
-      const existing = prev.find((i) => i.id === course.id);
-      if (existing) {
-        // Re-adding a compliance course is a no-op (you can only buy one seat
-        // for yourself); for a seat-based course it adds to the quantity.
-        if (!course.isSeatBased) return prev;
-        return prev.map((i) =>
-          i.id === course.id ? { ...i, users: i.users + Math.max(1, users) } : i
-        );
-      }
-      return [...prev, { id: course.id, users: Math.max(1, users) }];
-    });
+  const add = useCallback(
+    (course: CartCourse, users = 1) => {
+      setItems((prev) => {
+        const existing = prev.find((i) => i.id === course.id);
+        if (existing) {
+          // Re-adding a compliance course is a no-op (you can only buy one
+          // seat for yourself). Seat-based re-adds bump the quantity — but
+          // only in team mode; individuals are always exactly one seat.
+          if (!course.isSeatBased || buyer.audience !== "company") return prev;
+          return prev.map((i) =>
+            i.id === course.id ? { ...i, users: i.users + Math.max(1, users) } : i
+          );
+        }
+        return [...prev, { id: course.id, users: Math.max(1, users) }];
+      });
 
-    // Optimistically show the line so the drawer isn't blank while the resolve
-    // round-trips. The resolve overwrites this with authoritative data.
-    setLines((prev) =>
-      prev.some((l) => l.id === course.id)
-        ? prev
-        : [...prev, { ...course, users: Math.max(1, users) }]
-    );
-  }, []);
+      // Optimistically show the line so the drawer isn't blank while the
+      // resolve round-trips. The resolve overwrites this with authoritative
+      // data.
+      setLines((prev) =>
+        prev.some((l) => l.id === course.id)
+          ? prev
+          : [...prev, { ...course, users: Math.max(1, users) }]
+      );
+    },
+    [buyer.audience]
+  );
 
   const remove = useCallback((id: number) => {
     setItems((prev) => prev.filter((i) => i.id !== id));

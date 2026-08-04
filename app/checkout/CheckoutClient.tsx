@@ -632,13 +632,16 @@ function CheckoutForm() {
                   <div>
                     <p className="t321-mkt-checkout__line-name">{line.name}</p>
                     <p className="t321-mkt-checkout__line-meta">
-                      {line.isSeatBased
-                        ? `${money(line.price)} × ${line.users} seats · one-time`
-                        : isCompany
-                          ? `${money(line.price)} / employee base`
-                          : money(line.price)}
+                      {/* Seat quantities and the one-time/recurring split are
+                          team concepts — an individual sees plain per-course
+                          prices, nothing else. */}
+                      {!isCompany
+                        ? money(line.price)
+                        : line.isSeatBased
+                          ? `${money(line.price)} × ${line.users} seats · one-time`
+                          : `${money(line.price)} / employee base`}
                     </p>
-                    {line.isSeatBased && (
+                    {line.isSeatBased && isCompany && (
                       <div className="t321-mkt-checkout__qty">
                         <button
                           type="button"

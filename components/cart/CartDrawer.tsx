@@ -187,12 +187,14 @@ export default function CartDrawer() {
                     )}
                     <p className="t321-mkt-cart__line-price">
                       {money(line.price)}
-                      {line.isSeatBased && <span> / seat</span>}
+                      {line.isSeatBased && isCompany && <span> / seat</span>}
                     </p>
 
-                    {/* Seat steppers only for courses the LMS marks seat-based —
-                        a compliance course is one seat for the buyer. */}
-                    {line.isSeatBased && (
+                    {/* Seat steppers are a team concept — an individual buys
+                        one seat of everything (the training is for them), so
+                        the quantity UI only appears in team mode and only on
+                        courses the LMS marks seat-based. */}
+                    {line.isSeatBased && isCompany && (
                       <div className="t321-mkt-cart__qty">
                         <button
                           type="button"

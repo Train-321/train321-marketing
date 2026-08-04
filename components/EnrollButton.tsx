@@ -61,7 +61,7 @@ export default function EnrollButton({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [added, setAdded] = useState(false);
-  const { add, has, openDrawer, notifyAdded } = useCart();
+  const { add, has, openDrawer, notifyAdded, buyer } = useCart();
   const router = useRouter();
 
   const hasOptions = Array.isArray(options) && options.length > 0;
@@ -105,9 +105,13 @@ export default function EnrollButton({
 
   // ── 2. Single course, buyable inline ───────────────────────────────────
   if (!hasOptions && course) {
-    // In "add" mode a compliance course already in the cart has nothing more
-    // to add, so the button becomes a way back into the drawer.
-    const settled = mode === "add" && has(course.id) && !course.isSeatBased;
+    // In "add" mode a course already in the cart usually has nothing more to
+    // add, so the button becomes a way back into the drawer. Seat-based
+    // courses stay addable only in team mode (re-add bumps the seat count).
+    const settled =
+      mode === "add" &&
+      has(course.id) &&
+      (!course.isSeatBased || buyer.audience !== "company");
     return (
       <button
         type="button"
