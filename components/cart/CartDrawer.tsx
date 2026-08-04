@@ -258,8 +258,12 @@ export default function CartDrawer() {
               className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block t321-mkt-btn--lg"
               onClick={closeDrawer}
             >
-              Checkout <i className="fas fa-arrow-right" aria-hidden="true" />
+              <i className="fas fa-lock" aria-hidden="true" /> Checkout
             </Link>
+            <p className="t321-mkt-cart__secure">
+              <i className="fas fa-shield-halved" aria-hidden="true" />
+              Secure checkout — payments powered by Stripe
+            </p>
             <Link href="/catalog" className="t321-mkt-cart__keep" onClick={closeDrawer}>
               Keep browsing
             </Link>

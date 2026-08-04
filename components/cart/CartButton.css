@@ -1,29 +1,57 @@
-/* Cart button in the header nav — occupies the slot the old "Enroll now"
-   CTA used to, so it reads as a primary action rather than a floating extra. */
+/* Cart entry point in the header nav — the slot the old "Enroll now" CTA
+   held, so it must read as a first-class action, not chrome.
+
+   Two visual states carry the story:
+     empty     → quiet outlined pill, receded like a secondary control
+     has items → filled brand ink with the count badge, promoted to the
+                 strongest element in the bar (it's now the buyer's next step)
+   The transition between them is animated so adding the first item visibly
+   "activates" the button. */
 .t321-mkt-cartbtn {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
-  padding: 0.6rem 1rem;
-  border: 1px solid #0B1F33;
-  border-radius: 8px;
-  background: #0B1F33;
-  color: #ffffff;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--t321-mkt-line-strong);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--t321-mkt-ink);
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
   line-height: 1.15;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 160ms ease, border-color 160ms ease, transform 120ms ease;
+  transition:
+    background 220ms ease,
+    color 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    transform 120ms ease;
 }
-.t321-mkt-cartbtn:hover { background: #061524; border-color: #061524; }
-.t321-mkt-cartbtn:active { transform: translateY(1px); }
+.t321-mkt-cartbtn:hover {
+  border-color: var(--t321-mkt-ink);
+  box-shadow: 0 4px 14px rgba(11, 31, 51, 0.12);
+  transform: translateY(-1px);
+}
+.t321-mkt-cartbtn:active { transform: translateY(0); }
 .t321-mkt-cartbtn:focus-visible {
   outline: 2px solid var(--t321-mkt-accent);
   outline-offset: 2px;
+}
+
+.t321-mkt-cartbtn.has-items {
+  background: linear-gradient(180deg, #12314E 0%, #0B1F33 100%);
+  border-color: #0B1F33;
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(11, 31, 51, 0.28);
+}
+.t321-mkt-cartbtn.has-items:hover {
+  background: linear-gradient(180deg, #163A5C 0%, #0E2740 100%);
+  box-shadow: 0 8px 22px rgba(11, 31, 51, 0.34);
+  transform: translateY(-1px);
 }
 
 .t321-mkt-cartbtn__icon {
@@ -31,47 +59,62 @@
   display: inline-flex;
   font-size: 0.95rem;
   /* The badge overhangs this box; letting it show keeps the button from
-     having to reserve space for a count that's usually absent. */
+     reserving space for a count that's usually absent. */
   overflow: visible;
 }
 
 .t321-mkt-cartbtn__badge {
   position: absolute;
-  top: -0.55rem;
-  right: -0.6rem;
-  min-width: 1.15rem;
-  height: 1.15rem;
+  top: -0.62rem;
+  right: -0.68rem;
+  min-width: 1.2rem;
+  height: 1.2rem;
   padding: 0 0.28rem;
   border-radius: 999px;
-  background: var(--t321-mkt-accent);
-  color: #05202B;
-  font-size: 0.68rem;
+  background: linear-gradient(135deg, #00B4DB 0%, #0083B0 100%);
+  color: #ffffff;
+  font-size: 0.66rem;
   font-weight: 800;
-  line-height: 1.15rem;
+  line-height: 1.2rem;
   text-align: center;
+  /* Ring separates the badge from whatever it overlaps — white on the light
+     button, and it doubles as a crisp edge on the dark filled state. */
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 2px 6px rgba(0, 131, 176, 0.45);
   /* Pops on mount. The component remounts this node whenever the count
      changes, so every add/remove gets the same little confirmation. */
-  animation: t321-cartbadge-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: t321-cartbadge-pop 380ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.t321-mkt-cartbtn.has-items .t321-mkt-cartbtn__badge {
+  box-shadow:
+    0 0 0 2px #0B1F33,
+    0 2px 6px rgba(0, 180, 219, 0.5);
 }
 
 @keyframes t321-cartbadge-pop {
   0%   { transform: scale(0.2); opacity: 0; }
-  60%  { transform: scale(1.18); opacity: 1; }
+  60%  { transform: scale(1.22); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
 }
 
 /* Below the nav breakpoint the header collapses to brand + cart + burger.
-   The cart takes the auto margin so it pushes right and the burger trails it. */
+   The cart takes the auto margin so it pushes right and the burger trails it.
+   Icon-only circle keeps it compact next to the burger. */
 @media (max-width: 991.98px) {
   .t321-mkt-cartbtn {
     margin-left: auto;
-    padding: 0.5rem 0.7rem;
+    width: 2.6rem;
+    height: 2.6rem;
+    padding: 0;
+    justify-content: center;
   }
   .t321-mkt-cartbtn__label { display: none; }
-  .t321-mkt-cartbtn__icon { font-size: 1rem; }
+  .t321-mkt-cartbtn__icon { font-size: 1.05rem; }
+  .t321-mkt-cartbtn__badge { top: -0.5rem; right: -0.55rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .t321-mkt-cartbtn,
-  .t321-mkt-cartbtn__badge { transition: none; animation: none; }
+  .t321-mkt-cartbtn { transition: none; }
+  .t321-mkt-cartbtn__badge { animation: none; }
 }

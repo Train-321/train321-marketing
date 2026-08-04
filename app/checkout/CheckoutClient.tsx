@@ -360,6 +360,22 @@ function CheckoutForm() {
                     <i className="fas fa-lock" aria-hidden="true" />
                     Card details go straight to Stripe — they never touch our servers.
                   </p>
+
+                  {/* Trust row — familiar payment marks plus the Stripe name.
+                      Brand glyphs come from the Font Awesome set already
+                      loaded site-wide, so no external image requests. */}
+                  <div className="t321-mkt-checkout__trust" aria-label="Accepted cards and security">
+                    <span className="t321-mkt-checkout__trust-cards">
+                      <i className="fab fa-cc-visa" aria-label="Visa" />
+                      <i className="fab fa-cc-mastercard" aria-label="Mastercard" />
+                      <i className="fab fa-cc-amex" aria-label="American Express" />
+                      <i className="fab fa-cc-discover" aria-label="Discover" />
+                    </span>
+                    <span className="t321-mkt-checkout__trust-badge">
+                      <i className="fab fa-stripe" aria-hidden="true" />
+                      <span className="t321-mkt-visually-hidden">Powered by Stripe</span>
+                    </span>
+                  </div>
                 </>
               )}
             </section>
@@ -496,6 +512,23 @@ function CheckoutForm() {
                 <>Pay {money(dueToday)}</>
               )}
             </button>
+
+            {/* Reassurance under the pay button — the moment of highest
+                hesitation. Quiet, factual, no marketing voice. */}
+            <ul className="t321-mkt-checkout__assure">
+              <li>
+                <i className="fas fa-shield-halved" aria-hidden="true" />
+                Secure 256-bit SSL encrypted payment
+              </li>
+              <li>
+                <i className="fas fa-bolt" aria-hidden="true" />
+                Instant access after purchase
+              </li>
+              <li>
+                <i className="fas fa-headset" aria-hidden="true" />
+                Support at support@train321.com
+              </li>
+            </ul>
 
             <p className="t321-mkt-checkout__terms">
               By enrolling you agree to our{" "}

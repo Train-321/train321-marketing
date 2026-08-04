@@ -216,17 +216,12 @@ export default function CatalogClient({
                           )}
                         </div>
                         <div className="t321-mkt-catalog__card-actions">
-                          {/* Two paths: add-and-keep-browsing, or straight to
-                              checkout for buyers who only want this one. */}
+                          {/* One action per card. Adding opens the drawer,
+                              which carries the "continue to checkout" path —
+                              so a separate Enroll button would be redundant. */}
                           <AddToCartButton
                             course={toCartCourse(c)}
                             mode="add"
-                            className="t321-mkt-btn t321-mkt-btn--ghost"
-                          />
-                          <AddToCartButton
-                            course={toCartCourse(c)}
-                            mode="buy"
-                            label="Enroll"
                             className="t321-mkt-btn t321-mkt-btn--primary"
                           />
                         </div>

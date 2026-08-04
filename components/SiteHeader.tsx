@@ -22,8 +22,25 @@ export default function SiteHeader({ settings }: Props) {
   const pathname = usePathname();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerClosing, setDrawerClosing] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
+
+  // Keep in sync with the exit animation duration in SiteHeader.css.
+  const NAV_DRAWER_EXIT_MS = 220;
+
+  /**
+   * Close with a slide-out. The drawer stays mounted with an `is-closing`
+   * class until the exit animation finishes — unmounting immediately would
+   * make it vanish with no transition.
+   */
+  const closeNavDrawer = () => {
+    setDrawerClosing(true);
+    setTimeout(() => {
+      setDrawerOpen(false);
+      setDrawerClosing(false);
+    }, NAV_DRAWER_EXIT_MS);
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -32,9 +49,11 @@ export default function SiteHeader({ settings }: Props) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close menus when route changes
+  // Close menus when route changes. Instant (no exit animation) — the page
+  // under the drawer has already changed, so a lingering panel looks stale.
   useEffect(() => {
     setDrawerOpen(false);
+    setDrawerClosing(false);
     setOpenMenu(null);
   }, [pathname]);
 
@@ -176,12 +195,12 @@ export default function SiteHeader({ settings }: Props) {
       </div>
 
       {drawerOpen && (
-        <div className="t321-mkt-drawer" role="dialog" aria-modal="true" aria-label="Menu">
+        <div className={`t321-mkt-drawer${drawerClosing ? " is-closing" : ""}`} role="dialog" aria-modal="true" aria-label="Menu">
           <button
             type="button"
             className="t321-mkt-drawer__scrim"
             aria-label="Close menu"
-            onClick={() => setDrawerOpen(false)}
+            onClick={closeNavDrawer}
           />
           <aside className="t321-mkt-drawer__panel">
             <div className="t321-mkt-drawer__head">
@@ -196,7 +215,7 @@ export default function SiteHeader({ settings }: Props) {
                 type="button"
                 className="t321-mkt-drawer__close"
                 aria-label="Close"
-                onClick={() => setDrawerOpen(false)}
+                onClick={closeNavDrawer}
               >
                 <i className="fas fa-times" aria-hidden="true" />
               </button>
@@ -208,7 +227,7 @@ export default function SiteHeader({ settings }: Props) {
                     key={item.label}
                     href={item.to}
                     className="t321-mkt-drawer__link"
-                    onClick={() => setDrawerOpen(false)}
+                    onClick={closeNavDrawer}
                   >
                     {item.label}
                   </Link>
@@ -224,7 +243,7 @@ export default function SiteHeader({ settings }: Props) {
                               key={link.to}
                               href={link.to}
                               className="t321-mkt-drawer__sublink"
-                              onClick={() => setDrawerOpen(false)}
+                              onClick={closeNavDrawer}
                             >
                               {link.label}
                             </Link>
@@ -243,7 +262,7 @@ export default function SiteHeader({ settings }: Props) {
               <Link
                 href="/catalog"
                 className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block"
-                onClick={() => setDrawerOpen(false)}
+                onClick={closeNavDrawer}
               >
                 Browse courses <i className="fas fa-arrow-right" aria-hidden="true" />
               </Link>
@@ -251,7 +270,7 @@ export default function SiteHeader({ settings }: Props) {
                 type="button"
                 className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--block"
                 onClick={() => {
-                  setDrawerOpen(false);
+                  closeNavDrawer();
                   setSignInOpen(true);
                 }}
               >

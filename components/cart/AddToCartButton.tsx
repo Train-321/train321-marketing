@@ -70,9 +70,14 @@ export default function AddToCartButton({
         </>
       ) : (
         <>
-          {alreadyMaxed && mode === "add" && (
-            <i className="fas fa-check" aria-hidden="true" />
-          )}
+          {/* Leading icon tells the story at a glance: check = already in the
+              cart, cart-plus = will be added. Buy mode keeps its arrow. */}
+          {mode === "add" &&
+            (alreadyMaxed ? (
+              <i className="fas fa-check" aria-hidden="true" />
+            ) : (
+              <i className="fas fa-cart-plus" aria-hidden="true" />
+            ))}
           {text}
           {showArrow && mode === "buy" && (
             <i className="fas fa-arrow-right" aria-hidden="true" />
