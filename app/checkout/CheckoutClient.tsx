@@ -681,6 +681,11 @@ function CheckoutForm() {
                     autoFocus={promoOpen && !promoCode}
                     value={promoDraft}
                     onChange={(e) => setPromoDraft(e.target.value)}
+                    onBlur={() => {
+                      // Opened it, typed nothing, clicked away — fold back to
+                      // the link rather than leaving an empty box behind.
+                      if (!promoDraft.trim() && !promoCode) setPromoOpen(false);
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();

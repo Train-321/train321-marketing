@@ -374,6 +374,45 @@
   color: var(--t321-mkt-ink);
 }
 
+/* Who's-buying switch — equal-half segmented control, the drawer-scale
+   sibling of checkout's audience cards. */
+.t321-mkt-cart__aud {
+  display: flex;
+  width: 100%;
+  margin-bottom: 0.9rem;
+  border: 1px solid var(--t321-mkt-line-strong);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.t321-mkt-cart__aud button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.6rem 0.5rem;
+  border: 0;
+  background: var(--t321-mkt-paper);
+  color: var(--t321-mkt-ink-muted);
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+.t321-mkt-cart__aud button + button {
+  border-left: 1px solid var(--t321-mkt-line-strong);
+}
+.t321-mkt-cart__aud button i { font-size: 0.75rem; }
+.t321-mkt-cart__aud button.is-active {
+  background: linear-gradient(180deg, #12314E 0%, #0B1F33 100%);
+  color: #fff;
+}
+.t321-mkt-cart__aud button:focus-visible {
+  outline: 2px solid var(--t321-mkt-accent);
+  outline-offset: -2px;
+}
+
 /* Team pricing controls (company carts) — employees/locations steppers and
    the cadence switch, mirroring checkout's inputs in drawer scale. */
 .t321-mkt-cart__teamctl {
@@ -544,28 +583,6 @@
 }
 .t321-mkt-cart__ongoing i { font-size: 0.72rem; }
 
-/* Audience switch link. */
-.t321-mkt-cart__team {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  width: 100%;
-  margin-top: 0.65rem;
-  padding: 0.5rem;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--t321-mkt-accent-ink);
-  font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 140ms ease;
-}
-.t321-mkt-cart__team:hover { background: var(--t321-mkt-accent-wash); }
-.t321-mkt-cart__team i { font-size: 0.75rem; }
-
 /* Small reassurance strip under the checkout CTA — same trust language as
    the checkout page, kept to one quiet line. */
 .t321-mkt-cart__secure {
@@ -578,16 +595,6 @@
   color: var(--t321-mkt-ink-muted);
 }
 .t321-mkt-cart__secure i { color: var(--t321-mkt-positive); font-size: 0.72rem; }
-
-.t321-mkt-cart__keep {
-  display: block;
-  margin-top: 0.55rem;
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--t321-mkt-ink-muted);
-  text-decoration: none;
-}
-.t321-mkt-cart__keep:hover { text-decoration: underline; }
 
 /* Motion is decorative here — the drawer still opens and closes without it. */
 @media (prefers-reduced-motion: reduce) {

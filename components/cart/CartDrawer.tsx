@@ -236,6 +236,30 @@ export default function CartDrawer() {
 
         {lines.length > 0 && (
           <footer className="t321-mkt-cart__foot">
+            {/* Who's buying — a visible two-state switch (mirrors checkout's
+                audience cards) instead of a text link whose wording flipped.
+                Selecting Team reveals the pricing controls below. */}
+            <div className="t321-mkt-cart__aud" role="radiogroup" aria-label="Buying for">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={!isCompany}
+                className={!isCompany ? "is-active" : ""}
+                onClick={() => setAudience("individual")}
+              >
+                <i className="fas fa-user" aria-hidden="true" /> Individual
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={isCompany}
+                className={isCompany ? "is-active" : ""}
+                onClick={() => setAudience("company")}
+              >
+                <i className="fas fa-users" aria-hidden="true" /> Team
+              </button>
+            </div>
+
             {/* Team pricing inputs — the same employees/locations/cadence
                 state checkout uses, editable right here so the totals below
                 can be tuned without leaving the drawer. */}
@@ -343,7 +367,13 @@ export default function CartDrawer() {
                     aria-label="Promo code"
                     autoFocus={promoOpen && !promoCode}
                     defaultValue={promoCode}
-                    onBlur={(e) => applyPromo(e.target.value)}
+                    onBlur={(e) => {
+                      const v = e.target.value.trim();
+                      applyPromo(v);
+                      // Opened it, typed nothing, clicked away — fold back to
+                      // the link rather than leaving an empty box behind.
+                      if (!v) setPromoOpen(false);
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") applyPromo((e.target as HTMLInputElement).value);
                     }}
@@ -406,29 +436,6 @@ export default function CartDrawer() {
               <i className="fas fa-shield-halved" aria-hidden="true" />
               Secure checkout — payments powered by Stripe
             </p>
-
-            {/* Audience switch, in the buyer's own words. Prices above
-                re-quote immediately; the details live at checkout. */}
-            <button
-              type="button"
-              className="t321-mkt-cart__team"
-              onClick={() => setAudience(isCompany ? "individual" : "company")}
-            >
-              {isCompany ? (
-                <>
-                  <i className="fas fa-user" aria-hidden="true" /> Switch to individual pricing
-                </>
-              ) : (
-                <>
-                  <i className="fas fa-users" aria-hidden="true" /> Buying for a team? See team
-                  pricing
-                </>
-              )}
-            </button>
-
-            <Link href="/catalog" className="t321-mkt-cart__keep" onClick={closeDrawer}>
-              Keep browsing
-            </Link>
           </footer>
         )}
       </aside>
