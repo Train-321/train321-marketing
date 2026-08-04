@@ -25,6 +25,11 @@ export type MarketplaceCourse = {
   image: string | null; // fully-qualified thumbnail URL (or null)
   categoryId: number | null; // marketplace_category_id
   price: number;
+  // Seat-based courses are bought in quantities and are priced through a
+  // different bucket at checkout (see lib/enroll.ts splitLines), so the cart
+  // needs to know which kind it's holding.
+  isSeatBased: boolean;
+  stateLabel: string | null;
 };
 
 export type MarketplaceCategory = {
@@ -61,6 +66,8 @@ type RawCourse = {
   category_id?: number | null;
   price?: number;
   entry_type?: string;
+  is_seat_based?: number;
+  state_label?: string | null;
 };
 
 /**
@@ -105,7 +112,9 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
       description: c.description || "",
       image: c.image || null,
       categoryId: c.category_id ?? null,
-      price: Number(c.price ?? 0)
+      price: Number(c.price ?? 0),
+      isSeatBased: Number(c.is_seat_based ?? 0) === 1,
+      stateLabel: c.state_label || null
     }));
 
     const categories: MarketplaceCategory[] = (data.categories || []).map((c) => ({

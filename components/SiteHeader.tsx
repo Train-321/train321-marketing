@@ -17,7 +17,6 @@ type Props = { settings?: SiteSettings };
 export default function SiteHeader({ settings }: Props) {
   const phone = settings?.phone || "561-325-7300";
   const email = settings?.email || "info@train321.com";
-  const enrollUrl = settings?.enrollBaseUrl || "http://new-features.train321.com/#/enroll";
   const phoneHref = `tel:+1${phone.replace(/\D/g, "")}`;
   const pathname = usePathname();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -157,9 +156,11 @@ export default function SiteHeader({ settings }: Props) {
 
         <div className="t321-mkt-header__cta">
           <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--ghost">Browse courses</Link>
-          <a href={enrollUrl} className="t321-mkt-btn t321-mkt-btn--primary">
+          {/* Enrollment now happens on-site, so this points at the catalog
+              (where courses go into the cart) instead of the external SPA. */}
+          <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--primary">
             Enroll now <i className="fas fa-arrow-right" aria-hidden="true" />
-          </a>
+          </Link>
         </div>
 
         <button
@@ -235,13 +236,13 @@ export default function SiteHeader({ settings }: Props) {
               )}
             </div>
             <div className="t321-mkt-drawer__foot">
-              <a
-                href={enrollUrl}
+              <Link
+                href="/catalog"
                 className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block"
                 onClick={() => setDrawerOpen(false)}
               >
                 Enroll now <i className="fas fa-arrow-right" aria-hidden="true" />
-              </a>
+              </Link>
               <button
                 type="button"
                 className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--block"

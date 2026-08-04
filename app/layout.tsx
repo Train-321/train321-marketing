@@ -6,6 +6,8 @@ import SiteHeader from "@/components/SiteHeaderShell";
 import SiteFooter from "@/components/SiteFooterShell";
 import ChatWidget from "@/components/ChatWidgetShell";
 import DisableDraftMode from "@/components/DisableDraftMode";
+import { CartProvider } from "@/components/cart/CartContext";
+import CartWidget from "@/components/cart/CartWidget";
 import { SanityLive } from "@/lib/sanity";
 import "./globals.css";
 
@@ -91,13 +93,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </noscript>
       </head>
       <body>
-        <div className="t321-mkt-page">
-          <SiteHeader />
-          <main id="main" className="t321-mkt-main">
-            {children}
-          </main>
-          <SiteFooter />
-        </div>
+        {/* Wraps everything so the cart survives client-side navigation and the
+            drawer can be opened from any page. */}
+        <CartProvider>
+          <div className="t321-mkt-page">
+            <SiteHeader />
+            <main id="main" className="t321-mkt-main">
+              {children}
+            </main>
+            <SiteFooter />
+          </div>
+          <CartWidget />
+        </CartProvider>
         <ChatWidget />
         {isDraft && (
           <>
