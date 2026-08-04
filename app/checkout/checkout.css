@@ -221,20 +221,6 @@
   color: #A9E5C4;
 }
 
-.t321-mkt-checkout__company-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  margin: 0;
-  padding: 0.7rem 0.85rem;
-  border-radius: 8px;
-  background: var(--t321-mkt-accent-wash);
-  color: var(--t321-mkt-accent-ink);
-  font-size: 0.8rem;
-  line-height: 1.45;
-}
-.t321-mkt-checkout__company-note i { margin-top: 0.15rem; font-size: 0.75rem; }
-
 /* Separate billing contact. */
 .t321-mkt-checkout__billing-toggle {
   display: flex;

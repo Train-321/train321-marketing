@@ -394,15 +394,6 @@ function CheckoutForm() {
                     </button>
                   </div>
 
-                  {/* The one company-pricing surprise, said plainly: compliance
-                      pricing scales on the employee count above, NOT on the
-                      per-course seat steppers (those only apply to seat-based
-                      courses, which bill once). */}
-                  <p className="t321-mkt-checkout__company-note">
-                    <i className="fas fa-circle-info" aria-hidden="true" />
-                    Compliance courses are priced by your employee count and renew{" "}
-                    {buyer.cadence}. Seat-based courses are billed once for the seats you chose.
-                  </p>
                 </div>
               )}
             </section>
