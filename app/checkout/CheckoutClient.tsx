@@ -10,27 +10,31 @@ import type { CheckoutResult } from "@/lib/enroll";
 import { US_STATES } from "./states";
 import "./checkout.css";
 
-// Publishable keys are public by design (they can only tokenise, never
-// charge), so a code-level fallback is safe. It MUST belong to the same
-// Stripe account as the new-features backend's STRIPE_SECRET_KEY or every
-// payment fails with "No such token" — this is that account's test-mode key.
-// Set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (e.g. on Vercel) to override,
-// and REMEMBER to update this fallback if the backend ever moves to live keys.
-const PUBLISHABLE_KEY =
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
-  "pk_test_51TXerrHCrvN27dgKikzbOVKiEgVrnoGpmaDOaRQ19Rggz4Vwobdezb8CughlPawXWT662nPSCAsWQPOGWdJc3I3Z00Ylg5794l";
-
-// loadStripe returns a promise that must be created once, outside the
-// component — re-creating it on every render would reload Stripe.js each time.
-const stripePromise = PUBLISHABLE_KEY ? loadStripe(PUBLISHABLE_KEY) : null;
+// The publishable key is chosen server-side in page.tsx so it always pairs
+// with the LMS backend this deployment talks to (test key for the staging
+// backend, live key for production) — a mismatched pair fails every payment
+// with "No such token".
+//
+// loadStripe must run once per key, outside the render cycle — re-creating
+// the promise on every render would reload Stripe.js each time.
+let stripePromise: ReturnType<typeof loadStripe> | null = null;
+let stripeKeyLoaded = "";
+function getStripe(publishableKey: string) {
+  if (!publishableKey) return null;
+  if (!stripePromise || stripeKeyLoaded !== publishableKey) {
+    stripePromise = loadStripe(publishableKey);
+    stripeKeyLoaded = publishableKey;
+  }
+  return stripePromise;
+}
 
 const money = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
-export default function CheckoutClient() {
+export default function CheckoutClient({ publishableKey }: { publishableKey: string }) {
   return (
-    <Elements stripe={stripePromise}>
-      <CheckoutForm />
+    <Elements stripe={getStripe(publishableKey)}>
+      <CheckoutForm stripeConfigured={Boolean(publishableKey)} />
     </Elements>
   );
 }
@@ -50,7 +54,7 @@ type FieldErrors = Partial<
   >
 >;
 
-function CheckoutForm() {
+function CheckoutForm({ stripeConfigured }: { stripeConfigured: boolean }) {
   const {
     lines,
     quote,
@@ -549,11 +553,9 @@ function CheckoutForm() {
                   <i className="fas fa-check-circle" aria-hidden="true" />
                   Your promo code covers the full amount — no payment needed.
                 </p>
-              ) : !stripePromise ? (
+              ) : !stripeConfigured ? (
                 <p className="t321-mkt-checkout__error" role="alert">
-                  Card payments aren&rsquo;t configured
-                  (<code>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code> is missing). Please contact
-                  support.
+                  Card payments aren&rsquo;t configured. Please contact support.
                 </p>
               ) : (
                 <>

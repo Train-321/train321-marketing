@@ -410,12 +410,23 @@ export async function checkout(input: {
     pay
   });
 
+  // The staging LMS returns absolute URLs, but the production LMS still has
+  // the config-cache bug where env() reads null and both come back RELATIVE
+  // ("/#/login", "/api/list/enroll-invoice/ch_..."). Left as-is they'd
+  // resolve against the marketing domain and 404. Anchor them to the hosts
+  // we already know: the invoice lives on the LMS API we just called, and
+  // the sign-in page lives on the learner app (same base the header's
+  // Sign In button uses).
+  const appBase = (process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com").replace(/\/+$/, "");
+  const absolute = (url: string | null | undefined, base: string): string | null =>
+    !url ? null : /^https?:\/\//i.test(url) ? url : base + (url.startsWith("/") ? url : `/${url}`);
+
   return {
     employee: raw.employee,
     chargeId: raw.charge?.id ?? null,
     receiptUrl: raw.charge?.receipt ?? null,
-    invoiceUrl: raw.invoice_url ?? null,
-    loginUrl: raw.login_url,
+    invoiceUrl: absolute(raw.invoice_url, API_BASE),
+    loginUrl: absolute(raw.login_url, appBase) || `${appBase}/#/login`,
     amount: Number(raw.pricing?.due_today ?? 0),
     subscription: raw.subscription
       ? {
