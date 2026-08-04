@@ -50,7 +50,7 @@ function readStoredBuyer(): BuyerState {
     return {
       audience: p.audience === "company" ? "company" : "individual",
       employees: Math.max(1, Number(p.employees) || DEFAULT_BUYER.employees),
-      locations: Math.min(50, Math.max(1, Number(p.locations) || 1)),
+      locations: Math.min(9999, Math.max(1, Number(p.locations) || 1)),
       cadence: p.cadence === "monthly" ? "monthly" : "yearly"
     };
   } catch {
@@ -419,8 +419,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   );
   const setLocations = useCallback(
     (n: number) =>
-      // Backend validation caps locations at 50.
-      setBuyer((b) => ({ ...b, locations: Math.min(50, Math.max(1, Math.floor(n) || 1)) })),
+      setBuyer((b) => ({ ...b, locations: Math.min(9999, Math.max(1, Math.floor(n) || 1)) })),
     []
   );
   const setCadence = useCallback(

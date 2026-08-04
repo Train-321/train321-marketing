@@ -83,7 +83,7 @@ export type QuoteInput = {
   audience?: BuyerAudience;
   /** Company only — how many people will take the compliance courses. */
   employees?: number;
-  /** Company only — how many locations (backend caps at 50). */
+  /** Company only — how many locations. */
   locations?: number;
   promoCode?: string;
 };
@@ -253,7 +253,7 @@ export async function getQuote(input: QuoteInput): Promise<EnrollQuote> {
   const { courseIds, specialCourses } = splitLines(input.lines);
   const audience: BuyerAudience = input.audience === "company" ? "company" : "individual";
   const employees = Math.max(1, input.employees || 1);
-  const locations = Math.min(50, Math.max(1, input.locations || 1));
+  const locations = Math.min(9999, Math.max(1, input.locations || 1));
 
   const raw = await post<{
     audience?: string;
@@ -403,7 +403,7 @@ export async function checkout(input: {
     course_ids: courseIds,
     special_courses: specialCourses,
     number_of_employees: Math.max(1, input.employees || 1),
-    number_of_locations: Math.min(50, Math.max(1, input.locations || 1)),
+    number_of_locations: Math.min(9999, Math.max(1, input.locations || 1)),
     invoice_cadence: cadence,
     promo_code: input.promoCode || "",
     details,

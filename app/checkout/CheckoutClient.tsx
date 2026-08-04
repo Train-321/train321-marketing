@@ -346,7 +346,11 @@ function CheckoutForm() {
 
                   <div className="t321-mkt-checkout__row">
                     <Field
-                      label="Employees"
+                      label={
+                        <>
+                          <i className="fas fa-user-group" aria-hidden="true" /> Employees
+                        </>
+                      }
                       hint="People taking the compliance courses."
                       required
                     >
@@ -358,11 +362,19 @@ function CheckoutForm() {
                         ariaLabel="Number of employees"
                       />
                     </Field>
-                    <Field label="Locations" hint="Up to 50." required>
+                    <Field
+                      label={
+                        <>
+                          <i className="fas fa-map-marker-alt" aria-hidden="true" /> Locations
+                        </>
+                      }
+                      hint="Where your team works."
+                      required
+                    >
                       <Stepper
                         value={buyer.locations}
                         min={1}
-                        max={50}
+                        max={9999}
                         onChange={setLocations}
                         ariaLabel="Number of locations"
                       />
@@ -808,7 +820,8 @@ function Field({
   required,
   children
 }: {
-  label: string;
+  /** Usually a string; company fields pass an icon + text fragment. */
+  label: React.ReactNode;
   hint?: string;
   error?: string;
   required?: boolean;

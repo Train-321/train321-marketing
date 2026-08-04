@@ -140,36 +140,45 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Full-width stepper — minus/plus anchored to the edges with the count
+   centered, so Employees and Locations read as one tidy row. Same design
+   language as the drawer's team controls. */
 .t321-mkt-checkout__stepper {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
   border: 1px solid var(--t321-mkt-line-strong);
-  border-radius: 8px;
+  border-radius: 9px;
   overflow: hidden;
   background: var(--t321-mkt-paper);
 }
 .t321-mkt-checkout__stepper button {
-  width: 2.4rem;
-  height: 2.55rem;
+  width: 2.75rem;
   border: 0;
-  background: transparent;
+  background: var(--t321-mkt-paper-sunk);
   color: var(--t321-mkt-ink);
   font-size: 0.72rem;
   cursor: pointer;
-  transition: background 120ms ease;
+  transition: background 120ms ease, color 120ms ease;
+  flex-shrink: 0;
 }
-.t321-mkt-checkout__stepper button:hover:not(:disabled) { background: var(--t321-mkt-paper-sunk); }
-.t321-mkt-checkout__stepper button:disabled { opacity: 0.4; cursor: not-allowed; }
+.t321-mkt-checkout__stepper button:hover:not(:disabled) {
+  background: var(--t321-mkt-accent-wash);
+  color: var(--t321-mkt-accent-ink);
+}
+.t321-mkt-checkout__stepper button:disabled { opacity: 0.35; cursor: not-allowed; }
 .t321-mkt-checkout__stepper input {
-  width: 4rem;
-  height: 2.55rem;
+  flex: 1;
+  min-width: 0;
+  height: 2.75rem;
   border: 0;
   border-left: 1px solid var(--t321-mkt-line);
   border-right: 1px solid var(--t321-mkt-line);
+  background: transparent;
   text-align: center;
   font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
   color: var(--t321-mkt-ink);
   -moz-appearance: textfield;
 }
@@ -177,6 +186,10 @@
 .t321-mkt-checkout__stepper input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+.t321-mkt-checkout__stepper input:focus-visible {
+  outline: 2px solid var(--t321-mkt-accent);
+  outline-offset: -2px;
 }
 
 /* Monthly/Yearly pills. */
@@ -257,6 +270,12 @@
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--t321-mkt-ink);
+}
+/* Company fields carry a small leading icon in the label. */
+.t321-mkt-field__label i {
+  margin-right: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--t321-mkt-accent-ink);
 }
 .t321-mkt-field__label em {
   margin-left: 0.15rem;

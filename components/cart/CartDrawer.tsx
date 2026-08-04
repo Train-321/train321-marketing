@@ -317,7 +317,7 @@ export default function CartDrawer() {
                       <input
                         type="number"
                         min={1}
-                        max={50}
+                        max={9999}
                         value={buyer.locations}
                         aria-label="Number of locations"
                         onChange={(e) => setLocations(Number(e.target.value))}
@@ -326,7 +326,6 @@ export default function CartDrawer() {
                         type="button"
                         aria-label="Increase locations"
                         onClick={() => setLocations(buyer.locations + 1)}
-                        disabled={buyer.locations >= 50}
                       >
                         <i className="fas fa-plus" aria-hidden="true" />
                       </button>
