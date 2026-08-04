@@ -103,15 +103,28 @@
   transform: translateX(2px);
 }
 .t321-mkt-enroll__option:focus-visible { outline: 2px solid var(--t321-mkt-accent, #0A427B); outline-offset: 2px; }
+/* Three fixed roles per row: state column (stable width, never squeezed by
+   a long title), flexible title that wraps inside its own column, and the
+   arrow pinned to the edge. Without this, a long course name compressed the
+   state label into an awkward mid-word wrap. */
 .t321-mkt-enroll__option-state {
+  flex-shrink: 0;
+  width: 6.5rem;
   font-weight: 600;
-  font-size: 0.98rem;
+  font-size: 0.95rem;
+  line-height: 1.25;
+  overflow-wrap: break-word;
 }
 .t321-mkt-enroll__option-course {
+  flex: 1;
+  min-width: 0;
   font-size: 0.8rem;
+  line-height: 1.4;
   color: var(--t321-mkt-ink-muted, #5E5C57);
+  overflow-wrap: break-word;
 }
 .t321-mkt-enroll__option i {
+  flex-shrink: 0;
   margin-left: auto;
   color: var(--t321-mkt-accent, #0A427B);
   font-size: 0.8rem;
