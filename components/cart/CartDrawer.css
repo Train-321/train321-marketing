@@ -307,6 +307,30 @@
   .t321-mkt-cart__foot { border-radius: 0; }
 }
 
+/* Collapsed promo entry — a quiet link until the buyer says they have one. */
+.t321-mkt-cart__promo-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--t321-mkt-ink-muted);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 140ms ease;
+}
+.t321-mkt-cart__promo-toggle:hover {
+  color: var(--t321-mkt-accent-ink);
+  text-decoration: underline;
+}
+.t321-mkt-cart__promo-toggle i { font-size: 0.72rem; }
+
+.t321-mkt-cart__promo {
+  animation: t321-cart-fade-up 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
 .t321-mkt-cart__promo input {
   width: 100%;
   padding: 0.6rem 0.8rem;
@@ -354,47 +378,131 @@
    the cadence switch, mirroring checkout's inputs in drawer scale. */
 .t321-mkt-cart__teamctl {
   margin-bottom: 0.9rem;
-  padding: 0.8rem 0.85rem;
+  padding: 0.9rem 1rem 1rem;
   border: 1px solid var(--t321-mkt-line);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--t321-mkt-paper);
+  box-shadow: 0 1px 2px rgba(11, 31, 51, 0.04);
 }
-.t321-mkt-cart__teamctl-row {
+
+.t321-mkt-cart__teamctl-head {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 0.7rem;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--t321-mkt-ink);
 }
+.t321-mkt-cart__teamctl-head i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 6px;
+  background: var(--t321-mkt-accent-wash);
+  color: var(--t321-mkt-accent-ink);
+  font-size: 0.68rem;
+}
+
+.t321-mkt-cart__teamctl-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
 .t321-mkt-cart__teamctl-field {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.4rem;
+  min-width: 0;
 }
 .t321-mkt-cart__teamctl-field > span:first-child {
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.74rem;
+  font-weight: 600;
   color: var(--t321-mkt-ink-muted);
 }
-/* Reuses the seat-stepper look; kill its default top margin in this spot. */
-.t321-mkt-cart__teamctl .t321-mkt-cart__qty { margin-top: 0; }
+.t321-mkt-cart__teamctl-field > span:first-child i {
+  font-size: 0.68rem;
+  color: var(--t321-mkt-accent-ink);
+}
 
-.t321-mkt-cart__teamctl-cadence {
-  display: inline-flex;
+/* Full-width stepper — buttons anchored to the edges, number centered, so
+   both fields read as one tidy row regardless of digit count. */
+.t321-mkt-cart__teamctl-stepper {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
   border: 1px solid var(--t321-mkt-line-strong);
-  border-radius: 999px;
+  border-radius: 9px;
+  overflow: hidden;
+  background: var(--t321-mkt-paper);
+}
+.t321-mkt-cart__teamctl-stepper button {
+  width: 2.2rem;
+  border: 0;
+  background: var(--t321-mkt-paper-sunk);
+  color: var(--t321-mkt-ink);
+  font-size: 0.68rem;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+  flex-shrink: 0;
+}
+.t321-mkt-cart__teamctl-stepper button:hover:not(:disabled) {
+  background: var(--t321-mkt-accent-wash);
+  color: var(--t321-mkt-accent-ink);
+}
+.t321-mkt-cart__teamctl-stepper button:disabled { opacity: 0.35; cursor: not-allowed; }
+.t321-mkt-cart__teamctl-stepper input {
+  flex: 1;
+  min-width: 0;
+  height: 2.3rem;
+  border: 0;
+  border-left: 1px solid var(--t321-mkt-line);
+  border-right: 1px solid var(--t321-mkt-line);
+  background: transparent;
+  text-align: center;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--t321-mkt-ink);
+  -moz-appearance: textfield;
+}
+.t321-mkt-cart__teamctl-stepper input::-webkit-outer-spin-button,
+.t321-mkt-cart__teamctl-stepper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.t321-mkt-cart__teamctl-stepper input:focus-visible {
+  outline: 2px solid var(--t321-mkt-accent);
+  outline-offset: -2px;
+}
+
+/* Cadence — full-width segmented control, equal halves. */
+.t321-mkt-cart__teamctl-cadence {
+  display: flex;
+  width: 100%;
+  border: 1px solid var(--t321-mkt-line-strong);
+  border-radius: 9px;
   overflow: hidden;
 }
 .t321-mkt-cart__teamctl-cadence button {
+  flex: 1;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.4rem 0.85rem;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.5rem;
   border: 0;
   background: var(--t321-mkt-paper);
   color: var(--t321-mkt-ink-muted);
   font-family: inherit;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 140ms ease, color 140ms ease;
@@ -403,17 +511,18 @@
   border-left: 1px solid var(--t321-mkt-line-strong);
 }
 .t321-mkt-cart__teamctl-cadence button.is-active {
-  background: #0B1F33;
+  background: linear-gradient(180deg, #12314E 0%, #0B1F33 100%);
   color: #fff;
 }
 .t321-mkt-cart__teamctl-cadence em {
-  padding: 0.05rem 0.35rem;
+  padding: 0.08rem 0.4rem;
   border-radius: 999px;
   background: var(--t321-mkt-positive-wash);
   color: var(--t321-mkt-positive);
-  font-size: 0.66rem;
+  font-size: 0.64rem;
   font-style: normal;
   font-weight: 700;
+  white-space: nowrap;
 }
 .t321-mkt-cart__teamctl-cadence button.is-active em {
   background: rgba(255, 255, 255, 0.16);

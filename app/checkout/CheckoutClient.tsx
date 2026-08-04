@@ -95,6 +95,10 @@ function CheckoutForm() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [result, setResult] = useState<CheckoutResult | null>(null);
   const [promoDraft, setPromoDraft] = useState(promoCode);
+  // Collapsed behind "Have a promo code?" — same disclosure as the drawer.
+  // Stays open once a code is set so an applied promo is never hidden.
+  const [promoOpen, setPromoOpen] = useState(false);
+  const showPromoInput = promoOpen || Boolean(promoCode);
 
   // ── Which numbers apply ────────────────────────────────────────────────
   // Individual: one-time totals. Company: the chosen cadence's subscription
@@ -667,29 +671,42 @@ function CheckoutForm() {
               ))}
             </ul>
 
-            <div className="t321-mkt-checkout__promo">
-              <input
-                type="text"
-                placeholder="Promo code"
-                aria-label="Promo code"
-                value={promoDraft}
-                onChange={(e) => setPromoDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    applyPromo(promoDraft);
-                  }
-                }}
-              />
+            {showPromoInput ? (
+              <>
+                <div className="t321-mkt-checkout__promo">
+                  <input
+                    type="text"
+                    placeholder="Promo code"
+                    aria-label="Promo code"
+                    autoFocus={promoOpen && !promoCode}
+                    value={promoDraft}
+                    onChange={(e) => setPromoDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        applyPromo(promoDraft);
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="t321-mkt-btn t321-mkt-btn--ghost"
+                    onClick={() => applyPromo(promoDraft)}
+                  >
+                    Apply
+                  </button>
+                </div>
+                {promoError && <p className="t321-mkt-checkout__promo-error">{promoError}</p>}
+              </>
+            ) : (
               <button
                 type="button"
-                className="t321-mkt-btn t321-mkt-btn--ghost"
-                onClick={() => applyPromo(promoDraft)}
+                className="t321-mkt-checkout__promo-toggle"
+                onClick={() => setPromoOpen(true)}
               >
-                Apply
+                <i className="fas fa-tag" aria-hidden="true" /> Have a promo code?
               </button>
-            </div>
-            {promoError && <p className="t321-mkt-checkout__promo-error">{promoError}</p>}
+            )}
             {quote?.promo && (
               <p className="t321-mkt-checkout__promo-ok">
                 <i className="fas fa-check" aria-hidden="true" /> {quote.promo.name} applied

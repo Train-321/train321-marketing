@@ -480,9 +480,31 @@
 }
 .t321-mkt-checkout__line-remove:hover { background: #FDECEE; color: var(--t321-mkt-critical); }
 
+/* Collapsed promo entry — a quiet link until the buyer says they have one. */
+.t321-mkt-checkout__promo-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--t321-mkt-ink-muted);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 140ms ease;
+}
+.t321-mkt-checkout__promo-toggle:hover {
+  color: var(--t321-mkt-accent-ink);
+  text-decoration: underline;
+}
+.t321-mkt-checkout__promo-toggle i { font-size: 0.72rem; }
+
 .t321-mkt-checkout__promo {
   display: flex;
   gap: 0.5rem;
+  animation: t321-checkout-reveal 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .t321-mkt-checkout__promo input {
   flex: 1;

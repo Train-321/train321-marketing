@@ -51,6 +51,12 @@ export default function CartDrawer() {
   const pathname = usePathname();
   const panelRef = useRef<HTMLElement | null>(null);
 
+  // Promo entry is collapsed behind a "Have a promo code?" link — most buyers
+  // don't have one, and a permanently empty input reads as homework. Stays
+  // open once a code is set so an applied promo is never hidden.
+  const [promoOpen, setPromoOpen] = useState(false);
+  const showPromoInput = promoOpen || Boolean(promoCode);
+
   // The drawer stays in the DOM through its exit animation — unmounting on
   // `drawerOpen === false` would make it vanish instantly with no transition.
   const [mounted, setMounted] = useState(false);
@@ -235,10 +241,15 @@ export default function CartDrawer() {
                 can be tuned without leaving the drawer. */}
             {isCompany && (
               <div className="t321-mkt-cart__teamctl">
+                <p className="t321-mkt-cart__teamctl-head">
+                  <i className="fas fa-users" aria-hidden="true" /> Team pricing
+                </p>
                 <div className="t321-mkt-cart__teamctl-row">
                   <label className="t321-mkt-cart__teamctl-field">
-                    <span>Employees</span>
-                    <span className="t321-mkt-cart__qty">
+                    <span>
+                      <i className="fas fa-user-group" aria-hidden="true" /> Employees
+                    </span>
+                    <span className="t321-mkt-cart__teamctl-stepper">
                       <button
                         type="button"
                         aria-label="Decrease employees"
@@ -265,8 +276,10 @@ export default function CartDrawer() {
                     </span>
                   </label>
                   <label className="t321-mkt-cart__teamctl-field">
-                    <span>Locations</span>
-                    <span className="t321-mkt-cart__qty">
+                    <span>
+                      <i className="fas fa-map-marker-alt" aria-hidden="true" /> Locations
+                    </span>
+                    <span className="t321-mkt-cart__teamctl-stepper">
                       <button
                         type="button"
                         aria-label="Decrease locations"
@@ -306,7 +319,7 @@ export default function CartDrawer() {
                     className={buyer.cadence === "yearly" ? "is-active" : ""}
                     onClick={() => setCadence("yearly")}
                   >
-                    Yearly <em>−10%</em>
+                    Yearly <em>Save 10%</em>
                   </button>
                   <button
                     type="button"
@@ -321,19 +334,32 @@ export default function CartDrawer() {
               </div>
             )}
 
-            <div className="t321-mkt-cart__promo">
-              <input
-                type="text"
-                placeholder="Promo code"
-                aria-label="Promo code"
-                defaultValue={promoCode}
-                onBlur={(e) => applyPromo(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") applyPromo((e.target as HTMLInputElement).value);
-                }}
-              />
-            </div>
-            {promoError && <p className="t321-mkt-cart__promo-error">{promoError}</p>}
+            {showPromoInput ? (
+              <>
+                <div className="t321-mkt-cart__promo">
+                  <input
+                    type="text"
+                    placeholder="Promo code"
+                    aria-label="Promo code"
+                    autoFocus={promoOpen && !promoCode}
+                    defaultValue={promoCode}
+                    onBlur={(e) => applyPromo(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") applyPromo((e.target as HTMLInputElement).value);
+                    }}
+                  />
+                </div>
+                {promoError && <p className="t321-mkt-cart__promo-error">{promoError}</p>}
+              </>
+            ) : (
+              <button
+                type="button"
+                className="t321-mkt-cart__promo-toggle"
+                onClick={() => setPromoOpen(true)}
+              >
+                <i className="fas fa-tag" aria-hidden="true" /> Have a promo code?
+              </button>
+            )}
 
             <dl className="t321-mkt-cart__totals">
               <div>
