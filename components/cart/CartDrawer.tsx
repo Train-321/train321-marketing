@@ -152,9 +152,16 @@ export default function CartDrawer() {
           {lines.length === 0 ? (
             <div className="t321-mkt-cart__empty">
               <i className="fas fa-shopping-basket" aria-hidden="true" />
-              <p>Your cart is empty.</p>
-              <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--primary">
-                Browse courses
+              <p className="t321-mkt-cart__empty-title">Your cart is empty</p>
+              <p className="t321-mkt-cart__empty-sub">
+                Add a course and it&rsquo;ll show up here, ready for checkout.
+              </p>
+              <Link
+                href="/catalog"
+                className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg"
+                onClick={closeDrawer}
+              >
+                Browse courses <i className="fas fa-arrow-right" aria-hidden="true" />
               </Link>
             </div>
           ) : (

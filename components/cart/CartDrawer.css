@@ -144,28 +144,46 @@
   padding: 0.5rem 1.4rem;
 }
 
+/* Fills the whole body and centers vertically — a short message pinned to
+   the top of a tall empty panel read as unfinished. */
 .t321-mkt-cart__empty {
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 4rem 1rem;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 2rem 1.5rem;
   text-align: center;
-  color: var(--t321-mkt-ink-muted);
   animation: t321-cart-fade-up 300ms ease both 120ms;
 }
-.t321-mkt-cart__empty i {
+.t321-mkt-cart__empty > i {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 4.25rem;
-  height: 4.25rem;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin-bottom: 0.6rem;
   border-radius: 999px;
-  background: var(--t321-mkt-paper-sunk);
-  color: var(--t321-mkt-line-strong);
-  font-size: 1.6rem;
+  background: var(--t321-mkt-accent-wash);
+  color: var(--t321-mkt-accent-ink);
+  font-size: 1.7rem;
 }
-.t321-mkt-cart__empty p { margin: 0; font-size: 0.95rem; }
+.t321-mkt-cart__empty-title {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--t321-mkt-ink);
+}
+.t321-mkt-cart__empty-sub {
+  margin: 0;
+  max-width: 16rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--t321-mkt-ink-muted);
+}
+.t321-mkt-cart__empty .t321-mkt-btn { margin-top: 1rem; }
 
 /* ── Lines ────────────────────────────────────────────────────────────── */
 .t321-mkt-cart__list {
