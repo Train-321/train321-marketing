@@ -192,7 +192,10 @@
 .t321-mkt-drawer {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  /* 1000 is the site's overlay layer (sign-in dialog, video modal, state
+     picker, cart). At the old 60 this sat UNDER the chat widget's fab (950),
+     so "Got questions?" floated over the open mobile menu. */
+  z-index: 1000;
   display: flex;
 }
 .t321-mkt-drawer__scrim {
@@ -293,7 +296,9 @@
 @media (max-width: 991.98px) {
   .t321-mkt-nav,
   .t321-mkt-header__cta { display: none; }
-  .t321-mkt-header__burger { display: inline-flex; margin-left: auto; }
+  /* The cart button takes the auto margin here (see CartButton.css) so the
+     bar collapses to brand · cart · burger with the pair pinned right. */
+  .t321-mkt-header__burger { display: inline-flex; }
   .t321-mkt-header__bar { height: 64px; gap: 1rem; }
 }
 

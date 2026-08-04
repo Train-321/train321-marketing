@@ -7,7 +7,7 @@ import SiteFooter from "@/components/SiteFooterShell";
 import ChatWidget from "@/components/ChatWidgetShell";
 import DisableDraftMode from "@/components/DisableDraftMode";
 import { CartProvider } from "@/components/cart/CartContext";
-import CartWidget from "@/components/cart/CartWidget";
+import CartDrawer from "@/components/cart/CartDrawer";
 import { SanityLive } from "@/lib/sanity";
 import "./globals.css";
 
@@ -103,7 +103,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </main>
             <SiteFooter />
           </div>
-          <CartWidget />
+          {/* Trigger lives in SiteHeader's nav; this is just the panel. */}
+          <CartDrawer />
         </CartProvider>
         <ChatWidget />
         {isDraft && (

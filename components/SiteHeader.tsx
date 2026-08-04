@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { marketingNav } from "@/lib/nav";
 import type { SiteSettings } from "@/lib/sanity";
 import SignInDialog from "./SignInDialog";
+import CartButton from "./cart/CartButton";
 import "./SiteHeader.css";
 
 const APP_BASE = process.env.NEXT_PUBLIC_APP_BASE || "/login";
@@ -156,12 +157,12 @@ export default function SiteHeader({ settings }: Props) {
 
         <div className="t321-mkt-header__cta">
           <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--ghost">Browse courses</Link>
-          {/* Enrollment now happens on-site, so this points at the catalog
-              (where courses go into the cart) instead of the external SPA. */}
-          <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--primary">
-            Enroll now <i className="fas fa-arrow-right" aria-hidden="true" />
-          </Link>
         </div>
+
+        {/* Sits outside __cta because that whole group is hidden below the nav
+            breakpoint — the cart has to survive on mobile. Enrollment happens
+            on-site now, so this replaced the old outbound "Enroll now" CTA. */}
+        <CartButton />
 
         <button
           type="button"
@@ -236,12 +237,15 @@ export default function SiteHeader({ settings }: Props) {
               )}
             </div>
             <div className="t321-mkt-drawer__foot">
+              {/* "Browse courses" lives in __cta, which is hidden at this
+                  breakpoint — so it surfaces here instead. The cart itself is
+                  in the header bar, always reachable. */}
               <Link
                 href="/catalog"
                 className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block"
                 onClick={() => setDrawerOpen(false)}
               >
-                Enroll now <i className="fas fa-arrow-right" aria-hidden="true" />
+                Browse courses <i className="fas fa-arrow-right" aria-hidden="true" />
               </Link>
               <button
                 type="button"
