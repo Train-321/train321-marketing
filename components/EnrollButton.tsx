@@ -8,8 +8,8 @@ import "./EnrollButton.css";
 
 export type StateOption = {
   state: string;
-  /** Full untruncated state list — shown as a tooltip when `state` is compacted. */
-  stateFull?: string;
+  /** Multi-state variants: the normalized 2-letter codes, rendered as chips. */
+  stateCodes?: string[];
   href: string;
   title?: string;
   /**
@@ -194,22 +194,14 @@ export default function EnrollButton({
                         buy(o.course!);
                       }}
                     >
-                      <span className="t321-mkt-enroll__option-state" title={o.stateFull}>{o.state}</span>
-                      {o.title && o.title !== o.state && (
-                        <span className="t321-mkt-enroll__option-course">{o.title}</span>
-                      )}
-                      <i className="fas fa-arrow-right" aria-hidden="true" />
+                      <OptionBody option={o} />
                     </button>
                   </li>
                 ) : (
                   // Not linked to a marketplace id yet — keep the old link.
                   <li key={`${o.state}-${idx}`}>
                     <a href={o.href} className="t321-mkt-enroll__option">
-                      <span className="t321-mkt-enroll__option-state" title={o.stateFull}>{o.state}</span>
-                      {o.title && o.title !== o.state && (
-                        <span className="t321-mkt-enroll__option-course">{o.title}</span>
-                      )}
-                      <i className="fas fa-arrow-right" aria-hidden="true" />
+                      <OptionBody option={o} />
                     </a>
                   </li>
                 )
@@ -218,6 +210,34 @@ export default function EnrollButton({
           </div>
         </div>
       )}
+    </>
+  );
+}
+
+/**
+ * Shared inner layout for a state-picker row: the state line gets the full
+ * row width (a bold name, or one chip per code for multi-state variants —
+ * every state visible, nothing truncated), with the course name beneath and
+ * the arrow pinned to the edge.
+ */
+function OptionBody({ option }: { option: StateOption }) {
+  return (
+    <>
+      <span className="t321-mkt-enroll__option-body">
+        {option.stateCodes?.length ? (
+          <span className="t321-mkt-enroll__option-states" aria-label={option.state}>
+            {option.stateCodes.map((c) => (
+              <em key={c}>{c}</em>
+            ))}
+          </span>
+        ) : (
+          <span className="t321-mkt-enroll__option-state">{option.state}</span>
+        )}
+        {option.title && option.title !== option.state && (
+          <span className="t321-mkt-enroll__option-course">{option.title}</span>
+        )}
+      </span>
+      <i className="fas fa-arrow-right" aria-hidden="true" />
     </>
   );
 }

@@ -247,8 +247,12 @@ export async function resolveEnrollCourse(enrollId?: string | null): Promise<Car
 export type StatePickerOption = {
   /** Display label — the variant's state tag, e.g. "Florida" or "All states". */
   state: string;
-  /** Full untruncated state list, for a tooltip when `state` is compacted. */
-  stateFull?: string;
+  /**
+   * Set when the tag is a multi-state list: the normalized 2-letter codes,
+   * rendered as individual chips so every state stays visible without
+   * squeezing the row.
+   */
+  stateCodes?: string[];
   /** The variant course's public name, shown muted beside the state. */
   title?: string;
   /** Outbound link for states served by an external provider; "" otherwise. */
@@ -279,12 +283,14 @@ const STATE_NAMES: Record<string, string> = {
  * Admins type these free-form ("Fl", "Az,CA, HI, IL, NM, TX, WV"), so:
  *   - empty / "ALL"            → "All states"
  *   - one 2-letter code        → the full state name ("Fl" → "Florida")
- *   - 2-3 codes                → normalized codes ("AZ, CA, HI")
- *   - 4+ codes                 → first three + count ("AZ, CA, HI +4"),
- *                                with the full normalized list in `full`
+ *   - several codes            → every normalized code in `codes`, rendered
+ *                                as chips — the full list stays visible,
+ *                                nothing is truncated behind a "+N"
  *   - anything else free-form  → passed through as typed
  */
-function shapeStateLabel(raw: string | null | undefined): { state: string; full?: string } {
+function shapeStateLabel(
+  raw: string | null | undefined
+): { state: string; codes?: string[] } {
   const text = String(raw || "").trim();
   if (!text || text.toUpperCase() === "ALL") return { state: "All states" };
 
@@ -294,11 +300,7 @@ function shapeStateLabel(raw: string | null | undefined): { state: string; full?
 
   if (!allCodes) return { state: text };
   if (codes.length === 1) return { state: STATE_NAMES[codes[0]] || codes[0] };
-  if (codes.length <= 3) return { state: codes.join(", ") };
-  return {
-    state: `${codes.slice(0, 3).join(", ")} +${codes.length - 3}`,
-    full: codes.join(", ")
-  };
+  return { state: codes.join(", "), codes };
 }
 
 /**
@@ -363,12 +365,12 @@ export async function getGroupStateOptions(
   for (let i = 0; i < variants.length; i++) {
     const v = variants[i];
     const c = resolved[i];
-    const { state, full } = shapeStateLabel(v.state_label);
+    const { state, codes } = shapeStateLabel(v.state_label);
     if (v.state_redirect_url) {
       // External-provider state — link out, never add to cart.
-      options.push({ state, stateFull: full, title: c?.name, href: v.state_redirect_url, course: null });
+      options.push({ state, stateCodes: codes, title: c?.name, href: v.state_redirect_url, course: null });
     } else if (c) {
-      options.push({ state, stateFull: full, title: c.name, href: "", course: c });
+      options.push({ state, stateCodes: codes, title: c.name, href: "", course: c });
     }
   }
 

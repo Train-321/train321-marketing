@@ -103,21 +103,37 @@
   transform: translateX(2px);
 }
 .t321-mkt-enroll__option:focus-visible { outline: 2px solid var(--t321-mkt-accent, #0A427B); outline-offset: 2px; }
-/* Three fixed roles per row: state column (stable width, never squeezed by
-   a long title), flexible title that wraps inside its own column, and the
-   arrow pinned to the edge. Without this, a long course name compressed the
-   state label into an awkward mid-word wrap. */
+/* Stacked row: the state line owns the full row width — a bold name, or one
+   chip per code for multi-state variants so every state stays visible without
+   truncation — with the course name beneath and the arrow pinned right. */
+.t321-mkt-enroll__option-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
 .t321-mkt-enroll__option-state {
-  flex-shrink: 0;
-  width: 6.5rem;
   font-weight: 600;
   font-size: 0.95rem;
   line-height: 1.25;
-  overflow-wrap: break-word;
+}
+.t321-mkt-enroll__option-states {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.t321-mkt-enroll__option-states em {
+  padding: 0.14rem 0.45rem;
+  border-radius: 5px;
+  background: var(--t321-mkt-accent-wash, #EEF3F9);
+  color: var(--t321-mkt-accent-ink, #0A427B);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 .t321-mkt-enroll__option-course {
-  flex: 1;
-  min-width: 0;
   font-size: 0.8rem;
   line-height: 1.4;
   color: var(--t321-mkt-ink-muted, #5E5C57);
