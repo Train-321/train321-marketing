@@ -8,6 +8,8 @@ import "./EnrollButton.css";
 
 export type StateOption = {
   state: string;
+  /** Full untruncated state list — shown as a tooltip when `state` is compacted. */
+  stateFull?: string;
   href: string;
   title?: string;
   /**
@@ -177,10 +179,13 @@ export default function EnrollButton({
             </div>
 
             <ul className="t321-mkt-enroll__list">
-              {options!.map((o) =>
+              {/* Keys: several variants can share a state label (e.g. two
+                  "All states" versions), so the course id / index breaks
+                  the tie. */}
+              {options!.map((o, idx) =>
                 o.course ? (
                   // Resolved to a real course — buy it inline.
-                  <li key={o.state}>
+                  <li key={o.course.id}>
                     <button
                       type="button"
                       className="t321-mkt-enroll__option"
@@ -189,7 +194,7 @@ export default function EnrollButton({
                         buy(o.course!);
                       }}
                     >
-                      <span className="t321-mkt-enroll__option-state">{o.state}</span>
+                      <span className="t321-mkt-enroll__option-state" title={o.stateFull}>{o.state}</span>
                       {o.title && o.title !== o.state && (
                         <span className="t321-mkt-enroll__option-course">{o.title}</span>
                       )}
@@ -198,9 +203,9 @@ export default function EnrollButton({
                   </li>
                 ) : (
                   // Not linked to a marketplace id yet — keep the old link.
-                  <li key={o.state}>
+                  <li key={`${o.state}-${idx}`}>
                     <a href={o.href} className="t321-mkt-enroll__option">
-                      <span className="t321-mkt-enroll__option-state">{o.state}</span>
+                      <span className="t321-mkt-enroll__option-state" title={o.stateFull}>{o.state}</span>
                       {o.title && o.title !== o.state && (
                         <span className="t321-mkt-enroll__option-course">{o.title}</span>
                       )}

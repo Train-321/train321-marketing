@@ -247,6 +247,8 @@ export async function resolveEnrollCourse(enrollId?: string | null): Promise<Car
 export type StatePickerOption = {
   /** Display label — the variant's state tag, e.g. "Florida" or "All states". */
   state: string;
+  /** Full untruncated state list, for a tooltip when `state` is compacted. */
+  stateFull?: string;
   /** The variant course's public name, shown muted beside the state. */
   title?: string;
   /** Outbound link for states served by an external provider; "" otherwise. */
@@ -254,6 +256,50 @@ export type StatePickerOption = {
   /** Cart-ready course for inline purchase; null when the state redirects out. */
   course: CartCourse | null;
 };
+
+/** Code → full name, for prettifying raw LMS state tags like "Fl". */
+const STATE_NAMES: Record<string, string> = {
+  AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
+  CO: "Colorado", CT: "Connecticut", DE: "Delaware", DC: "District of Columbia",
+  FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho", IL: "Illinois",
+  IN: "Indiana", IA: "Iowa", KS: "Kansas", KY: "Kentucky", LA: "Louisiana",
+  ME: "Maine", MD: "Maryland", MA: "Massachusetts", MI: "Michigan",
+  MN: "Minnesota", MS: "Mississippi", MO: "Missouri", MT: "Montana",
+  NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey",
+  NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota",
+  OH: "Ohio", OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania",
+  RI: "Rhode Island", SC: "South Carolina", SD: "South Dakota",
+  TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont", VA: "Virginia",
+  WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming"
+};
+
+/**
+ * Turn a raw LMS state tag into a picker-friendly label.
+ *
+ * Admins type these free-form ("Fl", "Az,CA, HI, IL, NM, TX, WV"), so:
+ *   - empty / "ALL"            → "All states"
+ *   - one 2-letter code        → the full state name ("Fl" → "Florida")
+ *   - 2-3 codes                → normalized codes ("AZ, CA, HI")
+ *   - 4+ codes                 → first three + count ("AZ, CA, HI +4"),
+ *                                with the full normalized list in `full`
+ *   - anything else free-form  → passed through as typed
+ */
+function shapeStateLabel(raw: string | null | undefined): { state: string; full?: string } {
+  const text = String(raw || "").trim();
+  if (!text || text.toUpperCase() === "ALL") return { state: "All states" };
+
+  const tokens = text.split(",").map((t) => t.trim()).filter(Boolean);
+  const codes = tokens.map((t) => t.toUpperCase());
+  const allCodes = codes.length > 0 && codes.every((c) => /^[A-Z]{2}$/.test(c));
+
+  if (!allCodes) return { state: text };
+  if (codes.length === 1) return { state: STATE_NAMES[codes[0]] || codes[0] };
+  if (codes.length <= 3) return { state: codes.join(", ") };
+  return {
+    state: `${codes.slice(0, 3).join(", ")} +${codes.length - 3}`,
+    full: codes.join(", ")
+  };
+}
 
 /**
  * Build state-picker options from the LMS's own course groups.
@@ -313,21 +359,16 @@ export async function getGroupStateOptions(
 
   const resolved = await Promise.all(variants.map((v) => getCartCourse(v.id)));
 
-  const label = (v: RawVariant): string => {
-    const raw = String(v.state_label || "").trim();
-    if (!raw || raw.toUpperCase() === "ALL") return "All states";
-    return raw;
-  };
-
   const options: StatePickerOption[] = [];
   for (let i = 0; i < variants.length; i++) {
     const v = variants[i];
     const c = resolved[i];
+    const { state, full } = shapeStateLabel(v.state_label);
     if (v.state_redirect_url) {
       // External-provider state — link out, never add to cart.
-      options.push({ state: label(v), title: c?.name, href: v.state_redirect_url, course: null });
+      options.push({ state, stateFull: full, title: c?.name, href: v.state_redirect_url, course: null });
     } else if (c) {
-      options.push({ state: label(v), title: c.name, href: "", course: c });
+      options.push({ state, stateFull: full, title: c.name, href: "", course: c });
     }
   }
 
