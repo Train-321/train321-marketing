@@ -17,10 +17,10 @@ type Props = {
 /**
  * The single entry point into the cart from anywhere on the site.
  *
- * "add" is the low-commitment path — the drawer opens so the buyer sees what
- * happened and can keep browsing. "buy" is the express path that skips the
- * drawer entirely and lands on checkout, which is what the old outbound
- * "Enroll now" buttons used to do.
+ * "add" is the low-commitment path — a bottom-center toast confirms the add
+ * while the buyer keeps browsing (the drawer only opens when they ask for
+ * it). "buy" is the express path that skips confirmation entirely and lands
+ * on checkout, which is what the old outbound "Enroll now" buttons used to do.
  */
 export default function AddToCartButton({
   course,
@@ -29,7 +29,7 @@ export default function AddToCartButton({
   className = "t321-mkt-btn t321-mkt-btn--primary",
   showArrow = true
 }: Props) {
-  const { add, has, openDrawer } = useCart();
+  const { add, has, openDrawer, notifyAdded } = useCart();
   const router = useRouter();
   const [justAdded, setJustAdded] = useState(false);
 
@@ -44,6 +44,8 @@ export default function AddToCartButton({
 
   const onClick = () => {
     if (alreadyMaxed && mode === "add") {
+      // Nothing more to add — clicking "In cart" is a request to SEE the
+      // cart, so this stays a drawer-opener.
       openDrawer();
       return;
     }
@@ -55,9 +57,9 @@ export default function AddToCartButton({
       return;
     }
 
-    openDrawer();
-    // Brief confirmation on the button itself, in case the drawer is dismissed
-    // faster than the eye can follow.
+    // Confirm without interrupting: toast at the bottom, plus a brief state
+    // change on the button itself for eyes that never leave it.
+    notifyAdded(course.name);
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1600);
   };

@@ -61,7 +61,7 @@ export default function EnrollButton({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [added, setAdded] = useState(false);
-  const { add, has, openDrawer } = useCart();
+  const { add, has, openDrawer, notifyAdded } = useCart();
   const router = useRouter();
 
   const hasOptions = Array.isArray(options) && options.length > 0;
@@ -87,7 +87,8 @@ export default function EnrollButton({
       router.push("/checkout");
       return;
     }
-    openDrawer();
+    // Toast confirmation instead of flinging the drawer open mid-browse.
+    notifyAdded(target.name);
     setAdded(true);
     setTimeout(() => setAdded(false), 1600);
   };

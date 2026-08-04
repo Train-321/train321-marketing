@@ -100,6 +100,15 @@ type CartContextValue = {
   setLocations: (n: number) => void;
   setCadence: (c: InvoiceCadence) => void;
 
+  /**
+   * Transient "added to cart" confirmation, rendered by <CartToast />.
+   * A fresh `id` per notify lets the toast remount (and its timer reset)
+   * even when the same course is added twice in a row.
+   */
+  toast: { id: number; name: string } | null;
+  notifyAdded: (name: string) => void;
+  dismissToast: () => void;
+
   /** Add a course. Adding one already in the cart bumps its seats instead. */
   add: (course: CartCourse, users?: number) => void;
   remove: (id: number) => void;
@@ -149,6 +158,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [promoCode, setPromoCode] = useState("");
   const [promoError, setPromoError] = useState<string | null>(null);
   const [buyer, setBuyer] = useState<BuyerState>(DEFAULT_BUYER);
+  const [toast, setToast] = useState<{ id: number; name: string } | null>(null);
 
   // Nothing is read from storage during render — that would desync the server
   // and client HTML and trip a hydration mismatch. We load on mount instead,
@@ -404,6 +414,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  // Date.now() as the id: strictly increasing across clicks, so adding the
+  // same course twice still produces a distinct toast instance.
+  const notifyAdded = useCallback((name: string) => {
+    setToast({ id: Date.now(), name });
+  }, []);
+  const dismissToast = useCallback(() => setToast(null), []);
+
   const applyPromo = useCallback((code: string) => {
     setPromoCode(code.trim());
     setPromoError(null);
@@ -436,6 +453,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setEmployees,
       setLocations,
       setCadence,
+      toast,
+      notifyAdded,
+      dismissToast,
       add,
       remove,
       setUsers,
@@ -444,7 +464,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       has,
       toApiLines
     }),
-    [lines, quote, loading, ready, promoError, promoCode, drawerOpen, openDrawer, closeDrawer, buyer, setAudience, setEmployees, setLocations, setCadence, add, remove, setUsers, clear, applyPromo, has, toApiLines]
+    [lines, quote, loading, ready, promoError, promoCode, drawerOpen, openDrawer, closeDrawer, buyer, setAudience, setEmployees, setLocations, setCadence, toast, notifyAdded, dismissToast, add, remove, setUsers, clear, applyPromo, has, toApiLines]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

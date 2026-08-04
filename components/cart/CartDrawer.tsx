@@ -33,7 +33,10 @@ export default function CartDrawer() {
     remove,
     setUsers,
     buyer,
-    setAudience
+    setAudience,
+    setEmployees,
+    setLocations,
+    setCadence
   } = useCart();
 
   // Which numbers to show: individual = one-time totals; company = the
@@ -227,6 +230,97 @@ export default function CartDrawer() {
 
         {lines.length > 0 && (
           <footer className="t321-mkt-cart__foot">
+            {/* Team pricing inputs — the same employees/locations/cadence
+                state checkout uses, editable right here so the totals below
+                can be tuned without leaving the drawer. */}
+            {isCompany && (
+              <div className="t321-mkt-cart__teamctl">
+                <div className="t321-mkt-cart__teamctl-row">
+                  <label className="t321-mkt-cart__teamctl-field">
+                    <span>Employees</span>
+                    <span className="t321-mkt-cart__qty">
+                      <button
+                        type="button"
+                        aria-label="Decrease employees"
+                        onClick={() => setEmployees(buyer.employees - 1)}
+                        disabled={buyer.employees <= 1}
+                      >
+                        <i className="fas fa-minus" aria-hidden="true" />
+                      </button>
+                      <input
+                        type="number"
+                        min={1}
+                        max={9999}
+                        value={buyer.employees}
+                        aria-label="Number of employees"
+                        onChange={(e) => setEmployees(Number(e.target.value))}
+                      />
+                      <button
+                        type="button"
+                        aria-label="Increase employees"
+                        onClick={() => setEmployees(buyer.employees + 1)}
+                      >
+                        <i className="fas fa-plus" aria-hidden="true" />
+                      </button>
+                    </span>
+                  </label>
+                  <label className="t321-mkt-cart__teamctl-field">
+                    <span>Locations</span>
+                    <span className="t321-mkt-cart__qty">
+                      <button
+                        type="button"
+                        aria-label="Decrease locations"
+                        onClick={() => setLocations(buyer.locations - 1)}
+                        disabled={buyer.locations <= 1}
+                      >
+                        <i className="fas fa-minus" aria-hidden="true" />
+                      </button>
+                      <input
+                        type="number"
+                        min={1}
+                        max={50}
+                        value={buyer.locations}
+                        aria-label="Number of locations"
+                        onChange={(e) => setLocations(Number(e.target.value))}
+                      />
+                      <button
+                        type="button"
+                        aria-label="Increase locations"
+                        onClick={() => setLocations(buyer.locations + 1)}
+                        disabled={buyer.locations >= 50}
+                      >
+                        <i className="fas fa-plus" aria-hidden="true" />
+                      </button>
+                    </span>
+                  </label>
+                </div>
+                <div
+                  className="t321-mkt-cart__teamctl-cadence"
+                  role="radiogroup"
+                  aria-label="Billing cadence"
+                >
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={buyer.cadence === "yearly"}
+                    className={buyer.cadence === "yearly" ? "is-active" : ""}
+                    onClick={() => setCadence("yearly")}
+                  >
+                    Yearly <em>−10%</em>
+                  </button>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={buyer.cadence === "monthly"}
+                    className={buyer.cadence === "monthly" ? "is-active" : ""}
+                    onClick={() => setCadence("monthly")}
+                  >
+                    Monthly
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="t321-mkt-cart__promo">
               <input
                 type="text"

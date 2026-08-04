@@ -350,6 +350,76 @@
   color: var(--t321-mkt-ink);
 }
 
+/* Team pricing controls (company carts) — employees/locations steppers and
+   the cadence switch, mirroring checkout's inputs in drawer scale. */
+.t321-mkt-cart__teamctl {
+  margin-bottom: 0.9rem;
+  padding: 0.8rem 0.85rem;
+  border: 1px solid var(--t321-mkt-line);
+  border-radius: 10px;
+  background: var(--t321-mkt-paper);
+}
+.t321-mkt-cart__teamctl-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+}
+.t321-mkt-cart__teamctl-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.t321-mkt-cart__teamctl-field > span:first-child {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--t321-mkt-ink-muted);
+}
+/* Reuses the seat-stepper look; kill its default top margin in this spot. */
+.t321-mkt-cart__teamctl .t321-mkt-cart__qty { margin-top: 0; }
+
+.t321-mkt-cart__teamctl-cadence {
+  display: inline-flex;
+  border: 1px solid var(--t321-mkt-line-strong);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.t321-mkt-cart__teamctl-cadence button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  border: 0;
+  background: var(--t321-mkt-paper);
+  color: var(--t321-mkt-ink-muted);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+.t321-mkt-cart__teamctl-cadence button + button {
+  border-left: 1px solid var(--t321-mkt-line-strong);
+}
+.t321-mkt-cart__teamctl-cadence button.is-active {
+  background: #0B1F33;
+  color: #fff;
+}
+.t321-mkt-cart__teamctl-cadence em {
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  background: var(--t321-mkt-positive-wash);
+  color: var(--t321-mkt-positive);
+  font-size: 0.66rem;
+  font-style: normal;
+  font-weight: 700;
+}
+.t321-mkt-cart__teamctl-cadence button.is-active em {
+  background: rgba(255, 255, 255, 0.16);
+  color: #A9E5C4;
+}
+
 /* "Then $X/mo" subscription line for company carts. */
 .t321-mkt-cart__ongoing {
   display: flex;
