@@ -7,7 +7,13 @@
 
 /* Shared slot rule: keeps whichever variant is rendered anchored in the
    bar and pinned right on mobile (where the __cta group is hidden). */
-.t321-mkt-cartbtn-slot { flex-shrink: 0; }
+.t321-mkt-cartbtn-slot {
+  flex-shrink: 0;
+  /* The header bar spaces its children 2rem apart — right for the nav, too
+     wide between "Browse courses" and this CTA, which belong together as a
+     pair. Pull back to the same 0.55rem the __cta group uses internally. */
+  margin-left: calc(0.55rem - 2rem);
+}
 
 /* Filled state — mirrors .t321-mkt-btn--primary's ink fill and 8px radius
    so it reads as a sibling of the other header buttons, not a special pill. */
