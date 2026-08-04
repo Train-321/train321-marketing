@@ -10,7 +10,15 @@ import type { CheckoutResult } from "@/lib/enroll";
 import { US_STATES } from "./states";
 import "./checkout.css";
 
-const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "";
+// Publishable keys are public by design (they can only tokenise, never
+// charge), so a code-level fallback is safe. It MUST belong to the same
+// Stripe account as the new-features backend's STRIPE_SECRET_KEY or every
+// payment fails with "No such token" — this is that account's test-mode key.
+// Set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (e.g. on Vercel) to override,
+// and REMEMBER to update this fallback if the backend ever moves to live keys.
+const PUBLISHABLE_KEY =
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
+  "pk_test_51TXerrHCrvN27dgKikzbOVKiEgVrnoGpmaDOaRQ19Rggz4Vwobdezb8CughlPawXWT662nPSCAsWQPOGWdJc3I3Z00Ylg5794l";
 
 // loadStripe returns a promise that must be created once, outside the
 // component — re-creating it on every render would reload Stripe.js each time.
