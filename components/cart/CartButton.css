@@ -1,39 +1,37 @@
-/* Cart entry point in the header nav — the slot the old "Enroll now" CTA
-   held, so it must read as a first-class action, not chrome.
+/* Header CTA slot. Two states rendered by CartButton.tsx:
+     empty  → a plain "Enroll now" primary button (global .t321-mkt-btn
+              styles — 8px radius, same as every other CTA on the site)
+     filled → the icon-only cart button below, same geometry as its
+              siblings, with the count badge pinned to the button's own
+              top-right corner. */
 
-   Two visual states carry the story:
-     empty     → quiet outlined pill, receded like a secondary control
-     has items → filled brand ink with the count badge, promoted to the
-                 strongest element in the bar (it's now the buyer's next step)
-   The transition between them is animated so adding the first item visibly
-   "activates" the button. */
+/* Shared slot rule: keeps whichever variant is rendered anchored in the
+   bar and pinned right on mobile (where the __cta group is hidden). */
+.t321-mkt-cartbtn-slot { flex-shrink: 0; }
+
+/* Filled state — mirrors .t321-mkt-btn--primary's ink fill and 8px radius
+   so it reads as a sibling of the other header buttons, not a special pill. */
 .t321-mkt-cartbtn {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
-  padding: 0.55rem 1.1rem;
-  border: 1px solid var(--t321-mkt-line-strong);
-  border-radius: 999px;
-  background: #ffffff;
-  color: var(--t321-mkt-ink);
-  font-family: inherit;
-  font-size: 0.88rem;
-  font-weight: 600;
-  line-height: 1.15;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.45rem;
+  padding: 0;
+  border: 1px solid #0B1F33;
+  border-radius: 8px;
+  background: #0B1F33;
+  color: #ffffff;
+  font-size: 1rem;
   cursor: pointer;
-  white-space: nowrap;
-  transition:
-    background 220ms ease,
-    color 220ms ease,
-    border-color 220ms ease,
-    box-shadow 220ms ease,
-    transform 120ms ease;
+  transition: background 160ms ease, border-color 160ms ease,
+    box-shadow 160ms ease, transform 120ms ease;
 }
 .t321-mkt-cartbtn:hover {
-  border-color: var(--t321-mkt-ink);
-  box-shadow: 0 4px 14px rgba(11, 31, 51, 0.12);
+  background: #061524;
+  border-color: #061524;
+  box-shadow: 0 4px 14px rgba(11, 31, 51, 0.22);
   transform: translateY(-1px);
 }
 .t321-mkt-cartbtn:active { transform: translateY(0); }
@@ -42,54 +40,27 @@
   outline-offset: 2px;
 }
 
-.t321-mkt-cartbtn.has-items {
-  background: linear-gradient(180deg, #12314E 0%, #0B1F33 100%);
-  border-color: #0B1F33;
-  color: #ffffff;
-  box-shadow: 0 6px 18px rgba(11, 31, 51, 0.28);
-}
-.t321-mkt-cartbtn.has-items:hover {
-  background: linear-gradient(180deg, #163A5C 0%, #0E2740 100%);
-  box-shadow: 0 8px 22px rgba(11, 31, 51, 0.34);
-  transform: translateY(-1px);
-}
-
-.t321-mkt-cartbtn__icon {
-  position: relative;
-  display: inline-flex;
-  font-size: 0.95rem;
-  /* The badge overhangs this box; letting it show keeps the button from
-     reserving space for a count that's usually absent. */
-  overflow: visible;
-}
-
+/* Count badge — sits ON the button's top-right corner edge, clear of the
+   icon. White ring lifts it off both the dark button and the page behind. */
 .t321-mkt-cartbtn__badge {
   position: absolute;
-  top: -0.62rem;
-  right: -0.68rem;
-  min-width: 1.2rem;
-  height: 1.2rem;
-  padding: 0 0.28rem;
+  top: -0.45rem;
+  right: -0.45rem;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.26rem;
   border-radius: 999px;
   background: linear-gradient(135deg, #00B4DB 0%, #0083B0 100%);
   color: #ffffff;
-  font-size: 0.66rem;
+  font-size: 0.64rem;
   font-weight: 800;
-  line-height: 1.2rem;
+  line-height: 1.1rem;
   text-align: center;
-  /* Ring separates the badge from whatever it overlaps — white on the light
-     button, and it doubles as a crisp edge on the dark filled state. */
   box-shadow:
     0 0 0 2px #ffffff,
-    0 2px 6px rgba(0, 131, 176, 0.45);
-  /* Pops on mount. The component remounts this node whenever the count
-     changes, so every add/remove gets the same little confirmation. */
+    0 2px 6px rgba(0, 131, 176, 0.4);
+  /* Pops on mount; the component remounts this node on every count change. */
   animation: t321-cartbadge-pop 380ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.t321-mkt-cartbtn.has-items .t321-mkt-cartbtn__badge {
-  box-shadow:
-    0 0 0 2px #0B1F33,
-    0 2px 6px rgba(0, 180, 219, 0.5);
 }
 
 @keyframes t321-cartbadge-pop {
@@ -98,20 +69,12 @@
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* Below the nav breakpoint the header collapses to brand + cart + burger.
-   The cart takes the auto margin so it pushes right and the burger trails it.
-   Icon-only circle keeps it compact next to the burger. */
+/* Below the nav breakpoint the header collapses to brand + CTA + burger;
+   this slot takes the auto margin so the pair pins right. */
 @media (max-width: 991.98px) {
-  .t321-mkt-cartbtn {
-    margin-left: auto;
-    width: 2.6rem;
-    height: 2.6rem;
-    padding: 0;
-    justify-content: center;
-  }
-  .t321-mkt-cartbtn__label { display: none; }
-  .t321-mkt-cartbtn__icon { font-size: 1.05rem; }
-  .t321-mkt-cartbtn__badge { top: -0.5rem; right: -0.55rem; }
+  .t321-mkt-cartbtn-slot { margin-left: auto; }
+  /* The link variant tightens up so "Enroll now" fits beside the burger. */
+  a.t321-mkt-cartbtn-slot { padding: 0.5rem 0.75rem; font-size: 0.85rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
