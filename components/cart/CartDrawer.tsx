@@ -33,7 +33,7 @@ export default function CartDrawer() {
     remove,
     setUsers,
     buyer,
-    setAudience,
+    requestAudienceChange,
     setEmployees,
     setLocations,
     setCadence
@@ -254,7 +254,7 @@ export default function CartDrawer() {
                 role="radio"
                 aria-checked={!isCompany}
                 className={!isCompany ? "is-active" : ""}
-                onClick={() => setAudience("individual")}
+                onClick={() => requestAudienceChange("individual")}
               >
                 <i className="fas fa-user" aria-hidden="true" /> Individual
               </button>
@@ -263,7 +263,7 @@ export default function CartDrawer() {
                 role="radio"
                 aria-checked={isCompany}
                 className={isCompany ? "is-active" : ""}
-                onClick={() => setAudience("company")}
+                onClick={() => requestAudienceChange("company")}
               >
                 <i className="fas fa-users" aria-hidden="true" /> Team
               </button>
@@ -406,7 +406,23 @@ export default function CartDrawer() {
               </div>
               {quote && shownDiscount > 0 && (
                 <div className="is-discount">
-                  <dt>Discount{quote.promo ? ` (${quote.promo.name})` : ""}</dt>
+                  <dt>
+                    Discount{quote.promo ? ` (${quote.promo.name})` : ""}
+                    {quote.promo && (
+                      <button
+                        type="button"
+                        className="t321-mkt-cart__promo-remove"
+                        aria-label="Remove promo code"
+                        title="Remove promo code"
+                        onClick={() => {
+                          applyPromo("");
+                          setPromoOpen(false);
+                        }}
+                      >
+                        <i className="fas fa-times" aria-hidden="true" />
+                      </button>
+                    )}
+                  </dt>
                   <dd>−{money(shownDiscount)}</dd>
                 </div>
               )}
@@ -443,6 +459,17 @@ export default function CartDrawer() {
             <p className="t321-mkt-cart__secure">
               <i className="fas fa-shield-halved" aria-hidden="true" />
               Secure checkout — payments powered by Stripe
+            </p>
+            <p className="t321-mkt-cart__terms">
+              By checking out you agree to our{" "}
+              <Link href="/legal/terms-conditions" onClick={closeDrawer}>
+                Terms &amp; Conditions
+              </Link>{" "}
+              and{" "}
+              <Link href="/legal/privacy-policy" onClick={closeDrawer}>
+                Privacy Policy
+              </Link>
+              .
             </p>
           </footer>
         )}
