@@ -21,7 +21,14 @@ export const ENROLL_BASE =
 export type MarketplaceCourse = {
   id: number;
   name: string;
-  description: string; // raw HTML from the backend
+  /**
+   * The Marketplace tab's "Overview" (raw HTML) — the copy an admin wrote for
+   * the public storefront. Deliberately NOT the course's `description`, which
+   * is the in-course instructions page: when no marketplace copy exists this
+   * is empty and the card simply shows no blurb, rather than leaking internal
+   * instructions text.
+   */
+  description: string;
   image: string | null; // fully-qualified thumbnail URL (or null)
   categoryId: number | null; // marketplace_category_id
   price: number;
@@ -62,6 +69,7 @@ type RawCourse = {
   id: number;
   name?: string;
   description?: string;
+  marketplace_description?: string;
   image?: string | null;
   category_id?: number | null;
   price?: number;
@@ -109,7 +117,9 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
     const courses: MarketplaceCourse[] = (data.courses || []).map((c) => ({
       id: c.id,
       name: c.name || "",
-      description: c.description || "",
+      // Marketplace Overview ONLY — no fallback to the instructions
+      // `description`. Empty marketplace copy → empty card blurb, by design.
+      description: c.marketplace_description || "",
       image: c.image || null,
       categoryId: c.category_id ?? null,
       price: Number(c.price ?? 0),
