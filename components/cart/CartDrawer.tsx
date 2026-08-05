@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useCart } from "./CartContext";
-import { COURSE_PLACEHOLDER_IMAGE } from "@/lib/newFeatures";
+import SkeletonImage from "@/components/SkeletonImage";
 import "./CartDrawer.css";
 
 const money = (n: number) =>
@@ -174,19 +174,7 @@ export default function CartDrawer() {
                   // large cart doesn't leave the last row trailing.
                   style={{ animationDelay: `${Math.min(i, 6) * 45 + 90}ms` }}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    className="t321-mkt-cart__thumb"
-                    src={line.image || COURSE_PLACEHOLDER_IMAGE}
-                    alt=""
-                    loading="lazy"
-                    onError={(e) => {
-                      const img = e.currentTarget;
-                      if (img.src.indexOf(COURSE_PLACEHOLDER_IMAGE) === -1) {
-                        img.src = COURSE_PLACEHOLDER_IMAGE;
-                      }
-                    }}
-                  />
+                  <SkeletonImage className="t321-mkt-cart__thumb" src={line.image} alt="" />
                   <div className="t321-mkt-cart__line-body">
                     <p className="t321-mkt-cart__line-name">{line.name}</p>
                     {line.stateLabel && (

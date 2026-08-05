@@ -9,8 +9,8 @@ import {
 } from "react";
 import type { GroupPicker } from "@/lib/enroll";
 import type { MarketplaceCourse } from "@/lib/newFeatures";
-import { COURSE_PLACEHOLDER_IMAGE } from "@/lib/newFeatures";
 import AddToCartButton from "./cart/AddToCartButton";
+import SkeletonImage from "./SkeletonImage";
 import CustomSelect from "./CustomSelect";
 import "./StateCoursePicker.css";
 
@@ -96,6 +96,7 @@ export function StateResults({ picker }: { picker: GroupPicker }) {
 
   // ── Cross-sell: other courses tagged for the picked state ──────────────
   const [recs, setRecs] = useState<MarketplaceCourse[]>([]);
+  const [recsLoading, setRecsLoading] = useState(false);
   const groupIds = useMemo(() => new Set(picker.variants.map((v) => v.id)), [picker]);
 
   useEffect(() => {
@@ -104,6 +105,7 @@ export function StateResults({ picker }: { picker: GroupPicker }) {
       return;
     }
     let cancelled = false;
+    setRecsLoading(true);
     (async () => {
       try {
         const res = await fetch(`/api/catalog?stateCode=${picked.code}&perPage=12`);
@@ -120,6 +122,8 @@ export function StateResults({ picker }: { picker: GroupPicker }) {
         );
       } catch {
         /* cross-sell is best-effort — the main results never depend on it */
+      } finally {
+        if (!cancelled) setRecsLoading(false);
       }
     })();
     return () => {
@@ -146,18 +150,7 @@ export function StateResults({ picker }: { picker: GroupPicker }) {
           {variants.map((v, idx) => (
             <article key={v.course ? v.course.id : `${v.id}-${idx}`} className="t321-sr__card">
               <div className="t321-sr__card-media">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={v.course?.image || COURSE_PLACEHOLDER_IMAGE}
-                  alt={v.title}
-                  loading="lazy"
-                  onError={(e) => {
-                    const img = e.currentTarget;
-                    if (img.src.indexOf(COURSE_PLACEHOLDER_IMAGE) === -1) {
-                      img.src = COURSE_PLACEHOLDER_IMAGE;
-                    }
-                  }}
-                />
+                <SkeletonImage src={v.course?.image} alt={v.title} />
                 {v.states === "all" && <span className="t321-sr__badge">All states</span>}
               </div>
               <div className="t321-sr__card-body">
@@ -194,7 +187,29 @@ export function StateResults({ picker }: { picker: GroupPicker }) {
           ))}
         </div>
 
-        {picked && recs.length > 0 && (
+        {picked && recsLoading && (
+          <div className="t321-sr__recs" aria-hidden="true">
+            <h3 className="t321-mkt-h3 t321-sr__recs-head">
+              Also available in {picked.name}
+            </h3>
+            <div className="t321-sr__grid">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="t321-sr__card t321-sr__card--skel">
+                  <div className="t321-sr__card-media t321-skel" />
+                  <div className="t321-sr__card-body">
+                    <span className="t321-skel t321-skel--label" style={{ width: "80%" }} />
+                    <div className="t321-sr__foot">
+                      <span className="t321-skel t321-skel--label" style={{ width: "3.5rem", marginBottom: 0 }} />
+                      <span className="t321-skel" style={{ width: "7rem", height: "2.4rem" }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {picked && !recsLoading && recs.length > 0 && (
           <div className="t321-sr__recs">
             <h3 className="t321-mkt-h3 t321-sr__recs-head">
               Also available in {picked.name}
@@ -203,18 +218,7 @@ export function StateResults({ picker }: { picker: GroupPicker }) {
               {recs.map((c) => (
                 <article key={c.id} className="t321-sr__card">
                   <div className="t321-sr__card-media">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={c.image || COURSE_PLACEHOLDER_IMAGE}
-                      alt={c.name}
-                      loading="lazy"
-                      onError={(e) => {
-                        const img = e.currentTarget;
-                        if (img.src.indexOf(COURSE_PLACEHOLDER_IMAGE) === -1) {
-                          img.src = COURSE_PLACEHOLDER_IMAGE;
-                        }
-                      }}
-                    />
+                    <SkeletonImage src={c.image} alt={c.name} />
                   </div>
                   <div className="t321-sr__card-body">
                     <h3 className="t321-sr__name">{c.name}</h3>

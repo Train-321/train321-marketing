@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CatalogPage } from "@/lib/sanity";
 import type { MarketplaceCourse, MarketplaceCategory, MarketplaceCatalog } from "@/lib/newFeatures";
-import { COURSE_PLACEHOLDER_IMAGE, CATALOG_PAGE_SIZE } from "@/lib/newFeatures";
+import { CATALOG_PAGE_SIZE } from "@/lib/newFeatures";
 import AddToCartButton from "@/components/cart/AddToCartButton";
+import SkeletonImage from "@/components/SkeletonImage";
 import type { CartCourse } from "@/lib/enroll";
 import "./catalog.css";
 
@@ -183,19 +184,7 @@ export default function CatalogClient({
                 {courses.map((c) => (
                   <article key={c.id} className="t321-mkt-catalog__card t321-mkt-card">
                     <div className="t321-mkt-catalog__card-top has-image is-tone-accent">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        className="t321-mkt-catalog__card-img"
-                        src={c.image || COURSE_PLACEHOLDER_IMAGE}
-                        alt={c.name}
-                        loading="lazy"
-                        onError={(e) => {
-                          const img = e.currentTarget;
-                          if (img.src.indexOf(COURSE_PLACEHOLDER_IMAGE) === -1) {
-                            img.src = COURSE_PLACEHOLDER_IMAGE;
-                          }
-                        }}
-                      />
+                      <SkeletonImage src={c.image} alt={c.name} className="t321-mkt-catalog__card-img" />
                     </div>
                     <div className="t321-mkt-catalog__card-body">
                       <h3 className="t321-mkt-h3">{c.name}</h3>
