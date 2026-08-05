@@ -27,6 +27,12 @@
 
 * { box-sizing: border-box; }
 
+/* Enroll buttons on grouped course pages anchor-scroll to the on-page
+   "Choose your state" section — glide there instead of teleporting. */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
 html, body {
   margin: 0;
   padding: 0;

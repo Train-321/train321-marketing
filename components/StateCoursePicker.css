@@ -1,0 +1,99 @@
+/* Inline state-first picker section on grouped course pages. */
+
+/* Anchor target — clear the sticky header when Enroll buttons scroll here. */
+#choose-your-state {
+  scroll-margin-top: 7rem;
+}
+
+.t321-sp__select {
+  max-width: 22rem;
+  margin-bottom: 1.5rem;
+}
+
+.t321-sp__hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 1.75rem 0.5rem;
+  font-size: 0.9rem;
+  color: var(--t321-mkt-ink-muted);
+}
+.t321-sp__hint i { font-size: 0.75rem; }
+
+.t321-sp__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  gap: 1rem;
+}
+
+.t321-sp__card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--t321-mkt-line);
+  border-radius: 12px;
+  background: var(--t321-mkt-paper);
+  box-shadow: 0 1px 2px rgba(11, 31, 51, 0.04);
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+  animation: t321-sp-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.t321-sp__card:hover {
+  border-color: var(--t321-mkt-line-strong);
+  box-shadow: 0 6px 18px rgba(11, 31, 51, 0.08);
+  transform: translateY(-1px);
+}
+
+@keyframes t321-sp-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.t321-sp__card-body { min-width: 0; }
+
+.t321-sp__name {
+  margin: 0 0 0.3rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: break-word;
+}
+
+.t321-sp__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--t321-mkt-ink-muted);
+}
+.t321-sp__meta em {
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--t321-mkt-accent-wash);
+  color: var(--t321-mkt-accent-ink);
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.t321-sp__card .t321-mkt-btn { flex-shrink: 0; white-space: nowrap; }
+
+@media (max-width: 560px) {
+  .t321-sp__card {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t321-sp__card { animation: none; transition: none; }
+}

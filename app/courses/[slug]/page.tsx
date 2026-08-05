@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { getCourse, getCourses, getDetailPagesCopy, getSiteSettings } from "@/lib/sanity";
 import EnrollButton from "@/components/EnrollButton";
 import CourseCertificate from "@/components/CourseCertificate";
-import { getGroupStateOptions, resolveEnrollCourse } from "@/lib/enroll";
+import StateCoursePicker from "@/components/StateCoursePicker";
+import { getGroupPicker, resolveEnrollCourse } from "@/lib/enroll";
 import "./course.css";
 
 export async function generateStaticParams() {
@@ -39,12 +40,17 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   //
   // An explicit `enrollUrl` override still wins — that's an editor saying
   // "send buyers here".
-  const [cartCourse, groupOptions] = await Promise.all([
+  const [cartCourse, picker] = await Promise.all([
     course.enrollUrl ? Promise.resolve(null) : resolveEnrollCourse(course.enrollId),
-    course.enrollUrl ? Promise.resolve(null) : getGroupStateOptions(course.enrollId)
+    course.enrollUrl ? Promise.resolve(null) : getGroupPicker(course.enrollId)
   ]);
 
-  const stateOptions = groupOptions ?? [];
+  // Grouped course → the page carries an inline "Choose your state" section
+  // (StateCoursePicker) and every Enroll button becomes an anchor scrolling
+  // to it. Ungrouped course → buttons act on the single course directly.
+  const grouped = Boolean(picker);
+  const ctaHref = grouped ? "#choose-your-state" : enrollHref;
+  const ctaCourse = grouped ? null : cartCourse;
 
   // Chrome copy with fallbacks.
   const crumbHome = copy?.courseCrumbHome || "Home";
@@ -102,11 +108,10 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             <p className="t321-mkt-lede">{course.tagline}</p>
             <div className="t321-mkt-course__cta">
               <EnrollButton
-                href={enrollHref}
+                href={ctaHref}
                 label={enrollLabel}
                 className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg"
-                options={stateOptions}
-                course={cartCourse}
+                course={ctaCourse}
                 mode="buy"
               />
               <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
@@ -156,11 +161,10 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
               {/* The aside is the "considering it" spot, so this one adds to
                   the cart and opens the drawer rather than jumping to checkout. */}
               <EnrollButton
-                href={enrollHref}
-                label={cartCourse || stateOptions.some((o) => o.course) ? "Add to cart" : getStartedLabel}
+                href={ctaHref}
+                label={grouped ? "Choose your state" : cartCourse ? "Add to cart" : getStartedLabel}
                 className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block"
-                options={stateOptions}
-                course={cartCourse}
+                course={ctaCourse}
                 mode="add"
                 showArrow={false}
               />
@@ -168,6 +172,8 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
           </aside>
         </div>
       </section>
+
+      {picker && <StateCoursePicker picker={picker} />}
 
       <section className="t321-mkt-section">
         <div className="t321-mkt-container t321-mkt-course__two">
@@ -263,11 +269,10 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
           </div>
           <div className="t321-mkt-course__cta-band-actions">
             <EnrollButton
-              href={ctaPrimaryHref}
+              href={grouped ? "#choose-your-state" : ctaPrimaryHref}
               label={ctaPrimaryLabel}
               className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg"
-              options={stateOptions}
-              course={cartCourse}
+              course={ctaCourse}
               mode="buy"
             />
             <Link href={ctaSecondaryHref} className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
