@@ -11,12 +11,12 @@
 // Only courses with status=1 AND in_store=1 (i.e. enabled in the marketplace)
 // are returned by the backend, which is exactly what we want to show here.
 
-const API_BASE = process.env.NEW_FEATURES_API_BASE || "https://new-features-api.train321.com";
+const API_BASE = process.env.NEW_FEATURES_API_BASE || "https://api.train321.com";
 
 // Where the Enroll button sends the buyer. Hash route on the new-features SPA;
 // `?add=<id>` deep-links the course straight into the enroll cart.
 export const ENROLL_BASE =
-  process.env.NEW_FEATURES_ENROLL_BASE || "https://new-features.train321.com/#/enroll";
+  process.env.NEW_FEATURES_ENROLL_BASE || "https://lms.train321.com/#/enroll";
 
 export type MarketplaceCourse = {
   id: number;

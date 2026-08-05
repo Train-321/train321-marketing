@@ -18,7 +18,7 @@
 // passes an invoice cadence.
 
 const API_BASE =
-  process.env.NEW_FEATURES_API_BASE || "https://new-features-api.train321.com";
+  process.env.NEW_FEATURES_API_BASE || "https://api.train321.com";
 
 /** A single course as the cart needs it. Mirrors the backend's course shape. */
 export type CartCourse = {
