@@ -63,6 +63,8 @@ export function StateSelect({ picker }: { picker: GroupPicker }) {
         placeholder="Select your state…"
         onChange={setStateName}
         ariaLabel="Your state"
+        searchable
+        searchPlaceholder="Search states…"
       />
       {!stateName && (
         <p className="t321-spc__hint">
