@@ -38,6 +38,13 @@
   min-width: 0;
 }
 .t321-mkt-catalog__search input::placeholder { color: var(--t321-mkt-ink-muted); }
+/* Hide the browser's built-in clear ("×") on type="search" — we render our
+   own clear button, and Chrome's native one made it show twice. */
+.t321-mkt-catalog__search input::-webkit-search-cancel-button,
+.t321-mkt-catalog__search input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
 .t321-mkt-catalog__search-clear {
   background: transparent;
   border: 0;

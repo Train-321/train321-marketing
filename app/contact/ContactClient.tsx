@@ -52,13 +52,17 @@ export default function ContactClient({ page, settings }: Props) {
   // is a placeholder, so editing the global phone updates the contact page too.
   const phone = settings?.phone || "561-325-7300";
   const email = settings?.email || "info@train321.com";
-  const tiles = (page?.tiles?.length ? page.tiles : FALLBACK_TILES).map((t) => ({
-    ...t,
-    linkHref:
-      t.linkHref === "PHONE" ? `tel:+1${phone.replace(/\D/g, "")}` :
-      t.linkHref === "EMAIL" ? `mailto:${email}` :
-      t.linkHref
-  }));
+  const tiles = (page?.tiles?.length ? page.tiles : FALLBACK_TILES).map((t) => {
+    let href = t.linkHref;
+    if (href === "PHONE") href = `tel:+1${phone.replace(/\D/g, "")}`;
+    else if (href === "EMAIL") href = `mailto:${email}`;
+    // CMS-entered tiles sometimes hold a bare address ("info@train321.com")
+    // or phone number — without a scheme those render as relative URLs and
+    // 404. Prefix the right scheme instead.
+    else if (href && /^[^\s@/]+@[^\s@/]+\.[^\s@/]+$/.test(href)) href = `mailto:${href}`;
+    else if (href && /^\+?[\d\s().-]{7,}$/.test(href)) href = `tel:${href.replace(/[^\d+]/g, "")}`;
+    return { ...t, linkHref: href };
+  });
 
   const formHeading = page?.formHeading || "Send us a message";
   const formLede = page?.formLede || "Fill out the form below and the right person on our team will pick it up.";

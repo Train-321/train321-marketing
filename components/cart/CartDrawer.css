@@ -614,6 +614,37 @@
 }
 .t321-mkt-cart__secure i { color: var(--t321-mkt-positive); font-size: 0.72rem; }
 
+.t321-mkt-cart__promo-remove {
+  margin-left: 0.4rem;
+  padding: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--t321-mkt-paper-sunk);
+  color: var(--t321-mkt-ink-muted);
+  font-size: 0.6rem;
+  line-height: 1;
+  cursor: pointer;
+  vertical-align: text-bottom;
+}
+.t321-mkt-cart__promo-remove:hover {
+  background: var(--t321-mkt-line);
+  color: var(--t321-mkt-ink);
+}
+
+.t321-mkt-cart__terms {
+  margin: 0.45rem 0 0;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--t321-mkt-ink-muted);
+}
+.t321-mkt-cart__terms a {
+  color: inherit;
+  text-decoration: underline;
+}
+.t321-mkt-cart__terms a:hover { color: var(--t321-mkt-ink); }
+
 /* Motion is decorative here — the drawer still opens and closes without it. */
 @media (prefers-reduced-motion: reduce) {
   .t321-mkt-cart__panel,

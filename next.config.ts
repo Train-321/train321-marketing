@@ -54,7 +54,12 @@ const nextConfig: NextConfig = {
         source: `/${slug}`,
         destination: `/legal/${slug}`,
         permanent: true
-      }))
+      })),
+      // Short/alternate legal slugs (used by some CMS-managed footer links)
+      // → the canonical legal documents.
+      { source: "/legal/terms", destination: "/legal/terms-conditions", permanent: true },
+      { source: "/legal/terms-of-service", destination: "/legal/terms-conditions", permanent: true },
+      { source: "/legal/privacy", destination: "/legal/privacy-policy", permanent: true }
     ];
   }
 };
