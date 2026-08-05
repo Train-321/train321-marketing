@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getCourse, getCourses, getDetailPagesCopy, getSiteSettings } from "@/lib/sanity";
 import EnrollButton from "@/components/EnrollButton";
 import CourseCertificate from "@/components/CourseCertificate";
-import StateCoursePicker from "@/components/StateCoursePicker";
+import { StatePickerProvider, StateSelect, StateResults } from "@/components/StateCoursePicker";
 import { getGroupPicker, resolveEnrollCourse } from "@/lib/enroll";
 import "./course.css";
 
@@ -90,6 +90,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
 
   return (
     <article className="t321-mkt-course">
+      <StatePickerProvider>
       <section className="t321-mkt-course__hero">
         <div className="t321-mkt-container t321-mkt-course__hero-grid">
           <div className="t321-mkt-course__hero-body">
@@ -158,22 +159,27 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                   ))}
                 </ul>
               )}
-              {/* The aside is the "considering it" spot, so this one adds to
-                  the cart and opens the drawer rather than jumping to checkout. */}
-              <EnrollButton
-                href={ctaHref}
-                label={grouped ? "Choose your state" : cartCourse ? "Add to cart" : getStartedLabel}
-                className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block"
-                course={ctaCourse}
-                mode="add"
-                showArrow={false}
-              />
+              {/* Grouped course → the state picker lives right here in the
+                  price card: highlighted dropdown, versions beneath it.
+                  Ungrouped → the plain add-to-cart button as before. */}
+              {picker ? (
+                <StateSelect picker={picker} />
+              ) : (
+                <EnrollButton
+                  href={ctaHref}
+                  label={cartCourse ? "Add to cart" : getStartedLabel}
+                  className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block"
+                  course={ctaCourse}
+                  mode="add"
+                  showArrow={false}
+                />
+              )}
             </div>
           </aside>
         </div>
       </section>
 
-      {picker && <StateCoursePicker picker={picker} />}
+      {picker && <StateResults picker={picker} />}
 
       <section className="t321-mkt-section">
         <div className="t321-mkt-container t321-mkt-course__two">
@@ -281,6 +287,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
           </div>
         </div>
       </section>
+      </StatePickerProvider>
     </article>
   );
 }

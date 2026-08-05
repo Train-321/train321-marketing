@@ -1,99 +1,145 @@
-/* Inline state-first picker section on grouped course pages. */
+/* State-first picker: dropdown in the hero card (.t321-spc) + full-width
+   results section below the hero (.t321-sr). */
 
-/* Anchor target — clear the sticky header when Enroll buttons scroll here. */
-#choose-your-state {
+/* ── Card dropdown ────────────────────────────────────────────────────── */
+.t321-spc {
   scroll-margin-top: 7rem;
 }
 
-.t321-sp__select {
-  max-width: 22rem;
-  margin-bottom: 1.5rem;
-}
-
-.t321-sp__hint {
+.t321-spc__label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-  padding: 1.75rem 0.5rem;
-  font-size: 0.9rem;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--t321-mkt-ink);
+}
+.t321-spc__label i {
+  color: var(--t321-mkt-accent-ink);
+  font-size: 0.75rem;
+}
+
+/* Highlighted dropdown — the card's primary action, so it gets the accent
+   treatment the buy button would otherwise carry. */
+.t321-spc .t321-mkt-select__btn {
+  border: 2px solid var(--t321-mkt-accent);
+  box-shadow: 0 0 0 3px var(--t321-mkt-accent-wash);
+  font-weight: 600;
+}
+.t321-spc .t321-mkt-select__btn:hover {
+  border-color: var(--t321-mkt-accent-hover, var(--t321-mkt-accent));
+}
+
+.t321-spc__hint {
+  margin: 0.6rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
   color: var(--t321-mkt-ink-muted);
 }
-.t321-sp__hint i { font-size: 0.75rem; }
 
-.t321-sp__grid {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/* ── Results section ──────────────────────────────────────────────────── */
+.t321-sr__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr));
+  gap: 1.25rem;
 }
 
-.t321-sp__card {
+.t321-sr__card {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.1rem 1.25rem;
+  flex-direction: column;
   border: 1px solid var(--t321-mkt-line);
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--t321-mkt-paper);
+  overflow: hidden;
   box-shadow: 0 1px 2px rgba(11, 31, 51, 0.04);
   transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
-  animation: t321-sp-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: t321-sr-in 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-.t321-sp__card:hover {
+.t321-sr__card:hover {
   border-color: var(--t321-mkt-line-strong);
-  box-shadow: 0 6px 18px rgba(11, 31, 51, 0.08);
-  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(11, 31, 51, 0.1);
+  transform: translateY(-2px);
 }
 
-@keyframes t321-sp-in {
-  from { opacity: 0; transform: translateY(8px); }
+@keyframes t321-sr-in {
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.t321-sp__card-body { min-width: 0; }
-
-.t321-sp__name {
-  margin: 0 0 0.3rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  line-height: 1.35;
-  overflow-wrap: break-word;
+.t321-sr__card-media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--t321-mkt-paper-sunk);
+}
+.t321-sr__card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.t321-sp__meta {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--t321-mkt-ink-muted);
-}
-.t321-sp__meta em {
-  padding: 0.1rem 0.45rem;
+.t321-sr__badge {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  padding: 0.18rem 0.55rem;
   border-radius: 999px;
-  background: var(--t321-mkt-accent-wash);
-  color: var(--t321-mkt-accent-ink);
+  background: rgba(11, 31, 51, 0.85);
+  color: #fff;
   font-size: 0.7rem;
-  font-style: normal;
   font-weight: 700;
   letter-spacing: 0.03em;
-  white-space: nowrap;
 }
 
-.t321-sp__card .t321-mkt-btn { flex-shrink: 0; white-space: nowrap; }
+.t321-sr__card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem 1.15rem;
+}
 
-@media (max-width: 560px) {
-  .t321-sp__card {
-    flex-direction: column;
-    align-items: stretch;
-    text-align: left;
-  }
+.t321-sr__name {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.t321-sr__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.t321-sr__price {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--t321-mkt-ink);
+}
+.t321-sr__price--muted {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--t321-mkt-ink-muted);
+}
+
+.t321-sr__foot .t321-mkt-btn { flex-shrink: 0; white-space: nowrap; }
+
+/* Cross-sell shelf. */
+.t321-sr__recs {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--t321-mkt-line);
+}
+.t321-sr__recs-head {
+  margin: 0 0 1.25rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .t321-sp__card { animation: none; transition: none; }
+  .t321-sr__card { animation: none; transition: none; }
 }

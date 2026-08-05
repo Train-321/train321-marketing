@@ -1,7 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 import type { GroupPicker } from "@/lib/enroll";
+import type { MarketplaceCourse } from "@/lib/newFeatures";
+import { COURSE_PLACEHOLDER_IMAGE } from "@/lib/newFeatures";
 import AddToCartButton from "./cart/AddToCartButton";
 import CustomSelect from "./CustomSelect";
 import "./StateCoursePicker.css";
@@ -10,94 +18,226 @@ const money = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
 /**
- * Inline state-first course picker for grouped courses — a page section, not
- * a dialog. The buyer picks their state from a dropdown and the versions
- * available there render directly beneath, each with its own Add to cart.
- *
- * Living on the page (rather than in a modal) means a buyer can add several
- * versions in one visit, and the section has room to grow into cross-sell
- * ("also available in Florida…") later. The Enroll buttons elsewhere on the
- * page anchor-scroll here via id="choose-your-state".
+ * The picked state is shared between two spots that live far apart in the
+ * page tree: the dropdown in the hero price card and the results section
+ * below the hero. This tiny context is the bridge.
  */
-export default function StateCoursePicker({ picker }: { picker: GroupPicker }) {
+const StateCtx = createContext<{
+  stateName: string;
+  setStateName: (s: string) => void;
+} | null>(null);
+
+export function StatePickerProvider({ children }: { children: React.ReactNode }) {
   const [stateName, setStateName] = useState("");
+  const value = useMemo(() => ({ stateName, setStateName }), [stateName]);
+  return <StateCtx.Provider value={value}>{children}</StateCtx.Provider>;
+}
 
+function useStatePicker() {
+  const ctx = useContext(StateCtx);
+  if (!ctx) throw new Error("State picker components need <StatePickerProvider>");
+  return ctx;
+}
+
+/**
+ * The hero price card's slice of the picker: a highlighted state dropdown.
+ * Selecting a state makes <StateResults /> (below the hero) render that
+ * state's course versions as full-size thumbnail cards.
+ */
+export function StateSelect({ picker }: { picker: GroupPicker }) {
+  const { stateName, setStateName } = useStatePicker();
   const stateNames = picker.states.map((s) => s.name);
-  const pickedCode = picker.states.find((s) => s.name === stateName)?.code ?? null;
 
-  // No specific states at all (every variant is "all states") → skip the
-  // dropdown and list everything. Otherwise: nothing shows until a state is
-  // picked, then that state's versions plus the all-states versions.
-  const visible =
-    stateNames.length === 0
-      ? picker.variants
-      : pickedCode
-        ? picker.variants.filter(
-            (v) => v.states === "all" || v.states.includes(pickedCode)
-          )
-        : [];
+  // Every variant is "all states" — nothing to choose; the results section
+  // shows everything on its own.
+  if (stateNames.length === 0) return null;
 
   return (
-    <section id="choose-your-state" className="t321-mkt-section t321-mkt-section--sunk t321-sp">
+    <div className="t321-spc" id="choose-your-state">
+      <p className="t321-spc__label">
+        <i className="fas fa-map-marker-alt" aria-hidden="true" /> Choose your state
+      </p>
+      <CustomSelect
+        value={stateName}
+        options={stateNames}
+        placeholder="Select your state…"
+        onChange={setStateName}
+        ariaLabel="Your state"
+      />
+      {!stateName && (
+        <p className="t321-spc__hint">
+          Courses for your state will appear below.
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Full-width results section under the hero. Appears once a state is picked
+ * (immediately when the group has no state-specific versions): the group's
+ * versions for that state as big thumbnail cards, followed by other courses
+ * available in the same state — the cross-sell shelf.
+ */
+export function StateResults({ picker }: { picker: GroupPicker }) {
+  const { stateName } = useStatePicker();
+
+  const picked = picker.states.find((s) => s.name === stateName) ?? null;
+  const hasStates = picker.states.length > 0;
+  const active = !hasStates || picked !== null;
+
+  const variants = !active
+    ? []
+    : !hasStates
+      ? picker.variants
+      : picker.variants.filter(
+          (v) => v.states === "all" || v.states.includes(picked!.code)
+        );
+
+  // ── Cross-sell: other courses tagged for the picked state ──────────────
+  const [recs, setRecs] = useState<MarketplaceCourse[]>([]);
+  const groupIds = useMemo(() => new Set(picker.variants.map((v) => v.id)), [picker]);
+
+  useEffect(() => {
+    if (!picked) {
+      setRecs([]);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/catalog?stateCode=${picked.code}&perPage=12`);
+        if (!res.ok) return;
+        const data = (await res.json()) as { courses: MarketplaceCourse[] };
+        if (cancelled) return;
+        setRecs(
+          data.courses
+            // Real courses only (no group entries), and nothing already
+            // offered by this group's own version list.
+            .filter((c) => typeof c.id === "number" && Number.isFinite(c.id))
+            .filter((c) => !groupIds.has(c.id))
+            .slice(0, 4)
+        );
+      } catch {
+        /* cross-sell is best-effort — the main results never depend on it */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [picked, groupIds]);
+
+  if (!active) return null;
+
+  return (
+    <section className="t321-mkt-section t321-mkt-section--sunk t321-sr">
       <div className="t321-mkt-container">
         <div className="t321-mkt-section__head">
           <span className="t321-mkt-eyebrow">
-            <i className="fas fa-map-marker-alt" aria-hidden="true" /> State-specific
+            <i className="fas fa-map-marker-alt" aria-hidden="true" />
+            {picked ? ` Available in ${picked.name}` : " Available everywhere"}
           </span>
-          <h2 className="t321-mkt-h2">Choose your state</h2>
-          <p className="t321-mkt-lede">
-            Requirements vary by state. Pick yours to see the versions available there.
-          </p>
+          <h2 className="t321-mkt-h2">
+            {picked ? `Your courses in ${picked.name}` : "Choose your version"}
+          </h2>
         </div>
 
-        {stateNames.length > 0 && (
-          <div className="t321-sp__select">
-            <CustomSelect
-              value={stateName}
-              options={stateNames}
-              placeholder="Select your state…"
-              onChange={setStateName}
-              ariaLabel="Your state"
-            />
-          </div>
-        )}
-
-        {stateNames.length > 0 && !pickedCode ? (
-          <p className="t321-sp__hint">
-            <i className="fas fa-arrow-up" aria-hidden="true" />
-            Choose a state above to see the courses available there.
-          </p>
-        ) : (
-          <ul className="t321-sp__grid">
-            {visible.map((v, idx) => (
-              <li key={v.course ? v.course.id : `${v.id}-${idx}`} className="t321-sp__card">
-                <div className="t321-sp__card-body">
-                  <p className="t321-sp__name">{v.title || v.stateText}</p>
-                  <p className="t321-sp__meta">
-                    {v.course ? money(v.price) : "Served by an external provider"}
-                    {v.states === "all" && <em>All states</em>}
-                  </p>
+        <div className="t321-sr__grid">
+          {variants.map((v, idx) => (
+            <article key={v.course ? v.course.id : `${v.id}-${idx}`} className="t321-sr__card">
+              <div className="t321-sr__card-media">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={v.course?.image || COURSE_PLACEHOLDER_IMAGE}
+                  alt={v.title}
+                  loading="lazy"
+                  onError={(e) => {
+                    const img = e.currentTarget;
+                    if (img.src.indexOf(COURSE_PLACEHOLDER_IMAGE) === -1) {
+                      img.src = COURSE_PLACEHOLDER_IMAGE;
+                    }
+                  }}
+                />
+                {v.states === "all" && <span className="t321-sr__badge">All states</span>}
+              </div>
+              <div className="t321-sr__card-body">
+                <h3 className="t321-sr__name">{v.title || v.stateText}</h3>
+                <div className="t321-sr__foot">
+                  {v.course ? (
+                    <>
+                      <span className="t321-sr__price">{money(v.price)}</span>
+                      <AddToCartButton
+                        course={v.course}
+                        mode="add"
+                        className="t321-mkt-btn t321-mkt-btn--primary"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <span className="t321-sr__price t321-sr__price--muted">
+                        External provider
+                      </span>
+                      <a
+                        href={v.href}
+                        className="t321-mkt-btn t321-mkt-btn--ghost"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Go to provider{" "}
+                        <i className="fas fa-external-link-alt" aria-hidden="true" />
+                      </a>
+                    </>
+                  )}
                 </div>
-                {v.course ? (
-                  <AddToCartButton
-                    course={v.course}
-                    mode="add"
-                    className="t321-mkt-btn t321-mkt-btn--primary"
-                  />
-                ) : (
-                  // External-provider state — link out, never add to cart.
-                  <a
-                    href={v.href}
-                    className="t321-mkt-btn t321-mkt-btn--ghost"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Go to provider <i className="fas fa-external-link-alt" aria-hidden="true" />
-                  </a>
-                )}
-              </li>
-            ))}
-          </ul>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        {picked && recs.length > 0 && (
+          <div className="t321-sr__recs">
+            <h3 className="t321-mkt-h3 t321-sr__recs-head">
+              Also available in {picked.name}
+            </h3>
+            <div className="t321-sr__grid">
+              {recs.map((c) => (
+                <article key={c.id} className="t321-sr__card">
+                  <div className="t321-sr__card-media">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={c.image || COURSE_PLACEHOLDER_IMAGE}
+                      alt={c.name}
+                      loading="lazy"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        if (img.src.indexOf(COURSE_PLACEHOLDER_IMAGE) === -1) {
+                          img.src = COURSE_PLACEHOLDER_IMAGE;
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="t321-sr__card-body">
+                    <h3 className="t321-sr__name">{c.name}</h3>
+                    <div className="t321-sr__foot">
+                      <span className="t321-sr__price">{money(c.price)}</span>
+                      <AddToCartButton
+                        course={{
+                          id: c.id,
+                          name: c.name,
+                          price: c.price,
+                          image: c.image,
+                          isSeatBased: c.isSeatBased,
+                          stateLabel: c.stateLabel
+                        }}
+                        mode="add"
+                        className="t321-mkt-btn t321-mkt-btn--primary"
+                      />
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </section>

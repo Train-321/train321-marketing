@@ -63,6 +63,12 @@ export type CatalogQuery = {
   categoryId?: number | null;
   page?: number;
   perPage?: number;
+  /**
+   * 2-letter state filter (strict): only courses an admin explicitly tagged
+   * for this state come back. Powers the "also available in {state}"
+   * cross-sell shelf on grouped course pages.
+   */
+  stateCode?: string | null;
 };
 
 type RawCourse = {
@@ -97,7 +103,8 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
         page,
         type: "all",
         search: query.search || "",
-        marketplace_category_id: query.categoryId || ""
+        marketplace_category_id: query.categoryId || "",
+        state_code: query.stateCode || ""
       }),
       // Revalidate every 5 minutes so newly enabled/disabled courses surface
       // without a redeploy, while keeping the page fast.
