@@ -8,6 +8,7 @@ import ChatWidget from "@/components/ChatWidgetShell";
 import DisableDraftMode from "@/components/DisableDraftMode";
 import { CartProvider } from "@/components/cart/CartContext";
 import CartDrawer from "@/components/cart/CartDrawer";
+import CartToast from "@/components/cart/CartToast";
 import { SanityLive } from "@/lib/sanity";
 import "./globals.css";
 
@@ -101,6 +102,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
           {/* Trigger lives in SiteHeader's nav; this is just the panel. */}
           <CartDrawer />
+          {/* Bottom-center "Added to cart" confirmation. */}
+          <CartToast />
         </CartProvider>
         <ChatWidget />
         {isDraft && (

@@ -8,6 +8,8 @@ import "./EnrollButton.css";
 
 export type StateOption = {
   state: string;
+  /** Multi-state variants: the normalized 2-letter codes, rendered as chips. */
+  stateCodes?: string[];
   href: string;
   title?: string;
   /**
@@ -61,7 +63,7 @@ export default function EnrollButton({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [added, setAdded] = useState(false);
-  const { add, has, openDrawer } = useCart();
+  const { add, has, openDrawer, notifyAdded, buyer } = useCart();
   const router = useRouter();
 
   const hasOptions = Array.isArray(options) && options.length > 0;
@@ -87,7 +89,8 @@ export default function EnrollButton({
       router.push("/checkout");
       return;
     }
-    openDrawer();
+    // Toast confirmation instead of flinging the drawer open mid-browse.
+    notifyAdded(target.name);
     setAdded(true);
     setTimeout(() => setAdded(false), 1600);
   };
@@ -104,9 +107,13 @@ export default function EnrollButton({
 
   // ── 2. Single course, buyable inline ───────────────────────────────────
   if (!hasOptions && course) {
-    // In "add" mode a compliance course already in the cart has nothing more
-    // to add, so the button becomes a way back into the drawer.
-    const settled = mode === "add" && has(course.id) && !course.isSeatBased;
+    // In "add" mode a course already in the cart usually has nothing more to
+    // add, so the button becomes a way back into the drawer. Seat-based
+    // courses stay addable only in team mode (re-add bumps the seat count).
+    const settled =
+      mode === "add" &&
+      has(course.id) &&
+      (!course.isSeatBased || buyer.audience !== "company");
     return (
       <button
         type="button"
@@ -172,10 +179,13 @@ export default function EnrollButton({
             </div>
 
             <ul className="t321-mkt-enroll__list">
-              {options!.map((o) =>
+              {/* Keys: several variants can share a state label (e.g. two
+                  "All states" versions), so the course id / index breaks
+                  the tie. */}
+              {options!.map((o, idx) =>
                 o.course ? (
                   // Resolved to a real course — buy it inline.
-                  <li key={o.state}>
+                  <li key={o.course.id}>
                     <button
                       type="button"
                       className="t321-mkt-enroll__option"
@@ -184,22 +194,14 @@ export default function EnrollButton({
                         buy(o.course!);
                       }}
                     >
-                      <span className="t321-mkt-enroll__option-state">{o.state}</span>
-                      {o.title && o.title !== o.state && (
-                        <span className="t321-mkt-enroll__option-course">{o.title}</span>
-                      )}
-                      <i className="fas fa-arrow-right" aria-hidden="true" />
+                      <OptionBody option={o} />
                     </button>
                   </li>
                 ) : (
                   // Not linked to a marketplace id yet — keep the old link.
-                  <li key={o.state}>
+                  <li key={`${o.state}-${idx}`}>
                     <a href={o.href} className="t321-mkt-enroll__option">
-                      <span className="t321-mkt-enroll__option-state">{o.state}</span>
-                      {o.title && o.title !== o.state && (
-                        <span className="t321-mkt-enroll__option-course">{o.title}</span>
-                      )}
-                      <i className="fas fa-arrow-right" aria-hidden="true" />
+                      <OptionBody option={o} />
                     </a>
                   </li>
                 )
@@ -208,6 +210,34 @@ export default function EnrollButton({
           </div>
         </div>
       )}
+    </>
+  );
+}
+
+/**
+ * Shared inner layout for a state-picker row: the state line gets the full
+ * row width (a bold name, or one chip per code for multi-state variants —
+ * every state visible, nothing truncated), with the course name beneath and
+ * the arrow pinned to the edge.
+ */
+function OptionBody({ option }: { option: StateOption }) {
+  return (
+    <>
+      <span className="t321-mkt-enroll__option-body">
+        {option.stateCodes?.length ? (
+          <span className="t321-mkt-enroll__option-states" aria-label={option.state}>
+            {option.stateCodes.map((c) => (
+              <em key={c}>{c}</em>
+            ))}
+          </span>
+        ) : (
+          <span className="t321-mkt-enroll__option-state">{option.state}</span>
+        )}
+        {option.title && option.title !== option.state && (
+          <span className="t321-mkt-enroll__option-course">{option.title}</span>
+        )}
+      </span>
+      <i className="fas fa-arrow-right" aria-hidden="true" />
     </>
   );
 }

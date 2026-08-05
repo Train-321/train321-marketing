@@ -29,8 +29,8 @@ export default function CourseCertificate({
   completionDate = "03-14-2026",
   expirationDate = "03-14-2029",
   certificateNo = "2026-100426",
-  signatureName = "Eric Mickelson",
-  signatureTitle = "Eric Mickelson, President · Train 321, Inc.",
+  signatureName = "Train 321 Learning Team",
+  signatureTitle = "Train 321, LLC",
   legalText = "SAMPLE CERTIFICATE — SHOWN FOR ILLUSTRATION. STUDENT CERTIFICATION: BY COMPLETING THIS PROGRAM THE STUDENT CERTIFIES THAT THEY COMPLETED ALL LESSONS, QUIZZES AND THE FINAL EXAM REQUIRED TO DEMONSTRATE MASTERY OF ALL MATERIAL. ISSUED CERTIFICATES CARRY THE LEARNER'S NAME, COMPLETION AND EXPIRATION DATES, AND A UNIQUE CERTIFICATE NUMBER."
 }: CourseCertificateProps) {
   return (

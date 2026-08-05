@@ -10,27 +10,31 @@ import type { CheckoutResult } from "@/lib/enroll";
 import { US_STATES } from "./states";
 import "./checkout.css";
 
-// Publishable keys are public by design (they can only tokenise, never
-// charge), so a code-level fallback is safe. It MUST belong to the same
-// Stripe account as the new-features backend's STRIPE_SECRET_KEY or every
-// payment fails with "No such token" — this is that account's test-mode key.
-// Set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (e.g. on Vercel) to override,
-// and REMEMBER to update this fallback if the backend ever moves to live keys.
-const PUBLISHABLE_KEY =
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
-  "pk_test_51TXerrHCrvN27dgKikzbOVKiEgVrnoGpmaDOaRQ19Rggz4Vwobdezb8CughlPawXWT662nPSCAsWQPOGWdJc3I3Z00Ylg5794l";
-
-// loadStripe returns a promise that must be created once, outside the
-// component — re-creating it on every render would reload Stripe.js each time.
-const stripePromise = PUBLISHABLE_KEY ? loadStripe(PUBLISHABLE_KEY) : null;
+// The publishable key is chosen server-side in page.tsx so it always pairs
+// with the LMS backend this deployment talks to (test key for the staging
+// backend, live key for production) — a mismatched pair fails every payment
+// with "No such token".
+//
+// loadStripe must run once per key, outside the render cycle — re-creating
+// the promise on every render would reload Stripe.js each time.
+let stripePromise: ReturnType<typeof loadStripe> | null = null;
+let stripeKeyLoaded = "";
+function getStripe(publishableKey: string) {
+  if (!publishableKey) return null;
+  if (!stripePromise || stripeKeyLoaded !== publishableKey) {
+    stripePromise = loadStripe(publishableKey);
+    stripeKeyLoaded = publishableKey;
+  }
+  return stripePromise;
+}
 
 const money = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
-export default function CheckoutClient() {
+export default function CheckoutClient({ publishableKey }: { publishableKey: string }) {
   return (
-    <Elements stripe={stripePromise}>
-      <CheckoutForm />
+    <Elements stripe={getStripe(publishableKey)}>
+      <CheckoutForm stripeConfigured={Boolean(publishableKey)} />
     </Elements>
   );
 }
@@ -45,33 +49,12 @@ type FieldErrors = Partial<
     | "company_name"
     | "billing_first_name"
     | "billing_last_name"
-    | "billing_email"
-    | "phone"
-    | "billing_phone",
+    | "billing_email",
     string
   >
 >;
 
-/**
- * Progressive US phone mask: "(555) 123-4567". Non-digits are stripped, a
- * leading country "1" on a full number is dropped, and input caps at 10
- * digits — so pasted values like "+1 555-123-4567" still land correctly.
- */
-function formatUsPhone(raw: string): string {
-  const d = raw.replace(/\D/g, "").replace(/^1(?=\d{10})/, "").slice(0, 10);
-  if (!d) return "";
-  if (d.length < 4) return `(${d}`;
-  if (d.length < 7) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
-  return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
-}
-
-/** A masked phone is valid when empty (optional field) or fully 10 digits. */
-function phoneIsValid(v: string): boolean {
-  const digits = v.replace(/\D/g, "").length;
-  return digits === 0 || digits === 10;
-}
-
-function CheckoutForm() {
+function CheckoutForm({ stripeConfigured }: { stripeConfigured: boolean }) {
   const {
     lines,
     quote,
@@ -85,7 +68,7 @@ function CheckoutForm() {
     clear,
     toApiLines,
     buyer,
-    requestAudienceChange,
+    setAudience,
     setEmployees,
     setLocations,
     setCadence
@@ -116,6 +99,10 @@ function CheckoutForm() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [result, setResult] = useState<CheckoutResult | null>(null);
   const [promoDraft, setPromoDraft] = useState(promoCode);
+  // Collapsed behind "Have a promo code?" — same disclosure as the drawer.
+  // Stays open once a code is set so an applied promo is never hidden.
+  const [promoOpen, setPromoOpen] = useState(false);
+  const showPromoInput = promoOpen || Boolean(promoCode);
 
   // ── Which numbers apply ────────────────────────────────────────────────
   // Individual: one-time totals. Company: the chosen cadence's subscription
@@ -148,25 +135,6 @@ function CheckoutForm() {
       setErrors((prev) => ({ ...prev, [`billing_${key}`]: undefined }));
     };
 
-  // Phone fields run through the mask instead of the plain setters.
-  const setPhone = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = formatUsPhone(e.target.value);
-    setForm((f) => ({ ...f, phone: value }));
-    setErrors((prev) => ({ ...prev, phone: undefined }));
-  };
-  const setBillPhone = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = formatUsPhone(e.target.value);
-    setBilling((b) => ({ ...b, phone: value }));
-    setErrors((prev) => ({ ...prev, billing_phone: undefined }));
-  };
-
-  const onBillingEmailBlur = () => {
-    const email = billing.email.trim();
-    if (email && !/^\S+@\S+\.\S+$/.test(email)) {
-      setErrors((prev) => ({ ...prev, billing_email: "Enter a valid email address." }));
-    }
-  };
-
   /**
    * Ask the backend whether this email already has an account, so the buyer
    * finds out here rather than after entering a card. Silent on failure — the
@@ -174,13 +142,7 @@ function CheckoutForm() {
    */
   const onEmailBlur = async () => {
     const email = form.email.trim();
-    // Flag a malformed address as soon as the buyer leaves the field —
-    // same message submit-time validation would show.
-    if (email && !/^\S+@\S+\.\S+$/.test(email)) {
-      setErrors((prev) => ({ ...prev, email: "Enter a valid email address." }));
-      return;
-    }
-    if (!email) return;
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) return;
     try {
       const res = await fetch("/api/enroll/check-email", {
         method: "POST",
@@ -200,21 +162,15 @@ function CheckoutForm() {
     if (!form.first_name.trim()) next.first_name = "Enter your first name.";
     if (!form.last_name.trim()) next.last_name = "Enter your last name.";
     if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) next.email = "Enter a valid email address.";
-    if (form.password.length !== 8) next.password = "Password must be exactly 8 characters.";
+    if (form.password.length < 8) next.password = "Use at least 8 characters.";
     if (isCompany && !form.company_name.trim()) {
       next.company_name = "Enter your company name.";
-    }
-    if (!phoneIsValid(form.phone)) {
-      next.phone = "Enter a 10-digit phone number like (555) 123-4567.";
     }
     if (isCompany && billingDifferent) {
       if (!billing.first_name.trim()) next.billing_first_name = "Enter a first name.";
       if (!billing.last_name.trim()) next.billing_last_name = "Enter a last name.";
       if (!/^\S+@\S+\.\S+$/.test(billing.email.trim()))
         next.billing_email = "Enter a valid email address.";
-      if (!phoneIsValid(billing.phone)) {
-        next.billing_phone = "Enter a 10-digit phone number like (555) 123-4567.";
-      }
     }
     if (!isFree && !cardComplete) next.card = "Enter your card details.";
     setErrors(next);
@@ -362,7 +318,7 @@ function CheckoutForm() {
                   role="radio"
                   aria-checked={!isCompany}
                   className={`t321-mkt-checkout__aud-card${!isCompany ? " is-active" : ""}`}
-                  onClick={() => requestAudienceChange("individual")}
+                  onClick={() => setAudience("individual")}
                 >
                   <i className="fas fa-user" aria-hidden="true" />
                   <strong>Just me</strong>
@@ -373,7 +329,7 @@ function CheckoutForm() {
                   role="radio"
                   aria-checked={isCompany}
                   className={`t321-mkt-checkout__aud-card${isCompany ? " is-active" : ""}`}
-                  onClick={() => requestAudienceChange("company")}
+                  onClick={() => setAudience("company")}
                 >
                   <i className="fas fa-users" aria-hidden="true" />
                   <strong>My team</strong>
@@ -394,7 +350,11 @@ function CheckoutForm() {
 
                   <div className="t321-mkt-checkout__row">
                     <Field
-                      label="Employees"
+                      label={
+                        <>
+                          <i className="fas fa-user-group" aria-hidden="true" /> Employees
+                        </>
+                      }
                       hint="People taking the compliance courses."
                       required
                     >
@@ -406,11 +366,19 @@ function CheckoutForm() {
                         ariaLabel="Number of employees"
                       />
                     </Field>
-                    <Field label="Locations" hint="Up to 50." required>
+                    <Field
+                      label={
+                        <>
+                          <i className="fas fa-map-marker-alt" aria-hidden="true" /> Locations
+                        </>
+                      }
+                      hint="Where your team works."
+                      required
+                    >
                       <Stepper
                         value={buyer.locations}
                         min={1}
-                        max={50}
+                        max={9999}
                         onChange={setLocations}
                         ariaLabel="Number of locations"
                       />
@@ -442,15 +410,6 @@ function CheckoutForm() {
                     </button>
                   </div>
 
-                  {/* The one company-pricing surprise, said plainly: compliance
-                      pricing scales on the employee count above, NOT on the
-                      per-course seat steppers (those only apply to seat-based
-                      courses, which bill once). */}
-                  <p className="t321-mkt-checkout__company-note">
-                    <i className="fas fa-circle-info" aria-hidden="true" />
-                    Compliance courses are priced by your employee count and renew{" "}
-                    {buyer.cadence}. Seat-based courses are billed once for the seats you chose.
-                  </p>
                 </div>
               )}
             </section>
@@ -506,27 +465,24 @@ function CheckoutForm() {
               <Field
                 label="Password"
                 error={errors.password}
-                hint="Exactly 8 characters."
+                hint="At least 8 characters."
                 required
               >
                 <input
                   type="password"
                   autoComplete="new-password"
-                  maxLength={8}
                   value={form.password}
                   onChange={set("password")}
                 />
               </Field>
 
               <div className="t321-mkt-checkout__row">
-                <Field label="Phone" error={errors.phone} hint="Optional">
+                <Field label="Phone" hint="Optional">
                   <input
                     type="tel"
                     autoComplete="tel"
-                    placeholder="(555) 123-4567"
-                    maxLength={14}
                     value={form.phone}
-                    onChange={setPhone}
+                    onChange={set("phone")}
                   />
                 </Field>
                 <Field label="State" hint="Optional">
@@ -574,21 +530,10 @@ function CheckoutForm() {
                       </div>
                       <div className="t321-mkt-checkout__row">
                         <Field label="Billing email" error={errors.billing_email} required>
-                          <input
-                            type="email"
-                            value={billing.email}
-                            onChange={setBill("email")}
-                            onBlur={onBillingEmailBlur}
-                          />
+                          <input type="email" value={billing.email} onChange={setBill("email")} />
                         </Field>
-                        <Field label="Billing phone" error={errors.billing_phone} hint="Optional">
-                          <input
-                            type="tel"
-                            placeholder="(555) 123-4567"
-                            maxLength={14}
-                            value={billing.phone}
-                            onChange={setBillPhone}
-                          />
+                        <Field label="Billing phone" hint="Optional">
+                          <input type="tel" value={billing.phone} onChange={setBill("phone")} />
                         </Field>
                       </div>
                     </div>
@@ -608,11 +553,9 @@ function CheckoutForm() {
                   <i className="fas fa-check-circle" aria-hidden="true" />
                   Your promo code covers the full amount — no payment needed.
                 </p>
-              ) : !stripePromise ? (
+              ) : !stripeConfigured ? (
                 <p className="t321-mkt-checkout__error" role="alert">
-                  Card payments aren&rsquo;t configured
-                  (<code>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code> is missing). Please contact
-                  support.
+                  Card payments aren&rsquo;t configured. Please contact support.
                 </p>
               ) : (
                 <>
@@ -694,13 +637,16 @@ function CheckoutForm() {
                   <div>
                     <p className="t321-mkt-checkout__line-name">{line.name}</p>
                     <p className="t321-mkt-checkout__line-meta">
-                      {line.isSeatBased
-                        ? `${money(line.price)} × ${line.users} seats · one-time`
-                        : isCompany
-                          ? `${money(line.price)} / employee base`
-                          : money(line.price)}
+                      {/* Seat quantities and the one-time/recurring split are
+                          team concepts — an individual sees plain per-course
+                          prices, nothing else. */}
+                      {!isCompany
+                        ? money(line.price)
+                        : line.isSeatBased
+                          ? `${money(line.price)} × ${line.users} seats · one-time`
+                          : `${money(line.price)} / employee base`}
                     </p>
-                    {line.isSeatBased && (
+                    {line.isSeatBased && isCompany && (
                       <div className="t321-mkt-checkout__qty">
                         <button
                           type="button"
@@ -733,43 +679,51 @@ function CheckoutForm() {
               ))}
             </ul>
 
-            <div className="t321-mkt-checkout__promo">
-              <input
-                type="text"
-                placeholder="Promo code"
-                aria-label="Promo code"
-                value={promoDraft}
-                onChange={(e) => setPromoDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    applyPromo(promoDraft);
-                  }
-                }}
-              />
+            {showPromoInput ? (
+              <>
+                <div className="t321-mkt-checkout__promo">
+                  <input
+                    type="text"
+                    placeholder="Promo code"
+                    aria-label="Promo code"
+                    autoFocus={promoOpen && !promoCode}
+                    value={promoDraft}
+                    onChange={(e) => setPromoDraft(e.target.value)}
+                    onBlur={() => {
+                      // Opened it, typed nothing, clicked away — fold back to
+                      // the link rather than leaving an empty box behind.
+                      if (!promoDraft.trim() && !promoCode) setPromoOpen(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        applyPromo(promoDraft);
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="t321-mkt-btn t321-mkt-btn--ghost"
+                    onClick={() => applyPromo(promoDraft)}
+                  >
+                    Apply
+                  </button>
+                </div>
+                {promoError && <p className="t321-mkt-checkout__promo-error">{promoError}</p>}
+              </>
+            ) : (
               <button
                 type="button"
-                className="t321-mkt-btn t321-mkt-btn--ghost"
-                onClick={() => applyPromo(promoDraft)}
+                className="t321-mkt-checkout__promo-toggle"
+                onClick={() => setPromoOpen(true)}
               >
-                Apply
+                <i className="fas fa-tag" aria-hidden="true" /> Have a promo code?
               </button>
-            </div>
-            {promoError && <p className="t321-mkt-checkout__promo-error">{promoError}</p>}
+            )}
             {quote?.promo && (
               <p className="t321-mkt-checkout__promo-ok">
                 <i className="fas fa-check" aria-hidden="true" /> {quote.promo.name} applied
                 {isCompany && needsSubscription ? " to your first invoice" : ""}
-                <button
-                  type="button"
-                  className="t321-mkt-checkout__promo-remove"
-                  onClick={() => {
-                    applyPromo("");
-                    setPromoDraft("");
-                  }}
-                >
-                  Remove
-                </button>
               </p>
             )}
 
@@ -850,7 +804,7 @@ function CheckoutForm() {
 
             <p className="t321-mkt-checkout__terms">
               By enrolling you agree to our{" "}
-              <Link href="/legal/terms-conditions">Terms &amp; Conditions</Link> and{" "}
+              <Link href="/legal/terms-of-service">Terms of Service</Link> and{" "}
               <Link href="/legal/privacy-policy">Privacy Policy</Link>.
             </p>
           </aside>
@@ -868,7 +822,8 @@ function Field({
   required,
   children
 }: {
-  label: string;
+  /** Usually a string; company fields pass an icon + text fragment. */
+  label: React.ReactNode;
   hint?: string;
   error?: string;
   required?: boolean;

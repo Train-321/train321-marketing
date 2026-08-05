@@ -144,28 +144,46 @@
   padding: 0.5rem 1.4rem;
 }
 
+/* Fills the whole body and centers vertically — a short message pinned to
+   the top of a tall empty panel read as unfinished. */
 .t321-mkt-cart__empty {
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 4rem 1rem;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 2rem 1.5rem;
   text-align: center;
-  color: var(--t321-mkt-ink-muted);
   animation: t321-cart-fade-up 300ms ease both 120ms;
 }
-.t321-mkt-cart__empty i {
+.t321-mkt-cart__empty > i {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 4.25rem;
-  height: 4.25rem;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin-bottom: 0.6rem;
   border-radius: 999px;
-  background: var(--t321-mkt-paper-sunk);
-  color: var(--t321-mkt-line-strong);
-  font-size: 1.6rem;
+  background: var(--t321-mkt-accent-wash);
+  color: var(--t321-mkt-accent-ink);
+  font-size: 1.7rem;
 }
-.t321-mkt-cart__empty p { margin: 0; font-size: 0.95rem; }
+.t321-mkt-cart__empty-title {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--t321-mkt-ink);
+}
+.t321-mkt-cart__empty-sub {
+  margin: 0;
+  max-width: 16rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--t321-mkt-ink-muted);
+}
+.t321-mkt-cart__empty .t321-mkt-btn { margin-top: 1rem; }
 
 /* ── Lines ────────────────────────────────────────────────────────────── */
 .t321-mkt-cart__list {
@@ -307,6 +325,30 @@
   .t321-mkt-cart__foot { border-radius: 0; }
 }
 
+/* Collapsed promo entry — a quiet link until the buyer says they have one. */
+.t321-mkt-cart__promo-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--t321-mkt-ink-muted);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 140ms ease;
+}
+.t321-mkt-cart__promo-toggle:hover {
+  color: var(--t321-mkt-accent-ink);
+  text-decoration: underline;
+}
+.t321-mkt-cart__promo-toggle i { font-size: 0.72rem; }
+
+.t321-mkt-cart__promo {
+  animation: t321-cart-fade-up 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
 .t321-mkt-cart__promo input {
   width: 100%;
   padding: 0.6rem 0.8rem;
@@ -350,6 +392,200 @@
   color: var(--t321-mkt-ink);
 }
 
+/* Who's-buying switch — equal-half segmented control, the drawer-scale
+   sibling of checkout's audience cards. */
+.t321-mkt-cart__aud {
+  display: flex;
+  width: 100%;
+  margin-bottom: 0.9rem;
+  border: 1px solid var(--t321-mkt-line-strong);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.t321-mkt-cart__aud button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.6rem 0.5rem;
+  border: 0;
+  background: var(--t321-mkt-paper);
+  color: var(--t321-mkt-ink-muted);
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+.t321-mkt-cart__aud button + button {
+  border-left: 1px solid var(--t321-mkt-line-strong);
+}
+.t321-mkt-cart__aud button i { font-size: 0.75rem; }
+.t321-mkt-cart__aud button.is-active {
+  background: linear-gradient(180deg, #12314E 0%, #0B1F33 100%);
+  color: #fff;
+}
+.t321-mkt-cart__aud button:focus-visible {
+  outline: 2px solid var(--t321-mkt-accent);
+  outline-offset: -2px;
+}
+
+/* Team pricing controls (company carts) — employees/locations steppers and
+   the cadence switch, mirroring checkout's inputs in drawer scale. */
+.t321-mkt-cart__teamctl {
+  margin-bottom: 0.9rem;
+  padding: 0.9rem 1rem 1rem;
+  border: 1px solid var(--t321-mkt-line);
+  border-radius: 12px;
+  background: var(--t321-mkt-paper);
+  box-shadow: 0 1px 2px rgba(11, 31, 51, 0.04);
+}
+
+.t321-mkt-cart__teamctl-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--t321-mkt-ink);
+}
+.t321-mkt-cart__teamctl-head i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 6px;
+  background: var(--t321-mkt-accent-wash);
+  color: var(--t321-mkt-accent-ink);
+  font-size: 0.68rem;
+}
+
+.t321-mkt-cart__teamctl-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.t321-mkt-cart__teamctl-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.t321-mkt-cart__teamctl-field > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--t321-mkt-ink-muted);
+}
+.t321-mkt-cart__teamctl-field > span:first-child i {
+  font-size: 0.68rem;
+  color: var(--t321-mkt-accent-ink);
+}
+
+/* Full-width stepper — buttons anchored to the edges, number centered, so
+   both fields read as one tidy row regardless of digit count. */
+.t321-mkt-cart__teamctl-stepper {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border: 1px solid var(--t321-mkt-line-strong);
+  border-radius: 9px;
+  overflow: hidden;
+  background: var(--t321-mkt-paper);
+}
+.t321-mkt-cart__teamctl-stepper button {
+  width: 2.2rem;
+  border: 0;
+  background: var(--t321-mkt-paper-sunk);
+  color: var(--t321-mkt-ink);
+  font-size: 0.68rem;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+  flex-shrink: 0;
+}
+.t321-mkt-cart__teamctl-stepper button:hover:not(:disabled) {
+  background: var(--t321-mkt-accent-wash);
+  color: var(--t321-mkt-accent-ink);
+}
+.t321-mkt-cart__teamctl-stepper button:disabled { opacity: 0.35; cursor: not-allowed; }
+.t321-mkt-cart__teamctl-stepper input {
+  flex: 1;
+  min-width: 0;
+  height: 2.3rem;
+  border: 0;
+  border-left: 1px solid var(--t321-mkt-line);
+  border-right: 1px solid var(--t321-mkt-line);
+  background: transparent;
+  text-align: center;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--t321-mkt-ink);
+  -moz-appearance: textfield;
+}
+.t321-mkt-cart__teamctl-stepper input::-webkit-outer-spin-button,
+.t321-mkt-cart__teamctl-stepper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.t321-mkt-cart__teamctl-stepper input:focus-visible {
+  outline: 2px solid var(--t321-mkt-accent);
+  outline-offset: -2px;
+}
+
+/* Cadence — full-width segmented control, equal halves. */
+.t321-mkt-cart__teamctl-cadence {
+  display: flex;
+  width: 100%;
+  border: 1px solid var(--t321-mkt-line-strong);
+  border-radius: 9px;
+  overflow: hidden;
+}
+.t321-mkt-cart__teamctl-cadence button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.5rem;
+  border: 0;
+  background: var(--t321-mkt-paper);
+  color: var(--t321-mkt-ink-muted);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+.t321-mkt-cart__teamctl-cadence button + button {
+  border-left: 1px solid var(--t321-mkt-line-strong);
+}
+.t321-mkt-cart__teamctl-cadence button.is-active {
+  background: linear-gradient(180deg, #12314E 0%, #0B1F33 100%);
+  color: #fff;
+}
+.t321-mkt-cart__teamctl-cadence em {
+  padding: 0.08rem 0.4rem;
+  border-radius: 999px;
+  background: var(--t321-mkt-positive-wash);
+  color: var(--t321-mkt-positive);
+  font-size: 0.64rem;
+  font-style: normal;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.t321-mkt-cart__teamctl-cadence button.is-active em {
+  background: rgba(255, 255, 255, 0.16);
+  color: #A9E5C4;
+}
+
 /* "Then $X/mo" subscription line for company carts. */
 .t321-mkt-cart__ongoing {
   display: flex;
@@ -365,28 +601,6 @@
 }
 .t321-mkt-cart__ongoing i { font-size: 0.72rem; }
 
-/* Audience switch link. */
-.t321-mkt-cart__team {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  width: 100%;
-  margin-top: 0.65rem;
-  padding: 0.5rem;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--t321-mkt-accent-ink);
-  font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 140ms ease;
-}
-.t321-mkt-cart__team:hover { background: var(--t321-mkt-accent-wash); }
-.t321-mkt-cart__team i { font-size: 0.75rem; }
-
 /* Small reassurance strip under the checkout CTA — same trust language as
    the checkout page, kept to one quiet line. */
 .t321-mkt-cart__secure {
@@ -399,47 +613,6 @@
   color: var(--t321-mkt-ink-muted);
 }
 .t321-mkt-cart__secure i { color: var(--t321-mkt-positive); font-size: 0.72rem; }
-
-.t321-mkt-cart__promo-remove {
-  margin-left: 0.4rem;
-  padding: 0;
-  width: 1.05rem;
-  height: 1.05rem;
-  border: 0;
-  border-radius: 50%;
-  background: var(--t321-mkt-paper-sunk);
-  color: var(--t321-mkt-ink-muted);
-  font-size: 0.6rem;
-  line-height: 1;
-  cursor: pointer;
-  vertical-align: text-bottom;
-}
-.t321-mkt-cart__promo-remove:hover {
-  background: var(--t321-mkt-line);
-  color: var(--t321-mkt-ink);
-}
-
-.t321-mkt-cart__terms {
-  margin: 0.45rem 0 0;
-  text-align: center;
-  font-size: 0.72rem;
-  color: var(--t321-mkt-ink-muted);
-}
-.t321-mkt-cart__terms a {
-  color: inherit;
-  text-decoration: underline;
-}
-.t321-mkt-cart__terms a:hover { color: var(--t321-mkt-ink); }
-
-.t321-mkt-cart__keep {
-  display: block;
-  margin-top: 0.55rem;
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--t321-mkt-ink-muted);
-  text-decoration: none;
-}
-.t321-mkt-cart__keep:hover { text-decoration: underline; }
 
 /* Motion is decorative here — the drawer still opens and closes without it. */
 @media (prefers-reduced-motion: reduce) {

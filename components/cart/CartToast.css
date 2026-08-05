@@ -1,0 +1,114 @@
+/* Bottom-center add-to-cart confirmation. Sits below the drawer/modal layer
+   (1000) and above page content; clear of the chat fab, which lives
+   bottom-right. */
+.t321-mkt-carttoast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  z-index: 990;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: min(26rem, calc(100vw - 2rem));
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #12314E 0%, #0B1F33 100%);
+  color: #fff;
+  box-shadow:
+    0 12px 32px rgba(6, 21, 36, 0.35),
+    0 2px 8px rgba(6, 21, 36, 0.25);
+  transform: translateX(-50%);
+  animation: t321-carttoast-in 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.t321-mkt-carttoast.is-closing {
+  /* Keep the duration in sync with EXIT_MS in CartToast.tsx. */
+  animation: t321-carttoast-out 220ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes t321-carttoast-in {
+  from { opacity: 0; transform: translate(-50%, 14px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes t321-carttoast-out {
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to   { opacity: 0; transform: translate(-50%, 10px); }
+}
+
+.t321-mkt-carttoast__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 999px;
+  background: rgba(0, 180, 219, 0.18);
+  color: #4FD8F5;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
+.t321-mkt-carttoast__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin: 0;
+  min-width: 0;
+}
+.t321-mkt-carttoast__text strong {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.t321-mkt-carttoast__text span {
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.72);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.t321-mkt-carttoast__view {
+  flex-shrink: 0;
+  padding: 0.45rem 0.8rem;
+  border: 0;
+  border-radius: 8px;
+  background: var(--t321-mkt-accent);
+  color: #05202B;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 140ms ease, transform 120ms ease;
+}
+.t321-mkt-carttoast__view:hover {
+  background: #2FC6E8;
+  transform: translateY(-1px);
+}
+.t321-mkt-carttoast__view:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.t321-mkt-carttoast__close {
+  flex-shrink: 0;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: color 140ms ease, background 140ms ease;
+}
+.t321-mkt-carttoast__close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t321-mkt-carttoast,
+  .t321-mkt-carttoast.is-closing {
+    animation-duration: 1ms;
+  }
+}

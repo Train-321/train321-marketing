@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getCourse, getCourses, getDetailPagesCopy, getSiteSettings } from "@/lib/sanity";
 import EnrollButton from "@/components/EnrollButton";
 import CourseCertificate from "@/components/CourseCertificate";
-import { resolveEnrollCourse } from "@/lib/enroll";
+import { getGroupStateOptions, resolveEnrollCourse } from "@/lib/enroll";
 import "./course.css";
 
 export async function generateStaticParams() {
@@ -30,32 +30,21 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   const enrollHref = course.enrollUrl
     || (course.enrollId ? `${enrollBase}?add=${course.enrollId}&checkout=1` : enrollBase);
 
-  // Course group: when state versions are set, the Enroll buttons open a state
-  // picker; each option either adds that version to the cart (when its
-  // enrollId resolves to a marketplace course) or links out as before.
-  const variants = (course.stateVariants || []).filter((v) => v.state);
-
-  // Resolve every purchasable id in one pass. `resolveEnrollCourse` returns
-  // null for the legacy slug-style enrollIds and for anything the LMS no
-  // longer serves, which is what keeps the outbound fallback in play.
-  // An explicit `enrollUrl` override always wins — that's an editor saying
-  // "send buyers here", so we don't second-guess it with an inline purchase.
-  const [cartCourse, variantCourses] = await Promise.all([
+  // State/regional versions come from ONE place: the LMS's course groups
+  // (new-features tbl_course_group). When this course's enrollId belongs to
+  // a group, the group's variants ARE the state picker — admins manage
+  // states, prices, and external-state redirects in the LMS and this page
+  // follows within its 5-minute revalidate. Ungrouped courses get no picker;
+  // the Sanity stateVariants field is intentionally NOT consulted anymore.
+  //
+  // An explicit `enrollUrl` override still wins — that's an editor saying
+  // "send buyers here".
+  const [cartCourse, groupOptions] = await Promise.all([
     course.enrollUrl ? Promise.resolve(null) : resolveEnrollCourse(course.enrollId),
-    Promise.all(
-      variants.map((v) => (v.enrollUrl ? Promise.resolve(null) : resolveEnrollCourse(v.enrollId)))
-    )
+    course.enrollUrl ? Promise.resolve(null) : getGroupStateOptions(course.enrollId)
   ]);
 
-  const stateOptions = variants
-    .map((v, i) => ({
-      state: v.state,
-      title: v.title,
-      href: v.enrollUrl || (v.enrollId ? `${enrollBase}?add=${v.enrollId}&checkout=1` : ""),
-      course: variantCourses[i]
-    }))
-    // Keep an option if it can be bought inline OR still has somewhere to go.
-    .filter((o) => o.course || o.href);
+  const stateOptions = groupOptions ?? [];
 
   // Chrome copy with fallbacks.
   const crumbHome = copy?.courseCrumbHome || "Home";

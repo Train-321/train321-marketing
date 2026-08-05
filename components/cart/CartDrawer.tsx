@@ -33,7 +33,10 @@ export default function CartDrawer() {
     remove,
     setUsers,
     buyer,
-    requestAudienceChange
+    setAudience,
+    setEmployees,
+    setLocations,
+    setCadence
   } = useCart();
 
   // Which numbers to show: individual = one-time totals; company = the
@@ -47,6 +50,12 @@ export default function CartDrawer() {
 
   const pathname = usePathname();
   const panelRef = useRef<HTMLElement | null>(null);
+
+  // Promo entry is collapsed behind a "Have a promo code?" link — most buyers
+  // don't have one, and a permanently empty input reads as homework. Stays
+  // open once a code is set so an applied promo is never hidden.
+  const [promoOpen, setPromoOpen] = useState(false);
+  const showPromoInput = promoOpen || Boolean(promoCode);
 
   // The drawer stays in the DOM through its exit animation — unmounting on
   // `drawerOpen === false` would make it vanish instantly with no transition.
@@ -143,9 +152,16 @@ export default function CartDrawer() {
           {lines.length === 0 ? (
             <div className="t321-mkt-cart__empty">
               <i className="fas fa-shopping-basket" aria-hidden="true" />
-              <p>Your cart is empty.</p>
-              <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--primary">
-                Browse courses
+              <p className="t321-mkt-cart__empty-title">Your cart is empty</p>
+              <p className="t321-mkt-cart__empty-sub">
+                Add a course and it&rsquo;ll show up here, ready for checkout.
+              </p>
+              <Link
+                href="/catalog"
+                className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg"
+                onClick={closeDrawer}
+              >
+                Browse courses <i className="fas fa-arrow-right" aria-hidden="true" />
               </Link>
             </div>
           ) : (
@@ -178,12 +194,14 @@ export default function CartDrawer() {
                     )}
                     <p className="t321-mkt-cart__line-price">
                       {money(line.price)}
-                      {line.isSeatBased && <span> / seat</span>}
+                      {line.isSeatBased && isCompany && <span> / seat</span>}
                     </p>
 
-                    {/* Seat steppers only for courses the LMS marks seat-based —
-                        a compliance course is one seat for the buyer. */}
-                    {line.isSeatBased && (
+                    {/* Seat steppers are a team concept — an individual buys
+                        one seat of everything (the training is for them), so
+                        the quantity UI only appears in team mode and only on
+                        courses the LMS marks seat-based. */}
+                    {line.isSeatBased && isCompany && (
                       <div className="t321-mkt-cart__qty">
                         <button
                           type="button"
@@ -227,23 +245,159 @@ export default function CartDrawer() {
 
         {lines.length > 0 && (
           <footer className="t321-mkt-cart__foot">
-            <div className="t321-mkt-cart__promo">
-              <input
-                // Uncontrolled on purpose (apply happens on blur/Enter); the
-                // key remounts it whenever the applied code changes so
-                // removing the promo visibly empties the field.
-                key={promoCode}
-                type="text"
-                placeholder="Promo code"
-                aria-label="Promo code"
-                defaultValue={promoCode}
-                onBlur={(e) => applyPromo(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") applyPromo((e.target as HTMLInputElement).value);
-                }}
-              />
+            {/* Who's buying — a visible two-state switch (mirrors checkout's
+                audience cards) instead of a text link whose wording flipped.
+                Selecting Team reveals the pricing controls below. */}
+            <div className="t321-mkt-cart__aud" role="radiogroup" aria-label="Buying for">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={!isCompany}
+                className={!isCompany ? "is-active" : ""}
+                onClick={() => setAudience("individual")}
+              >
+                <i className="fas fa-user" aria-hidden="true" /> Individual
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={isCompany}
+                className={isCompany ? "is-active" : ""}
+                onClick={() => setAudience("company")}
+              >
+                <i className="fas fa-users" aria-hidden="true" /> Team
+              </button>
             </div>
-            {promoError && <p className="t321-mkt-cart__promo-error">{promoError}</p>}
+
+            {/* Team pricing inputs — the same employees/locations/cadence
+                state checkout uses, editable right here so the totals below
+                can be tuned without leaving the drawer. */}
+            {isCompany && (
+              <div className="t321-mkt-cart__teamctl">
+                <p className="t321-mkt-cart__teamctl-head">
+                  <i className="fas fa-users" aria-hidden="true" /> Team pricing
+                </p>
+                <div className="t321-mkt-cart__teamctl-row">
+                  <label className="t321-mkt-cart__teamctl-field">
+                    <span>
+                      <i className="fas fa-user-group" aria-hidden="true" /> Employees
+                    </span>
+                    <span className="t321-mkt-cart__teamctl-stepper">
+                      <button
+                        type="button"
+                        aria-label="Decrease employees"
+                        onClick={() => setEmployees(buyer.employees - 1)}
+                        disabled={buyer.employees <= 1}
+                      >
+                        <i className="fas fa-minus" aria-hidden="true" />
+                      </button>
+                      <input
+                        type="number"
+                        min={1}
+                        max={9999}
+                        value={buyer.employees}
+                        aria-label="Number of employees"
+                        onChange={(e) => setEmployees(Number(e.target.value))}
+                      />
+                      <button
+                        type="button"
+                        aria-label="Increase employees"
+                        onClick={() => setEmployees(buyer.employees + 1)}
+                      >
+                        <i className="fas fa-plus" aria-hidden="true" />
+                      </button>
+                    </span>
+                  </label>
+                  <label className="t321-mkt-cart__teamctl-field">
+                    <span>
+                      <i className="fas fa-map-marker-alt" aria-hidden="true" /> Locations
+                    </span>
+                    <span className="t321-mkt-cart__teamctl-stepper">
+                      <button
+                        type="button"
+                        aria-label="Decrease locations"
+                        onClick={() => setLocations(buyer.locations - 1)}
+                        disabled={buyer.locations <= 1}
+                      >
+                        <i className="fas fa-minus" aria-hidden="true" />
+                      </button>
+                      <input
+                        type="number"
+                        min={1}
+                        max={9999}
+                        value={buyer.locations}
+                        aria-label="Number of locations"
+                        onChange={(e) => setLocations(Number(e.target.value))}
+                      />
+                      <button
+                        type="button"
+                        aria-label="Increase locations"
+                        onClick={() => setLocations(buyer.locations + 1)}
+                      >
+                        <i className="fas fa-plus" aria-hidden="true" />
+                      </button>
+                    </span>
+                  </label>
+                </div>
+                <div
+                  className="t321-mkt-cart__teamctl-cadence"
+                  role="radiogroup"
+                  aria-label="Billing cadence"
+                >
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={buyer.cadence === "yearly"}
+                    className={buyer.cadence === "yearly" ? "is-active" : ""}
+                    onClick={() => setCadence("yearly")}
+                  >
+                    Yearly <em>Save 10%</em>
+                  </button>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={buyer.cadence === "monthly"}
+                    className={buyer.cadence === "monthly" ? "is-active" : ""}
+                    onClick={() => setCadence("monthly")}
+                  >
+                    Monthly
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {showPromoInput ? (
+              <>
+                <div className="t321-mkt-cart__promo">
+                  <input
+                    type="text"
+                    placeholder="Promo code"
+                    aria-label="Promo code"
+                    autoFocus={promoOpen && !promoCode}
+                    defaultValue={promoCode}
+                    onBlur={(e) => {
+                      const v = e.target.value.trim();
+                      applyPromo(v);
+                      // Opened it, typed nothing, clicked away — fold back to
+                      // the link rather than leaving an empty box behind.
+                      if (!v) setPromoOpen(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") applyPromo((e.target as HTMLInputElement).value);
+                    }}
+                  />
+                </div>
+                {promoError && <p className="t321-mkt-cart__promo-error">{promoError}</p>}
+              </>
+            ) : (
+              <button
+                type="button"
+                className="t321-mkt-cart__promo-toggle"
+                onClick={() => setPromoOpen(true)}
+              >
+                <i className="fas fa-tag" aria-hidden="true" /> Have a promo code?
+              </button>
+            )}
 
             <dl className="t321-mkt-cart__totals">
               <div>
@@ -252,20 +406,7 @@ export default function CartDrawer() {
               </div>
               {quote && shownDiscount > 0 && (
                 <div className="is-discount">
-                  <dt>
-                    Discount{quote.promo ? ` (${quote.promo.name})` : ""}
-                    {quote.promo && (
-                      <button
-                        type="button"
-                        className="t321-mkt-cart__promo-remove"
-                        aria-label="Remove promo code"
-                        title="Remove promo code"
-                        onClick={() => applyPromo("")}
-                      >
-                        <i className="fas fa-times" aria-hidden="true" />
-                      </button>
-                    )}
-                  </dt>
+                  <dt>Discount{quote.promo ? ` (${quote.promo.name})` : ""}</dt>
                   <dd>−{money(shownDiscount)}</dd>
                 </div>
               )}
@@ -303,40 +444,6 @@ export default function CartDrawer() {
               <i className="fas fa-shield-halved" aria-hidden="true" />
               Secure checkout — payments powered by Stripe
             </p>
-            <p className="t321-mkt-cart__terms">
-              By checking out you agree to our{" "}
-              <Link href="/legal/terms-conditions" onClick={closeDrawer}>
-                Terms &amp; Conditions
-              </Link>{" "}
-              and{" "}
-              <Link href="/legal/privacy-policy" onClick={closeDrawer}>
-                Privacy Policy
-              </Link>
-              .
-            </p>
-
-            {/* Audience switch, in the buyer's own words. Prices above
-                re-quote immediately; the details live at checkout. */}
-            <button
-              type="button"
-              className="t321-mkt-cart__team"
-              onClick={() => requestAudienceChange(isCompany ? "individual" : "company")}
-            >
-              {isCompany ? (
-                <>
-                  <i className="fas fa-user" aria-hidden="true" /> Switch to individual pricing
-                </>
-              ) : (
-                <>
-                  <i className="fas fa-users" aria-hidden="true" /> Buying for a team? See team
-                  pricing
-                </>
-              )}
-            </button>
-
-            <Link href="/catalog" className="t321-mkt-cart__keep" onClick={closeDrawer}>
-              Keep browsing
-            </Link>
           </footer>
         )}
       </aside>

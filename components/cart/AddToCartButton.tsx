@@ -17,10 +17,10 @@ type Props = {
 /**
  * The single entry point into the cart from anywhere on the site.
  *
- * "add" is the low-commitment path — the drawer opens so the buyer sees what
- * happened and can keep browsing. "buy" is the express path that skips the
- * drawer entirely and lands on checkout, which is what the old outbound
- * "Enroll now" buttons used to do.
+ * "add" is the low-commitment path — a bottom-center toast confirms the add
+ * while the buyer keeps browsing (the drawer only opens when they ask for
+ * it). "buy" is the express path that skips confirmation entirely and lands
+ * on checkout, which is what the old outbound "Enroll now" buttons used to do.
  */
 export default function AddToCartButton({
   course,
@@ -29,21 +29,26 @@ export default function AddToCartButton({
   className = "t321-mkt-btn t321-mkt-btn--primary",
   showArrow = true
 }: Props) {
-  const { add, has, openDrawer } = useCart();
+  const { add, has, openDrawer, notifyAdded, buyer } = useCart();
   const router = useRouter();
   const [justAdded, setJustAdded] = useState(false);
 
   const inCart = has(course.id);
 
-  // A compliance course is one seat for the buyer, so once it's in the cart
-  // there's nothing to add — the button becomes a way back into the drawer.
-  const alreadyMaxed = inCart && !course.isSeatBased;
+  // Once in the cart there's usually nothing more to add — the button becomes
+  // a way back into the drawer. The exception is a seat-based course in TEAM
+  // mode, where re-adding bumps the seat count; individuals always buy
+  // exactly one seat of everything.
+  const alreadyMaxed =
+    inCart && (!course.isSeatBased || buyer.audience !== "company");
 
   const text =
     label ?? (mode === "buy" ? "Enroll now" : alreadyMaxed ? "In cart" : "Add to cart");
 
   const onClick = () => {
     if (alreadyMaxed && mode === "add") {
+      // Nothing more to add — clicking "In cart" is a request to SEE the
+      // cart, so this stays a drawer-opener.
       openDrawer();
       return;
     }
@@ -55,9 +60,9 @@ export default function AddToCartButton({
       return;
     }
 
-    openDrawer();
-    // Brief confirmation on the button itself, in case the drawer is dismissed
-    // faster than the eye can follow.
+    // Confirm without interrupting: toast at the bottom, plus a brief state
+    // change on the button itself for eyes that never leave it.
+    notifyAdded(course.name);
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1600);
   };

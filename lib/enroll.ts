@@ -83,7 +83,7 @@ export type QuoteInput = {
   audience?: BuyerAudience;
   /** Company only — how many people will take the compliance courses. */
   employees?: number;
-  /** Company only — how many locations (backend caps at 50). */
+  /** Company only — how many locations. */
   locations?: number;
   promoCode?: string;
 };
@@ -243,6 +243,140 @@ export async function resolveEnrollCourse(enrollId?: string | null): Promise<Car
   return getCartCourse(id);
 }
 
+/** One row in the course page's state picker. */
+export type StatePickerOption = {
+  /** Display label — the variant's state tag, e.g. "Florida" or "All states". */
+  state: string;
+  /**
+   * Set when the tag is a multi-state list: the normalized 2-letter codes,
+   * rendered as individual chips so every state stays visible without
+   * squeezing the row.
+   */
+  stateCodes?: string[];
+  /** The variant course's public name, shown muted beside the state. */
+  title?: string;
+  /** Outbound link for states served by an external provider; "" otherwise. */
+  href: string;
+  /** Cart-ready course for inline purchase; null when the state redirects out. */
+  course: CartCourse | null;
+};
+
+/** Code → full name, for prettifying raw LMS state tags like "Fl". */
+const STATE_NAMES: Record<string, string> = {
+  AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
+  CO: "Colorado", CT: "Connecticut", DE: "Delaware", DC: "District of Columbia",
+  FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho", IL: "Illinois",
+  IN: "Indiana", IA: "Iowa", KS: "Kansas", KY: "Kentucky", LA: "Louisiana",
+  ME: "Maine", MD: "Maryland", MA: "Massachusetts", MI: "Michigan",
+  MN: "Minnesota", MS: "Mississippi", MO: "Missouri", MT: "Montana",
+  NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey",
+  NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota",
+  OH: "Ohio", OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania",
+  RI: "Rhode Island", SC: "South Carolina", SD: "South Dakota",
+  TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont", VA: "Virginia",
+  WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming"
+};
+
+/**
+ * Turn a raw LMS state tag into a picker-friendly label.
+ *
+ * Admins type these free-form ("Fl", "Az,CA, HI, IL, NM, TX, WV"), so:
+ *   - empty / "ALL"            → "All states"
+ *   - one 2-letter code        → the full state name ("Fl" → "Florida")
+ *   - several codes            → every normalized code in `codes`, rendered
+ *                                as chips — the full list stays visible,
+ *                                nothing is truncated behind a "+N"
+ *   - anything else free-form  → passed through as typed
+ */
+function shapeStateLabel(
+  raw: string | null | undefined
+): { state: string; codes?: string[] } {
+  const text = String(raw || "").trim();
+  if (!text || text.toUpperCase() === "ALL") return { state: "All states" };
+
+  const tokens = text.split(",").map((t) => t.trim()).filter(Boolean);
+  const codes = tokens.map((t) => t.toUpperCase());
+  const allCodes = codes.length > 0 && codes.every((c) => /^[A-Z]{2}$/.test(c));
+
+  if (!allCodes) return { state: text };
+  if (codes.length === 1) return { state: STATE_NAMES[codes[0]] || codes[0] };
+  return { state: codes.join(", "), codes };
+}
+
+/**
+ * Build state-picker options from the LMS's own course groups.
+ *
+ * The new-features backend models state/regional versions as course groups
+ * (tbl_course_group): each member course carries a state_label and optional
+ * state_redirect_url. When the given course id belongs to a group with 2+
+ * variants, the group IS the state picker — managed by LMS admins, no Sanity
+ * editing involved. Returns null when the course isn't grouped (callers fall
+ * back to the Sanity-managed stateVariants).
+ *
+ * The group payload doesn't include variant names, so each variant is
+ * resolved through the course endpoint — which also gives us the canonical
+ * price/image/seat flags for the cart. Variants that no longer resolve are
+ * dropped rather than rendered as dead options.
+ */
+export async function getGroupStateOptions(
+  enrollId?: string | null
+): Promise<StatePickerOption[] | null> {
+  const id = Number(enrollId);
+  if (!Number.isInteger(id) || id <= 0) return null;
+
+  type RawVariant = {
+    id: number;
+    state_label?: string | null;
+    state_redirect_url?: string | null;
+    price?: number;
+  };
+  type RawEntry = { entry_type?: string; variants?: RawVariant[] };
+
+  let entries: RawEntry[];
+  try {
+    // POST fetches aren't cached by Next's data cache, but this runs inside
+    // ISR page generation (5-minute revalidate on course pages), so the
+    // backend sees one call per regeneration, not one per visitor.
+    const res = await fetch(`${API_BASE}/api/list/enroll-courses`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ per_page: 500, page: 1, type: "all" })
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { courses?: RawEntry[] };
+    entries = data.courses || [];
+  } catch {
+    return null;
+  }
+
+  const group = entries.find(
+    (e) => e.entry_type === "group" && (e.variants || []).some((v) => v.id === id)
+  );
+  // A 1-variant "group" isn't a choice — treat it as a normal course.
+  if (!group || (group.variants || []).length < 2) return null;
+
+  const variants = [...(group.variants || [])].sort((a, b) =>
+    String(a.state_label || "").localeCompare(String(b.state_label || ""))
+  );
+
+  const resolved = await Promise.all(variants.map((v) => getCartCourse(v.id)));
+
+  const options: StatePickerOption[] = [];
+  for (let i = 0; i < variants.length; i++) {
+    const v = variants[i];
+    const c = resolved[i];
+    const { state, codes } = shapeStateLabel(v.state_label);
+    if (v.state_redirect_url) {
+      // External-provider state — link out, never add to cart.
+      options.push({ state, stateCodes: codes, title: c?.name, href: v.state_redirect_url, course: null });
+    } else if (c) {
+      options.push({ state, stateCodes: codes, title: c.name, href: "", course: c });
+    }
+  }
+
+  return options.length >= 2 ? options : null;
+}
+
 /**
  * Split the cart into the two buckets the backend expects and ask it to price
  * them. This is the ONLY source of truth for what the buyer sees — we never
@@ -253,7 +387,7 @@ export async function getQuote(input: QuoteInput): Promise<EnrollQuote> {
   const { courseIds, specialCourses } = splitLines(input.lines);
   const audience: BuyerAudience = input.audience === "company" ? "company" : "individual";
   const employees = Math.max(1, input.employees || 1);
-  const locations = Math.min(50, Math.max(1, input.locations || 1));
+  const locations = Math.min(9999, Math.max(1, input.locations || 1));
 
   const raw = await post<{
     audience?: string;
@@ -403,19 +537,30 @@ export async function checkout(input: {
     course_ids: courseIds,
     special_courses: specialCourses,
     number_of_employees: Math.max(1, input.employees || 1),
-    number_of_locations: Math.min(50, Math.max(1, input.locations || 1)),
+    number_of_locations: Math.min(9999, Math.max(1, input.locations || 1)),
     invoice_cadence: cadence,
     promo_code: input.promoCode || "",
     details,
     pay
   });
 
+  // The staging LMS returns absolute URLs, but the production LMS still has
+  // the config-cache bug where env() reads null and both come back RELATIVE
+  // ("/#/login", "/api/list/enroll-invoice/ch_..."). Left as-is they'd
+  // resolve against the marketing domain and 404. Anchor them to the hosts
+  // we already know: the invoice lives on the LMS API we just called, and
+  // the sign-in page lives on the learner app (same base the header's
+  // Sign In button uses).
+  const appBase = (process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com").replace(/\/+$/, "");
+  const absolute = (url: string | null | undefined, base: string): string | null =>
+    !url ? null : /^https?:\/\//i.test(url) ? url : base + (url.startsWith("/") ? url : `/${url}`);
+
   return {
     employee: raw.employee,
     chargeId: raw.charge?.id ?? null,
     receiptUrl: raw.charge?.receipt ?? null,
-    invoiceUrl: raw.invoice_url ?? null,
-    loginUrl: raw.login_url,
+    invoiceUrl: absolute(raw.invoice_url, API_BASE),
+    loginUrl: absolute(raw.login_url, appBase) || `${appBase}/#/login`,
     amount: Number(raw.pricing?.due_today ?? 0),
     subscription: raw.subscription
       ? {
