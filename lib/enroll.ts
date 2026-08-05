@@ -17,6 +17,8 @@
 // backend prices that as `cadence: "one_time"`, which is why nothing here
 // passes an invoice cadence.
 
+import { secureImageUrl } from "@/lib/newFeatures";
+
 const API_BASE =
   process.env.NEW_FEATURES_API_BASE || "https://api.train321.com";
 
@@ -221,7 +223,7 @@ export async function getCartCourse(id: number): Promise<CartCourse | null> {
       // super-admin `name` must not surface on the storefront.
       name: c.marketplace_name || c.name || "",
       price: Number(c.price ?? 0),
-      image: c.image || null,
+      image: secureImageUrl(c.image),
       isSeatBased: Number(c.is_seat_based ?? 0) === 1,
       stateLabel: c.state_label || null
     };
@@ -396,7 +398,7 @@ export async function getGroupPicker(enrollId?: string | null): Promise<GroupPic
           id: v.id,
           name: title,
           price: Number(v.price ?? fallback?.price ?? 0),
-          image: v.image ?? fallback?.image ?? null,
+          image: secureImageUrl(v.image) ?? fallback?.image ?? null,
           isSeatBased:
             v.is_seat_based != null
               ? Number(v.is_seat_based) === 1

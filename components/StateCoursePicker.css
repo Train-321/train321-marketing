@@ -20,15 +20,27 @@
   font-size: 0.75rem;
 }
 
-/* Highlighted dropdown — the card's primary action, so it gets the accent
-   treatment the buy button would otherwise carry. */
+/* The card's primary action. Calm at rest — a clean bordered control that
+   reads as "interact with me" without glowing like a stuck focus ring; the
+   accent treatment appears on hover, keyboard focus, and while open. */
 .t321-spc .t321-mkt-select__btn {
-  border: 2px solid var(--t321-mkt-accent);
-  box-shadow: 0 0 0 3px var(--t321-mkt-accent-wash);
+  border: 1px solid var(--t321-mkt-line-strong);
   font-weight: 600;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
 }
 .t321-spc .t321-mkt-select__btn:hover {
-  border-color: var(--t321-mkt-accent-hover, var(--t321-mkt-accent));
+  border-color: var(--t321-mkt-accent);
+}
+.t321-spc .t321-mkt-select__btn:focus-visible,
+.t321-spc .t321-mkt-select.is-open .t321-mkt-select__btn {
+  border-color: var(--t321-mkt-accent);
+  box-shadow: 0 0 0 3px var(--t321-mkt-accent-wash);
+  outline: none;
+}
+/* Once a state is chosen the control shows its value with quiet confidence. */
+.t321-spc .t321-mkt-select__btn.has-value {
+  border-color: var(--t321-mkt-line-strong);
+  color: var(--t321-mkt-ink);
 }
 
 .t321-spc__hint {

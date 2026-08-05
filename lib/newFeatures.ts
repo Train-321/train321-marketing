@@ -56,6 +56,17 @@ export type MarketplaceCatalog = {
 // thumbnail URL fails to load).
 export const COURSE_PLACEHOLDER_IMAGE = "/img/course-placeholder.svg";
 
+/**
+ * The LMS builds thumbnail URLs with Laravel's asset(), which can emit
+ * plain http:// — mixed content on the https marketing site. Every image
+ * URL from the API goes through here so no card ever depends on the
+ * browser's auto-upgrade behavior.
+ */
+export function secureImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  return url.replace(/^http:\/\//i, "https://");
+}
+
 export const CATALOG_PAGE_SIZE = 6;
 
 export type CatalogQuery = {
@@ -127,7 +138,7 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
       // Marketplace Overview ONLY — no fallback to the instructions
       // `description`. Empty marketplace copy → empty card blurb, by design.
       description: c.marketplace_description || "",
-      image: c.image || null,
+      image: secureImageUrl(c.image),
       categoryId: c.category_id ?? null,
       price: Number(c.price ?? 0),
       isSeatBased: Number(c.is_seat_based ?? 0) === 1,
