@@ -33,7 +33,7 @@ export default function CartDrawer() {
     remove,
     setUsers,
     buyer,
-    requestAudienceChange,
+    setAudience,
     setEmployees,
     setLocations,
     setCadence
@@ -254,7 +254,7 @@ export default function CartDrawer() {
                 role="radio"
                 aria-checked={!isCompany}
                 className={!isCompany ? "is-active" : ""}
-                onClick={() => requestAudienceChange("individual")}
+                onClick={() => setAudience("individual")}
               >
                 <i className="fas fa-user" aria-hidden="true" /> Individual
               </button>
@@ -263,7 +263,7 @@ export default function CartDrawer() {
                 role="radio"
                 aria-checked={isCompany}
                 className={isCompany ? "is-active" : ""}
-                onClick={() => requestAudienceChange("company")}
+                onClick={() => setAudience("company")}
               >
                 <i className="fas fa-users" aria-hidden="true" /> Team
               </button>

@@ -183,7 +183,7 @@ export default function HomePage({
   const [audience, setAudience] = useState<Audience>(forcedAudience || "self");
   const [courseIndex, setCourseIndex] = useState(0);
   const [videoOpen, setVideoOpen] = useState(false);
-  const { requestAudienceChange, buyer, ready: cartReady } = useCart();
+  const { setAudience: setCartAudience, buyer, ready: cartReady } = useCart();
 
   // Hydrate audience from localStorage when not pinned by prop.
   useEffect(() => {
@@ -297,9 +297,10 @@ export default function HomePage({
   const chooseAudience = (val: Audience) => {
     if (forcedAudience) return;
     // Route through the cart so a non-empty cart gets the "this clears your
-    // cart" confirm first. The pill and localStorage follow via the
-    // buyer-sync effect above — only after the switch actually applies.
-    requestAudienceChange(val === "team" ? "company" : "individual");
+    // Switching never clears the cart — items simply re-quote under the
+    // other pricing model. The pill and localStorage follow via the
+    // buyer-sync effect above.
+    setCartAudience(val === "team" ? "company" : "individual");
   };
 
   const setCourse = (i: number) => setCourseIndex(i);
