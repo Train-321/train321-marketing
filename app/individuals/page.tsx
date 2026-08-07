@@ -1,4 +1,5 @@
 import HomePage from "@/components/HomePage";
+import { getMarketplaceCatalog } from "@/lib/newFeatures";
 import {
   getCourses,
   getTestimonials,
@@ -14,12 +15,13 @@ export const metadata = {
 };
 
 export default async function IndividualsPage() {
-  const [courses, testimonials, faqs, settings, home] = await Promise.all([
+  const [courses, testimonials, faqs, settings, home, catalog] = await Promise.all([
     getCourses(),
     getTestimonials(),
     getFaqGroups(),
     getSiteSettings(),
-    getHomePage()
+    getHomePage(),
+    getMarketplaceCatalog()
   ]);
   return (
     <HomePage
@@ -30,6 +32,11 @@ export default async function IndividualsPage() {
       companyStats={settings.companyStats || []}
       trustLogos={settings.trustLogos || []}
       home={home}
+      marketplace={{
+        courses: catalog.courses,
+        categories: catalog.categories,
+        total: catalog.total
+      }}
     />
   );
 }

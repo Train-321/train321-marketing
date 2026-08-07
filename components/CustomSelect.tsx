@@ -69,7 +69,12 @@ export default function CustomSelect({
       if (searchable) searchRef.current?.focus();
       else listRef.current?.focus();
     }
-  }, [open, options, value, searchable]);
+    // Deliberately keyed to `open` alone: options/value are often rebuilt on
+    // every parent render, and refiring on their identity would wipe an
+    // in-progress search (and steal focus) any time something else on the
+    // page re-renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   // Typing re-filters — keep the highlight on something that exists.
   useEffect(() => {
