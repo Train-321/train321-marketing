@@ -241,6 +241,30 @@ export function FinderControls() {
   );
 }
 
+/** Shimmer cards shown while a filter change is in flight — same shell as
+    the real catalog cards (image band, title, blurb, price + button) so the
+    swap doesn't shift the layout. */
+function SkeletonCards({ count = 3 }: { count?: number }) {
+  return (
+    <div className="t321-mkt-catalog__grid" aria-hidden="true">
+      {Array.from({ length: count }, (_, i) => (
+        <div key={i} className="t321-mkt-catalog__card t321-mkt-card">
+          <div className="t321-skel" style={{ height: 180, borderRadius: 0 }} />
+          <div className="t321-mkt-catalog__card-body">
+            <span className="t321-skel t321-skel--label" style={{ width: "70%", height: "1.15rem" }} />
+            <span className="t321-skel t321-skel--label" style={{ width: "95%" }} />
+            <span className="t321-skel t321-skel--label" style={{ width: "60%" }} />
+            <div className="t321-mkt-catalog__card-foot">
+              <span className="t321-skel" style={{ width: "4.5rem", height: "1.6rem" }} />
+              <span className="t321-skel" style={{ width: "8rem", height: "2.6rem", borderRadius: 10 }} />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /** Below-hero half: the filtered course grid + the path into the catalog. */
 export function FinderResults() {
   const { categories, activeCategory, stateName, courses, total, loading, fallback } =
@@ -266,7 +290,12 @@ export function FinderResults() {
           </h2>
         </div>
 
-        {courses.length === 0 && !loading ? (
+        {loading ? (
+          /* Shimmer placeholders shaped like the cards they become — a
+             filter change (especially one that ends in the empty + fallback
+             fetch pair) shows these instead of a dimmed stale grid. */
+          <SkeletonCards />
+        ) : courses.length === 0 ? (
           /* Same visual language as the catalog's no-results card. When a
              fallback upsell renders right below, the copy hands off to it
              instead of dead-ending on a catalog button. */
@@ -299,7 +328,7 @@ export function FinderResults() {
             )}
           </div>
         ) : (
-          <div className={`t321-mkt-catalog__grid${loading ? " is-loading" : ""}`}>
+          <div className="t321-mkt-catalog__grid">
             {courses.map((c) => (
               <CourseCard key={c.id} course={c} />
             ))}
@@ -324,7 +353,8 @@ export function FinderResults() {
             the foot too would render the same button twice. */}
         {(courses.length > 0 || loading || fallback) && (
           <div className="t321-hcf__foot">
-            {total > courses.length && (
+            {/* Count hides mid-fetch — it would report the outgoing result. */}
+            {!loading && total > courses.length && (
               <p className="t321-hcf__count">
                 Showing {courses.length} of {total} courses
                 {stateName ? ` available in ${stateName}` : ""}.

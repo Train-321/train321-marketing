@@ -48,16 +48,6 @@
 
 /* ── Results section ──────────────────────────────────────────────────── */
 
-/* Soften the swap while a refetch is in flight — the old grid dims instead
-   of flashing away. */
-.t321-hcf-results .t321-mkt-catalog__grid {
-  transition: opacity 160ms ease;
-}
-.t321-hcf-results .t321-mkt-catalog__grid.is-loading {
-  opacity: 0.45;
-  pointer-events: none;
-}
-
 /* Upsell block under an empty result. */
 .t321-hcf__fallback {
   margin-top: 2.5rem;
