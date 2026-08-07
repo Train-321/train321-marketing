@@ -105,32 +105,54 @@ export function HomeFinderProvider({
         setCourses(data.courses);
         setTotal(data.total);
 
-        // Empty result → upsell what IS available instead of a dead end. A
-        // buyer's state is fixed but their category isn't, so a picked state
-        // falls back to that state's other courses; a bare category falls
-        // back to its state-specific versions.
+        // Empty result → upsell what IS available instead of a dead end,
+        // trying the most relevant pool first. A buyer's state is fixed but
+        // their category isn't, so a picked state falls back to that state's
+        // other courses; a bare category falls back to its state-specific
+        // versions; and a category with nothing at all (or a fallback that
+        // itself came back empty) falls back to courses from the other
+        // categories so there's always something on screen next to the
+        // catalog CTA.
         if (data.total === 0) {
           const catName = marketplace.categories.find(
             (c) => String(c.id) === category
           )?.name;
-          let fbParams: URLSearchParams | null = null;
-          let label = "";
-          let hint = "";
+
+          const candidates: Array<{ params: URLSearchParams; label: string; hint: string }> = [];
           if (code) {
-            fbParams = new URLSearchParams({ stateCode: code });
-            label = `Other courses available in ${state}`;
-            hint = `More training approved for ${state}, from every category.`;
+            candidates.push({
+              params: new URLSearchParams({ stateCode: code }),
+              label: `Other courses available in ${state}`,
+              hint: `More training approved for ${state}, from every category.`
+            });
           } else if (category !== "all") {
-            fbParams = new URLSearchParams({ categoryId: category, anyState: "1" });
-            label = `${catName || "These"} courses for specific states`;
-            hint = "Offered state by state — pick yours above to confirm what applies.";
+            candidates.push({
+              params: new URLSearchParams({ categoryId: category, anyState: "1" }),
+              label: `${catName || "These"} courses for specific states`,
+              hint: "Offered state by state — pick yours above to confirm what applies."
+            });
           }
-          if (fbParams) {
-            const fb = await fetchPage(fbParams);
-            setFallback(fb.courses.length > 0 ? { label, hint, courses: fb.courses } : null);
-          } else {
-            setFallback(null);
+          // Last resort — the unfiltered everywhere baseline. Only when the
+          // main query actually had a filter; if THAT query was already
+          // unfiltered and still empty, the LMS is down and there's nothing
+          // to fetch.
+          if (code || category !== "all") {
+            candidates.push({
+              params: new URLSearchParams(),
+              label: "Popular courses from our other categories",
+              hint: "Available in every state — pick anything, or browse the full catalog."
+            });
           }
+
+          let picked: FinderState["fallback"] = null;
+          for (const cand of candidates) {
+            const fb = await fetchPage(cand.params);
+            if (fb.courses.length > 0) {
+              picked = { label: cand.label, hint: cand.hint, courses: fb.courses };
+              break;
+            }
+          }
+          setFallback(picked);
         } else {
           setFallback(null);
         }
