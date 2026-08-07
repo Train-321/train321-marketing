@@ -11,7 +11,11 @@
 // Only courses with status=1 AND in_store=1 (i.e. enabled in the marketplace)
 // are returned by the backend, which is exactly what we want to show here.
 
-import { parseStateTag } from "@/lib/states";
+import {
+  availableIn,
+  resolveAvailability,
+  type Availability
+} from "@/lib/states";
 
 const API_BASE = process.env.NEW_FEATURES_API_BASE || "https://api.train321.com";
 
@@ -39,6 +43,12 @@ export type MarketplaceCourse = {
   // needs to know which kind it's holding.
   isSeatBased: boolean;
   stateLabel: string | null;
+  /**
+   * Resolved availability — the structured "Select States" tags plus the
+   * include/exclude flag, falling back to the free-text label. This is what
+   * every state decision (filtering, ordering, badges) should read.
+   */
+  availability: Availability;
 };
 
 export type MarketplaceCategory = {
@@ -93,10 +103,11 @@ export type CatalogQuery = {
   perPage?: number;
   /**
    * 2-letter state filter, applying the site-wide availability rule: a course
-   * (or group variant) tagged for this state matches, and a course with NO
-   * state tag is available everywhere so it always matches. With no stateCode
-   * the catalog shows the "available everywhere" baseline — untagged courses
-   * and untagged variants only.
+   * tagged for this state matches, a course whose EXCLUDED-states list omits
+   * it matches, and a course with no tags at all is available everywhere so
+   * it always matches. With no stateCode the catalog shows the "available
+   * everywhere" baseline — genuinely untagged courses/variants only; both
+   * state-limited and state-excluding courses wait for a pick.
    */
   stateCode?: string | null;
 };
@@ -108,6 +119,8 @@ type RawVariant = {
   price?: number;
   is_seat_based?: number;
   state_label?: string | null;
+  state_codes?: string[];
+  state_exclude?: number;
   state_redirect_url?: string | null;
 };
 
@@ -123,6 +136,8 @@ type RawCourse = {
   entry_type?: string;
   is_seat_based?: number;
   state_label?: string | null;
+  state_codes?: string[];
+  state_exclude?: number;
   variants?: RawVariant[];
 };
 
@@ -143,12 +158,10 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
   const perPage = Math.max(1, query.perPage || CATALOG_PAGE_SIZE);
   const stateCode = (query.stateCode || "").trim().toUpperCase() || null;
 
-  // No stateCode → the "available everywhere" baseline (untagged only), the
-  // same rule the course-page picker applies before a state is chosen.
-  const matches = (label: string | null | undefined): boolean => {
-    const { states } = parseStateTag(label);
-    return states === "all" || (stateCode !== null && states.includes(stateCode));
-  };
+  // No stateCode → the "available everywhere" baseline: availableIn(a, null)
+  // passes only truly-untagged courses, hiding both state-limited and
+  // state-excluding ones until a state is picked.
+  const matches = (a: Availability): boolean => availableIn(a, stateCode);
 
   try {
     const res = await fetch(`${API_BASE}/api/list/enroll-courses`, {
@@ -188,7 +201,8 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
           const id = Number(v.id);
           if (v.state_redirect_url || !v.name) continue;
           if (!Number.isInteger(id) || id <= 0 || seen.has(id)) continue;
-          if (!matches(v.state_label)) continue;
+          const availability = resolveAvailability(v.state_label, v.state_codes, v.state_exclude);
+          if (!matches(availability)) continue;
           seen.add(id);
           all.push({
             id,
@@ -199,7 +213,8 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
             categoryId: c.category_id ?? null,
             price: Number(v.price ?? 0),
             isSeatBased: Number(v.is_seat_based ?? 0) === 1,
-            stateLabel: v.state_label || null
+            stateLabel: v.state_label || null,
+            availability
           });
         }
         continue;
@@ -207,7 +222,8 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
 
       const id = Number(c.id);
       if (!Number.isInteger(id) || id <= 0 || seen.has(id)) continue;
-      if (!matches(c.state_label)) continue;
+      const availability = resolveAvailability(c.state_label, c.state_codes, c.state_exclude);
+      if (!matches(availability)) continue;
       seen.add(id);
       all.push({
         id,
@@ -219,7 +235,8 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
         categoryId: c.category_id ?? null,
         price: Number(c.price ?? 0),
         isSeatBased: Number(c.is_seat_based ?? 0) === 1,
-        stateLabel: c.state_label || null
+        stateLabel: c.state_label || null,
+        availability
       });
     }
 
@@ -228,11 +245,11 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
       name: c.name
     }));
 
-    // With a state picked, that state's own versions lead and the
-    // available-everywhere courses follow. Stable sort, so the backend's
-    // ordering is kept within each bucket.
+    // With a state picked, that state's own versions lead and the broadly
+    // available courses (everywhere / everywhere-except) follow. Stable
+    // sort, so the backend's ordering is kept within each bucket.
     if (stateCode) {
-      const specific = (c: MarketplaceCourse) => parseStateTag(c.stateLabel).states !== "all";
+      const specific = (c: MarketplaceCourse) => c.availability.kind === "in";
       all.sort((a, b) => Number(specific(b)) - Number(specific(a)));
     }
 

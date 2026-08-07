@@ -7,7 +7,8 @@ import {
   useMemo,
   useState
 } from "react";
-import type { GroupPicker } from "@/lib/enroll";
+import type { GroupPicker, StateVariant } from "@/lib/enroll";
+import { availableIn } from "@/lib/states";
 import type { MarketplaceCourse } from "@/lib/newFeatures";
 import AddToCartButton from "./cart/AddToCartButton";
 import SkeletonImage from "./SkeletonImage";
@@ -59,7 +60,7 @@ export function StateSelect({
   // Whether anything is already on screen below drives which hint we show —
   // promising "courses accepted in every state" reads as broken on a group
   // that has none and renders no results until a state is picked.
-  const hasNationwide = picker.variants.some((v) => v.states === "all");
+  const hasNationwide = picker.variants.some((v) => v.availability.kind === "all");
 
   // Every variant is "all states" — nothing to choose; the results section
   // shows everything on its own.
@@ -105,13 +106,15 @@ export function StateResults({ picker }: { picker: GroupPicker }) {
 
   const picked = picker.states.find((s) => s.name === stateName) ?? null;
 
-  const variants = picker.variants.filter(
-    (v) => v.states === "all" || (picked !== null && v.states.includes(picked.code))
+  const variants = picker.variants.filter((v) =>
+    availableIn(v.availability, picked?.code ?? null)
   );
-  // With a state picked, its own versions lead and the available-everywhere
-  // ones follow. Stable sort keeps the admin's ordering within each bucket.
+  // With a state picked, its own versions lead and the broadly available
+  // ones (everywhere / everywhere-except) follow. Stable sort keeps the
+  // admin's ordering within each bucket.
   if (picked) {
-    variants.sort((a, b) => Number(b.states !== "all") - Number(a.states !== "all"));
+    const specific = (v: StateVariant) => v.availability.kind === "in";
+    variants.sort((a, b) => Number(specific(b)) - Number(specific(a)));
   }
 
   // ── Cross-sell: other courses tagged for the picked state ──────────────
@@ -181,7 +184,11 @@ export function StateResults({ picker }: { picker: GroupPicker }) {
             <article key={v.course ? v.course.id : `${v.id}-${idx}`} className="t321-sr__card">
               <div className="t321-sr__card-media">
                 <SkeletonImage src={v.course?.image} alt={v.title} />
-                {v.states === "all" && <span className="t321-sr__badge">All states</span>}
+                {v.availability.kind !== "in" && (
+                  <span className="t321-sr__badge">
+                    {v.availability.kind === "all" ? "All states" : v.stateText}
+                  </span>
+                )}
               </div>
               <div className="t321-sr__card-body">
                 <h3 className="t321-sr__name">{v.title || v.stateText}</h3>

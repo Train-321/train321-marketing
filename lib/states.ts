@@ -60,3 +60,59 @@ export function tagMatchesState(raw: string | null | undefined, code: string): b
   const { states } = parseStateTag(raw);
   return states === "all" || states.includes(code);
 }
+
+/**
+ * A course's resolved availability:
+ *   all    — no tags: available in every state
+ *   in     — available only in `codes` (the tagged states)
+ *   except — available everywhere EXCEPT `codes` (state_exclude = 1)
+ */
+export type Availability =
+  | { kind: "all" }
+  | { kind: "in"; codes: string[] }
+  | { kind: "except"; codes: string[] };
+
+/**
+ * Resolve a course's availability from what the LMS provides. The structured
+ * `state_codes` + `state_exclude` pair (course_state pivot + flag) wins when
+ * tags exist; the free-text state_label is the fallback for anything older.
+ */
+export function resolveAvailability(
+  label: string | null | undefined,
+  codes?: string[] | null,
+  exclude?: number | boolean | null
+): Availability {
+  const isExclude = Boolean(Number(exclude ?? 0)) || exclude === true;
+  const explicit = (codes || [])
+    .map((c) => String(c).toUpperCase())
+    .filter((c) => STATE_NAMES[c]);
+  if (explicit.length > 0) {
+    return isExclude
+      ? { kind: "except", codes: explicit }
+      : { kind: "in", codes: explicit };
+  }
+  const parsed = parseStateTag(label);
+  if (parsed.states === "all") return { kind: "all" };
+  return isExclude
+    ? { kind: "except", codes: parsed.states }
+    : { kind: "in", codes: parsed.states };
+}
+
+/**
+ * Is the course available under this selection? `code === null` is the
+ * no-state baseline, which only truly-everywhere courses pass — both
+ * state-limited AND state-excluding courses wait for a pick.
+ */
+export function availableIn(a: Availability, code: string | null): boolean {
+  if (a.kind === "all") return true;
+  if (code === null) return false;
+  return a.kind === "in" ? a.codes.includes(code) : !a.codes.includes(code);
+}
+
+/** Badge/chip copy for an availability. */
+export function availabilityText(a: Availability): string {
+  if (a.kind === "all") return "All states";
+  return a.kind === "in"
+    ? a.codes.join(", ")
+    : `Not available in ${a.codes.join(", ")}`;
+}

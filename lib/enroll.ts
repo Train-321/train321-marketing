@@ -18,7 +18,12 @@
 // passes an invoice cadence.
 
 import { secureImageUrl } from "@/lib/newFeatures";
-import { US_STATES, parseStateTag } from "@/lib/states";
+import {
+  US_STATES,
+  availabilityText,
+  resolveAvailability,
+  type Availability
+} from "@/lib/states";
 
 const API_BASE =
   process.env.NEW_FEATURES_API_BASE || "https://api.train321.com";
@@ -256,11 +261,11 @@ export type StateVariant = {
   title: string;
   price: number;
   /**
-   * Where this version applies: "all" (available everywhere, shown under any
-   * state selection) or a list of normalized 2-letter codes.
+   * Where this version applies: everywhere, only in its tagged states, or
+   * everywhere EXCEPT its tagged states (state_exclude = 1).
    */
-  states: "all" | string[];
-  /** Label for the "available everywhere" badge / unusual free-text tags. */
+  availability: Availability;
+  /** Badge copy for the availability ("All states", codes, "Not available in …"). */
   stateText: string;
   /** Outbound link for states served by an external provider; "" otherwise. */
   href: string;
@@ -310,6 +315,8 @@ export async function getGroupPicker(enrollId?: string | null): Promise<GroupPic
     image?: string | null;
     is_seat_based?: number;
     state_label?: string | null;
+    state_codes?: string[];
+    state_exclude?: number;
     state_redirect_url?: string | null;
     price?: number;
   };
@@ -352,7 +359,8 @@ export async function getGroupPicker(enrollId?: string | null): Promise<GroupPic
     const title = v.name || fallback?.name || "";
     if (!title && !v.state_redirect_url) continue; // dead option — drop
 
-    const { states, text } = parseStateTag(v.state_label);
+    const availability = resolveAvailability(v.state_label, v.state_codes, v.state_exclude);
+    const text = availabilityText(availability);
     const course: CartCourse | null = v.state_redirect_url
       ? null // external-provider state — link out, never add to cart
       : {
@@ -371,7 +379,7 @@ export async function getGroupPicker(enrollId?: string | null): Promise<GroupPic
       id: v.id,
       title: title || text,
       price: Number(v.price ?? fallback?.price ?? 0),
-      states,
+      availability,
       stateText: text,
       href: v.state_redirect_url || "",
       course

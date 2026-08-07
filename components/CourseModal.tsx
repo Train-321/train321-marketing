@@ -23,6 +23,7 @@ import {
 } from "react";
 import { flushSync } from "react-dom";
 import type { MarketplaceCourse } from "@/lib/newFeatures";
+import { availabilityText } from "@/lib/states";
 import AddToCartButton from "./cart/AddToCartButton";
 import SkeletonImage from "./SkeletonImage";
 import "./CourseModal.css";
@@ -179,10 +180,10 @@ export function CourseModalProvider({ children }: { children: React.ReactNode })
             </div>
 
             <div className="t321-cm__body">
-              {active.stateLabel && (
+              {active.availability.kind !== "all" && (
                 <span className="t321-cm__chip">
                   <i className="fas fa-map-marker-alt" aria-hidden="true" />
-                  {active.stateLabel}
+                  {availabilityText(active.availability)}
                 </span>
               )}
               <h3 className="t321-cm__title">{active.name}</h3>
