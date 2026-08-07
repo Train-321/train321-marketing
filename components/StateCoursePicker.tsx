@@ -174,18 +174,30 @@ export function StateResults({ picker }: { picker: GroupPicker }) {
         {variants.length === 0 && (
           <div className="t321-sr__empty">
             <i className="fas fa-map-marker-alt" aria-hidden="true" />
-            <h3>Nothing for {picked?.name} yet</h3>
-            <p>
-              We don&rsquo;t have a version of this course approved for{" "}
-              {picked?.name} yet — but there&rsquo;s plenty more in the catalog.
-            </p>
-            <a
-              href={picked ? `/catalog?state=${picked.code}` : "/catalog"}
-              className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg"
-            >
-              Browse the full catalog{" "}
-              <i className="fas fa-arrow-right" aria-hidden="true" />
-            </a>
+            <h3>No {picked?.name} version of this course yet</h3>
+            {recsLoading || recs.length > 0 ? (
+              // The cross-sell shelf renders right below — hand off to it
+              // instead of contradicting it with a "nothing here" dead end.
+              <p>
+                This course isn&rsquo;t approved for {picked?.name} yet — but
+                other courses available in {picked?.name} are right below.
+              </p>
+            ) : (
+              <>
+                <p>
+                  We don&rsquo;t have a version of this course approved for{" "}
+                  {picked?.name} yet — but there&rsquo;s plenty more in the
+                  catalog.
+                </p>
+                <a
+                  href={picked ? `/catalog?state=${picked.code}` : "/catalog"}
+                  className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg"
+                >
+                  Browse the full catalog{" "}
+                  <i className="fas fa-arrow-right" aria-hidden="true" />
+                </a>
+              </>
+            )}
           </div>
         )}
 
@@ -237,7 +249,9 @@ export function StateResults({ picker }: { picker: GroupPicker }) {
         {picked && recsLoading && (
           <div className="t321-sr__recs" aria-hidden="true">
             <h3 className="t321-mkt-h3 t321-sr__recs-head">
-              Also available in {picked.name}
+              {variants.length === 0
+                ? `Other courses available in ${picked.name}`
+                : `Also available in ${picked.name}`}
             </h3>
             <div className="t321-sr__grid">
               {[0, 1, 2].map((i) => (
@@ -259,7 +273,9 @@ export function StateResults({ picker }: { picker: GroupPicker }) {
         {picked && !recsLoading && recs.length > 0 && (
           <div className="t321-sr__recs">
             <h3 className="t321-mkt-h3 t321-sr__recs-head">
-              Also available in {picked.name}
+              {variants.length === 0
+                ? `Other courses available in ${picked.name}`
+                : `Also available in ${picked.name}`}
             </h3>
             <div className="t321-sr__grid">
               {recs.map((c) => (

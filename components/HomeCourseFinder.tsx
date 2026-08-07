@@ -54,6 +54,13 @@ type FinderState = {
   courses: MarketplaceCourse[];
   total: number;
   loading: boolean;
+  /**
+   * Upsell shown when the main result is empty: with a state picked, other
+   * courses available in that state; with only a category, that category's
+   * state-specific courses. Null when the main result has content (or the
+   * fallback itself came back empty).
+   */
+  fallback: { label: string; hint: string; courses: MarketplaceCourse[] } | null;
 };
 
 const FinderCtx = createContext<FinderState | null>(null);
@@ -76,26 +83,65 @@ export function HomeFinderProvider({
   const [courses, setCourses] = useState(marketplace.courses.slice(0, HOME_PAGE_SIZE));
   const [total, setTotal] = useState(marketplace.total);
   const [loading, setLoading] = useState(false);
+  const [fallback, setFallback] = useState<FinderState["fallback"]>(null);
 
-  const refetch = useCallback(async (category: string, state: string) => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({ perPage: String(HOME_PAGE_SIZE) });
-      if (category !== "all") params.set("categoryId", category);
-      const code = US_STATES.find((s) => s.name === state)?.code;
-      if (code) params.set("stateCode", code);
-
-      const res = await fetch(`/api/catalog?${params.toString()}`);
-      if (!res.ok) throw new Error(String(res.status));
-      const data = (await res.json()) as MarketplaceCatalog;
-      setCourses(data.courses);
-      setTotal(data.total);
-    } catch {
-      /* keep whatever is on screen — the finder is never worth an error wall */
-    } finally {
-      setLoading(false);
-    }
+  const fetchPage = useCallback(async (params: URLSearchParams) => {
+    params.set("perPage", String(HOME_PAGE_SIZE));
+    const res = await fetch(`/api/catalog?${params.toString()}`);
+    if (!res.ok) throw new Error(String(res.status));
+    return (await res.json()) as MarketplaceCatalog;
   }, []);
+
+  const refetch = useCallback(
+    async (category: string, state: string) => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams();
+        if (category !== "all") params.set("categoryId", category);
+        const code = US_STATES.find((s) => s.name === state)?.code;
+        if (code) params.set("stateCode", code);
+
+        const data = await fetchPage(params);
+        setCourses(data.courses);
+        setTotal(data.total);
+
+        // Empty result → upsell what IS available instead of a dead end. A
+        // buyer's state is fixed but their category isn't, so a picked state
+        // falls back to that state's other courses; a bare category falls
+        // back to its state-specific versions.
+        if (data.total === 0) {
+          const catName = marketplace.categories.find(
+            (c) => String(c.id) === category
+          )?.name;
+          let fbParams: URLSearchParams | null = null;
+          let label = "";
+          let hint = "";
+          if (code) {
+            fbParams = new URLSearchParams({ stateCode: code });
+            label = `Other courses available in ${state}`;
+            hint = `More training approved for ${state}, from every category.`;
+          } else if (category !== "all") {
+            fbParams = new URLSearchParams({ categoryId: category, anyState: "1" });
+            label = `${catName || "These"} courses for specific states`;
+            hint = "Offered state by state — pick yours above to confirm what applies.";
+          }
+          if (fbParams) {
+            const fb = await fetchPage(fbParams);
+            setFallback(fb.courses.length > 0 ? { label, hint, courses: fb.courses } : null);
+          } else {
+            setFallback(null);
+          }
+        } else {
+          setFallback(null);
+        }
+      } catch {
+        /* keep whatever is on screen — the finder is never worth an error wall */
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchPage, marketplace.categories]
+  );
 
   // Refetch when a filter changes; the server-rendered first page covers the
   // initial render.
@@ -117,9 +163,10 @@ export function HomeFinderProvider({
       setStateName,
       courses,
       total,
-      loading
+      loading,
+      fallback
     }),
-    [marketplace.categories, activeCategory, stateName, courses, total, loading]
+    [marketplace.categories, activeCategory, stateName, courses, total, loading, fallback]
   );
 
   return <FinderCtx.Provider value={value}>{children}</FinderCtx.Provider>;
@@ -174,7 +221,8 @@ export function FinderControls() {
 
 /** Below-hero half: the filtered course grid + the path into the catalog. */
 export function FinderResults() {
-  const { categories, activeCategory, stateName, courses, total, loading } = useFinder();
+  const { categories, activeCategory, stateName, courses, total, loading, fallback } =
+    useFinder();
 
   const stateCode = US_STATES.find((s) => s.name === stateName)?.code;
   const catalogHref = stateCode ? `/catalog?state=${stateCode}` : "/catalog";
@@ -197,10 +245,9 @@ export function FinderResults() {
         </div>
 
         {courses.length === 0 && !loading ? (
-          /* Same visual language as the catalog's no-results card: dashed
-             outline, icon tile, serif heading — with the catalog CTA built
-             in (the section foot hides in this state so the button isn't
-             doubled). */
+          /* Same visual language as the catalog's no-results card. When a
+             fallback upsell renders right below, the copy hands off to it
+             instead of dead-ending on a catalog button. */
           <div className="t321-mkt-catalog__empty">
             <i
               className={stateName ? "fas fa-map-marker-alt" : "fas fa-search"}
@@ -210,15 +257,24 @@ export function FinderResults() {
               No {categoryName ? `${categoryName.toLowerCase()} courses` : "courses"}
               {stateName ? ` in ${stateName}` : ""} yet
             </h3>
-            <p>
-              {stateName
-                ? "Try another category or state — or see everything we offer in one place."
-                : "Try another category — or see everything we offer in one place."}
-            </p>
-            <Link href={catalogHref} className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg">
-              Browse the full catalog
-              <i className="fas fa-arrow-right" aria-hidden="true" />
-            </Link>
+            {fallback ? (
+              <p>
+                Nothing in this exact combination — but don&rsquo;t leave
+                empty-handed: here&rsquo;s what we do have.
+              </p>
+            ) : (
+              <>
+                <p>
+                  {stateName
+                    ? "Try another category or state — or see everything we offer in one place."
+                    : "Try another category — or see everything we offer in one place."}
+                </p>
+                <Link href={catalogHref} className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg">
+                  Browse the full catalog
+                  <i className="fas fa-arrow-right" aria-hidden="true" />
+                </Link>
+              </>
+            )}
           </div>
         ) : (
           <div className={`t321-mkt-catalog__grid${loading ? " is-loading" : ""}`}>
@@ -228,9 +284,23 @@ export function FinderResults() {
           </div>
         )}
 
-        {/* The empty card above carries its own catalog CTA — showing the
-            foot too would render the same button twice. */}
-        {(courses.length > 0 || loading) && (
+        {/* Upsell grid for an empty result — other courses in the picked
+            state, or the category's state-specific versions. */}
+        {courses.length === 0 && !loading && fallback && (
+          <div className="t321-hcf__fallback">
+            <h3 className="t321-mkt-h3">{fallback.label}</h3>
+            <p className="t321-hcf__fallback-hint">{fallback.hint}</p>
+            <div className="t321-mkt-catalog__grid">
+              {fallback.courses.map((c) => (
+                <CourseCard key={c.id} course={c} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* The no-fallback empty card carries its own catalog CTA — showing
+            the foot too would render the same button twice. */}
+        {(courses.length > 0 || loading || fallback) && (
           <div className="t321-hcf__foot">
             {total > courses.length && (
               <p className="t321-hcf__count">

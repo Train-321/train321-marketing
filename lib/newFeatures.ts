@@ -110,6 +110,13 @@ export type CatalogQuery = {
    * state-limited and state-excluding courses wait for a pick.
    */
   stateCode?: string | null;
+  /**
+   * Skip the availability filter entirely — every marketplace course (and
+   * group variant) in scope comes back regardless of state tags. Powers the
+   * finder's "these exist for specific states" fallback when a category has
+   * nothing in the everywhere baseline.
+   */
+  anyState?: boolean;
 };
 
 type RawVariant = {
@@ -160,8 +167,10 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
 
   // No stateCode → the "available everywhere" baseline: availableIn(a, null)
   // passes only truly-untagged courses, hiding both state-limited and
-  // state-excluding ones until a state is picked.
-  const matches = (a: Availability): boolean => availableIn(a, stateCode);
+  // state-excluding ones until a state is picked. anyState mode bypasses the
+  // filter altogether (the caller wants to SHOW what's state-specific).
+  const matches = (a: Availability): boolean =>
+    query.anyState ? true : availableIn(a, stateCode);
 
   try {
     const res = await fetch(`${API_BASE}/api/list/enroll-courses`, {

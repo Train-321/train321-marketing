@@ -58,6 +58,21 @@
   pointer-events: none;
 }
 
+/* Upsell block under an empty result. */
+.t321-hcf__fallback {
+  margin-top: 2.5rem;
+}
+.t321-hcf__fallback h3 {
+  margin: 0 0 0.35rem;
+  text-align: center;
+}
+.t321-hcf__fallback-hint {
+  margin: 0 0 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--t321-mkt-ink-muted);
+}
+
 .t321-hcf__foot {
   margin-top: 2rem;
   display: flex;
