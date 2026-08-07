@@ -33,6 +33,15 @@
   flex-wrap: wrap;
   margin-top: 0.5rem;
 }
+
+/* The state picker standing in for the CTA buttons on grouped courses. The
+   hero body is a wide column, so the control is capped rather than stretched
+   across the full measure — a 40rem-wide select reads as a form field, not as
+   the page's primary action. */
+.t321-mkt-course__pick {
+  margin-top: 1.25rem;
+  max-width: 24rem;
+}
 .t321-mkt-course__accred {
   list-style: none;
   margin: 1.75rem 0 0;

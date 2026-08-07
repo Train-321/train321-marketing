@@ -96,14 +96,21 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             </span>
             <h1 className="t321-mkt-h1">{course.title}</h1>
             <p className="t321-mkt-lede">{course.tagline}</p>
-            <div className="t321-mkt-course__cta">
-              <Suspense fallback={<span className="t321-skel t321-skel--btn" aria-hidden="true" />}>
-                <BuyCta {...lms} label={enrollLabel} className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg" />
-              </Suspense>
-              <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
-                {browseLabel}
-              </Link>
-            </div>
+            {/* Grouped course → picking a state IS the primary action, so the
+                picker sits here in the hero body rather than off in the price
+                card. Ungrouped courses keep the enroll / browse pair, since
+                they have nothing to choose. Streams in behind a skeleton
+                shaped like the picker, the common case. */}
+            <Suspense
+              fallback={
+                <div className="t321-mkt-course__pick" aria-hidden="true">
+                  <span className="t321-skel t321-skel--label" style={{ display: "block" }} />
+                  <span className="t321-skel t321-skel--select" style={{ display: "block" }} />
+                </div>
+              }
+            >
+              <HeroWidget {...lms} enrollLabel={enrollLabel} browseLabel={browseLabel} />
+            </Suspense>
             {course.accreditations && course.accreditations.length > 0 && (
               <ul className="t321-mkt-course__accred">
                 {course.accreditations.map((a) => (
@@ -144,15 +151,12 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                   ))}
                 </ul>
               )}
-              {/* Grouped course → the state picker lives right here in the
-                  price card. Ungrouped → the plain add-to-cart button.
-                  Streams in behind a select-shaped skeleton. */}
+              {/* Ungrouped course → the plain add-to-cart button. Grouped
+                  courses render nothing here; their state picker lives in the
+                  hero body. Streams in behind a button-shaped skeleton. */}
               <Suspense
                 fallback={
-                  <div aria-hidden="true">
-                    <span className="t321-skel t321-skel--label" style={{ display: "block" }} />
-                    <span className="t321-skel t321-skel--select" style={{ display: "block" }} />
-                  </div>
+                  <span className="t321-skel t321-skel--btn-block" aria-hidden="true" />
                 }
               >
                 <CardWidget {...lms} getStartedLabel={getStartedLabel} />
@@ -310,11 +314,47 @@ async function BuyCta(
   );
 }
 
-/** Hero price-card widget: state dropdown for grouped courses, add-to-cart
-    for the rest. */
+/** The hero body's primary action. A grouped course leads with the state
+    picker — nothing can be bought until a state is chosen, so the dropdown
+    replaces the enroll / browse pair entirely. Everything else keeps the
+    original buttons. */
+async function HeroWidget(
+  props: LmsProps & { enrollLabel: string; browseLabel: string }
+) {
+  const { cartCourse, picker } = await lookup(props);
+
+  if (picker && picker.states.length > 0) {
+    return (
+      <div className="t321-mkt-course__pick">
+        <StateSelect picker={picker} variant="hero" />
+      </div>
+    );
+  }
+
+  // Ungrouped course — nothing to choose, so the original buttons stand. The
+  // states list is now every state rather than only the tagged ones, so the
+  // length guard above is a safety net, not a case we expect to hit.
+  return (
+    <div className="t321-mkt-course__cta">
+      <EnrollButton
+        href={picker ? "#choose-your-state" : props.enrollHref}
+        label={props.enrollLabel}
+        className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg"
+        course={picker ? null : cartCourse}
+        mode="buy"
+      />
+      <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
+        {props.browseLabel}
+      </Link>
+    </div>
+  );
+}
+
+/** Hero price-card widget: add-to-cart for ungrouped courses. Grouped courses
+    render nothing — their picker moved to the hero body. */
 async function CardWidget(props: LmsProps & { getStartedLabel: string }) {
   const { cartCourse, picker } = await lookup(props);
-  if (picker) return <StateSelect picker={picker} />;
+  if (picker) return null;
   return (
     <EnrollButton
       href={props.enrollHref}

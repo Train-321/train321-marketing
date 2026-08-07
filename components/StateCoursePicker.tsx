@@ -40,20 +40,33 @@ function useStatePicker() {
 }
 
 /**
- * The hero price card's slice of the picker: a highlighted state dropdown.
- * Selecting a state makes <StateResults /> (below the hero) render that
- * state's course versions as full-size thumbnail cards.
+ * The picker's dropdown half. Selecting a state makes <StateResults /> (below
+ * the hero) render that state's course versions as full-size thumbnail cards.
+ *
+ * `variant` only changes the sizing: "hero" sits in the wide hero body as the
+ * page's primary call to action, "card" is the narrow price-card fit.
  */
-export function StateSelect({ picker }: { picker: GroupPicker }) {
+export function StateSelect({
+  picker,
+  variant = "card"
+}: {
+  picker: GroupPicker;
+  variant?: "card" | "hero";
+}) {
   const { stateName, setStateName } = useStatePicker();
   const stateNames = picker.states.map((s) => s.name);
+
+  // Whether anything is already on screen below drives which hint we show —
+  // promising "courses accepted in every state" reads as broken on a group
+  // that has none and renders no results until a state is picked.
+  const hasNationwide = picker.variants.some((v) => v.states === "all");
 
   // Every variant is "all states" — nothing to choose; the results section
   // shows everything on its own.
   if (stateNames.length === 0) return null;
 
   return (
-    <div className="t321-spc" id="choose-your-state">
+    <div className={`t321-spc t321-spc--${variant}`} id="choose-your-state">
       <p className="t321-spc__label">
         <i className="fas fa-map-marker-alt" aria-hidden="true" /> Choose your state
       </p>
@@ -68,7 +81,9 @@ export function StateSelect({ picker }: { picker: GroupPicker }) {
       />
       {!stateName && (
         <p className="t321-spc__hint">
-          Courses for your state will appear below.
+          {hasNationwide
+            ? "Showing courses accepted in every state. Pick yours to see versions approved there."
+            : "Courses for your state will appear below."}
         </p>
       )}
     </div>
@@ -76,25 +91,28 @@ export function StateSelect({ picker }: { picker: GroupPicker }) {
 }
 
 /**
- * Full-width results section under the hero. Appears once a state is picked
- * (immediately when the group has no state-specific versions): the group's
- * versions for that state as big thumbnail cards, followed by other courses
- * available in the same state — the cross-sell shelf.
+ * Full-width results section under the hero: the group's versions as big
+ * thumbnail cards, followed by other courses available in the same state —
+ * the cross-sell shelf.
+ *
+ * A version carrying no state tag is available everywhere, so those are the
+ * baseline and are ALWAYS on screen: on their own before a state is picked,
+ * and alongside a picked state's own versions after. A state with no version
+ * of its own therefore falls back to exactly these rather than to nothing.
  */
 export function StateResults({ picker }: { picker: GroupPicker }) {
   const { stateName } = useStatePicker();
 
   const picked = picker.states.find((s) => s.name === stateName) ?? null;
-  const hasStates = picker.states.length > 0;
-  const active = !hasStates || picked !== null;
 
-  const variants = !active
-    ? []
-    : !hasStates
-      ? picker.variants
-      : picker.variants.filter(
-          (v) => v.states === "all" || v.states.includes(picked!.code)
-        );
+  const variants = picker.variants.filter(
+    (v) => v.states === "all" || (picked !== null && v.states.includes(picked.code))
+  );
+  // With a state picked, its own versions lead and the available-everywhere
+  // ones follow. Stable sort keeps the admin's ordering within each bucket.
+  if (picked) {
+    variants.sort((a, b) => Number(b.states !== "all") - Number(a.states !== "all"));
+  }
 
   // ── Cross-sell: other courses tagged for the picked state ──────────────
   const [recs, setRecs] = useState<MarketplaceCourse[]>([]);
@@ -133,7 +151,9 @@ export function StateResults({ picker }: { picker: GroupPicker }) {
     };
   }, [picked, groupIds]);
 
-  if (!active) return null;
+  // Nothing to show only when this group has no nationwide version AND the
+  // visitor hasn't picked a state yet.
+  if (variants.length === 0 && !picked) return null;
 
   return (
     <section className="t321-mkt-section t321-mkt-section--sunk t321-sr">
@@ -144,9 +164,17 @@ export function StateResults({ picker }: { picker: GroupPicker }) {
             {picked ? ` Available in ${picked.name}` : " Available everywhere"}
           </span>
           <h2 className="t321-mkt-h2">
-            {picked ? `Your courses in ${picked.name}` : "Choose your version"}
+            {picked ? `Your courses in ${picked.name}` : "Available in every state"}
           </h2>
         </div>
+
+        {variants.length === 0 && (
+          <p className="t321-sr__empty">
+            We don&rsquo;t have a version of this course for {picked?.name} yet.{" "}
+            <a href="/catalog">Browse the full catalog</a> to see what else is
+            available.
+          </p>
+        )}
 
         <div className="t321-sr__grid">
           {variants.map((v, idx) => (

@@ -11,6 +11,8 @@
 // Only courses with status=1 AND in_store=1 (i.e. enabled in the marketplace)
 // are returned by the backend, which is exactly what we want to show here.
 
+import { parseStateTag } from "@/lib/states";
+
 const API_BASE = process.env.NEW_FEATURES_API_BASE || "https://api.train321.com";
 
 // Where the Enroll button sends the buyer. Hash route on the new-features SPA;
@@ -69,21 +71,49 @@ export function secureImageUrl(url: string | null | undefined): string | null {
 
 export const CATALOG_PAGE_SIZE = 6;
 
+// The backend `description` is rich HTML. Strip tags + decode the handful of
+// entities the LMS editor emits, then trim to a short card-sized blurb.
+export function toBlurb(html: string, max = 160): string {
+  const text = html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&rsquo;|&lsquo;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (text.length <= max) return text;
+  return text.slice(0, max).replace(/\s+\S*$/, "") + "…";
+}
+
 export type CatalogQuery = {
   search?: string;
   categoryId?: number | null;
   page?: number;
   perPage?: number;
   /**
-   * 2-letter state filter (strict): only courses an admin explicitly tagged
-   * for this state come back. Powers the "also available in {state}"
-   * cross-sell shelf on grouped course pages.
+   * 2-letter state filter, applying the site-wide availability rule: a course
+   * (or group variant) tagged for this state matches, and a course with NO
+   * state tag is available everywhere so it always matches. With no stateCode
+   * the catalog shows the "available everywhere" baseline — untagged courses
+   * and untagged variants only.
    */
   stateCode?: string | null;
 };
 
-type RawCourse = {
+type RawVariant = {
   id: number;
+  name?: string;
+  image?: string | null;
+  price?: number;
+  is_seat_based?: number;
+  state_label?: string | null;
+  state_redirect_url?: string | null;
+};
+
+type RawCourse = {
+  /** Numeric for real courses; "group-<n>" strings for group entries. */
+  id: number | string;
   name?: string;
   description?: string;
   marketplace_description?: string;
@@ -93,29 +123,44 @@ type RawCourse = {
   entry_type?: string;
   is_seat_based?: number;
   state_label?: string | null;
+  variants?: RawVariant[];
 };
 
 /**
- * Fetch one page of marketplace-enabled courses plus the ordered category list.
- * Search + category filtering + pagination are all handled server-side by the
- * backend so the catalog page loads incrementally (infinite scroll) instead of
- * pulling every course at once.
+ * Fetch the marketplace catalog plus the ordered category list.
+ *
+ * Search + category filtering happen server-side on the backend; state
+ * filtering and pagination happen HERE. The backend's own state_code filter
+ * is strict (explicitly tagged only) and it returns group shells rather than
+ * buyable courses, so instead we pull the full result set (93 courses today,
+ * one cached call per search/category combo), flatten group entries into
+ * their purchasable variants, apply the availability rule, and slice pages
+ * locally. Group variants with a state_redirect_url (external providers) are
+ * dropped — a catalog card's only action is add-to-cart, which they can't do.
  */
 export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<MarketplaceCatalog> {
   const page = Math.max(1, query.page || 1);
   const perPage = Math.max(1, query.perPage || CATALOG_PAGE_SIZE);
+  const stateCode = (query.stateCode || "").trim().toUpperCase() || null;
+
+  // No stateCode → the "available everywhere" baseline (untagged only), the
+  // same rule the course-page picker applies before a state is chosen.
+  const matches = (label: string | null | undefined): boolean => {
+    const { states } = parseStateTag(label);
+    return states === "all" || (stateCode !== null && states.includes(stateCode));
+  };
 
   try {
     const res = await fetch(`${API_BASE}/api/list/enroll-courses`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({
-        per_page: perPage,
-        page,
+        // Everything in one page — state filtering + pagination are local.
+        per_page: 500,
+        page: 1,
         type: "all",
         search: query.search || "",
-        marketplace_category_id: query.categoryId || "",
-        state_code: query.stateCode || ""
+        marketplace_category_id: query.categoryId || ""
       }),
       // Revalidate every 5 minutes so newly enabled/disabled courses surface
       // without a redeploy, while keeping the page fast.
@@ -132,25 +177,72 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
       total?: number;
     };
 
-    const courses: MarketplaceCourse[] = (data.courses || []).map((c) => ({
-      id: c.id,
-      name: c.name || "",
-      // Marketplace Overview ONLY — no fallback to the instructions
-      // `description`. Empty marketplace copy → empty card blurb, by design.
-      description: c.marketplace_description || "",
-      image: secureImageUrl(c.image),
-      categoryId: c.category_id ?? null,
-      price: Number(c.price ?? 0),
-      isSeatBased: Number(c.is_seat_based ?? 0) === 1,
-      stateLabel: c.state_label || null
-    }));
+    const all: MarketplaceCourse[] = [];
+    const seen = new Set<number>();
+
+    for (const c of data.courses || []) {
+      if (c.entry_type === "group") {
+        // A group is a container, not a product — surface its variants that
+        // fit the state instead of an unbuyable "group-6" card.
+        for (const v of c.variants || []) {
+          const id = Number(v.id);
+          if (v.state_redirect_url || !v.name) continue;
+          if (!Number.isInteger(id) || id <= 0 || seen.has(id)) continue;
+          if (!matches(v.state_label)) continue;
+          seen.add(id);
+          all.push({
+            id,
+            name: v.name,
+            // Variants carry no marketplace copy — card shows no blurb.
+            description: "",
+            image: secureImageUrl(v.image),
+            categoryId: c.category_id ?? null,
+            price: Number(v.price ?? 0),
+            isSeatBased: Number(v.is_seat_based ?? 0) === 1,
+            stateLabel: v.state_label || null
+          });
+        }
+        continue;
+      }
+
+      const id = Number(c.id);
+      if (!Number.isInteger(id) || id <= 0 || seen.has(id)) continue;
+      if (!matches(c.state_label)) continue;
+      seen.add(id);
+      all.push({
+        id,
+        name: c.name || "",
+        // Marketplace Overview ONLY — no fallback to the instructions
+        // `description`. Empty marketplace copy → empty card blurb, by design.
+        description: c.marketplace_description || "",
+        image: secureImageUrl(c.image),
+        categoryId: c.category_id ?? null,
+        price: Number(c.price ?? 0),
+        isSeatBased: Number(c.is_seat_based ?? 0) === 1,
+        stateLabel: c.state_label || null
+      });
+    }
 
     const categories: MarketplaceCategory[] = (data.categories || []).map((c) => ({
       id: c.id,
       name: c.name
     }));
 
-    return { courses, categories, total: Number(data.total ?? courses.length), page, perPage };
+    // With a state picked, that state's own versions lead and the
+    // available-everywhere courses follow. Stable sort, so the backend's
+    // ordering is kept within each bucket.
+    if (stateCode) {
+      const specific = (c: MarketplaceCourse) => parseStateTag(c.stateLabel).states !== "all";
+      all.sort((a, b) => Number(specific(b)) - Number(specific(a)));
+    }
+
+    return {
+      courses: all.slice((page - 1) * perPage, page * perPage),
+      categories,
+      total: all.length,
+      page,
+      perPage
+    };
   } catch {
     // Network/backend hiccup — render an empty catalog rather than crash the page.
     return { courses: [], categories: [], total: 0, page, perPage };

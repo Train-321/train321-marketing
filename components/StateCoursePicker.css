@@ -1,7 +1,7 @@
 /* State-first picker: dropdown in the hero card (.t321-spc) + full-width
    results section below the hero (.t321-sr). */
 
-/* ── Card dropdown ────────────────────────────────────────────────────── */
+/* ── Dropdown ─────────────────────────────────────────────────────────── */
 .t321-spc {
   scroll-margin-top: 7rem;
 }
@@ -18,6 +18,25 @@
 .t321-spc__label i {
   color: var(--t321-mkt-accent-ink);
   font-size: 0.75rem;
+}
+
+/* Hero placement: the picker is the page's primary action here, standing
+   where the Enroll button used to, so it carries a little more weight than
+   the compact in-card version. */
+.t321-spc--hero .t321-spc__label {
+  font-size: 0.92rem;
+  margin-bottom: 0.6rem;
+}
+.t321-spc--hero .t321-spc__label i {
+  font-size: 0.85rem;
+}
+.t321-spc--hero .t321-mkt-select__btn {
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+  font-size: 1rem;
+}
+.t321-spc--hero .t321-spc__hint {
+  font-size: 0.82rem;
 }
 
 /* The card's primary action. Calm at rest — a clean bordered control that
@@ -51,6 +70,17 @@
 }
 
 /* ── Results section ──────────────────────────────────────────────────── */
+.t321-sr__empty {
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--t321-mkt-ink-muted);
+}
+.t321-sr__empty a {
+  color: var(--t321-mkt-accent-ink);
+  font-weight: 600;
+}
+
 .t321-sr__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr));

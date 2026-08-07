@@ -18,6 +18,7 @@
 // passes an invoice cadence.
 
 import { secureImageUrl } from "@/lib/newFeatures";
+import { US_STATES, parseStateTag } from "@/lib/states";
 
 const API_BASE =
   process.env.NEW_FEATURES_API_BASE || "https://api.train321.com";
@@ -268,61 +269,21 @@ export type StateVariant = {
 };
 
 /**
- * Everything the state-first picker needs: the dropdown's state list (union
- * of the specific states across variants) plus every variant with its
- * marketplace name and availability. The UI flow is: pick a state, see that
- * state's versions (plus any "all states" versions), add one to the cart —
- * a flat list of 50 states x N versions would not scale.
+ * Everything the state-first picker needs: the dropdown's state list plus
+ * every variant with its marketplace name and availability. The UI flow is:
+ * pick a state, see that state's versions (plus any "all states" versions),
+ * add one to the cart — a flat list of 50 states x N versions would not scale.
  */
 export type GroupPicker = {
   groupName: string;
-  /** Specific states available, sorted by full name. Empty when every
-      variant is "all states" (the UI then skips the dropdown). */
+  /** Every US state + DC, sorted by full name — NOT just the ones with a
+      dedicated version. A course carrying no state tag is valid everywhere,
+      so a state with no version of its own still resolves to those; listing
+      only the tagged states would leave most visitors unable to pick their
+      own and make the picker look broken. */
   states: Array<{ code: string; name: string }>;
   variants: StateVariant[];
 };
-
-/** Code → full name, for prettifying raw LMS state tags like "Fl". */
-const STATE_NAMES: Record<string, string> = {
-  AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
-  CO: "Colorado", CT: "Connecticut", DE: "Delaware", DC: "District of Columbia",
-  FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho", IL: "Illinois",
-  IN: "Indiana", IA: "Iowa", KS: "Kansas", KY: "Kentucky", LA: "Louisiana",
-  ME: "Maine", MD: "Maryland", MA: "Massachusetts", MI: "Michigan",
-  MN: "Minnesota", MS: "Mississippi", MO: "Missouri", MT: "Montana",
-  NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey",
-  NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota",
-  OH: "Ohio", OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania",
-  RI: "Rhode Island", SC: "South Carolina", SD: "South Dakota",
-  TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont", VA: "Virginia",
-  WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming"
-};
-
-/** Full name (lowercased) → code, so free-text tags like "California" parse. */
-const STATE_CODES_BY_NAME: Record<string, string> = Object.fromEntries(
-  Object.entries(STATE_NAMES).map(([code, name]) => [name.toLowerCase(), code])
-);
-
-/**
- * Parse a raw admin-typed state tag ("Fl", "Az,CA, HI", "California", "ALL")
- * into normalized codes, or "all" when it applies everywhere. Unparseable
- * free text also maps to "all" (with its text preserved) — better to show a
- * version under every state than to hide it behind a typo.
- */
-function parseStateTag(raw: string | null | undefined): { states: "all" | string[]; text: string } {
-  const text = String(raw || "").trim();
-  if (!text || text.toUpperCase() === "ALL") return { states: "all", text: "All states" };
-
-  const tokens = text.split(",").map((t) => t.trim()).filter(Boolean);
-  const codes: string[] = [];
-  for (const t of tokens) {
-    const up = t.toUpperCase();
-    if (/^[A-Z]{2}$/.test(up) && STATE_NAMES[up]) codes.push(up);
-    else if (STATE_CODES_BY_NAME[t.toLowerCase()]) codes.push(STATE_CODES_BY_NAME[t.toLowerCase()]);
-    else return { states: "all", text };
-  }
-  return { states: Array.from(new Set(codes)), text };
-}
 
 /**
  * Build the state-first picker from the LMS's course groups.
@@ -419,13 +380,8 @@ export async function getGroupPicker(enrollId?: string | null): Promise<GroupPic
 
   if (variants.length < 2) return null;
 
-  const codeSet = new Set<string>();
-  for (const v of variants) if (v.states !== "all") v.states.forEach((c) => codeSet.add(c));
-  const states = Array.from(codeSet)
-    .map((code) => ({ code, name: STATE_NAMES[code] || code }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-
-  return { groupName: group.name || "", states, variants };
+  // The full list, not the union of tagged states — see GroupPicker.states.
+  return { groupName: group.name || "", states: US_STATES, variants };
 }
 
 /**
