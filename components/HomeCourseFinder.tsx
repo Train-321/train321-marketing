@@ -197,12 +197,29 @@ export function FinderResults() {
         </div>
 
         {courses.length === 0 && !loading ? (
-          <p className="t321-hcf__empty">
-            No {categoryName ? `${categoryName.toLowerCase()} courses` : "courses"}
-            {stateName ? ` for ${stateName}` : ""} yet —{" "}
-            <Link href={catalogHref}>browse the full catalog</Link> to see
-            everything we offer.
-          </p>
+          /* Same visual language as the catalog's no-results card: dashed
+             outline, icon tile, serif heading — with the catalog CTA built
+             in (the section foot hides in this state so the button isn't
+             doubled). */
+          <div className="t321-mkt-catalog__empty">
+            <i
+              className={stateName ? "fas fa-map-marker-alt" : "fas fa-search"}
+              aria-hidden="true"
+            />
+            <h3>
+              No {categoryName ? `${categoryName.toLowerCase()} courses` : "courses"}
+              {stateName ? ` in ${stateName}` : ""} yet
+            </h3>
+            <p>
+              {stateName
+                ? "Try another category or state — or see everything we offer in one place."
+                : "Try another category — or see everything we offer in one place."}
+            </p>
+            <Link href={catalogHref} className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg">
+              Browse the full catalog
+              <i className="fas fa-arrow-right" aria-hidden="true" />
+            </Link>
+          </div>
         ) : (
           <div className={`t321-mkt-catalog__grid${loading ? " is-loading" : ""}`}>
             {courses.map((c) => (
@@ -211,18 +228,22 @@ export function FinderResults() {
           </div>
         )}
 
-        <div className="t321-hcf__foot">
-          {total > courses.length && (
-            <p className="t321-hcf__count">
-              Showing {courses.length} of {total} courses
-              {stateName ? ` available in ${stateName}` : ""}.
-            </p>
-          )}
-          <Link href={catalogHref} className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg">
-            Explore the full catalog
-            <i className="fas fa-arrow-right" aria-hidden="true" />
-          </Link>
-        </div>
+        {/* The empty card above carries its own catalog CTA — showing the
+            foot too would render the same button twice. */}
+        {(courses.length > 0 || loading) && (
+          <div className="t321-hcf__foot">
+            {total > courses.length && (
+              <p className="t321-hcf__count">
+                Showing {courses.length} of {total} courses
+                {stateName ? ` available in ${stateName}` : ""}.
+              </p>
+            )}
+            <Link href={catalogHref} className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg">
+              Explore the full catalog
+              <i className="fas fa-arrow-right" aria-hidden="true" />
+            </Link>
+          </div>
+        )}
       </div>
     </section>
     </CourseModalProvider>

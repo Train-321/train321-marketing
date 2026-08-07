@@ -172,11 +172,21 @@ export function StateResults({ picker }: { picker: GroupPicker }) {
         </div>
 
         {variants.length === 0 && (
-          <p className="t321-sr__empty">
-            We don&rsquo;t have a version of this course for {picked?.name} yet.{" "}
-            <a href="/catalog">Browse the full catalog</a> to see what else is
-            available.
-          </p>
+          <div className="t321-sr__empty">
+            <i className="fas fa-map-marker-alt" aria-hidden="true" />
+            <h3>Nothing for {picked?.name} yet</h3>
+            <p>
+              We don&rsquo;t have a version of this course approved for{" "}
+              {picked?.name} yet — but there&rsquo;s plenty more in the catalog.
+            </p>
+            <a
+              href={picked ? `/catalog?state=${picked.code}` : "/catalog"}
+              className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg"
+            >
+              Browse the full catalog{" "}
+              <i className="fas fa-arrow-right" aria-hidden="true" />
+            </a>
+          </div>
         )}
 
         <div className="t321-sr__grid">

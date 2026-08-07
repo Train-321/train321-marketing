@@ -58,17 +58,6 @@
   pointer-events: none;
 }
 
-.t321-hcf__empty {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: var(--t321-mkt-ink-muted);
-}
-.t321-hcf__empty a {
-  color: var(--t321-mkt-accent-ink);
-  font-weight: 600;
-}
-
 .t321-hcf__foot {
   margin-top: 2rem;
   display: flex;
