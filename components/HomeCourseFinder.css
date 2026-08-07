@@ -62,7 +62,9 @@
 .t321-hcf__fallback {
   margin-top: 2.5rem;
 }
-.t321-hcf__fallback h3 {
+/* Direct child only — the section heading. A bare `h3` descendant selector
+   would also catch every course card's title inside the grid. */
+.t321-hcf__fallback > h3 {
   margin: 0 0 0.35rem;
   text-align: center;
 }
