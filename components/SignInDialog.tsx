@@ -7,13 +7,21 @@ type Props = {
   open: boolean;
   onClose: () => void;
   loginUrl: string;
-  /** Called with the signed-in user's display name after a successful login. */
-  onSignedIn?: (user: { name: string; role: string; id: number }) => void;
+  /** Sign-up page on the learner app — where "Create an account" goes. */
+  enrollUrl: string;
+  /** Learner app dashboard — where a successful sign-in lands. */
+  dashboardUrl: string;
 };
 
 type Mode = "signin" | "forgot";
 
-export default function SignInDialog({ open, onClose, loginUrl, onSignedIn }: Props) {
+export default function SignInDialog({
+  open,
+  onClose,
+  loginUrl,
+  enrollUrl,
+  dashboardUrl
+}: Props) {
   const emailRef = useRef<HTMLInputElement>(null);
   const forgotEmailRef = useRef<HTMLInputElement>(null);
   const [mode, setMode] = useState<Mode>("signin");
@@ -50,12 +58,10 @@ export default function SignInDialog({ open, onClose, loginUrl, onSignedIn }: Pr
         setError(data?.message || "Email or password did not match, try again.");
         return;
       }
-      onSignedIn?.({
-        name: data?.fullName || email,
-        role: data?.role || "",
-        id: Number(data?.userId) || 0
-      });
-      onClose();
+      // Credentials checked out — hand the learner over to the LMS. Kept as a
+      // full page load (not router.push) because the dashboard is a different
+      // app on another host.
+      window.location.href = dashboardUrl;
     } catch {
       setError("We couldn't reach the sign-in service. Please try again.");
     } finally {
@@ -188,7 +194,7 @@ export default function SignInDialog({ open, onClose, loginUrl, onSignedIn }: Pr
             </a>
 
             <p className="t321-mkt-signin__foot">
-              New to Train 321? <a href="/enroll">Create an account</a>
+              New to Train 321? <a href={enrollUrl}>Create an account</a>
             </p>
           </>
         ) : (

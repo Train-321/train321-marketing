@@ -12,7 +12,14 @@ import { useCart } from "./cart/CartContext";
 import "./SiteHeader.css";
 
 const APP_BASE = process.env.NEXT_PUBLIC_APP_BASE || "/login";
-const LOGIN_URL = `${APP_BASE.replace(/\/$/, "")}/login`;
+// The learner app is a hash-routed SPA, so these are hash routes — /login is a
+// server path the host answers with an error page instead of the app.
+// Matches the fallback getCheckout() builds in lib/enroll.ts.
+const LMS_BASE = APP_BASE.replace(/\/+$/, "");
+const LOGIN_URL = `${LMS_BASE}/#/login`;
+const ENROLL_URL = `${LMS_BASE}/#/enroll`;
+/** Where a successful sign-in sends the learner. */
+const DASHBOARD_URL = `${LMS_BASE}/#/dashboard`;
 
 type Props = { settings?: SiteSettings };
 
@@ -26,31 +33,6 @@ export default function SiteHeader({ settings }: Props) {
   const [drawerClosing, setDrawerClosing] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
-  const [user, setUser] = useState<{ name: string; role: string; id: number } | null>(null);
-
-  // The token lives in an httpOnly cookie we can't read; this companion cookie
-  // holds display info only, so the header can show who's signed in.
-  useEffect(() => {
-    try {
-      const raw = document.cookie
-        .split("; ")
-        .find((c) => c.startsWith("t321_user="))
-        ?.slice("t321_user=".length);
-      if (raw) setUser(JSON.parse(decodeURIComponent(raw)));
-    } catch {
-      /* malformed cookie — stay signed out */
-    }
-  }, []);
-
-  const signOut = async () => {
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-    } catch {
-      /* clearing locally is what matters */
-    }
-    setUser(null);
-  };
-
   // Keep in sync with the exit animation duration in SiteHeader.css.
   const NAV_DRAWER_EXIT_MS = 220;
 
@@ -134,32 +116,15 @@ export default function SiteHeader({ settings }: Props) {
             <i className="fas fa-user-friends" aria-hidden="true" />
             <span>{audienceLink.label}</span>
           </Link>
-          {user ? (
-            <>
-              <span className="t321-mkt-header__util-link t321-mkt-header__util-link--user">
-                <i className="fas fa-user-circle" aria-hidden="true" />
-                <span>{user.name}</span>
-              </span>
-              <button
-                type="button"
-                className="t321-mkt-header__util-link t321-mkt-header__util-link--btn"
-                onClick={signOut}
-              >
-                <i className="fas fa-sign-out-alt" aria-hidden="true" />
-                <span>Sign out</span>
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              className="t321-mkt-header__util-link t321-mkt-header__util-link--btn"
-              aria-label="Sign in"
-              onClick={() => setSignInOpen(true)}
-            >
-              <i className="fas fa-sign-in-alt" aria-hidden="true" />
-              <span>Sign in</span>
-            </button>
-          )}
+          <button
+            type="button"
+            className="t321-mkt-header__util-link t321-mkt-header__util-link--btn"
+            aria-label="Sign in"
+            onClick={() => setSignInOpen(true)}
+          >
+            <i className="fas fa-sign-in-alt" aria-hidden="true" />
+            <span>Sign in</span>
+          </button>
         </div>
       </div>
 
@@ -339,7 +304,8 @@ export default function SiteHeader({ settings }: Props) {
         open={signInOpen}
         onClose={() => setSignInOpen(false)}
         loginUrl={LOGIN_URL}
-        onSignedIn={setUser}
+        enrollUrl={ENROLL_URL}
+        dashboardUrl={DASHBOARD_URL}
       />
     </header>
   );

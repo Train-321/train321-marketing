@@ -52,10 +52,6 @@
   font: inherit;
   cursor: pointer;
 }
-.t321-mkt-header__util-link--user {
-  font-weight: 600;
-  cursor: default;
-}
 .t321-mkt-header__util-link--accent {
   color: var(--t321-mkt-accent, #0A427B);
   font-weight: 600;
