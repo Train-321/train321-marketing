@@ -29,10 +29,12 @@ export type MarketplaceCourse = {
   name: string;
   /**
    * The Marketplace tab's "Overview" (raw HTML) — the copy an admin wrote for
-   * the public storefront. Deliberately NOT the course's `description`, which
-   * is the in-course instructions page: when no marketplace copy exists this
-   * is empty and the card simply shows no blurb, rather than leaking internal
-   * instructions text.
+   * the public storefront. For a grouped course this is the parent group's
+   * Overview, since variants carry no marketplace copy of their own.
+   *
+   * Deliberately NOT the course's `description`, which is the in-course
+   * instructions page: when no marketplace copy exists this is empty and the
+   * card simply shows no blurb, rather than leaking internal instructions text.
    */
   description: string;
   image: string | null; // fully-qualified thumbnail URL (or null)
@@ -216,8 +218,11 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
           all.push({
             id,
             name: v.name,
-            // Variants carry no marketplace copy — card shows no blurb.
-            description: "",
+            // Variants have no marketplace_description of their own, so they
+            // inherit the group's Overview — the copy an admin wrote for this
+            // family of courses. Still never the variant's own `description`,
+            // which is the in-course instructions page.
+            description: c.marketplace_description || "",
             image: secureImageUrl(v.image),
             categoryId: c.category_id ?? null,
             price: Number(v.price ?? 0),
