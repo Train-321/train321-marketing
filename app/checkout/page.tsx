@@ -26,7 +26,7 @@ const PROD_PK =
 
 export default function CheckoutPage() {
   const apiBase =
-    process.env.NEW_FEATURES_API_BASE || "https://new-features-api.train321.com";
+    process.env.NEW_FEATURES_API_BASE || "https://api.train321.com";
 
   const publishableKey =
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||

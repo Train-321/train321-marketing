@@ -64,6 +64,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Connection warmup for the two third-party origins we always hit. */}
         <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
+        {/* Course thumbnails come from the LMS — warm the connection so
+            SkeletonImage shimmer windows stay short. */}
+        <link rel="preconnect" href="https://api.train321.com" crossOrigin="anonymous" />
 
         <link rel="icon" type="image/png" href="/img/logos/train321_logo.png" />
 

@@ -27,6 +27,12 @@
 
 * { box-sizing: border-box; }
 
+/* Enroll buttons on grouped course pages anchor-scroll to the on-page
+   "Choose your state" section — glide there instead of teleporting. */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -53,6 +59,34 @@ a { color: inherit; }
   margin: 0 auto;
   padding: 0 1.5rem;
   width: 100%;
+}
+
+/* ── Skeletons ───────────────────────────────────────────────────────────
+   Shared shimmer for anything that streams or lazy-loads: a sunk block with
+   a light sweep. Sized by the modifier classes below or by the caller. */
+.t321-skel {
+  position: relative;
+  overflow: hidden;
+  background: var(--t321-mkt-paper-sunk);
+  border-radius: 8px;
+}
+.t321-skel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+  animation: t321-shimmer 1.4s infinite;
+}
+@keyframes t321-shimmer {
+  100% { transform: translateX(100%); }
+}
+.t321-skel--label { height: 0.9rem; width: 8.5rem; margin-bottom: 0.55rem; border-radius: 5px; }
+.t321-skel--select { height: 2.75rem; width: 100%; }
+.t321-skel--btn { display: inline-block; height: 2.9rem; width: 11rem; }
+.t321-skel--btn-block { display: block; height: 2.75rem; width: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  .t321-skel::after { animation: none; }
 }
 
 /* Buttons */

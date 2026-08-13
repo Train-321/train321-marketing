@@ -1,0 +1,187 @@
+/* Course detail dialog (.t321-cm) that a course card morphs into.
+   z-index 990: above the chat widget (950), below the cart drawer (1000) so
+   adding from the dialog lets the drawer slide in on top. */
+
+.t321-cm__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 990;
+  background: rgba(11, 31, 51, 0.5);
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  /* Its own transition layer: the backdrop fades in/out as one piece,
+     stacked below the card↔dialog morph (tree order puts the dialog's
+     group, a later sibling snapshot, on top). */
+  view-transition-name: t321-cm-overlay;
+}
+
+.t321-cm {
+  position: relative;
+  width: min(34rem, 100%);
+  max-height: min(85dvh, 46rem);
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(11, 31, 51, 0.35);
+  outline: none;
+}
+
+.t321-cm__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--t321-mkt-ink);
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(11, 31, 51, 0.18);
+  transition: transform 120ms ease, background 120ms ease;
+}
+.t321-cm__close:hover {
+  background: #ffffff;
+  transform: scale(1.06);
+}
+
+/* Fixed-height media box, like the cards' 180px band — a width-driven
+   aspect box would blow small LMS thumbnails up past their resolution and
+   crop them differently in every dialog. */
+.t321-cm__media {
+  height: 230px;
+  flex-shrink: 0;
+  background: var(--t321-mkt-paper-sunk);
+}
+.t321-cm__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+@media (max-height: 640px) {
+  .t321-cm__media { height: 170px; }
+}
+
+.t321-cm__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1.25rem 1.4rem 1.35rem;
+  overflow-y: auto;
+}
+
+.t321-cm__chip {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  background: var(--t321-mkt-accent-wash);
+  color: var(--t321-mkt-accent-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.t321-cm__chip i { font-size: 0.7rem; }
+
+.t321-cm__title {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--t321-mkt-ink);
+}
+
+.t321-cm__desc {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--t321-mkt-ink-muted);
+}
+.t321-cm__desc p { margin: 0 0 0.6em; }
+.t321-cm__desc p:last-child { margin-bottom: 0; }
+.t321-cm__desc ul,
+.t321-cm__desc ol {
+  margin: 0.4em 0 0.6em;
+  padding-left: 1.25em;
+}
+.t321-cm__desc li { margin-bottom: 0.25em; }
+.t321-cm__desc--empty { font-style: italic; }
+
+.t321-cm__foot {
+  margin-top: 0.4rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--t321-mkt-line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.t321-cm__price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  color: var(--t321-mkt-ink-muted);
+  font-size: 0.82rem;
+}
+.t321-cm__price strong {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--t321-mkt-ink);
+}
+
+/* ── Motion ───────────────────────────────────────────────────────────── */
+
+/* Browsers WITHOUT view transitions: plain fade + pop so opening still has
+   some life. Browsers WITH them skip these (the morph is the animation —
+   running both would double-animate the dialog). */
+@supports not (view-transition-name: none) {
+  .t321-cm__overlay { animation: t321-cm-fade 160ms ease both; }
+  .t321-cm { animation: t321-cm-pop 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+}
+@keyframes t321-cm-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes t321-cm-pop {
+  from { opacity: 0; transform: translateY(14px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Morph pacing for the shared-element groups (card↔dialog + backdrop). */
+@supports (view-transition-name: none) {
+  ::view-transition-group(*) {
+    animation-duration: 300ms;
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  /* Snapshot groups stack in creation order, which on open puts the
+     backdrop (new-only element, appended last) ABOVE the flying card.
+     Pin the layers explicitly: morph always over backdrop. */
+  ::view-transition-group(t321-cm-overlay) { z-index: 1; }
+  ::view-transition-group(t321-course-morph) { z-index: 2; }
+  /* Both snapshots fill the morphing box edge-to-edge so the card reads as
+     stretching into the dialog instead of letterboxing mid-flight. */
+  ::view-transition-old(t321-course-morph),
+  ::view-transition-new(t321-course-morph) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t321-cm__overlay,
+  .t321-cm {
+    animation: none;
+  }
+}

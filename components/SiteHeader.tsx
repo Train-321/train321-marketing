@@ -85,16 +85,15 @@ export default function SiteHeader({ settings }: Props) {
   // The utility link always offers the OPPOSITE of the buyer's current mode:
   // individual mode → "For teams", team mode → "For individuals". Clicking it
   // switches the mode too, so the cart, checkout, and homepage hero follow.
-  const { buyer, count, requestAudienceChange } = useCart();
+  const { buyer, setAudience } = useCart();
   const audienceLink =
     buyer.audience === "company"
       ? { to: "/individuals", label: "For individuals", audience: "individual" as const }
       : { to: "/", label: "For teams", audience: "company" as const };
-  const onAudienceClick = (e: React.MouseEvent) => {
-    // A non-empty cart means requestAudienceChange will show a confirm dialog
-    // instead of switching right away — stay on this page while it's up.
-    if (count > 0) e.preventDefault();
-    requestAudienceChange(audienceLink.audience);
+  const onAudienceClick = () => {
+    // Switching never clears the cart — the items re-quote under the other
+    // pricing model while the link navigates to the matching landing page.
+    setAudience(audienceLink.audience);
   };
 
   const isActive = (to?: string) => {

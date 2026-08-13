@@ -518,7 +518,7 @@ const COURSE_PROJECTION = `
 // is unreachable so the marketing site never breaks on an LMS outage.
 
 const LMS_COURSE_LIST_URL =
-  "https://new-features-api.train321.com/course/public-list";
+  "https://api.train321.com/course/public-list";
 
 async function getLmsPriceMap(): Promise<Map<string, number>> {
   try {

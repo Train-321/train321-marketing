@@ -89,7 +89,7 @@ function CheckoutForm({ stripeConfigured }: { stripeConfigured: boolean }) {
     clear,
     toApiLines,
     buyer,
-    requestAudienceChange,
+    setAudience,
     setEmployees,
     setLocations,
     setCadence
@@ -370,7 +370,7 @@ function CheckoutForm({ stripeConfigured }: { stripeConfigured: boolean }) {
                   role="radio"
                   aria-checked={!isCompany}
                   className={`t321-mkt-checkout__aud-card${!isCompany ? " is-active" : ""}`}
-                  onClick={() => requestAudienceChange("individual")}
+                  onClick={() => setAudience("individual")}
                 >
                   <i className="fas fa-user" aria-hidden="true" />
                   <strong>Just me</strong>
@@ -381,7 +381,7 @@ function CheckoutForm({ stripeConfigured }: { stripeConfigured: boolean }) {
                   role="radio"
                   aria-checked={isCompany}
                   className={`t321-mkt-checkout__aud-card${isCompany ? " is-active" : ""}`}
-                  onClick={() => requestAudienceChange("company")}
+                  onClick={() => setAudience("company")}
                 >
                   <i className="fas fa-users" aria-hidden="true" />
                   <strong>My team</strong>

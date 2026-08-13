@@ -33,6 +33,15 @@
   flex-wrap: wrap;
   margin-top: 0.5rem;
 }
+
+/* The state picker standing in for the CTA buttons on grouped courses. The
+   hero body is a wide column, so the control is capped rather than stretched
+   across the full measure — a 40rem-wide select reads as a form field, not as
+   the page's primary action. */
+.t321-mkt-course__pick {
+  margin-top: 1.25rem;
+  max-width: 24rem;
+}
 .t321-mkt-course__accred {
   list-style: none;
   margin: 1.75rem 0 0;
@@ -56,7 +65,9 @@
   background: #ffffff;
   border: 1px solid var(--t321-mkt-line);
   border-radius: 16px;
-  overflow: hidden;
+  /* Visible so the state-picker dropdown menu can overhang the card instead
+     of being clipped inside it; the head rounds its own top corners. */
+  overflow: visible;
   box-shadow: 0 10px 32px rgba(15, 15, 14, 0.06);
   position: sticky;
   top: 120px;
@@ -66,6 +77,9 @@
   font-size: 2.2rem;
   color: #ffffff;
   text-align: center;
+  /* The card no longer clips (overflow: visible for the state dropdown), so
+     the head rounds its own top corners. */
+  border-radius: 15px 15px 0 0;
   background: linear-gradient(135deg, #0B1F33, #00B4DB);
 }
 .t321-mkt-course__hero-card-head.is-tone-amber {

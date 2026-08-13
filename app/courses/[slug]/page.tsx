@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { Suspense, cache } from "react";
 import { notFound } from "next/navigation";
 import { getCourse, getCourses, getDetailPagesCopy, getSiteSettings } from "@/lib/sanity";
 import EnrollButton from "@/components/EnrollButton";
 import CourseCertificate from "@/components/CourseCertificate";
-import { getGroupStateOptions, resolveEnrollCourse } from "@/lib/enroll";
+import { StatePickerProvider, StateSelect, StateResults } from "@/components/StateCoursePicker";
+import { getGroupPicker, resolveEnrollCourse } from "@/lib/enroll";
 import "./course.css";
 
 export async function generateStaticParams() {
@@ -30,21 +32,14 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   const enrollHref = course.enrollUrl
     || (course.enrollId ? `${enrollBase}?add=${course.enrollId}&checkout=1` : enrollBase);
 
-  // State/regional versions come from ONE place: the LMS's course groups
-  // (new-features tbl_course_group). When this course's enrollId belongs to
-  // a group, the group's variants ARE the state picker — admins manage
-  // states, prices, and external-state redirects in the LMS and this page
-  // follows within its 5-minute revalidate. Ungrouped courses get no picker;
-  // the Sanity stateVariants field is intentionally NOT consulted anymore.
-  //
-  // An explicit `enrollUrl` override still wins — that's an editor saying
-  // "send buyers here".
-  const [cartCourse, groupOptions] = await Promise.all([
-    course.enrollUrl ? Promise.resolve(null) : resolveEnrollCourse(course.enrollId),
-    course.enrollUrl ? Promise.resolve(null) : getGroupStateOptions(course.enrollId)
-  ]);
-
-  const stateOptions = groupOptions ?? [];
+  // Everything commerce (the cart course, the LMS course group, the state
+  // picker) streams in AFTER the page shell: the static content renders
+  // instantly and the purchase widgets suspend behind skeletons until the
+  // LMS answers. cache() dedupes the lookups so all four islands below
+  // share ONE round-trip per render. An explicit enrollUrl override skips
+  // the LMS entirely — that's an editor saying "send buyers here".
+  const skipLms = Boolean(course.enrollUrl);
+  const lms = { enrollId: course.enrollId, skipLms, enrollHref };
 
   // Chrome copy with fallbacks.
   const crumbHome = copy?.courseCrumbHome || "Home";
@@ -84,6 +79,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
 
   return (
     <article className="t321-mkt-course">
+      <StatePickerProvider>
       <section className="t321-mkt-course__hero">
         <div className="t321-mkt-container t321-mkt-course__hero-grid">
           <div className="t321-mkt-course__hero-body">
@@ -100,19 +96,21 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             </span>
             <h1 className="t321-mkt-h1">{course.title}</h1>
             <p className="t321-mkt-lede">{course.tagline}</p>
-            <div className="t321-mkt-course__cta">
-              <EnrollButton
-                href={enrollHref}
-                label={enrollLabel}
-                className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg"
-                options={stateOptions}
-                course={cartCourse}
-                mode="buy"
-              />
-              <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
-                {browseLabel}
-              </Link>
-            </div>
+            {/* Grouped course → picking a state IS the primary action, so the
+                picker sits here in the hero body rather than off in the price
+                card. Ungrouped courses keep the enroll / browse pair, since
+                they have nothing to choose. Streams in behind a skeleton
+                shaped like the picker, the common case. */}
+            <Suspense
+              fallback={
+                <div className="t321-mkt-course__pick" aria-hidden="true">
+                  <span className="t321-skel t321-skel--label" style={{ display: "block" }} />
+                  <span className="t321-skel t321-skel--select" style={{ display: "block" }} />
+                </div>
+              }
+            >
+              <HeroWidget {...lms} enrollLabel={enrollLabel} browseLabel={browseLabel} />
+            </Suspense>
             {course.accreditations && course.accreditations.length > 0 && (
               <ul className="t321-mkt-course__accred">
                 {course.accreditations.map((a) => (
@@ -153,21 +151,24 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                   ))}
                 </ul>
               )}
-              {/* The aside is the "considering it" spot, so this one adds to
-                  the cart and opens the drawer rather than jumping to checkout. */}
-              <EnrollButton
-                href={enrollHref}
-                label={cartCourse || stateOptions.some((o) => o.course) ? "Add to cart" : getStartedLabel}
-                className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block"
-                options={stateOptions}
-                course={cartCourse}
-                mode="add"
-                showArrow={false}
-              />
+              {/* Ungrouped course → the plain add-to-cart button. Grouped
+                  courses render nothing here; their state picker lives in the
+                  hero body. Streams in behind a button-shaped skeleton. */}
+              <Suspense
+                fallback={
+                  <span className="t321-skel t321-skel--btn-block" aria-hidden="true" />
+                }
+              >
+                <CardWidget {...lms} getStartedLabel={getStartedLabel} />
+              </Suspense>
             </div>
           </aside>
         </div>
       </section>
+
+      <Suspense fallback={null}>
+        <ResultsIsland {...lms} />
+      </Suspense>
 
       <section className="t321-mkt-section">
         <div className="t321-mkt-container t321-mkt-course__two">
@@ -262,20 +263,112 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             <p className="t321-mkt-lede">{ctaLede}</p>
           </div>
           <div className="t321-mkt-course__cta-band-actions">
-            <EnrollButton
-              href={ctaPrimaryHref}
-              label={ctaPrimaryLabel}
-              className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg"
-              options={stateOptions}
-              course={cartCourse}
-              mode="buy"
-            />
+            <Suspense fallback={<span className="t321-skel t321-skel--btn" aria-hidden="true" />}>
+              <BuyCta {...lms} fallbackHref={ctaPrimaryHref} label={ctaPrimaryLabel} className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg" />
+            </Suspense>
             <Link href={ctaSecondaryHref} className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
               {ctaSecondaryLabel}
             </Link>
           </div>
         </div>
       </section>
+      </StatePickerProvider>
     </article>
   );
+}
+
+/* ── Streaming commerce islands ─────────────────────────
+   The page shell renders instantly; these suspend behind skeletons while
+   the LMS answers. cache() scopes dedupe to the render, so the four
+   islands cost one resolveEnrollCourse + one getGroupPicker between them. */
+
+const cachedCourse = cache((enrollId?: string) => resolveEnrollCourse(enrollId));
+const cachedPicker = cache((enrollId?: string) => getGroupPicker(enrollId));
+
+type LmsProps = { enrollId?: string; skipLms: boolean; enrollHref: string };
+
+async function lookup({ enrollId, skipLms }: LmsProps) {
+  if (skipLms) return { cartCourse: null, picker: null };
+  const [cartCourse, picker] = await Promise.all([
+    cachedCourse(enrollId),
+    cachedPicker(enrollId)
+  ]);
+  return { cartCourse, picker };
+}
+
+/** Hero / bottom-band buy button: anchors to the state picker for grouped
+    courses, buys the single course inline otherwise. */
+async function BuyCta(
+  props: LmsProps & { label: string; className: string; fallbackHref?: string }
+) {
+  const { cartCourse, picker } = await lookup(props);
+  const grouped = Boolean(picker);
+  return (
+    <EnrollButton
+      href={grouped ? "#choose-your-state" : props.fallbackHref || props.enrollHref}
+      label={props.label}
+      className={props.className}
+      course={grouped ? null : cartCourse}
+      mode="buy"
+    />
+  );
+}
+
+/** The hero body's primary action. A grouped course leads with the state
+    picker — nothing can be bought until a state is chosen, so the dropdown
+    replaces the enroll / browse pair entirely. Everything else keeps the
+    original buttons. */
+async function HeroWidget(
+  props: LmsProps & { enrollLabel: string; browseLabel: string }
+) {
+  const { cartCourse, picker } = await lookup(props);
+
+  if (picker && picker.states.length > 0) {
+    return (
+      <div className="t321-mkt-course__pick">
+        <StateSelect picker={picker} variant="hero" />
+      </div>
+    );
+  }
+
+  // Ungrouped course — nothing to choose, so the original buttons stand. The
+  // states list is now every state rather than only the tagged ones, so the
+  // length guard above is a safety net, not a case we expect to hit.
+  return (
+    <div className="t321-mkt-course__cta">
+      <EnrollButton
+        href={picker ? "#choose-your-state" : props.enrollHref}
+        label={props.enrollLabel}
+        className="t321-mkt-btn t321-mkt-btn--accent t321-mkt-btn--lg"
+        course={picker ? null : cartCourse}
+        mode="buy"
+      />
+      <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg">
+        {props.browseLabel}
+      </Link>
+    </div>
+  );
+}
+
+/** Hero price-card widget: add-to-cart for ungrouped courses. Grouped courses
+    render nothing — their picker moved to the hero body. */
+async function CardWidget(props: LmsProps & { getStartedLabel: string }) {
+  const { cartCourse, picker } = await lookup(props);
+  if (picker) return null;
+  return (
+    <EnrollButton
+      href={props.enrollHref}
+      label={cartCourse ? "Add to cart" : props.getStartedLabel}
+      className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block"
+      course={cartCourse}
+      mode="add"
+      showArrow={false}
+    />
+  );
+}
+
+/** The per-state results + cross-sell section (only for grouped courses). */
+async function ResultsIsland(props: LmsProps) {
+  const { picker } = await lookup(props);
+  return picker ? <StateResults picker={picker} /> : null;
 }

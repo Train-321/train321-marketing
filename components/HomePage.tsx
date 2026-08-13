@@ -4,7 +4,12 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Course, Testimonial, FaqGroup, TrustLogo, HomePage as HomePageDoc } from "@/lib/sanity";
 import TrustLogosCarousel from "./TrustLogosCarousel";
-import VideoModal from "./VideoModal";
+import {
+  HomeFinderProvider,
+  FinderControls,
+  FinderResults,
+  type HomeMarketplace
+} from "./HomeCourseFinder";
 import { useCart } from "./cart/CartContext";
 import "./HomePage.css";
 
@@ -169,6 +174,8 @@ type HomePageProps = {
   faqs: FaqGroup[];
   trustLogos?: TrustLogo[];
   home?: HomePageDoc | null;
+  /** Marketplace catalog slice powering the hero course finder. */
+  marketplace: HomeMarketplace;
 };
 
 export default function HomePage({
@@ -178,12 +185,12 @@ export default function HomePage({
   companyStats,
   faqs,
   trustLogos = [],
-  home = null
+  home = null,
+  marketplace
 }: HomePageProps) {
   const [audience, setAudience] = useState<Audience>(forcedAudience || "self");
   const [courseIndex, setCourseIndex] = useState(0);
-  const [videoOpen, setVideoOpen] = useState(false);
-  const { requestAudienceChange, buyer, ready: cartReady } = useCart();
+  const { setAudience: setCartAudience, buyer, ready: cartReady } = useCart();
 
   // Hydrate audience from localStorage when not pinned by prop.
   useEffect(() => {
@@ -297,15 +304,17 @@ export default function HomePage({
   const chooseAudience = (val: Audience) => {
     if (forcedAudience) return;
     // Route through the cart so a non-empty cart gets the "this clears your
-    // cart" confirm first. The pill and localStorage follow via the
-    // buyer-sync effect above — only after the switch actually applies.
-    requestAudienceChange(val === "team" ? "company" : "individual");
+    // Switching never clears the cart — items simply re-quote under the
+    // other pricing model. The pill and localStorage follow via the
+    // buyer-sync effect above.
+    setCartAudience(val === "team" ? "company" : "individual");
   };
 
   const setCourse = (i: number) => setCourseIndex(i);
 
   return (
     <div className="t321-mkt-home">
+      <HomeFinderProvider marketplace={marketplace}>
       <section className="t321-mkt-hero">
         <div className="t321-mkt-container t321-mkt-hero__inner">
           <div className="t321-mkt-hero__body">
@@ -342,20 +351,10 @@ export default function HomePage({
               {copy.h1Pre} <em>{copy.h1Em}</em>
             </h1>
             <p className="t321-mkt-lede">{copy.lede}</p>
-            <div className="t321-mkt-hero__cta">
-              <Link href={copy.ctaPrimary.to} className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg">
-                {copy.ctaPrimary.label}
-                <i className="fas fa-arrow-right" aria-hidden="true" />
-              </Link>
-              <button
-                type="button"
-                onClick={() => setVideoOpen(true)}
-                className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg"
-              >
-                <i className={copy.ctaGhost.icon} aria-hidden="true" />
-                {copy.ctaGhost.label}
-              </button>
-            </div>
+            {/* The old Find-my-course / See-how-it-works button pair is
+                replaced by the course finder: category chips + state picker
+                here, live results in <FinderResults /> right below the hero. */}
+            <FinderControls />
             <ul className="t321-mkt-hero__trust">
               {(home?.heroTrustPills?.length
                 ? home.heroTrustPills
@@ -467,11 +466,8 @@ export default function HomePage({
         </div>
       </section>
 
-      <section className="t321-mkt-section t321-mkt-section--tight t321-mkt-section--sunk t321-mkt-trust">
-        <div className="t321-mkt-container">
-          <TrustLogosCarousel logos={trustLogos} label={copy.trustLabel} />
-        </div>
-      </section>
+      <FinderResults />
+      </HomeFinderProvider>
 
       <section className="t321-mkt-section">
         <div className="t321-mkt-container">
@@ -563,6 +559,15 @@ export default function HomePage({
         </div>
       </section>
 
+      {/* The trust logos lead into the numbers band — social proof and the
+          headline stats read as one block rather than being split across the
+          page. */}
+      <section className="t321-mkt-section t321-mkt-section--tight t321-mkt-section--sunk t321-mkt-trust">
+        <div className="t321-mkt-container">
+          <TrustLogosCarousel logos={trustLogos} label={copy.trustLabel} />
+        </div>
+      </section>
+
       <section className="t321-mkt-section t321-mkt-section--ink">
         <div className="t321-mkt-container t321-mkt-stats">
           {companyStats.map((s) => (
@@ -650,11 +655,6 @@ export default function HomePage({
         </div>
       </section>
 
-      <VideoModal
-        vimeoId={videoOpen ? "508994861" : null}
-        title="Train321 walkthrough"
-        onClose={() => setVideoOpen(false)}
-      />
     </div>
   );
 }

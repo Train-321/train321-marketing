@@ -17,8 +17,16 @@
 // backend prices that as `cadence: "one_time"`, which is why nothing here
 // passes an invoice cadence.
 
+import { secureImageUrl } from "@/lib/newFeatures";
+import {
+  US_STATES,
+  availabilityText,
+  resolveAvailability,
+  type Availability
+} from "@/lib/states";
+
 const API_BASE =
-  process.env.NEW_FEATURES_API_BASE || "https://new-features-api.train321.com";
+  process.env.NEW_FEATURES_API_BASE || "https://api.train321.com";
 
 /** A single course as the cart needs it. Mirrors the backend's course shape. */
 export type CartCourse = {
@@ -205,6 +213,7 @@ export async function getCartCourse(id: number): Promise<CartCourse | null> {
       course?: {
         id: number;
         name?: string;
+        marketplace_name?: string;
         price?: number;
         image?: string | null;
         is_seat_based?: number;
@@ -216,9 +225,11 @@ export async function getCartCourse(id: number): Promise<CartCourse | null> {
 
     return {
       id: c.id,
-      name: c.name || "",
+      // Marketplace display name when the backend provides it — the internal
+      // super-admin `name` must not surface on the storefront.
+      name: c.marketplace_name || c.name || "",
       price: Number(c.price ?? 0),
-      image: c.image || null,
+      image: secureImageUrl(c.image),
       isSeatBased: Number(c.is_seat_based ?? 0) === 1,
       stateLabel: c.state_label || null
     };
@@ -243,96 +254,75 @@ export async function resolveEnrollCourse(enrollId?: string | null): Promise<Car
   return getCartCourse(id);
 }
 
-/** One row in the course page's state picker. */
-export type StatePickerOption = {
-  /** Display label — the variant's state tag, e.g. "Florida" or "All states". */
-  state: string;
+/** One selectable course version inside a state picker. */
+export type StateVariant = {
+  id: number;
+  /** Marketplace display name — never the internal super-admin course name. */
+  title: string;
+  price: number;
   /**
-   * Set when the tag is a multi-state list: the normalized 2-letter codes,
-   * rendered as individual chips so every state stays visible without
-   * squeezing the row.
+   * Where this version applies: everywhere, only in its tagged states, or
+   * everywhere EXCEPT its tagged states (state_exclude = 1).
    */
-  stateCodes?: string[];
-  /** The variant course's public name, shown muted beside the state. */
-  title?: string;
+  availability: Availability;
+  /** Badge copy for the availability ("All states", codes, "Not available in …"). */
+  stateText: string;
   /** Outbound link for states served by an external provider; "" otherwise. */
   href: string;
   /** Cart-ready course for inline purchase; null when the state redirects out. */
   course: CartCourse | null;
 };
 
-/** Code → full name, for prettifying raw LMS state tags like "Fl". */
-const STATE_NAMES: Record<string, string> = {
-  AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
-  CO: "Colorado", CT: "Connecticut", DE: "Delaware", DC: "District of Columbia",
-  FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho", IL: "Illinois",
-  IN: "Indiana", IA: "Iowa", KS: "Kansas", KY: "Kentucky", LA: "Louisiana",
-  ME: "Maine", MD: "Maryland", MA: "Massachusetts", MI: "Michigan",
-  MN: "Minnesota", MS: "Mississippi", MO: "Missouri", MT: "Montana",
-  NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey",
-  NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota",
-  OH: "Ohio", OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania",
-  RI: "Rhode Island", SC: "South Carolina", SD: "South Dakota",
-  TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont", VA: "Virginia",
-  WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming"
+/**
+ * Everything the state-first picker needs: the dropdown's state list plus
+ * every variant with its marketplace name and availability. The UI flow is:
+ * pick a state, see that state's versions (plus any "all states" versions),
+ * add one to the cart — a flat list of 50 states x N versions would not scale.
+ */
+export type GroupPicker = {
+  groupName: string;
+  /** Every US state + DC, sorted by full name — NOT just the ones with a
+      dedicated version. A course carrying no state tag is valid everywhere,
+      so a state with no version of its own still resolves to those; listing
+      only the tagged states would leave most visitors unable to pick their
+      own and make the picker look broken. */
+  states: Array<{ code: string; name: string }>;
+  variants: StateVariant[];
 };
 
 /**
- * Turn a raw LMS state tag into a picker-friendly label.
- *
- * Admins type these free-form ("Fl", "Az,CA, HI, IL, NM, TX, WV"), so:
- *   - empty / "ALL"            → "All states"
- *   - one 2-letter code        → the full state name ("Fl" → "Florida")
- *   - several codes            → every normalized code in `codes`, rendered
- *                                as chips — the full list stays visible,
- *                                nothing is truncated behind a "+N"
- *   - anything else free-form  → passed through as typed
- */
-function shapeStateLabel(
-  raw: string | null | undefined
-): { state: string; codes?: string[] } {
-  const text = String(raw || "").trim();
-  if (!text || text.toUpperCase() === "ALL") return { state: "All states" };
-
-  const tokens = text.split(",").map((t) => t.trim()).filter(Boolean);
-  const codes = tokens.map((t) => t.toUpperCase());
-  const allCodes = codes.length > 0 && codes.every((c) => /^[A-Z]{2}$/.test(c));
-
-  if (!allCodes) return { state: text };
-  if (codes.length === 1) return { state: STATE_NAMES[codes[0]] || codes[0] };
-  return { state: codes.join(", "), codes };
-}
-
-/**
- * Build state-picker options from the LMS's own course groups.
+ * Build the state-first picker from the LMS's course groups.
  *
  * The new-features backend models state/regional versions as course groups
- * (tbl_course_group): each member course carries a state_label and optional
- * state_redirect_url. When the given course id belongs to a group with 2+
- * variants, the group IS the state picker — managed by LMS admins, no Sanity
- * editing involved. Returns null when the course isn't grouped (callers fall
- * back to the Sanity-managed stateVariants).
+ * (tbl_course_group): each member course carries a state_label, its
+ * marketplace display name, and an optional state_redirect_url. When the
+ * given course id belongs to a group with 2+ variants, the group IS the
+ * picker — managed by LMS admins, no CMS editing involved. Returns null when
+ * the course isn't grouped.
  *
- * The group payload doesn't include variant names, so each variant is
- * resolved through the course endpoint — which also gives us the canonical
- * price/image/seat flags for the cart. Variants that no longer resolve are
- * dropped rather than rendered as dead options.
+ * Variant name/image/seat flags come straight from the group payload (newer
+ * backends); when absent, each variant falls back to a course-endpoint
+ * resolve. Variants that neither resolve nor redirect are dropped rather
+ * than rendered as dead options.
  */
-export async function getGroupStateOptions(
-  enrollId?: string | null
-): Promise<StatePickerOption[] | null> {
+export async function getGroupPicker(enrollId?: string | null): Promise<GroupPicker | null> {
   const id = Number(enrollId);
   if (!Number.isInteger(id) || id <= 0) return null;
 
   type RawVariant = {
     id: number;
+    name?: string;
+    image?: string | null;
+    is_seat_based?: number;
     state_label?: string | null;
+    state_codes?: string[];
+    state_exclude?: number;
     state_redirect_url?: string | null;
     price?: number;
   };
-  type RawEntry = { entry_type?: string; variants?: RawVariant[] };
+  type RawEntry = { entry_type?: string; name?: string; variants?: RawVariant[] };
 
-  let entries: RawEntry[];
+  let group: RawEntry | undefined;
   try {
     // POST fetches aren't cached by Next's data cache, but this runs inside
     // ISR page generation (5-minute revalidate on course pages), so the
@@ -344,37 +334,62 @@ export async function getGroupStateOptions(
     });
     if (!res.ok) return null;
     const data = (await res.json()) as { courses?: RawEntry[] };
-    entries = data.courses || [];
+    group = (data.courses || []).find(
+      (e) => e.entry_type === "group" && (e.variants || []).some((v) => v.id === id)
+    );
   } catch {
     return null;
   }
 
-  const group = entries.find(
-    (e) => e.entry_type === "group" && (e.variants || []).some((v) => v.id === id)
-  );
   // A 1-variant "group" isn't a choice — treat it as a normal course.
   if (!group || (group.variants || []).length < 2) return null;
 
-  const variants = [...(group.variants || [])].sort((a, b) =>
-    String(a.state_label || "").localeCompare(String(b.state_label || ""))
+  const raws = group.variants || [];
+
+  // Older backends don't put names on variants — resolve those (and only
+  // those) through the course endpoint.
+  const resolved = await Promise.all(
+    raws.map((v) => (v.name ? Promise.resolve(null) : getCartCourse(v.id)))
   );
 
-  const resolved = await Promise.all(variants.map((v) => getCartCourse(v.id)));
+  const variants: StateVariant[] = [];
+  for (let i = 0; i < raws.length; i++) {
+    const v = raws[i];
+    const fallback = resolved[i];
+    const title = v.name || fallback?.name || "";
+    if (!title && !v.state_redirect_url) continue; // dead option — drop
 
-  const options: StatePickerOption[] = [];
-  for (let i = 0; i < variants.length; i++) {
-    const v = variants[i];
-    const c = resolved[i];
-    const { state, codes } = shapeStateLabel(v.state_label);
-    if (v.state_redirect_url) {
-      // External-provider state — link out, never add to cart.
-      options.push({ state, stateCodes: codes, title: c?.name, href: v.state_redirect_url, course: null });
-    } else if (c) {
-      options.push({ state, stateCodes: codes, title: c.name, href: "", course: c });
-    }
+    const availability = resolveAvailability(v.state_label, v.state_codes, v.state_exclude);
+    const text = availabilityText(availability);
+    const course: CartCourse | null = v.state_redirect_url
+      ? null // external-provider state — link out, never add to cart
+      : {
+          id: v.id,
+          name: title,
+          price: Number(v.price ?? fallback?.price ?? 0),
+          image: secureImageUrl(v.image) ?? fallback?.image ?? null,
+          isSeatBased:
+            v.is_seat_based != null
+              ? Number(v.is_seat_based) === 1
+              : Boolean(fallback?.isSeatBased),
+          stateLabel: String(v.state_label || "").trim() || null
+        };
+
+    variants.push({
+      id: v.id,
+      title: title || text,
+      price: Number(v.price ?? fallback?.price ?? 0),
+      availability,
+      stateText: text,
+      href: v.state_redirect_url || "",
+      course
+    });
   }
 
-  return options.length >= 2 ? options : null;
+  if (variants.length < 2) return null;
+
+  // The full list, not the union of tagged states — see GroupPicker.states.
+  return { groupName: group.name || "", states: US_STATES, variants };
 }
 
 /**

@@ -1,0 +1,219 @@
+/* State-first picker: dropdown in the hero card (.t321-spc) + full-width
+   results section below the hero (.t321-sr). */
+
+/* ── Dropdown ─────────────────────────────────────────────────────────── */
+.t321-spc {
+  scroll-margin-top: 7rem;
+}
+
+.t321-spc__label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--t321-mkt-ink);
+}
+.t321-spc__label i {
+  color: var(--t321-mkt-accent-ink);
+  font-size: 0.75rem;
+}
+
+/* Hero placement: the picker is the page's primary action here, standing
+   where the Enroll button used to, so it carries a little more weight than
+   the compact in-card version. */
+.t321-spc--hero .t321-spc__label {
+  font-size: 0.92rem;
+  margin-bottom: 0.6rem;
+}
+.t321-spc--hero .t321-spc__label i {
+  font-size: 0.85rem;
+}
+.t321-spc--hero .t321-mkt-select__btn {
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+  font-size: 1rem;
+}
+.t321-spc--hero .t321-spc__hint {
+  font-size: 0.82rem;
+}
+
+/* The card's primary action. Calm at rest — a clean bordered control that
+   reads as "interact with me" without glowing like a stuck focus ring; the
+   accent treatment appears on hover, keyboard focus, and while open. */
+.t321-spc .t321-mkt-select__btn {
+  border: 1px solid var(--t321-mkt-line-strong);
+  font-weight: 600;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+.t321-spc .t321-mkt-select__btn:hover {
+  border-color: var(--t321-mkt-accent);
+}
+.t321-spc .t321-mkt-select__btn:focus-visible,
+.t321-spc .t321-mkt-select.is-open .t321-mkt-select__btn {
+  border-color: var(--t321-mkt-accent);
+  box-shadow: 0 0 0 3px var(--t321-mkt-accent-wash);
+  outline: none;
+}
+/* Once a state is chosen the control shows its value with quiet confidence. */
+.t321-spc .t321-mkt-select__btn.has-value {
+  border-color: var(--t321-mkt-line-strong);
+  color: var(--t321-mkt-ink);
+}
+
+.t321-spc__hint {
+  margin: 0.6rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--t321-mkt-ink-muted);
+}
+
+/* ── Results section ──────────────────────────────────────────────────── */
+
+/* No-version-for-this-state card — same visual language as the catalog's
+   no-results state: centered dashed card, icon tile, serif heading, CTA. */
+.t321-sr__empty {
+  text-align: center;
+  padding: 4rem 1rem;
+  background: #ffffff;
+  border: 1px dashed var(--t321-mkt-line-strong);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.t321-sr__empty > i {
+  font-size: 1.75rem;
+  color: var(--t321-mkt-ink-muted);
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: var(--t321-mkt-paper-sunk);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+.t321-sr__empty h3 {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.t321-sr__empty p {
+  margin: 0;
+  color: var(--t321-mkt-ink-muted);
+  font-size: 0.92rem;
+  max-width: 42ch;
+}
+.t321-sr__empty .t321-mkt-btn {
+  margin-top: 0.9rem;
+}
+
+.t321-sr__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr));
+  gap: 1.25rem;
+}
+
+.t321-sr__card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--t321-mkt-line);
+  border-radius: 14px;
+  background: var(--t321-mkt-paper);
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(11, 31, 51, 0.04);
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+  animation: t321-sr-in 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.t321-sr__card:hover {
+  border-color: var(--t321-mkt-line-strong);
+  box-shadow: 0 10px 28px rgba(11, 31, 51, 0.1);
+  transform: translateY(-2px);
+}
+
+@keyframes t321-sr-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.t321-sr__card-media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--t321-mkt-paper-sunk);
+}
+.t321-sr__card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.t321-sr__badge {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(11, 31, 51, 0.85);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.t321-sr__card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem 1.15rem;
+}
+
+.t321-sr__name {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.t321-sr__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.t321-sr__price {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--t321-mkt-ink);
+}
+.t321-sr__price--muted {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--t321-mkt-ink-muted);
+}
+
+.t321-sr__foot .t321-mkt-btn { flex-shrink: 0; white-space: nowrap; }
+
+/* Cross-sell shelf. */
+.t321-sr__recs {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--t321-mkt-line);
+}
+.t321-sr__recs-head {
+  margin: 0 0 1.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t321-sr__card { animation: none; transition: none; }
+}

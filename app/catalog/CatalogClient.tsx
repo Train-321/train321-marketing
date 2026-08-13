@@ -4,10 +4,15 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CatalogPage } from "@/lib/sanity";
 import type { MarketplaceCourse, MarketplaceCategory, MarketplaceCatalog } from "@/lib/newFeatures";
-import { COURSE_PLACEHOLDER_IMAGE, CATALOG_PAGE_SIZE } from "@/lib/newFeatures";
-import AddToCartButton from "@/components/cart/AddToCartButton";
-import type { CartCourse } from "@/lib/enroll";
+import CustomSelect from "@/components/CustomSelect";
+import CourseCard from "@/components/CourseCard";
+import { CourseModalProvider } from "@/components/CourseModal";
+import { US_STATES } from "@/lib/states";
 import "./catalog.css";
+
+/** Sentinel option that clears the state filter back to the baseline. */
+const ALL_STATES_OPTION = "All states";
+const STATE_OPTIONS = [ALL_STATES_OPTION, ...US_STATES.map((s) => s.name)];
 
 type Props = {
   initialCourses: MarketplaceCourse[];
@@ -15,33 +20,6 @@ type Props = {
   initialTotal: number;
   page?: CatalogPage | null;
 };
-
-/** Narrow a catalog row to just what the cart stores. */
-function toCartCourse(c: MarketplaceCourse): CartCourse {
-  return {
-    id: c.id,
-    name: c.name,
-    price: c.price,
-    image: c.image,
-    isSeatBased: c.isSeatBased,
-    stateLabel: c.stateLabel
-  };
-}
-
-// The backend `description` is rich HTML. Strip tags + decode the handful of
-// entities the LMS editor emits, then trim to a short card-sized blurb.
-function toBlurb(html: string, max = 160): string {
-  const text = html
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;|&rsquo;|&lsquo;/g, "'")
-    .replace(/\s+/g, " ")
-    .trim();
-  if (text.length <= max) return text;
-  return text.slice(0, max).replace(/\s+\S*$/, "") + "…";
-}
 
 export default function CatalogClient({
   initialCourses,
@@ -52,6 +30,9 @@ export default function CatalogClient({
   const [query, setQuery] = useState("");
   // activeCategory holds a marketplace category id (as string) or "all".
   const [activeCategory, setActiveCategory] = useState<string>("all");
+  // stateName holds a full state name ("Ohio") or "" for the everywhere
+  // baseline. The 2-letter code is derived when building the request.
+  const [stateName, setStateName] = useState("");
 
   const [courses, setCourses] = useState<MarketplaceCourse[]>(initialCourses);
   const [total, setTotal] = useState(initialTotal);
@@ -84,15 +65,17 @@ export default function CatalogClient({
   const hasMore = courses.length < total;
 
   // Fetch a page from the proxy route. page 1 replaces the list (used on
-  // search / category change); higher pages append (infinite scroll).
+  // search / category / state change); higher pages append (infinite scroll).
   const fetchPage = useCallback(
-    async (nextPage: number, search: string, category: string) => {
+    async (nextPage: number, search: string, category: string, state: string) => {
       setLoading(true);
       setError(null);
       try {
         const params = new URLSearchParams({ page: String(nextPage) });
         if (search.trim()) params.set("search", search.trim());
         if (category !== "all") params.set("categoryId", category);
+        const stateCode = US_STATES.find((s) => s.name === state)?.code;
+        if (stateCode) params.set("stateCode", stateCode);
 
         const res = await fetch(`/api/catalog?${params.toString()}`);
         if (!res.ok) throw new Error(`Request failed (${res.status})`);
@@ -110,24 +93,35 @@ export default function CatalogClient({
     []
   );
 
-  // Debounced reload from page 1 whenever the search query or category changes.
-  // Skips the very first render so we reuse the server-rendered first page.
+  // Debounced reload from page 1 whenever any filter changes. Skips the very
+  // first render so we reuse the server-rendered first page.
   const firstRender = useRef(true);
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false;
       return;
     }
-    const t = setTimeout(() => fetchPage(1, query, activeCategory), 300);
+    const t = setTimeout(() => fetchPage(1, query, activeCategory, stateName), 300);
     return () => clearTimeout(t);
-  }, [query, activeCategory, fetchPage]);
+  }, [query, activeCategory, stateName, fetchPage]);
+
+  // Deep links from the home course finder ("/catalog?state=OH") preselect
+  // the state. Read once on mount — defined AFTER the reload effect so the
+  // resulting state change triggers a normal filtered fetch.
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("state");
+    const match = code && US_STATES.find((s) => s.code === code.toUpperCase());
+    if (match) setStateName(match.name);
+  }, []);
 
   const resetFilters = () => {
     setQuery("");
     setActiveCategory("all");
+    setStateName("");
   };
 
   return (
+    <CourseModalProvider>
     <div className="t321-mkt-catalog">
       <section className="t321-mkt-catalog__hero">
         <div className="t321-mkt-container">
@@ -135,20 +129,33 @@ export default function CatalogClient({
           <h1 className="t321-mkt-h1">{heroHeading}</h1>
           <p className="t321-mkt-lede">{heroLede}</p>
 
-          <div className="t321-mkt-catalog__search">
-            <i className="fas fa-search" aria-hidden="true" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              type="search"
-              placeholder={searchPlaceholder}
-              aria-label="Search courses"
-            />
-            {query && (
-              <button type="button" className="t321-mkt-catalog__search-clear" aria-label="Clear" onClick={() => setQuery("")}>
-                <i className="fas fa-times" />
-              </button>
-            )}
+          <div className="t321-mkt-catalog__controls">
+            <div className="t321-mkt-catalog__search">
+              <i className="fas fa-search" aria-hidden="true" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                type="search"
+                placeholder={searchPlaceholder}
+                aria-label="Search courses"
+              />
+              {query && (
+                <button type="button" className="t321-mkt-catalog__search-clear" aria-label="Clear" onClick={() => setQuery("")}>
+                  <i className="fas fa-times" />
+                </button>
+              )}
+            </div>
+            <div className="t321-mkt-catalog__state">
+              <CustomSelect
+                value={stateName}
+                options={STATE_OPTIONS}
+                placeholder="Your state…"
+                onChange={(v) => setStateName(v === ALL_STATES_OPTION ? "" : v)}
+                ariaLabel="Filter by state"
+                searchable
+                searchPlaceholder="Search states…"
+              />
+            </div>
           </div>
 
           <div className="t321-mkt-catalog__filters" role="tablist" aria-label="Category filter">
@@ -173,6 +180,7 @@ export default function CatalogClient({
           <div className="t321-mkt-catalog__toolbar">
             <p className="t321-mkt-catalog__count">
               Showing <strong>{courses.length}</strong> of {total} courses
+              {stateName && <span> available in {stateName}</span>}
               {query && <span> matching &ldquo;{query}&rdquo;</span>}
             </p>
           </div>
@@ -181,53 +189,7 @@ export default function CatalogClient({
             <>
               <div className="t321-mkt-catalog__grid">
                 {courses.map((c) => (
-                  <article key={c.id} className="t321-mkt-catalog__card t321-mkt-card">
-                    <div className="t321-mkt-catalog__card-top has-image is-tone-accent">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        className="t321-mkt-catalog__card-img"
-                        src={c.image || COURSE_PLACEHOLDER_IMAGE}
-                        alt={c.name}
-                        loading="lazy"
-                        onError={(e) => {
-                          const img = e.currentTarget;
-                          if (img.src.indexOf(COURSE_PLACEHOLDER_IMAGE) === -1) {
-                            img.src = COURSE_PLACEHOLDER_IMAGE;
-                          }
-                        }}
-                      />
-                    </div>
-                    <div className="t321-mkt-catalog__card-body">
-                      <h3 className="t321-mkt-h3">{c.name}</h3>
-                      {c.description && <p>{toBlurb(c.description)}</p>}
-
-                      <div className="t321-mkt-catalog__card-foot">
-                        <div>
-                          {c.price > 0 ? (
-                            <span className="t321-mkt-catalog__card-price">
-                              <span>From</span>
-                              <strong>${c.price}</strong>
-                              <span>/ seat</span>
-                            </span>
-                          ) : (
-                            <span className="t321-mkt-catalog__card-price">
-                              <strong>Custom</strong>
-                            </span>
-                          )}
-                        </div>
-                        <div className="t321-mkt-catalog__card-actions">
-                          {/* One action per card. Adding opens the drawer,
-                              which carries the "continue to checkout" path —
-                              so a separate Enroll button would be redundant. */}
-                          <AddToCartButton
-                            course={toCartCourse(c)}
-                            mode="add"
-                            className="t321-mkt-btn t321-mkt-btn--primary"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </article>
+                  <CourseCard key={c.id} course={c} />
                 ))}
               </div>
 
@@ -238,7 +200,7 @@ export default function CatalogClient({
                   <button
                     type="button"
                     className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg"
-                    onClick={() => fetchPage(pageNum + 1, query, activeCategory)}
+                    onClick={() => fetchPage(pageNum + 1, query, activeCategory, stateName)}
                     disabled={loading}
                   >
                     {loading ? (
@@ -283,5 +245,6 @@ export default function CatalogClient({
         </div>
       </section>
     </div>
+    </CourseModalProvider>
   );
 }

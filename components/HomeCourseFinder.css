@@ -1,0 +1,80 @@
+/* Home hero course finder: chips + state select in the hero body
+   (.t321-hcf), results section below the hero (.t321-hcf-results). */
+
+.t321-hcf {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.t321-hcf__cats {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* The state picker is the hero's primary action now — same footprint the big
+   CTA button had. */
+.t321-hcf__state {
+  max-width: 22rem;
+}
+.t321-hcf__state .t321-mkt-select__btn {
+  border: 1.5px solid var(--t321-mkt-line-strong);
+  border-radius: 12px;
+  background: #ffffff;
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+.t321-hcf__state .t321-mkt-select__btn:hover {
+  border-color: var(--t321-mkt-accent);
+}
+.t321-hcf__state .t321-mkt-select__btn:focus-visible,
+.t321-hcf__state .t321-mkt-select.is-open .t321-mkt-select__btn {
+  border-color: var(--t321-mkt-accent);
+  box-shadow: 0 0 0 3px var(--t321-mkt-accent-wash);
+  outline: none;
+}
+
+.t321-hcf__hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--t321-mkt-ink-muted);
+}
+
+/* ── Results section ──────────────────────────────────────────────────── */
+
+/* Upsell block under an empty result. */
+.t321-hcf__fallback {
+  margin-top: 2.5rem;
+}
+/* Direct child only — the section heading. A bare `h3` descendant selector
+   would also catch every course card's title inside the grid. */
+.t321-hcf__fallback > h3 {
+  margin: 0 0 0.35rem;
+  text-align: center;
+}
+.t321-hcf__fallback-hint {
+  margin: 0 0 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--t321-mkt-ink-muted);
+}
+
+.t321-hcf__foot {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+.t321-hcf__count {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--t321-mkt-ink-muted);
+}
