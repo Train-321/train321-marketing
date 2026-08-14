@@ -18,7 +18,13 @@ const APP_BASE = process.env.NEXT_PUBLIC_APP_BASE || "/login";
 const LMS_BASE = APP_BASE.replace(/\/+$/, "");
 const LOGIN_URL = `${LMS_BASE}/#/login`;
 const ENROLL_URL = `${LMS_BASE}/#/enroll`;
-/** Where a successful sign-in sends the learner. */
+/**
+ * Fallback destination after sign-in. The normal path is the `redirectUrl`
+ * /api/auth/login returns, which carries a one-time SSO code — a bare link to
+ * /#/dashboard has no session on the LMS origin and its guard sends the
+ * learner to /#/login. For an already-signed-in visitor, link at
+ * /api/auth/handoff instead, which mints a code server-side and redirects.
+ */
 const DASHBOARD_URL = `${LMS_BASE}/#/dashboard`;
 
 type Props = { settings?: SiteSettings };

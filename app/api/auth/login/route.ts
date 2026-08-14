@@ -1,14 +1,23 @@
 import { NextResponse } from "next/server";
-import { login, AuthError, TOKEN_COOKIE, USER_COOKIE } from "@/lib/auth";
+import {
+  login,
+  AuthError,
+  TOKEN_COOKIE,
+  USER_COOKIE,
+  issueHandoffCode,
+  handoffUrl,
+  APP_BASE
+} from "@/lib/auth";
 
 // Sign-in proxy. The browser posts credentials here rather than cross-origin
 // to api.train321.com, so the bearer token can be parked in an httpOnly cookie
 // that page scripts (and any injected third-party script) cannot read.
 export async function POST(request: Request) {
   try {
-    const { email, password } = (await request.json()) as {
+    const { email, password, next } = (await request.json()) as {
       email?: string;
       password?: string;
+      next?: string;
     };
     if (!email || !password) {
       return NextResponse.json(
@@ -19,10 +28,23 @@ export async function POST(request: Request) {
 
     const result = await login(email, password);
 
+    // Trade the token for a one-time code so the learner app can build its own
+    // session — a bare link to /#/dashboard would hit its auth guard with an
+    // empty localStorage and get redirected back to /#/login. If minting the
+    // code fails we still consider the sign-in successful and fall back to the
+    // learner app's own login page rather than stranding the buyer here.
+    let redirectUrl = `${APP_BASE}/#/login`;
+    try {
+      redirectUrl = handoffUrl(await issueHandoffCode(result.token), next);
+    } catch {
+      /* fall through to the plain login URL */
+    }
+
     const res = NextResponse.json({
       role: result.role,
       fullName: result.fullName,
-      userId: result.userId
+      userId: result.userId,
+      redirectUrl
     });
 
     const secure = process.env.NODE_ENV === "production";

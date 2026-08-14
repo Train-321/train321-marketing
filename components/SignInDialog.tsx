@@ -51,7 +51,13 @@ export default function SignInDialog({
         body: JSON.stringify({ email, password })
       });
       const data = (await res.json().catch(() => null)) as
-        | { role?: string; fullName?: string; userId?: number; message?: string }
+        | {
+            role?: string;
+            fullName?: string;
+            userId?: number;
+            message?: string;
+            redirectUrl?: string;
+          }
         | null;
 
       if (!res.ok) {
@@ -61,7 +67,11 @@ export default function SignInDialog({
       // Credentials checked out — hand the learner over to the LMS. Kept as a
       // full page load (not router.push) because the dashboard is a different
       // app on another host.
-      window.location.href = dashboardUrl;
+      //
+      // `redirectUrl` carries a one-time SSO code so the LMS can build its own
+      // session; linking straight at the dashboard would hit its auth guard
+      // with an empty localStorage and bounce back to its login page.
+      window.location.href = data?.redirectUrl || dashboardUrl;
     } catch {
       setError("We couldn't reach the sign-in service. Please try again.");
     } finally {

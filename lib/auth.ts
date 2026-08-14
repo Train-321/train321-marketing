@@ -79,3 +79,76 @@ export async function login(email: string, password: string): Promise<LoginResul
 export const TOKEN_COOKIE = "t321_token";
 /** Display-only profile cookie (name/role), readable so the header can render. */
 export const USER_COOKIE = "t321_user";
+
+/**
+ * Cross-domain handoff into the learner app.
+ *
+ * Signing in here only establishes a session on THIS origin. The learner app
+ * is a different host with its own localStorage, so sending someone straight
+ * to /#/dashboard lands them on a blank session and its router guard bounces
+ * them to /#/login. Instead we trade our bearer token for a one-time code and
+ * put that in the URL; the learner app redeems it at /#/sso for a session of
+ * its own.
+ *
+ * The code — never the bearer token — is what travels through the URL, so a
+ * copy stranded in browser history or a Referer header is already expired
+ * (two minutes, single use).
+ */
+export async function issueHandoffCode(token: string): Promise<string> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/user/sso/issue`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: "{}",
+      cache: "no-store"
+    });
+  } catch {
+    throw new AuthError("We couldn't reach the sign-in service. Please try again.", 502);
+  }
+
+  const data = (await res.json().catch(() => null)) as
+    | { code?: string; message?: string }
+    | null;
+
+  if (!res.ok || !data?.code) {
+    throw new AuthError(
+      data?.message || "We couldn't open your account. Please try again.",
+      res.status || 500
+    );
+  }
+  return data.code;
+}
+
+/** Learner app base, trailing slash stripped. Matches lib/enroll.ts. */
+export const APP_BASE = (
+  process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com"
+).replace(/\/+$/, "");
+
+/**
+ * Build the learner-app URL that redeems a handoff code.
+ * `next` is an in-app hash path (e.g. "/course_catalog"); the learner app
+ * validates it again before navigating.
+ *
+ * The `?_cb=` before the fragment is deliberate. The learner app's host
+ * serves index.html with no Cache-Control header, so browsers fall back to
+ * heuristic caching and can keep serving a pre-deploy index.html — and with
+ * it a stale bundle that has never heard of /#/sso, which renders the app's
+ * "Page not found" instead of signing anyone in. Everything after `#` is
+ * never sent to the server, so the hash alone cannot defeat that cache; a
+ * real query string can. One uncached HTML fetch per sign-in is a cheap
+ * price for the handoff always landing on the current build.
+ *
+ * `_cb` matches the parameter the learner app's own router already uses when
+ * it self-recovers from a stale index (see frontend/src/routes/router.js).
+ */
+export function handoffUrl(code: string, next?: string | null): string {
+  const q = new URLSearchParams({ code });
+  if (next && /^\/[A-Za-z0-9_\-/]*$/.test(next)) q.set("next", next);
+  const cb = Date.now().toString(36);
+  return `${APP_BASE}/?_cb=${cb}#/sso?${q.toString()}`;
+}
