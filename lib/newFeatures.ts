@@ -167,12 +167,22 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
   const perPage = Math.max(1, query.perPage || CATALOG_PAGE_SIZE);
   const stateCode = (query.stateCode || "").trim().toUpperCase() || null;
 
-  // No stateCode → the "available everywhere" baseline: availableIn(a, null)
-  // passes only truly-untagged courses, hiding both state-limited and
-  // state-excluding ones until a state is picked. anyState mode bypasses the
-  // filter altogether (the caller wants to SHOW what's state-specific).
+  // No state picked → show the whole catalog, each card badged with where it
+  // applies (see availabilityShort / CourseCard).
+  //
+  // This used to be an "available everywhere" baseline: availableIn(a, null)
+  // passes ONLY untagged courses. But essentially every real course carries
+  // state tags, so categories like Food Handler and Alcohol Safety rendered a
+  // chip and then "No courses match your search" — with 4 and 10 courses
+  // respectively sitting behind it, covering 48 states between them. Hiding
+  // stock from a buyer who hasn't picked a state yet loses the sale outright,
+  // and the state dropdown is right there to narrow things down.
+  //
+  // Once a state IS picked nothing changes: availableIn() decides exactly as
+  // before, and the sort further down still floats that state's own versions
+  // to the top. anyState keeps working for callers that ask for it explicitly.
   const matches = (a: Availability): boolean =>
-    query.anyState ? true : availableIn(a, stateCode);
+    query.anyState || stateCode === null ? true : availableIn(a, stateCode);
 
   try {
     const res = await fetch(`${API_BASE}/api/list/enroll-courses`, {

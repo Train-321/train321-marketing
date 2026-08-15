@@ -6,6 +6,7 @@
 
 import type { MarketplaceCourse } from "@/lib/newFeatures";
 import { toBlurb } from "@/lib/newFeatures";
+import { availabilityShort } from "@/lib/states";
 import AddToCartButton from "./cart/AddToCartButton";
 import SkeletonImage from "./SkeletonImage";
 import { COURSE_MORPH_NAME, useCourseModal } from "./CourseModal";
@@ -20,6 +21,10 @@ export default function CourseCard({ course }: { course: MarketplaceCourse }) {
   // the name, and a duplicate would abort the whole transition.
   const isOpen = activeId === course.id;
   const isMorphSource = morphId === course.id && !isOpen;
+
+  // "" for courses available everywhere, which is most of them — see
+  // availabilityShort(). Falsy means no badge is rendered at all.
+  const stateBadge = availabilityShort(course.availability);
 
   return (
     <article
@@ -46,6 +51,17 @@ export default function CourseCard({ course }: { course: MarketplaceCourse }) {
         <SkeletonImage src={course.image} alt={course.name} className="t321-mkt-catalog__card-img" />
       </div>
       <div className="t321-mkt-catalog__card-body">
+        {/* Where this one applies. Only for state-limited courses — the modal
+            makes the same call. It earns its place now that the catalog lists
+            every course before a state is picked: three cards all reading
+            "Food Handler Certificate" are indistinguishable without it, and a
+            buyer would pick the wrong state's course. */}
+        {stateBadge && (
+          <span className="t321-mkt-catalog__card-state">
+            <i className="fas fa-map-marker-alt" aria-hidden="true" />
+            {stateBadge}
+          </span>
+        )}
         <h3 className="t321-mkt-h3">{course.name}</h3>
         {course.description && <p>{toBlurb(course.description)}</p>}
 

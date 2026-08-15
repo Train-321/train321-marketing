@@ -116,3 +116,22 @@ export function availabilityText(a: Availability): string {
     ? a.codes.join(", ")
     : `Not available in ${a.codes.join(", ")}`;
 }
+
+/**
+ * The same thing compressed to fit a catalog card, where availabilityText()
+ * would run to 41 comma-separated codes and wreck the layout.
+ *
+ * Returns "" for courses available everywhere: they need no qualifier, and a
+ * badge on every card is noise that makes the ones that DO matter invisible.
+ */
+export function availabilityShort(a: Availability, max = 3): string {
+  if (a.kind === "all") return "";
+  if (a.kind === "except") {
+    return a.codes.length <= max
+      ? `All states except ${a.codes.join(", ")}`
+      : `All except ${a.codes.length} states`;
+  }
+  if (a.codes.length === 0) return "";
+  if (a.codes.length <= max) return a.codes.join(", ");
+  return `${a.codes.slice(0, max).join(", ")} +${a.codes.length - max} more`;
+}

@@ -248,6 +248,24 @@
   text-transform: uppercase;
   color: var(--t321-mkt-ink-muted);
 }
+/* Which states a course applies to. Same accent-wash pill as the course
+   modal's chip (.t321-cm__chip), so a card and the dialog it opens into say
+   the same thing the same way. align-self keeps it hugging its text rather
+   than stretching across the flex column. */
+.t321-mkt-catalog__card-state {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  background: var(--t321-mkt-accent-wash);
+  color: var(--t321-mkt-accent-ink);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.t321-mkt-catalog__card-state i { font-size: 0.62rem; }
 .t321-mkt-catalog__card-body p {
   margin: 0;
   font-size: 0.9rem;
