@@ -101,6 +101,15 @@
 .t321-mkt-blog__featured-art.is-tone-critical { background: #fbe2e4; color: var(--t321-mkt-critical); }
 .t321-mkt-blog__featured-art.is-tone-purple { background: var(--t321-mkt-purple-wash); color: var(--t321-mkt-purple); }
 
+/* A featured image, when the post has one, replaces the tone tile + icon. */
+.t321-mkt-blog__featured-art img,
+.t321-mkt-blog__card-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .t321-mkt-blog__featured-link {
   display: inline-flex;
   align-items: center;

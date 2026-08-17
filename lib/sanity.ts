@@ -49,6 +49,9 @@ export type BlogPost = {
   author: { name: string; role?: string };
   publishedAt: string;
   readMinutes?: number;
+  featured?: boolean;
+  coverImage?: string; // URL string
+  coverImageAlt?: string;
   heroTone?: "accent" | "warn" | "positive" | "critical" | "purple";
   heroIcon?: string;
 };
@@ -416,10 +419,18 @@ export const sanityClient = createClient({
 // (including unpublished draft edits in the Presentation tool) and switches
 // to the drafts perspective automatically when Next.js draft mode is on.
 // <SanityLive /> (mounted in the layout) opens the live connection.
+//
+// fetchOptions.revalidate is the safety net. Without it next-sanity caches
+// production responses indefinitely and only drops them when <SanityLive />
+// or the /api/revalidate webhook fires a purge — so a post deleted or
+// unpublished in Studio could keep serving until the next deploy. A 60s
+// window bounds that; the webhook still makes the purge immediate.
 export const { sanityFetch, SanityLive } = defineLive({
   client: sanityClient.withConfig({ useCdn: false }),
   serverToken: SERVER_TOKEN,
-  browserToken: BROWSER_TOKEN
+  browserToken: BROWSER_TOKEN,
+  // 0 in development so editors see Studio changes on the next refresh.
+  fetchOptions: { revalidate: process.env.NODE_ENV === "production" ? 60 : 0 }
 });
 
 // Back-compat shim. Every helper below calls (await getClient()).fetch(query,
@@ -583,7 +594,15 @@ export async function getCourse(slug: string): Promise<Course | null> {
 const BLOG_PROJECTION = `
   "slug": slug.current,
   title, excerpt, category, publishedAt, readMinutes, heroTone, heroIcon,
-  "author": { "name": authorName, "role": authorRole },
+  "featured": featured == true,
+  // A linked team member wins; the free-text fields are the fallback for
+  // guest authors who aren't in Team Members.
+  "author": {
+    "name": coalesce(author->name, authorName),
+    "role": coalesce(author->role, authorRole)
+  },
+  "coverImage": coverImage.asset->url + "?w=1600&auto=format",
+  "coverImageAlt": coverImage.alt,
   "rawBody": body
 `;
 
@@ -591,7 +610,7 @@ type BlogPostRow = Omit<BlogPost, "body"> & { rawBody: AnyBlock[] | null };
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
   const rows: BlogPostRow[] = await (await getClient()).fetch(
-    `*[_type == "blogPost"] | order(publishedAt desc) { ${BLOG_PROJECTION} }`
+    `*[_type == "blogPost" && defined(slug.current)] | order(publishedAt desc) { ${BLOG_PROJECTION} }`
   );
   return rows.map((r) => ({ ...r, body: blocksToMarkdown(r.rawBody) }));
 }

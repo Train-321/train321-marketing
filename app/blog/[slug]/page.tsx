@@ -19,6 +19,10 @@ function formatDate(iso: string) {
   return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
 
+// Re-render on a short window so a post deleted or unpublished in Studio stops
+// serving its public URL (it falls through to notFound below).
+export const revalidate = 60;
+
 export async function generateStaticParams() {
   const posts = await getBlogPosts();
   return posts.map((p) => ({ slug: p.slug }));
@@ -54,6 +58,8 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
   const relatedHeading = copy?.blogRelatedHead?.heading || "More in the journal";
   const relatedReadLabel = copy?.blogRelatedReadLabel || "Read article";
 
+  const authorName = post.author?.name || orgSuffix;
+
   const cta = copy?.blogBottomCta;
   const ctaHeading = cta?.heading || "Ready to see the platform?";
   const ctaLede =
@@ -80,10 +86,10 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
           <h1 className="t321-mkt-h1">{post.title}</h1>
           <p className="t321-mkt-lede">{post.excerpt}</p>
           <div className="t321-mkt-article__meta">
-            <div className="t321-mkt-article__avatar" aria-hidden="true">{initials(post.author.name)}</div>
+            <div className="t321-mkt-article__avatar" aria-hidden="true">{initials(authorName)}</div>
             <div className="t321-mkt-article__author">
-              <strong>{post.author.name}</strong>
-              <span>{post.author.role}</span>
+              <strong>{authorName}</strong>
+              <span>{post.author?.role}</span>
             </div>
             <div className="t321-mkt-article__dot" aria-hidden="true" />
             <div className="t321-mkt-article__dates">
@@ -93,6 +99,15 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
           </div>
         </div>
       </header>
+
+      {post.coverImage && (
+        <div className="t321-mkt-container">
+          <figure className="t321-mkt-article__cover">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={post.coverImage} alt={post.coverImageAlt || ""} />
+          </figure>
+        </div>
+      )}
 
       <section className="t321-mkt-section">
         <div className="t321-mkt-container t321-mkt-article__body">
@@ -140,11 +155,11 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
 
             <div className="t321-mkt-article__sign">
               <div className="t321-mkt-article__avatar t321-mkt-article__avatar--lg" aria-hidden="true">
-                {initials(post.author.name)}
+                {initials(authorName)}
               </div>
               <div>
-                <strong>{post.author.name}</strong>
-                <span>{post.author.role} · {orgSuffix}</span>
+                <strong>{authorName}</strong>
+                <span>{[post.author?.role, orgSuffix].filter(Boolean).join(" · ")}</span>
               </div>
             </div>
           </article>
@@ -166,7 +181,12 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
                   className="t321-mkt-card t321-mkt-card--hover t321-mkt-article__related-card"
                 >
                   <div className={`t321-mkt-article__related-art is-tone-${p.heroTone}`}>
-                    <i className={p.heroIcon} aria-hidden="true" />
+                    {p.coverImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.coverImage} alt={p.coverImageAlt || ""} />
+                    ) : (
+                      <i className={p.heroIcon} aria-hidden="true" />
+                    )}
                   </div>
                   <span className="t321-mkt-eyebrow">{p.category}</span>
                   <h3 className="t321-mkt-h3">{p.title}</h3>

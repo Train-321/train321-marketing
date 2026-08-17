@@ -20,6 +20,43 @@ export default defineConfig({
           S.listItem()
             .title(title)
             .child(S.document().schemaType(type).documentId(id))
+
+        const newestFirst = [{ field: 'publishedAt', direction: 'desc' as const }]
+
+        // Posts split by live state. Sanity keeps an unpublished edit as a
+        // separate `drafts.<id>` document, so "is it live?" is the same
+        // question as "does a non-draft copy exist?" — and a draft whose
+        // published twin is missing has never been published at all.
+        const isDraft = '_id in path("drafts.**")'
+        const hasPublishedTwin =
+          'defined(*[_id == string::split(^._id, "drafts.")[1]][0]._id)'
+
+        const postList = (title: string, filter: string) =>
+          S.listItem()
+            .title(title)
+            .child(
+              S.documentTypeList('blogPost')
+                .title(title)
+                .filter(`_type == "blogPost" && ${filter}`)
+                .defaultOrdering(newestFirst)
+            )
+
+        const blog = S.listItem()
+          .title('Blog')
+          .child(
+            S.list()
+              .title('Blog')
+              .items([
+                postList('All posts', 'true'),
+                postList('Published — live on the site', `!(${isDraft})`),
+                postList('Drafts — not published yet', `${isDraft} && !${hasPublishedTwin}`),
+                postList('Edited since publishing', `${isDraft} && ${hasPublishedTwin}`),
+                postList('Featured on the Journal', 'featured == true'),
+                S.divider(),
+                single('blogIndexPage', 'blogIndexPage', 'Journal page settings')
+              ])
+          )
+
         return S.list()
           .title('Content')
           .items([
@@ -30,14 +67,14 @@ export default defineConfig({
             single('demoPage', 'demoPage', 'Demo Page'),
             single('servicesPage', 'servicesPage', 'Services / Pricing Page'),
             single('aboutPage', 'aboutPage', 'About Page'),
-            single('blogIndexPage', 'blogIndexPage', 'Blog Index'),
             single('faqPage', 'faqPage', 'FAQ Page'),
             single('catalogPage', 'catalogPage', 'Catalog Page'),
             single('testimonialsPage', 'testimonialsPage', 'Testimonials Page'),
             single('detailPagesCopy', 'detailPagesCopy', 'Detail Pages (chrome)'),
             S.divider(),
+            blog,
+            S.divider(),
             S.documentTypeListItem('course').title('Courses'),
-            S.documentTypeListItem('blogPost').title('Blog Posts'),
             S.documentTypeListItem('testimonial').title('Testimonials'),
             S.documentTypeListItem('faqItem').title('FAQ Items'),
             S.documentTypeListItem('service').title('Services'),

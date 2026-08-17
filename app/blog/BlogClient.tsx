@@ -52,7 +52,11 @@ export default function BlogClient({ posts, page }: Props) {
     });
   }, [query, activeCategory, sortedPosts]);
 
-  const featured = sortedPosts[0];
+  // An editor picks the hero post with the "featured" toggle in Studio. With
+  // nothing ticked (or the pick unpublished) the newest post takes the slot.
+  const pinned = sortedPosts.find((p) => p.featured);
+  const featured = pinned || sortedPosts[0];
+  const featuredLabel = pinned ? "Featured" : "Latest";
   const showFeatured = !query && activeCategory === allLabel && Boolean(featured);
 
   const filteredRest = useMemo(() => {
@@ -112,10 +116,15 @@ export default function BlogClient({ posts, page }: Props) {
           <div className="t321-mkt-container">
             <Link href={`/blog/${featured.slug}`} className="t321-mkt-blog__featured">
               <div className={`t321-mkt-blog__featured-art is-tone-${featured.heroTone}`}>
-                <i className={featured.heroIcon} aria-hidden="true" />
+                {featured.coverImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={featured.coverImage} alt={featured.coverImageAlt || ""} />
+                ) : (
+                  <i className={featured.heroIcon} aria-hidden="true" />
+                )}
               </div>
               <div>
-                <span className="t321-mkt-eyebrow">{featured.category} · Latest</span>
+                <span className="t321-mkt-eyebrow">{featured.category} · {featuredLabel}</span>
                 <h2 className="t321-mkt-h2">{featured.title}</h2>
                 <p>{featured.excerpt}</p>
                 <div className="t321-mkt-blog__meta">
@@ -152,7 +161,12 @@ export default function BlogClient({ posts, page }: Props) {
                   className="t321-mkt-blog__card t321-mkt-card t321-mkt-card--hover"
                 >
                   <div className={`t321-mkt-blog__card-art is-tone-${p.heroTone}`}>
-                    <i className={p.heroIcon} aria-hidden="true" />
+                    {p.coverImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.coverImage} alt={p.coverImageAlt || ""} />
+                    ) : (
+                      <i className={p.heroIcon} aria-hidden="true" />
+                    )}
                   </div>
                   <span className="t321-mkt-blog__card-cat">{p.category}</span>
                   <h3 className="t321-mkt-h3">{p.title}</h3>
