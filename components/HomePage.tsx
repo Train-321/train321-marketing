@@ -466,40 +466,6 @@ export default function HomePage({
         </div>
       </section>
 
-      <FinderResults />
-      </HomeFinderProvider>
-
-      <section className="t321-mkt-section">
-        <div className="t321-mkt-container">
-          <div className="t321-mkt-section__head">
-            <span className="t321-mkt-eyebrow"><i className={home?.pillarsHead?.icon || "fas fa-tag"} /> {home?.pillarsHead?.eyebrow || "What we do"}</span>
-            <h2 className="t321-mkt-h2">{home?.pillarsHead?.heading || "Three categories. One platform."}</h2>
-            <p className="t321-mkt-lede">
-              {home?.pillarsHead?.lede || "Everything compliance-sensitive in the hospitality and service industries — under one login, one dashboard, one invoice."}
-            </p>
-          </div>
-          <div className="t321-mkt-pillars">
-            {(home?.pillars?.length
-              ? home.pillars
-              : [
-                  { icon: "fas fa-utensils", tone: "amber", title: "Food safety", body: "Food Handler, Food Manager, accredited variants. Accepted by every state health department.", linkLabel: "Browse food safety", linkHref: "/food-handler" },
-                  { icon: "fas fa-wine-glass-alt", tone: "plum", title: "Alcohol & service", body: "TIPS-equivalent alcohol server training plus bar basics, service basics, and security host.", linkLabel: "Browse alcohol & service", linkHref: "/alcohol" },
-                  { icon: "fas fa-users-cog", tone: "emerald", title: "HR & compliance", body: "Sexual harassment (state-specific), human trafficking, and practical HR for managers.", linkLabel: "Browse HR & compliance", linkHref: "/human-resources" }
-                ]
-            ).map((p, i) => (
-              <Link key={i} href={p.linkHref || "#"} className="t321-mkt-pillar t321-mkt-card t321-mkt-card--hover">
-                <span className={`t321-mkt-pillar__icon t321-mkt-pillar__icon--${p.tone || "amber"}`}>
-                  <i className={p.icon || "fas fa-circle"} />
-                </span>
-                <h3 className="t321-mkt-h3">{p.title}</h3>
-                <p>{p.body}</p>
-                <span className="t321-mkt-pillar__link">{p.linkLabel || "Learn more"} <i className="fas fa-arrow-right" /></span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section className="t321-mkt-section t321-mkt-section--sunk">
         <div className="t321-mkt-container">
           <div className="t321-mkt-section__head">
@@ -539,6 +505,44 @@ export default function HomePage({
           </div>
         </div>
       </section>
+
+      <section className="t321-mkt-section">
+        <div className="t321-mkt-container">
+          <div className="t321-mkt-section__head">
+            <span className="t321-mkt-eyebrow"><i className={home?.pillarsHead?.icon || "fas fa-tag"} /> {home?.pillarsHead?.eyebrow || "What we do"}</span>
+            <h2 className="t321-mkt-h2">{home?.pillarsHead?.heading || "Three categories. One platform."}</h2>
+            <p className="t321-mkt-lede">
+              {home?.pillarsHead?.lede || "Everything compliance-sensitive in the hospitality and service industries — under one login, one dashboard, one invoice."}
+            </p>
+          </div>
+          <div className="t321-mkt-pillars">
+            {(home?.pillars?.length
+              ? home.pillars
+              : [
+                  { icon: "fas fa-utensils", tone: "amber", title: "Food safety", body: "Food Handler, Food Manager, accredited variants. Accepted by every state health department.", linkLabel: "Browse food safety", linkHref: "/food-handler" },
+                  { icon: "fas fa-wine-glass-alt", tone: "plum", title: "Alcohol & service", body: "TIPS-equivalent alcohol server training plus bar basics, service basics, and security host.", linkLabel: "Browse alcohol & service", linkHref: "/alcohol" },
+                  { icon: "fas fa-users-cog", tone: "emerald", title: "HR & compliance", body: "Sexual harassment (state-specific), human trafficking, and practical HR for managers.", linkLabel: "Browse HR & compliance", linkHref: "/human-resources" }
+                ]
+            ).map((p, i) => (
+              <Link key={i} href={p.linkHref || "#"} className="t321-mkt-pillar t321-mkt-card t321-mkt-card--hover">
+                <span className={`t321-mkt-pillar__icon t321-mkt-pillar__icon--${p.tone || "amber"}`}>
+                  <i className={p.icon || "fas fa-circle"} />
+                </span>
+                <h3 className="t321-mkt-h3">{p.title}</h3>
+                <p>{p.body}</p>
+                <span className="t321-mkt-pillar__link">{p.linkLabel || "Learn more"} <i className="fas fa-arrow-right" /></span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* The live course finder results now sit here, where the Popular block
+          used to be — the two swapped places so Popular leads. FinderResults
+          reads the finder context, so HomeFinderProvider closes after it
+          rather than up by the hero. */}
+      <FinderResults />
+      </HomeFinderProvider>
 
       <section className="t321-mkt-section">
         <div className="t321-mkt-container">
