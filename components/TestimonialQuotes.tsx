@@ -58,9 +58,8 @@ function QuoteCard({
         </div>
         <div className="t321-mkt-quote__meta">
           <strong>{testimonial.name}</strong>
-          <span>
-            {testimonial.role} · {testimonial.company}
-          </span>
+          <span>{testimonial.role}</span>
+          <span>{testimonial.company}</span>
         </div>
       </figcaption>
       {testimonial.stat && (
@@ -125,9 +124,8 @@ function QuoteModal({
           </div>
           <div className="t321-mkt-quote__meta">
             <strong>{testimonial.name}</strong>
-            <span>
-              {testimonial.role} · {testimonial.company}
-            </span>
+            <span>{testimonial.role}</span>
+            <span>{testimonial.company}</span>
           </div>
         </div>
         {testimonial.stat && (

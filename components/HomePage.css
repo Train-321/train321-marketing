@@ -1097,8 +1097,20 @@
   font-weight: 600;
   color: var(--t321-mkt-ink);
 }
+/* Role and company each get their own line. Run together they wrapped to one
+   line for some people and two for others, which left the rule above the
+   attribution sitting at a different height in every card. Split and held to
+   a single line each, the block is always exactly three lines tall, so the
+   rules line up across the row without reserving blank space. min-height
+   keeps the line if a testimonial is missing a role or company. */
 .t321-mkt-quote__meta span {
+  display: block;
+  min-height: calc(1.35 * 0.8rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.8rem;
+  line-height: 1.35;
   color: var(--t321-mkt-ink-muted);
 }
 .t321-mkt-quote__stat {
@@ -1107,6 +1119,7 @@
   background: var(--t321-mkt-accent-wash);
   border-radius: 8px;
   font-size: 0.82rem;
+  line-height: 1.4;
   color: var(--t321-mkt-ink-muted);
 }
 .t321-mkt-quote__stat strong {
@@ -1286,6 +1299,13 @@
   /* One card per swipe, with the next one peeking so the rail reads as
      swipeable rather than as a single stranded card. */
   .t321-mkt-quote { flex-basis: 87%; }
+  /* At this width some stat pills wrap to two lines and some don't, which
+     shifts that card's divider relative to the one peeking beside it. Reserve
+     two lines so the rail stays steady as you swipe. Padding is included —
+     box-sizing is border-box. */
+  .t321-mkt-quote__stat {
+    min-height: calc(1.1rem + 2 * 1.4 * 0.82rem);
+  }
   /* A single narrow column cuts off even the short quotes at six lines, and
      there is no shared row height to protect here, so allow more before
      "Read more" takes over. */
