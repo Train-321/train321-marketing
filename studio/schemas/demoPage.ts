@@ -44,6 +44,16 @@ export default defineType({
       group: 'form',
       of: [{ type: 'string' }]
     }),
+    defineField({
+      name: 'notesPlaceholder',
+      type: 'string',
+      title: 'Notes field placeholder',
+      description:
+        'Grey hint inside the "Anything we should know?" box. Leave blank to use the built-in default.',
+      initialValue:
+        'Tell us about your training needs, timeline, integrations, or anything specific you would like us to cover.',
+      group: 'form'
+    }),
     defineField({ name: 'submitLabel', type: 'string', initialValue: 'Book my demo', group: 'form' }),
     defineField({ name: 'submitSendingLabel', type: 'string', initialValue: 'Booking…', group: 'form' }),
     defineField({ name: 'successText', type: 'text', rows: 2, group: 'form' }),

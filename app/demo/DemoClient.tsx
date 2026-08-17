@@ -92,6 +92,11 @@ export default function DemoClient({ page }: Props) {
   const interests = page?.interestOptions?.length ? page.interestOptions : FALLBACK_INTERESTS;
   const submitLabel = page?.submitLabel || "Book my demo";
   const submitSendingLabel = page?.submitSendingLabel || "Request received";
+  // Editable in Studio (Demo page → Booking form). The fallback keeps the
+  // field usable if an editor clears it.
+  const notesPlaceholder =
+    page?.notesPlaceholder ||
+    "Tell us about your training needs, timeline, integrations, or anything specific you would like us to cover.";
   const successText = page?.successText || "Thanks {name} — we'll email you within 2 business hours.";
   const disclaimer =
     page?.disclaimer ||
@@ -234,7 +239,12 @@ export default function DemoClient({ page }: Props) {
 
             <label className="t321-mkt-demo__field">
               <span>Anything we should know?</span>
-              <textarea value={form.notes} onChange={update("notes")} rows={3} placeholder="Deadline, specific audit, integration questions — optional." />
+              <textarea
+                value={form.notes}
+                onChange={update("notes")}
+                rows={3}
+                placeholder={notesPlaceholder}
+              />
             </label>
 
             <button type="submit" className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg" disabled={sent}>

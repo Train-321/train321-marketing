@@ -235,6 +235,7 @@ export type DemoPage = {
   teamSizeOptions?: string[];
   timeslotOptions?: string[];
   interestOptions?: string[];
+  notesPlaceholder?: string;
   submitLabel?: string;
   submitSendingLabel?: string;
   successText?: string;
@@ -794,7 +795,7 @@ export async function getDemoPage(): Promise<DemoPage | null> {
       `*[_id == "demoPage"][0] {
         heroEyebrow, heroHeading, heroLede, heroBullets,
         formHeading, teamSizeOptions, timeslotOptions, interestOptions,
-        submitLabel, submitSendingLabel, successText, disclaimer,
+        notesPlaceholder, submitLabel, submitSendingLabel, successText, disclaimer,
         "agendaHead": agendaHead${SECTION_HEAD_PROJ},
         agenda[]{ time, title, desc },
         "faqHead": faqHead${SECTION_HEAD_PROJ},
