@@ -141,7 +141,10 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                 </div>
               )}
               {course.priceNote && <p className="t321-mkt-course__price-note">{course.priceNote}</p>}
-              {course.hero?.stats && (
+              {/* Empty array is truthy again: the stats list carries a border
+                  top and bottom, so with no stats it drew two rules across
+                  the price card with nothing between them. */}
+              {course.hero?.stats && course.hero.stats.length > 0 && (
                 <ul className="t321-mkt-course__stats">
                   {course.hero.stats.map((s) => (
                     <li key={s.label}>
