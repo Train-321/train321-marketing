@@ -236,6 +236,14 @@ export type DemoPage = {
   timeslotOptions?: string[];
   interestOptions?: string[];
   notesPlaceholder?: string;
+  demoHead?: SectionHead;
+  demoVideos?: Array<{
+    title?: string;
+    videoUrl?: string;
+    image?: string | null;
+    order?: number;
+    hidden?: boolean;
+  }>;
   submitLabel?: string;
   submitSendingLabel?: string;
   successText?: string;
@@ -796,6 +804,8 @@ export async function getDemoPage(): Promise<DemoPage | null> {
         heroEyebrow, heroHeading, heroLede, heroBullets,
         formHeading, teamSizeOptions, timeslotOptions, interestOptions,
         notesPlaceholder, submitLabel, submitSendingLabel, successText, disclaimer,
+        "demoHead": demoHead${SECTION_HEAD_PROJ},
+        demoVideos[]{ title, videoUrl, order, hidden, "image": image.asset->url },
         "agendaHead": agendaHead${SECTION_HEAD_PROJ},
         agenda[]{ time, title, desc },
         "faqHead": faqHead${SECTION_HEAD_PROJ},

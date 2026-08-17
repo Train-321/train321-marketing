@@ -102,6 +102,27 @@ export default function DemoClient({ page }: Props) {
     page?.disclaimer ||
     "We'll never share your info. Expect a reply from a real human within 2 business hours.";
 
+  // Demo gallery. Copy is editable in Studio; the cards fall back to the LMS
+  // feed unless an editor has added their own below.
+  const demoEyebrow = page?.demoHead?.eyebrow || "See it in action";
+  const demoHeading = page?.demoHead?.heading || "A closer look at what we do";
+  const demoIcon = page?.demoHead?.icon || "fas fa-film";
+  const demoLede =
+    page?.demoHead?.lede ||
+    "Explore real examples of our platform, custom training, branded programs, and client solutions.";
+
+  const studioVideos: VideoItem[] = (page?.demoVideos || [])
+    .filter((v) => !v.hidden && v.title)
+    .sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999))
+    .map((v) => ({
+      // The player takes a Vimeo id, so pull the trailing digits out of
+      // whatever shape the editor pasted (full URL, /video/<id>, or a bare id).
+      id: String(v.videoUrl || "").match(/(\d{6,})/)?.[1] || "",
+      name: v.title || "",
+      thumbnail: v.image || null
+    }))
+    .filter((v) => v.id);
+
   const agendaEyebrow = page?.agendaHead?.eyebrow || "What we'll cover";
   const agendaHeading = page?.agendaHead?.heading || "The 20-minute agenda";
   const agendaIcon = page?.agendaHead?.icon || "fas fa-route";
@@ -122,6 +143,13 @@ export default function DemoClient({ page }: Props) {
   const ctaSecondaryHref = cta?.secondaryCta?.to || "/contact";
 
   useEffect(() => {
+    // Studio cards win outright — skip the LMS round-trip entirely so the two
+    // lists can't briefly fight over the gallery on load.
+    if (studioVideos.length) {
+      setVideos(studioVideos);
+      setVideosLoading(false);
+      return;
+    }
     let cancelled = false;
     fetch("https://api.train321.com/tour/demovideos")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status))))
@@ -266,9 +294,9 @@ export default function DemoClient({ page }: Props) {
         <section className="t321-mkt-section t321-mkt-demo__videos-section">
           <div className="t321-mkt-container">
             <div className="t321-mkt-section__head">
-              <span className="t321-mkt-eyebrow"><i className="fas fa-film" /> See it in action</span>
-              <h2 className="t321-mkt-h2">Watch a quick walkthrough</h2>
-              <p className="t321-mkt-lede">Short clips from the actual learner and manager experience — tap any to play inline.</p>
+              <span className="t321-mkt-eyebrow"><i className={demoIcon} /> {demoEyebrow}</span>
+              <h2 className="t321-mkt-h2">{demoHeading}</h2>
+              <p className="t321-mkt-lede">{demoLede}</p>
             </div>
 
             {videosLoading ? (

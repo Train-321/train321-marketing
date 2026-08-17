@@ -7,6 +7,7 @@ export default defineType({
   groups: [
     { name: 'hero', title: 'Hero' },
     { name: 'form', title: 'Booking form' },
+    { name: 'gallery', title: 'Demo gallery' },
     { name: 'agenda', title: 'Agenda' },
     { name: 'faq', title: 'FAQs' }
   ],
@@ -58,6 +59,61 @@ export default defineType({
     defineField({ name: 'submitSendingLabel', type: 'string', initialValue: 'Booking…', group: 'form' }),
     defineField({ name: 'successText', type: 'text', rows: 2, group: 'form' }),
     defineField({ name: 'disclaimer', type: 'text', rows: 2, group: 'form' }),
+
+    // ── Demo gallery ──────────────────────────────────────────────────────
+    // The cards themselves come from the LMS (api/tour/demovideos) so the two
+    // stay in step by default. Adding any card below takes over the gallery
+    // completely, which is the escape hatch when the marketing site needs to
+    // show something the LMS feed doesn't carry.
+    defineField({
+      name: 'demoHead',
+      type: 'sectionHead',
+      title: 'Demo gallery section head',
+      group: 'gallery'
+    }),
+    defineField({
+      name: 'demoVideos',
+      type: 'array',
+      title: 'Demo cards',
+      description:
+        'Leave empty to show the videos managed in the LMS. Add cards here to replace that list entirely.',
+      group: 'gallery',
+      of: [
+        {
+          type: 'object',
+          name: 'demoVideo',
+          fields: [
+            { name: 'title', type: 'string', validation: (R) => R.required() },
+            {
+              name: 'videoUrl',
+              type: 'url',
+              title: 'Video URL',
+              description: 'Vimeo link or id, e.g. https://vimeo.com/123456789'
+            },
+            {
+              name: 'image',
+              type: 'image',
+              title: 'Thumbnail',
+              options: { hotspot: true },
+              description: 'Optional. Falls back to the Vimeo thumbnail.'
+            },
+            {
+              name: 'order',
+              type: 'number',
+              title: 'Display order',
+              description: 'Lower numbers first. Ties keep list order.'
+            },
+            {
+              name: 'hidden',
+              type: 'boolean',
+              title: 'Hide this card',
+              initialValue: false
+            }
+          ],
+          preview: { select: { title: 'title', subtitle: 'videoUrl', media: 'image' } }
+        }
+      ]
+    }),
 
     defineField({ name: 'agendaHead', type: 'sectionHead', title: 'Agenda section head', group: 'agenda' }),
     defineField({
