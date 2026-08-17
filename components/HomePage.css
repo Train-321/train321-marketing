@@ -1420,8 +1420,6 @@
     font-size: 0.88rem;
     margin: 0;
   }
-  .t321-mkt-hero__backdrop { height: 17rem; }
-  .t321-mkt-hero__sheet { margin-top: 1rem; padding-top: 0.5rem; }
   .t321-mkt-hero__sheet-grip { margin-bottom: 0.7rem; }
   .t321-mkt-hero__rail { margin-top: 1rem; }
   .t321-mkt-hero__tiles { margin-top: 1rem; }
@@ -1525,8 +1523,6 @@
   }
 
   /* With a row reclaimed, let the photo breathe before the sheet lifts. */
-  .t321-mkt-hero__backdrop { height: 19rem; }
-  .t321-mkt-hero__sheet { margin-top: 2.5rem; }
 }
 
 /* ── Phone: results follow the filters directly ───────────────────────────
@@ -1610,8 +1606,6 @@
   }
 
   /* More photo before the sheet lifts. */
-  .t321-mkt-hero__backdrop { height: 23rem; }
-  .t321-mkt-hero__sheet { margin-top: 4.25rem; }
 
   /* Smaller type chips. */
   .t321-mkt-finder-mobile .t321-mkt-catalog__chip {
@@ -1731,6 +1725,9 @@
   .t321-mkt-hero__rail-meta { margin-top: 0.3rem; padding-top: 0.35rem; }
   .t321-mkt-hero__rail-price { font-size: 0.76rem; }
   .t321-mkt-hero__rail-track { gap: 0.5rem; }
-  .t321-mkt-hero__backdrop { height: 21rem; }
-  .t321-mkt-hero__sheet { margin-top: 3rem; }
+  /* Photo height and the sheet's overlap move together: the sheet starts
+     lower by the same amount the photo grows, so the four course boxes keep
+     their place above the fold. */
+  .t321-mkt-hero__backdrop { height: 26rem; }
+  .t321-mkt-hero__sheet { margin-top: 6rem; }
 }
