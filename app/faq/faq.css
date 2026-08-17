@@ -148,11 +148,10 @@
 
 @media (max-width: 991.98px) {
   .t321-mkt-faq__body { grid-template-columns: 1fr; }
-  .t321-mkt-faq__nav {
-    position: static;
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-  .t321-mkt-faq__nav-head { width: 100%; }
+  /* One column puts this list of category names directly above the same
+     names as section headings, so the page read as though every category
+     were printed twice. It is a sticky jump-nav for the desktop sidebar and
+     earns nothing stacked — it scrolls away before the first heading. */
+  .t321-mkt-faq__nav { display: none; }
   .t321-mkt-faq__cta { grid-template-columns: 1fr; }
 }
