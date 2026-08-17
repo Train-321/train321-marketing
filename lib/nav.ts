@@ -45,8 +45,8 @@ export const marketingNav: NavItem[] = [
           // a link, so the overview page needs its own entry here to stay
           // reachable from the bar.
           { label: "Services overview", to: "/services", icon: "fas fa-briefcase" },
-          { label: "Licensing", to: "/courses/licensing", icon: "fas fa-id-card" },
-          { label: "White Labeling", to: "/courses/white-labeling", icon: "fas fa-paint-brush" }
+          { label: "Licensing", to: "/services/licensing", icon: "fas fa-id-card" },
+          { label: "White Labeling", to: "/services/white-labeling", icon: "fas fa-paint-brush" }
         ]
       }
     ]

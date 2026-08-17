@@ -35,14 +35,19 @@ const nextConfig: NextConfig = {
         "new-york-sexual-harassment",
         "human-trafficking",
         "additional-courses",
-        "custom-courses",
-        "licensing",
-        "white-labeling"
+        "custom-courses"
       ].map((slug) => ({
         source: `/${slug}`,
         destination: `/courses/${slug}`,
         permanent: true
       })),
+      // Services. These were course documents until they moved to the services
+      // template, so both the bare legacy slug and the old /courses/ address
+      // have to land on /services/<slug>.
+      ...["licensing", "white-labeling"].flatMap((slug) => [
+        { source: `/${slug}`, destination: `/services/${slug}`, permanent: true },
+        { source: `/courses/${slug}`, destination: `/services/${slug}`, permanent: true }
+      ]),
       // Legacy legal slugs → /legal/<slug>
       ...[
         "privacy-policy",

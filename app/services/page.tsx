@@ -55,8 +55,8 @@ const FALLBACK_TIERS: ServicesTier[] = [
 
 const FALLBACK_ADDONS: PillarCard[] = [
   { linkHref: "/courses/custom-courses", icon: "fas fa-sliders-h", title: "Custom course production", body: "We script, record, and deploy custom courses from your SOPs in 4-6 weeks. You own the content; we host it." },
-  { linkHref: "/courses/white-labeling", icon: "fas fa-paint-brush", title: "White-label deployment", body: "Every course, delivered in your colors, at your URL, with your logo on every certificate." },
-  { linkHref: "/courses/licensing", icon: "fas fa-id-card", title: "Association licensing", body: "State restaurant associations and trade groups license our catalog as the engine behind their member training." },
+  { linkHref: "/services/white-labeling", icon: "fas fa-paint-brush", title: "White-label deployment", body: "Every course, delivered in your colors, at your URL, with your logo on every certificate." },
+  { linkHref: "/services/licensing", icon: "fas fa-id-card", title: "Association licensing", body: "State restaurant associations and trade groups license our catalog as the engine behind their member training." },
   { linkHref: "/courses/additional-courses", icon: "fas fa-plus-circle", title: "Specialized training", body: "Cash handling, active-shooter response, data privacy, workplace violence — beyond the core compliance catalog." }
 ];
 
