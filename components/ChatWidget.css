@@ -609,3 +609,19 @@
     animation: none !important;
   }
 }
+
+/* Phone only: keep the launcher off the first screen — it sat on top of the
+   hero's course boxes. It fades in once the visitor scrolls past the fold,
+   and an open panel always wins. */
+@media (max-width: 767.98px) {
+  .t321-chat-fab.is-early:not(.is-open) {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(10px);
+  }
+  .t321-chat-fab { transition: opacity 200ms ease, transform 200ms ease, visibility 200ms; }
+}
+@media (max-width: 767.98px) and (prefers-reduced-motion: reduce) {
+  .t321-chat-fab { transition: none; }
+}

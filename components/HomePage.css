@@ -1128,3 +1128,609 @@
   }
 }
 
+
+/* ── Phone hero: photo backdrop + sheet ────────────────────────────────────
+   All of this is off by default. `display: contents` dissolves the sheet
+   wrapper above the phone breakpoint so the desktop hero keeps its original
+   box tree, and the backdrop/rail/tiles never render there at all. */
+.t321-mkt-hero__sheet { display: contents; }
+.t321-mkt-hero__backdrop,
+.t321-mkt-hero__sheet-grip,
+.t321-mkt-hero__rail,
+.t321-mkt-hero__tiles { display: none; }
+
+@media (max-width: 767.98px) {
+  /* Grid items default to min-width:auto, so the single-column hero track
+     refuses to shrink below its widest child and the page picks up a
+     horizontal scrollbar. */
+  .t321-mkt-hero__body { min-width: 0; max-width: 100%; }
+
+  .t321-mkt-hero {
+    position: relative;
+    padding: 0 0 2rem;
+    background: #0B1F33;
+    border-bottom: 0;
+    overflow: hidden;
+  }
+  .t321-mkt-hero__inner { padding-top: 1.5rem; }
+
+  .t321-mkt-hero__backdrop {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 21rem;
+    z-index: 0;
+  }
+  .t321-mkt-hero__backdrop-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 35%;
+  }
+  .t321-mkt-hero__backdrop-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(11,31,51,0.72) 0%, rgba(11,31,51,0.48) 45%, rgba(11,31,51,0.72) 100%);
+  }
+
+  /* Copy sits over the photo, so it flips to light. */
+  .t321-mkt-hero__body { position: relative; z-index: 1; }
+  .t321-mkt-hero .t321-mkt-eyebrow { color: #7FD8EE; }
+  .t321-mkt-hero .t321-mkt-h1 {
+    color: #fff;
+    font-size: clamp(1.9rem, 8vw, 2.4rem);
+    line-height: 1.12;
+  }
+  .t321-mkt-hero__body .t321-mkt-h1 em { color: #6FD3EA; }
+  .t321-mkt-hero .t321-mkt-lede {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.92rem;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Audience pills as glass over the photo. */
+  .t321-mkt-hero__audience {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(6px);
+  }
+  .t321-mkt-hero__audience-pill { color: rgba(255, 255, 255, 0.78); }
+  .t321-mkt-hero__audience-pill.is-active { background: #fff; color: #0B1F33; }
+
+  /* The sheet: bleeds to both edges and lifts over the photo. */
+  .t321-mkt-hero__sheet {
+    display: block;
+    position: relative;
+    margin: 1.5rem -1.5rem 0;
+    padding: 0.6rem 1.5rem 1.35rem;
+    background: var(--t321-mkt-paper);
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -8px 28px rgba(11, 31, 51, 0.22);
+  }
+  .t321-mkt-hero__sheet-grip {
+    display: block;
+    width: 2.25rem;
+    height: 4px;
+    margin: 0 auto 0.9rem;
+    border-radius: 99px;
+    background: var(--t321-mkt-line-strong);
+  }
+
+  /* ── Popular rail ── */
+  .t321-mkt-hero__rail { display: block; margin-top: 1.35rem; }
+  .t321-mkt-hero__rail-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.65rem;
+  }
+  .t321-mkt-hero__rail-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--t321-mkt-ink);
+  }
+  .t321-mkt-hero__rail-all {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--t321-mkt-accent);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .t321-mkt-hero__rail-all i { font-size: 0.68rem; margin-left: 0.2rem; }
+
+  .t321-mkt-hero__rail-track {
+    list-style: none;
+    margin: 0 -1.5rem;
+    padding: 0.2rem 1.5rem 0.5rem;
+    display: flex;
+    gap: 0.7rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .t321-mkt-hero__rail-track::-webkit-scrollbar { display: none; }
+  .t321-mkt-hero__rail-track > li {
+    flex: 0 0 clamp(8.5rem, 38vw, 10rem);
+    scroll-snap-align: start;
+  }
+  .t321-mkt-hero__rail-card {
+    display: block;
+    height: 100%;
+    border: 1px solid var(--t321-mkt-line);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    text-decoration: none;
+    box-shadow: 0 1px 2px rgba(11, 31, 51, 0.05);
+    transition: transform 140ms ease;
+  }
+  .t321-mkt-hero__rail-card:active { transform: scale(0.97); }
+  .t321-mkt-hero__rail-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 3.6rem;
+    color: #fff;
+    font-size: 1.15rem;
+    background: linear-gradient(135deg, #0B1F33, #00B4DB);
+  }
+  .t321-mkt-hero__rail-top.is-tone-amber   { background: linear-gradient(135deg, #9D6200, #C08A2E); }
+  .t321-mkt-hero__rail-top.is-tone-plum    { background: linear-gradient(135deg, #6C5CE7, #8B7EF0); }
+  .t321-mkt-hero__rail-top.is-tone-emerald { background: linear-gradient(135deg, #2D6A4F, #3E8E68); }
+  .t321-mkt-hero__rail-top.is-tone-neutral { background: linear-gradient(135deg, #0F0F0E, #3A3A38); }
+  .t321-mkt-hero__rail-body { display: block; padding: 0.6rem 0.65rem 0.7rem; }
+  .t321-mkt-hero__rail-name {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.84rem;
+    font-weight: 600;
+    line-height: 1.28;
+    color: var(--t321-mkt-ink);
+  }
+  .t321-mkt-hero__rail-meta { display: block; margin-top: 0.3rem; }
+  .t321-mkt-hero__rail-price {
+    font-style: normal;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--t321-mkt-accent);
+  }
+
+  /* ── Section tiles ── */
+  .t321-mkt-hero__tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.55rem;
+    margin-top: 1.35rem;
+  }
+  .t321-mkt-hero__tile {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.65rem 0.7rem;
+    border: 1px solid var(--t321-mkt-line);
+    border-radius: 12px;
+    background: #fff;
+    text-decoration: none;
+    transition: transform 140ms ease;
+  }
+  .t321-mkt-hero__tile:active { transform: scale(0.97); }
+  .t321-mkt-hero__tile-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 9px;
+    color: #fff;
+    font-size: 0.74rem;
+    background: linear-gradient(135deg, #0B1F33, #00B4DB);
+  }
+  .t321-mkt-hero__tile-icon.is-tone-amber   { background: linear-gradient(135deg, #9D6200, #C08A2E); }
+  .t321-mkt-hero__tile-icon.is-tone-plum    { background: linear-gradient(135deg, #6C5CE7, #8B7EF0); }
+  .t321-mkt-hero__tile-icon.is-tone-emerald { background: linear-gradient(135deg, #2D6A4F, #3E8E68); }
+  .t321-mkt-hero__tile-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--t321-mkt-ink);
+  }
+
+  /* Trust pills close the hero, under the sheet on the dark ground. */
+  .t321-mkt-hero__trust { margin-top: 1.25rem; gap: 0.6rem 1.1rem; }
+  .t321-mkt-hero__trust li { font-size: 0.74rem; color: rgba(255, 255, 255, 0.75); }
+  .t321-mkt-hero__trust i { color: #6FD3EA; }
+}
+
+@media (max-width: 767.98px) and (prefers-reduced-motion: reduce) {
+  .t321-mkt-hero__rail-card,
+  .t321-mkt-hero__tile { transition: none; }
+  .t321-mkt-hero__rail-card:active,
+  .t321-mkt-hero__tile:active { transform: none; }
+}
+
+/* ── Phone: finder polish + de-duplication ────────────────────────────────
+   Scoped to the phone breakpoint. Desktop keeps the stacked chip cloud and
+   both course sections exactly as they were. */
+@media (max-width: 767.98px) {
+  /* The chip cloud wrapped onto five rows and pushed the courses off-screen.
+     One swipeable row instead, bleeding past the sheet's padding so it reads
+     as scrollable. */
+  .t321-mkt-hero__sheet .t321-hcf__cats {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 0 -1.5rem;
+    padding: 0.15rem 1.5rem 0.35rem;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .t321-mkt-hero__sheet .t321-hcf__cats::-webkit-scrollbar { display: none; }
+  .t321-mkt-hero__sheet .t321-hcf__cats > * {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+  .t321-mkt-hero__sheet .t321-mkt-catalog__chip {
+    padding: 0.42rem 0.85rem;
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+
+  /* State picker reads as a field, not a paragraph. */
+  .t321-mkt-hero__sheet .t321-hcf__state { margin-top: 0.7rem; }
+  .t321-mkt-hero__sheet .t321-hcf__state select {
+    height: 2.9rem;
+    border-radius: 12px;
+    font-size: 0.92rem;
+  }
+  .t321-mkt-hero__sheet .t321-hcf__note {
+    font-size: 0.76rem;
+    line-height: 1.4;
+    margin-top: 0.45rem;
+  }
+
+  /* Same courses already sit in the hero rail — don't run them twice. */
+  .t321-mkt-section--popular { display: none; }
+}
+
+/* ── Phone: compress the fold ─────────────────────────────────────────────
+   Target: categories, the state picker and the course rail all land on the
+   first screen. The eyebrow and a long lede are what pushed them under, so
+   they give way — the headline still carries the promise. */
+@media (max-width: 767.98px) {
+  .t321-mkt-hero__inner { padding-top: 1rem; }
+  .t321-mkt-hero .t321-mkt-eyebrow { display: none; }
+  .t321-mkt-hero__audience { margin-bottom: 0.8rem; }
+  .t321-mkt-hero .t321-mkt-h1 {
+    font-size: clamp(1.7rem, 7vw, 2.05rem);
+    margin: 0 0 0.5rem;
+  }
+  .t321-mkt-hero .t321-mkt-lede {
+    -webkit-line-clamp: 2;
+    font-size: 0.88rem;
+    margin: 0;
+  }
+  .t321-mkt-hero__backdrop { height: 17rem; }
+  .t321-mkt-hero__sheet { margin-top: 1rem; padding-top: 0.5rem; }
+  .t321-mkt-hero__sheet-grip { margin-bottom: 0.7rem; }
+  .t321-mkt-hero__rail { margin-top: 1rem; }
+  .t321-mkt-hero__tiles { margin-top: 1rem; }
+}
+
+/* ── Phone: final sizing pass ─────────────────────────────────────────────
+   Smaller chips with an even gutter, a shorter state field, and the courses
+   as a 2×2 grid rather than a rail — four boxes read at a glance, and "See
+   all" carries anyone who wants more into the catalog. */
+@media (max-width: 767.98px) {
+  /* Chips scroll inside the sheet's own padding, so the first and last sit
+     the same distance from each edge instead of bleeding off. */
+  .t321-mkt-hero__sheet .t321-hcf__cats {
+    margin: 0;
+    padding: 0.1rem 0 0.3rem;
+    gap: 0.4rem;
+  }
+  .t321-mkt-hero__sheet .t321-mkt-catalog__chip {
+    padding: 0.32rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  .t321-mkt-hero__sheet .t321-hcf__state { margin-top: 0.55rem; }
+  .t321-mkt-hero__sheet .t321-hcf__state select {
+    height: 2.4rem;
+    border-radius: 10px;
+    font-size: 0.84rem;
+  }
+  .t321-mkt-hero__sheet .t321-hcf__note {
+    font-size: 0.72rem;
+    margin-top: 0.35rem;
+  }
+
+  /* Four boxes, no horizontal scrolling. */
+  .t321-mkt-hero__rail { margin-top: 0.9rem; }
+  .t321-mkt-hero__rail-title { font-size: 0.88rem; }
+  .t321-mkt-hero__rail-track {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .t321-mkt-hero__rail-track > li { flex: initial; }
+  .t321-mkt-hero__rail-top { height: 2.6rem; font-size: 0.95rem; }
+  .t321-mkt-hero__rail-body { padding: 0.5rem 0.55rem 0.6rem; }
+  .t321-mkt-hero__rail-name { font-size: 0.79rem; }
+  .t321-mkt-hero__rail-price { font-size: 0.74rem; }
+}
+
+/* The state picker renders as a button (custom dropdown), not a select — the
+   earlier rule only matched selects, so it kept its full desktop height. */
+@media (max-width: 767.98px) {
+  .t321-mkt-hero__sheet .t321-hcf__state > button,
+  .t321-mkt-hero__sheet .t321-hcf__state select {
+    height: 2.5rem;
+    min-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-radius: 10px;
+    font-size: 0.84rem;
+  }
+}
+
+/* ── Phone: filters as one compact bar ────────────────────────────────────
+   The chip cloud and a full-width state field stacked to three rows and the
+   hint added two more, which pushed the sheet up over the photo. On phones
+   they share a single row: state on the left as a fixed-width pill, chips
+   scrolling beside it. The hint goes — the picker's own placeholder already
+   says what it does. */
+@media (max-width: 767.98px) {
+  .t321-mkt-hero__sheet .t321-hcf {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    gap: 0.45rem;
+    align-items: center;
+  }
+  .t321-mkt-hero__sheet .t321-hcf__state { order: -1; margin: 0; min-width: 0; }
+  .t321-mkt-hero__sheet .t321-hcf__hint { display: none; }
+
+  .t321-mkt-hero__sheet .t321-hcf__cats {
+    min-width: 0;
+    margin: 0;
+    padding: 0.1rem 0;
+  }
+
+  /* Both controls read as the same size class. */
+  .t321-mkt-hero__sheet .t321-hcf__state > button,
+  .t321-mkt-hero__sheet .t321-hcf__state select {
+    width: 100%;
+    height: 2.15rem;
+    min-height: 0;
+    padding: 0 0.55rem;
+    border-radius: 999px;
+    font-size: 0.76rem;
+  }
+  .t321-mkt-hero__sheet .t321-mkt-catalog__chip {
+    padding: 0.3rem 0.68rem;
+    font-size: 0.75rem;
+  }
+
+  /* With a row reclaimed, let the photo breathe before the sheet lifts. */
+  .t321-mkt-hero__backdrop { height: 19rem; }
+  .t321-mkt-hero__sheet { margin-top: 2.5rem; }
+}
+
+/* ── Phone: results follow the filters directly ───────────────────────────
+   The hero sheet is now just the filter bar, and the live results section
+   sits immediately under it — so changing type or state visibly changes the
+   courses, with no static list in between claiming to be filtered. */
+@media (max-width: 767.98px) {
+  .t321-hcf-results { padding-top: 1.1rem; }
+  .t321-hcf-results .t321-mkt-section__head { margin-bottom: 0.8rem; }
+  .t321-hcf-results .t321-mkt-h2 { font-size: 1.25rem; }
+  .t321-hcf-results .t321-mkt-lede { font-size: 0.85rem; }
+  .t321-hcf-results .t321-mkt-catalog__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+}
+
+/* ── Finder placement by breakpoint ───────────────────────────────────────
+   Desktop: finder in the hero (as before). Phone: the hero copy is hidden and
+   the duplicate down by the results shows instead, so the type and state
+   controls sit beside the courses they filter. Exactly one is ever rendered
+   visibly, so there is no duplicate tab stop or duplicate tablist. */
+.t321-mkt-finder-mobile { display: none; }
+
+@media (max-width: 767.98px) {
+  .t321-mkt-hero__finder { display: none; }
+
+  .t321-mkt-finder-mobile {
+    display: block;
+    padding: 1.25rem 0 0;
+    background: var(--t321-mkt-paper-sunk);
+  }
+  /* Stack here — there is room in a full-width section, unlike the sheet. */
+  .t321-mkt-finder-mobile .t321-hcf { display: block; }
+  .t321-mkt-finder-mobile .t321-hcf__cats {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 0.4rem;
+    margin: 0 -1.5rem;
+    padding: 0.1rem 1.5rem 0.4rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .t321-mkt-finder-mobile .t321-hcf__cats::-webkit-scrollbar { display: none; }
+  .t321-mkt-finder-mobile .t321-hcf__cats > * { flex: 0 0 auto; }
+  .t321-mkt-finder-mobile .t321-mkt-catalog__chip {
+    padding: 0.34rem 0.72rem;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+  .t321-mkt-finder-mobile .t321-hcf__state { margin-top: 0.5rem; }
+  .t321-mkt-finder-mobile .t321-hcf__state > button,
+  .t321-mkt-finder-mobile .t321-hcf__state select {
+    width: 100%;
+    height: 2.5rem;
+    min-height: 0;
+    padding: 0 0.75rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+  }
+  .t321-mkt-finder-mobile .t321-hcf__hint {
+    font-size: 0.74rem;
+    line-height: 1.4;
+    margin-top: 0.4rem;
+  }
+
+  /* The sheet is now photo + popular only, so it needs its own bottom room. */
+  .t321-mkt-hero__sheet { padding-bottom: 1.1rem; }
+  .t321-mkt-hero__rail { margin-top: 0; }
+}
+
+/* ── Phone: corrections ───────────────────────────────────────────────────
+   The two-column results grid squeezed the catalog cards until titles broke
+   one word per line and the buy button ran off the edge — these cards carry a
+   blurb and a price row, so they need the full width. */
+@media (max-width: 767.98px) {
+  .t321-hcf-results .t321-mkt-catalog__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.85rem;
+  }
+
+  /* More photo before the sheet lifts. */
+  .t321-mkt-hero__backdrop { height: 23rem; }
+  .t321-mkt-hero__sheet { margin-top: 4.25rem; }
+
+  /* Smaller type chips. */
+  .t321-mkt-finder-mobile .t321-mkt-catalog__chip {
+    padding: 0.28rem 0.62rem;
+    font-size: 0.72rem;
+  }
+}
+
+/* ── Phone: toggle size + close the sheet cleanly ─────────────────────────
+   The dark hero ground was peeking out under the white sheet on scroll. The
+   sheet now runs to the bottom of the hero, and the trust pills — which were
+   the only reason for that dark strip — move into the sheet's flow instead. */
+@media (max-width: 767.98px) {
+  .t321-mkt-hero { padding-bottom: 0; }
+  .t321-mkt-hero__sheet {
+    margin-bottom: 0;
+    padding-bottom: 1.35rem;
+  }
+  .t321-mkt-hero__trust { display: none; }
+
+  /* Audience toggle: smaller pills, less chrome. */
+  .t321-mkt-hero__audience {
+    padding: 3px;
+    gap: 2px;
+    margin-bottom: 0.7rem;
+  }
+  .t321-mkt-hero__audience-pill {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.74rem;
+    gap: 0.3rem;
+  }
+  .t321-mkt-hero__audience-pill i { font-size: 0.7rem; }
+}
+
+/* ── Phone: course boxes on-brand ─────────────────────────────────────────
+   The full-width colour headers came from the desktop popular cards and read
+   as four unrelated products. These are one product line, so the card is a
+   white tile with a small brand-tinted icon badge; the only strong colour is
+   the price. Tone still varies the badge so categories stay distinguishable. */
+@media (max-width: 767.98px) {
+  .t321-mkt-hero__rail-track { gap: 0.6rem; }
+
+  .t321-mkt-hero__rail-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem 0.8rem 0.7rem;
+    border: 1px solid var(--t321-mkt-line);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(11, 31, 51, 0.04), 0 6px 16px -10px rgba(11, 31, 51, 0.25);
+  }
+
+  /* Badge, not a banner. */
+  .t321-mkt-hero__rail-top {
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 11px;
+    font-size: 0.85rem;
+    background: var(--t321-mkt-accent-wash);
+    color: var(--t321-mkt-accent);
+  }
+  .t321-mkt-hero__rail-top.is-tone-amber   { background: #FDF1DF; color: #9D6200; }
+  .t321-mkt-hero__rail-top.is-tone-plum    { background: #EEEDFE; color: #5B4FD0; }
+  .t321-mkt-hero__rail-top.is-tone-emerald { background: #E1F5EE; color: #2D6A4F; }
+  .t321-mkt-hero__rail-top.is-tone-neutral { background: var(--t321-mkt-paper-sunk); color: var(--t321-mkt-ink); }
+
+  .t321-mkt-hero__rail-body { padding: 0; }
+  .t321-mkt-hero__rail-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.005em;
+  }
+  .t321-mkt-hero__rail-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.45rem;
+    padding-top: 0.45rem;
+    border-top: 1px solid var(--t321-mkt-line);
+  }
+  .t321-mkt-hero__rail-price {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--t321-mkt-ink);
+  }
+  /* Affordance that the tile opens the course. */
+  .t321-mkt-hero__rail-meta::after {
+    content: "\f054";
+    font-family: "Font Awesome 6 Free", "Font Awesome 5 Free";
+    font-weight: 900;
+    font-size: 0.6rem;
+    color: var(--t321-mkt-accent);
+  }
+
+  .t321-mkt-hero__rail-title {
+    font-size: 0.92rem;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Compact enough that all four boxes clear the fold on a 390×844 phone. */
+@media (max-width: 767.98px) {
+  .t321-mkt-hero__rail-card {
+    gap: 0.35rem;
+    padding: 0.6rem 0.65rem 0.55rem;
+    border-radius: 14px;
+  }
+  .t321-mkt-hero__rail-top { width: 1.75rem; height: 1.75rem; border-radius: 9px; font-size: 0.72rem; }
+  .t321-mkt-hero__rail-name {
+    font-size: 0.78rem;
+    line-height: 1.25;
+    -webkit-line-clamp: 2;
+    min-height: 1.95rem;
+  }
+  .t321-mkt-hero__rail-meta { margin-top: 0.3rem; padding-top: 0.35rem; }
+  .t321-mkt-hero__rail-price { font-size: 0.76rem; }
+  .t321-mkt-hero__rail-track { gap: 0.5rem; }
+  .t321-mkt-hero__backdrop { height: 21rem; }
+  .t321-mkt-hero__sheet { margin-top: 3rem; }
+}

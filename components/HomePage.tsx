@@ -316,6 +316,13 @@ export default function HomePage({
     <div className="t321-mkt-home">
       <HomeFinderProvider marketplace={marketplace}>
       <section className="t321-mkt-hero">
+        {/* Phone-only backdrop: the desktop hero art is hidden below 600px,
+            which left the fold as plain copy on white. Hidden at every desktop
+            width, so it costs the two-column layout nothing. */}
+        <div className="t321-mkt-hero__backdrop" aria-hidden="true">
+          <img src="/img/hero-restaurant.png" alt="" className="t321-mkt-hero__backdrop-img" />
+          <span className="t321-mkt-hero__backdrop-shade" />
+        </div>
         <div className="t321-mkt-container t321-mkt-hero__inner">
           <div className="t321-mkt-hero__body">
             {showAudienceToggle && (
@@ -354,7 +361,51 @@ export default function HomePage({
             {/* The old Find-my-course / See-how-it-works button pair is
                 replaced by the course finder: category chips + state picker
                 here, live results in <FinderResults /> right below the hero. */}
-            <FinderControls />
+            {/* Phones get an app-style layout: the photo below fills the top of
+                the screen and this sheet slides up over it, carrying the finder
+                and the courses. `display: contents` above the phone breakpoint
+                dissolves the wrapper, so the desktop hero is byte-for-byte the
+                same box it was. */}
+            <div className="t321-mkt-hero__sheet">
+              <span className="t321-mkt-hero__sheet-grip" aria-hidden="true" />
+              {/* Desktop keeps the finder in the hero. On phones this copy is
+                  hidden and a second one renders down with the results, beside
+                  the courses it actually filters. Both read the same context,
+                  so they can never disagree. */}
+              <div className="t321-mkt-hero__finder">
+                <FinderControls />
+              </div>
+
+              {popularCourses.length > 0 && (
+                <div className="t321-mkt-hero__rail">
+                  <div className="t321-mkt-hero__rail-head">
+                    <span className="t321-mkt-hero__rail-title">Most enrolled</span>
+                    <Link href="/catalog" className="t321-mkt-hero__rail-all">
+                      See all <i className="fas fa-arrow-right" aria-hidden="true" />
+                    </Link>
+                  </div>
+                  <ul className="t321-mkt-hero__rail-track">
+                    {popularCourses.slice(0, 4).map((c) => (
+                      <li key={c.slug}>
+                        <Link href={`/courses/${c.slug}`} className="t321-mkt-hero__rail-card">
+                          <span className={`t321-mkt-hero__rail-top is-tone-${c.color || "neutral"}`}>
+                            <i className={c.icon} aria-hidden="true" />
+                          </span>
+                          <span className="t321-mkt-hero__rail-body">
+                            <strong className="t321-mkt-hero__rail-name">{c.title}</strong>
+                            <span className="t321-mkt-hero__rail-meta">
+                              {c.priceFrom != null && (
+                                <em className="t321-mkt-hero__rail-price">From ${c.priceFrom}</em>
+                              )}
+                            </span>
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
             <ul className="t321-mkt-hero__trust">
               {(home?.heroTrustPills?.length
                 ? home.heroTrustPills
@@ -466,7 +517,77 @@ export default function HomePage({
         </div>
       </section>
 
-      <section className="t321-mkt-section t321-mkt-section--sunk">
+      {/* Live finder results lead: the hero's controls (or, on phones, the
+          copy just below) filter these, so they belong directly under them.
+          Popular follows. */}
+      {/* Phone-only second copy of the finder, sitting directly above the
+          results it drives. Hidden on desktop, where the hero's copy shows
+          instead — only ever one is visible, and shared context keeps them
+          in step. */}
+      <div className="t321-mkt-finder-mobile">
+        <div className="t321-mkt-container">
+          <FinderControls />
+        </div>
+      </div>
+      <FinderResults />
+
+      <section className="t321-mkt-section">
+        <div className="t321-mkt-container">
+          <div className="t321-mkt-section__head">
+            <span className="t321-mkt-eyebrow"><i className={home?.pillarsHead?.icon || "fas fa-tag"} /> {home?.pillarsHead?.eyebrow || "What we do"}</span>
+            <h2 className="t321-mkt-h2">{home?.pillarsHead?.heading || "Three categories. One platform."}</h2>
+            <p className="t321-mkt-lede">
+              {home?.pillarsHead?.lede || "Everything compliance-sensitive in the hospitality and service industries — under one login, one dashboard, one invoice."}
+            </p>
+          </div>
+          <div className="t321-mkt-pillars">
+            {(home?.pillars?.length
+              ? home.pillars
+              : [
+                  { icon: "fas fa-utensils", tone: "amber", title: "Food safety", body: "Food Handler, Food Manager, accredited variants. Accepted by every state health department.", linkLabel: "Browse food safety", linkHref: "/food-handler" },
+                  { icon: "fas fa-wine-glass-alt", tone: "plum", title: "Alcohol & service", body: "TIPS-equivalent alcohol server training plus bar basics, service basics, and security host.", linkLabel: "Browse alcohol & service", linkHref: "/alcohol" },
+                  { icon: "fas fa-users-cog", tone: "emerald", title: "HR & compliance", body: "Sexual harassment (state-specific), human trafficking, and practical HR for managers.", linkLabel: "Browse HR & compliance", linkHref: "/human-resources" }
+                ]
+            ).map((p, i) => (
+              <Link key={i} href={p.linkHref || "#"} className="t321-mkt-pillar t321-mkt-card t321-mkt-card--hover">
+                <span className={`t321-mkt-pillar__icon t321-mkt-pillar__icon--${p.tone || "amber"}`}>
+                  <i className={p.icon || "fas fa-circle"} />
+                </span>
+                <h3 className="t321-mkt-h3">{p.title}</h3>
+                <p>{p.body}</p>
+                <span className="t321-mkt-pillar__link">{p.linkLabel || "Learn more"} <i className="fas fa-arrow-right" /></span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+
+      </HomeFinderProvider>
+
+      <section className="t321-mkt-section">
+        <div className="t321-mkt-container">
+          <div className="t321-mkt-section__head">
+            <span className="t321-mkt-eyebrow"><i className={home?.howHead?.icon || "fas fa-magic"} /> {home?.howHead?.eyebrow || "How it works"}</span>
+            <h2 className="t321-mkt-h2">{copy.stepsTitle}</h2>
+            <p className="t321-mkt-lede">{copy.stepsLede}</p>
+          </div>
+          <ol className="t321-mkt-steps">
+            {copy.steps.map((step, i) => (
+              <li key={i}>
+                <span className="t321-mkt-steps__num">{i + 1}</span>
+                <h3 className="t321-mkt-h3">{step.title}</h3>
+                <p>{step.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Phones show these same courses in the hero's "Most enrolled" rail, so
+          this section is hidden there rather than repeating them a screen
+          later. Desktop keeps it — the hero has no rail at that width. */}
+      <section className="t321-mkt-section t321-mkt-section--sunk t321-mkt-section--popular">
         <div className="t321-mkt-container">
           <div className="t321-mkt-section__head">
             <span className="t321-mkt-eyebrow"><i className={home?.popularHead?.icon || "fas fa-fire"} /> {home?.popularHead?.eyebrow || "Most enrolled"}</span>
@@ -503,63 +624,6 @@ export default function HomePage({
               <i className="fas fa-arrow-right" aria-hidden="true" />
             </Link>
           </div>
-        </div>
-      </section>
-
-      <section className="t321-mkt-section">
-        <div className="t321-mkt-container">
-          <div className="t321-mkt-section__head">
-            <span className="t321-mkt-eyebrow"><i className={home?.pillarsHead?.icon || "fas fa-tag"} /> {home?.pillarsHead?.eyebrow || "What we do"}</span>
-            <h2 className="t321-mkt-h2">{home?.pillarsHead?.heading || "Three categories. One platform."}</h2>
-            <p className="t321-mkt-lede">
-              {home?.pillarsHead?.lede || "Everything compliance-sensitive in the hospitality and service industries — under one login, one dashboard, one invoice."}
-            </p>
-          </div>
-          <div className="t321-mkt-pillars">
-            {(home?.pillars?.length
-              ? home.pillars
-              : [
-                  { icon: "fas fa-utensils", tone: "amber", title: "Food safety", body: "Food Handler, Food Manager, accredited variants. Accepted by every state health department.", linkLabel: "Browse food safety", linkHref: "/food-handler" },
-                  { icon: "fas fa-wine-glass-alt", tone: "plum", title: "Alcohol & service", body: "TIPS-equivalent alcohol server training plus bar basics, service basics, and security host.", linkLabel: "Browse alcohol & service", linkHref: "/alcohol" },
-                  { icon: "fas fa-users-cog", tone: "emerald", title: "HR & compliance", body: "Sexual harassment (state-specific), human trafficking, and practical HR for managers.", linkLabel: "Browse HR & compliance", linkHref: "/human-resources" }
-                ]
-            ).map((p, i) => (
-              <Link key={i} href={p.linkHref || "#"} className="t321-mkt-pillar t321-mkt-card t321-mkt-card--hover">
-                <span className={`t321-mkt-pillar__icon t321-mkt-pillar__icon--${p.tone || "amber"}`}>
-                  <i className={p.icon || "fas fa-circle"} />
-                </span>
-                <h3 className="t321-mkt-h3">{p.title}</h3>
-                <p>{p.body}</p>
-                <span className="t321-mkt-pillar__link">{p.linkLabel || "Learn more"} <i className="fas fa-arrow-right" /></span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* The live course finder results now sit here, where the Popular block
-          used to be — the two swapped places so Popular leads. FinderResults
-          reads the finder context, so HomeFinderProvider closes after it
-          rather than up by the hero. */}
-      <FinderResults />
-      </HomeFinderProvider>
-
-      <section className="t321-mkt-section">
-        <div className="t321-mkt-container">
-          <div className="t321-mkt-section__head">
-            <span className="t321-mkt-eyebrow"><i className={home?.howHead?.icon || "fas fa-magic"} /> {home?.howHead?.eyebrow || "How it works"}</span>
-            <h2 className="t321-mkt-h2">{copy.stepsTitle}</h2>
-            <p className="t321-mkt-lede">{copy.stepsLede}</p>
-          </div>
-          <ol className="t321-mkt-steps">
-            {copy.steps.map((step, i) => (
-              <li key={i}>
-                <span className="t321-mkt-steps__num">{i + 1}</span>
-                <h3 className="t321-mkt-h3">{step.title}</h3>
-                <p>{step.body}</p>
-              </li>
-            ))}
-          </ol>
         </div>
       </section>
 

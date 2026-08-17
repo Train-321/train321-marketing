@@ -207,6 +207,17 @@ export default function ChatWidget({ aiEnabled }: Props) {
     sendMessage(input);
   }
 
+  // On phones the launcher covers the hero's course boxes, so it stays out of
+  // the way until the visitor scrolls past the first screen. Desktop ignores
+  // this — the class only does anything inside the phone breakpoint.
+  const [pastFold, setPastFold] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setPastFold(window.scrollY > window.innerHeight * 0.6);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -218,7 +229,7 @@ export default function ChatWidget({ aiEnabled }: Props) {
     <>
       <button
         type="button"
-        className={`t321-chat-fab ${open ? "is-open" : ""}`}
+        className={`t321-chat-fab ${open ? "is-open" : ""}${pastFold ? "" : " is-early"}`}
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls="t321-chat-panel"
