@@ -202,11 +202,21 @@ export default function SignInDialog({
               </button>
             </form>
 
-            <div className="t321-mkt-signin__divider"><span>or</span></div>
+            {/* Same consent line and legal routes the checkout already uses, so
+                the two places a visitor agrees to terms say it identically. */}
+            <p className="t321-mkt-signin__legal">
+              By clicking Sign In you agree to our{" "}
+              <Link href="/legal/terms-conditions" onClick={onClose}>Terms</Link> and{" "}
+              <Link href="/legal/privacy-policy" onClick={onClose}>Privacy Policy</Link>.
+            </p>
 
-            <a href={loginUrl} className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-signin__sso">
-              Continue to the full sign-in portal
-            </a>
+            {/* Marketing has no bug-report tool of its own, so this points at
+                the contact page rather than inventing a second support channel. */}
+            <p className="t321-mkt-signin__report">
+              <Link href="/contact" onClick={onClose}>
+                <i className="fas fa-question-circle" aria-hidden="true" /> Report an Issue
+              </Link>
+            </p>
 
             <p className="t321-mkt-signin__foot">
               {/* Next Link, not an <a> to the learner app: this is our own
