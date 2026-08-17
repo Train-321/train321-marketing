@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import "./SignInDialog.css";
 
@@ -7,8 +8,13 @@ type Props = {
   open: boolean;
   onClose: () => void;
   loginUrl: string;
-  /** Sign-up page on the learner app — where "Create an account" goes. */
-  enrollUrl: string;
+  /**
+   * Kept for callers that still pass it. "Create an account" no longer uses
+   * it: someone with no account needs to choose a course before an account
+   * means anything, so the link goes to our own catalog rather than straight
+   * to the learner app's signup form.
+   */
+  enrollUrl?: string;
   /** Learner app dashboard — where a successful sign-in lands. */
   dashboardUrl: string;
 };
@@ -19,7 +25,6 @@ export default function SignInDialog({
   open,
   onClose,
   loginUrl,
-  enrollUrl,
   dashboardUrl
 }: Props) {
   const emailRef = useRef<HTMLInputElement>(null);
@@ -204,7 +209,11 @@ export default function SignInDialog({
             </a>
 
             <p className="t321-mkt-signin__foot">
-              New to Train 321? <a href={enrollUrl}>Create an account</a>
+              {/* Next Link, not an <a> to the learner app: this is our own
+                  /catalog route, so it navigates client-side. onClose keeps
+                  the dialog from staying mounted over the page it lands on. */}
+              New to Train 321?{" "}
+              <Link href="/catalog" onClick={onClose}>Create an account</Link>
             </p>
           </>
         ) : (
