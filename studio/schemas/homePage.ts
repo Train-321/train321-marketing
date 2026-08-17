@@ -92,10 +92,12 @@ export default defineType({
     defineField({
       name: 'popularSlugs',
       type: 'array',
-      title: 'Popular course slugs',
-      description: 'Course slugs to surface in the home-page popular block (4 recommended).',
+      title: 'Popular courses',
+      description:
+        'The courses shown in the Popular block near the top of the home page. Search and pick them here, and drag to reorder — the first three or four read best. Each card uses that course\'s own image, title and price.',
       group: 'sections',
-      of: [{ type: 'string' }]
+      of: [{ type: 'reference', to: [{ type: 'course' }] }],
+      validation: (R) => R.max(4).unique()
     }),
 
     defineField({ name: 'howHead', type: 'sectionHead', title: 'How-it-works section head', group: 'sections' }),

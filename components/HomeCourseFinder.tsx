@@ -194,10 +194,23 @@ export function HomeFinderProvider({
   return <FinderCtx.Provider value={value}>{children}</FinderCtx.Provider>;
 }
 
+/** Anchor the category chips scroll to, so a pick shows its own results. */
+const FINDER_RESULTS_ID = "course-results";
+
 /** Hero-body half: category chips + the searchable state dropdown. */
 export function FinderControls() {
   const { categories, activeCategory, setActiveCategory, stateName, setStateName } =
     useFinder();
+
+  // Picking a category filters a list further down the page, which on desktop
+  // is below the fold — without this the chip looks like it did nothing.
+  const pickCategory = (id: string) => {
+    setActiveCategory(id);
+    const results = document.getElementById(FINDER_RESULTS_ID);
+    if (!results) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    results.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+  };
 
   const chips = [
     { id: "all", label: "All courses" },
@@ -214,7 +227,7 @@ export function FinderControls() {
             role="tab"
             aria-selected={activeCategory === c.id}
             className={`t321-mkt-catalog__chip${activeCategory === c.id ? " is-active" : ""}`}
-            onClick={() => setActiveCategory(c.id)}
+            onClick={() => pickCategory(c.id)}
           >
             {c.label}
           </button>
@@ -276,7 +289,10 @@ export function FinderResults() {
 
   return (
     <CourseModalProvider>
-    <section className="t321-mkt-section t321-mkt-section--sunk t321-hcf-results">
+    <section
+      id={FINDER_RESULTS_ID}
+      className="t321-mkt-section t321-mkt-section--sunk t321-hcf-results"
+    >
       <div className="t321-mkt-container">
         <div className="t321-mkt-section__head">
           <span className="t321-mkt-eyebrow">

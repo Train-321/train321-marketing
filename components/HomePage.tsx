@@ -515,9 +515,67 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* Live finder results lead: the hero's controls (or, on phones, the
-          copy just below) filter these, so they belong directly under them.
-          Popular follows. */}
+      {/* Phones show these same courses in the hero's "Most enrolled" rail, so
+          this section is hidden there rather than repeating them a screen
+          later. Desktop keeps it — the hero has no rail at that width.
+          Skipped entirely when nothing resolves, so a mistyped or deleted
+          course leaves no empty heading-and-button shell behind. */}
+      {popularCourses.length > 0 && (
+      <section className="t321-mkt-section t321-mkt-section--sunk t321-mkt-section--popular">
+        <div className="t321-mkt-container">
+          <div className="t321-mkt-section__head">
+            <span className="t321-mkt-eyebrow"><i className={home?.popularHead?.icon || "fas fa-fire"} /> {home?.popularHead?.eyebrow || "Most enrolled"}</span>
+            <h2 className="t321-mkt-h2">{home?.popularHead?.heading || "Popular courses"}</h2>
+            <p className="t321-mkt-lede">{home?.popularHead?.lede || "The courses most operators start with. Click any to see details or enroll now."}</p>
+          </div>
+          <div className="t321-mkt-popular">
+            {popularCourses.map((c) => (
+              <Link
+                key={c.slug}
+                href={`/courses/${c.slug}`}
+                className="t321-mkt-popular__card t321-mkt-card t321-mkt-card--hover"
+              >
+                {/* The course's own photo when it has one; the tinted tile and
+                    icon stay as the fallback so a course with no image still
+                    gets a card top rather than a gap. */}
+                <div
+                  className={`t321-mkt-popular__top is-tone-${c.color || "neutral"}${
+                    c.image ? " has-thumb" : ""
+                  }`}
+                >
+                  {c.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={c.image} alt="" className="t321-mkt-popular__thumb" />
+                  ) : (
+                    <i className={c.icon} aria-hidden="true" />
+                  )}
+                  {c.priceFrom != null && (
+                    <span className="t321-mkt-popular__price">From ${c.priceFrom}</span>
+                  )}
+                </div>
+                <div className="t321-mkt-popular__body">
+                  <span className="t321-mkt-popular__eyebrow">{c.eyebrow}</span>
+                  <h3 className="t321-mkt-h3">{c.title}</h3>
+                  <p>{c.tagline}</p>
+                  <span className="t321-mkt-popular__link">
+                    See details <i className="fas fa-arrow-right" />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div className="t321-mkt-popular__foot">
+            <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg">
+              {home?.popularCtaLabel || "Browse the full catalog"}
+              <i className="fas fa-arrow-right" aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </section>
+      )}
+
+      {/* Finder results follow Popular: the hero's controls (or, on phones,
+          the copy just below) filter these, so they stay close to them. */}
       {/* Phone-only second copy of the finder, sitting directly above the
           results it drives. Hidden on desktop, where the hero's copy shows
           instead — only ever one is visible, and shared context keeps them
@@ -582,48 +640,6 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* Phones show these same courses in the hero's "Most enrolled" rail, so
-          this section is hidden there rather than repeating them a screen
-          later. Desktop keeps it — the hero has no rail at that width. */}
-      <section className="t321-mkt-section t321-mkt-section--sunk t321-mkt-section--popular">
-        <div className="t321-mkt-container">
-          <div className="t321-mkt-section__head">
-            <span className="t321-mkt-eyebrow"><i className={home?.popularHead?.icon || "fas fa-fire"} /> {home?.popularHead?.eyebrow || "Most enrolled"}</span>
-            <h2 className="t321-mkt-h2">{home?.popularHead?.heading || "Popular courses"}</h2>
-            <p className="t321-mkt-lede">{home?.popularHead?.lede || "The courses most operators start with. Click any to see details or enroll now."}</p>
-          </div>
-          <div className="t321-mkt-popular">
-            {popularCourses.map((c) => (
-              <Link
-                key={c.slug}
-                href={`/courses/${c.slug}`}
-                className="t321-mkt-popular__card t321-mkt-card t321-mkt-card--hover"
-              >
-                <div className={`t321-mkt-popular__top is-tone-${c.color || "neutral"}`}>
-                  <i className={c.icon} aria-hidden="true" />
-                  {c.priceFrom != null && (
-                    <span className="t321-mkt-popular__price">From ${c.priceFrom}</span>
-                  )}
-                </div>
-                <div className="t321-mkt-popular__body">
-                  <span className="t321-mkt-popular__eyebrow">{c.eyebrow}</span>
-                  <h3 className="t321-mkt-h3">{c.title}</h3>
-                  <p>{c.tagline}</p>
-                  <span className="t321-mkt-popular__link">
-                    See details <i className="fas fa-arrow-right" />
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-          <div className="t321-mkt-popular__foot">
-            <Link href="/catalog" className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg">
-              {home?.popularCtaLabel || "Browse the full catalog"}
-              <i className="fas fa-arrow-right" aria-hidden="true" />
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* The trust logos lead into the numbers band — social proof and the
           headline stats read as one block rather than being split across the

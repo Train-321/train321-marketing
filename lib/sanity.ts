@@ -788,7 +788,9 @@ export async function getHomePage(): Promise<HomePage | null> {
         pillars[]${PILLAR_PROJ},
         "popularHead": popularHead${SECTION_HEAD_PROJ},
         popularCtaLabel,
-        popularSlugs,
+        // Editors pick course documents; the page still matches on slug so the
+        // cards keep the live LMS pricing getCourses() has already applied.
+        "popularSlugs": popularSlugs[]->slug.current,
         "howHead": howHead${SECTION_HEAD_PROJ},
         "opinionsHead": opinionsHead${SECTION_HEAD_PROJ},
         opinionsLinkLabel,

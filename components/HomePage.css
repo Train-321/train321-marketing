@@ -835,9 +835,11 @@
 }
 
 /* Popular courses grid */
+/* auto-fit rather than a fixed four, so three picks fill the row evenly
+   instead of leaving a dead fourth column. */
 .t321-mkt-popular {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1rem;
 }
 .t321-mkt-popular__card {
@@ -857,6 +859,33 @@
   background: linear-gradient(135deg, #0B1F33, #00B4DB);
 }
 .t321-mkt-popular__top i { font-size: 1.5rem; }
+
+/* Photo card top. The tinted gradient stays underneath as the backdrop while
+   the image loads, and the price moves to a chip over the corner. */
+/* A fixed depth rather than an aspect ratio: the image is height:100% of this
+   box, which with aspect-ratio leaves the height circular and resolves
+   differently depending on how long the card's body text is. Pinning it keeps
+   every thumbnail the same depth across the row. */
+.t321-mkt-popular__top.has-thumb {
+  display: block;
+  padding: 0;
+  position: relative;
+  height: 180px;
+  flex: 0 0 180px;
+}
+.t321-mkt-popular__thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.t321-mkt-popular__top.has-thumb .t321-mkt-popular__price {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: rgba(15, 15, 14, 0.65);
+  backdrop-filter: blur(4px);
+}
 .t321-mkt-popular__top.is-tone-amber {
   background: linear-gradient(135deg, #9D6200, #C08A2E);
 }
@@ -910,6 +939,16 @@
   display: flex;
   justify-content: center;
 }
+
+/* The finder results sit directly below and share this section's sunk
+   background, so the two paddings ran together into one oversized gap with no
+   edge to explain it. Drop this one and let the next section's top padding
+   set the spacing. */
+.t321-mkt-section--popular { padding-bottom: 0; }
+
+/* Picking a category scrolls here; the header is sticky, so leave it room
+   rather than tucking the heading underneath. */
+.t321-hcf-results { scroll-margin-top: 5rem; }
 
 /* Steps */
 .t321-mkt-steps {
