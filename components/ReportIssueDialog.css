@@ -1,0 +1,172 @@
+/* Report-an-issue modal. Overlay, panel, and close button intentionally match
+   SignInDialog.css so the two dialogs on this site feel like one component —
+   the panel is wider because this one carries a two-column form. */
+
+.t321-mkt-report {
+  position: fixed;
+  inset: 0;
+  z-index: 1100; /* above the sign-in dialog, which can open it */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(8, 12, 24, 0.7);
+  backdrop-filter: blur(6px);
+  animation: t321-mkt-report-fade 160ms ease-out;
+  overflow-y: auto;
+}
+.t321-mkt-report__panel {
+  position: relative;
+  width: min(760px, 100%);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  animation: t321-mkt-report-pop 200ms ease-out;
+  max-height: calc(100vh - 2.5rem);
+  display: flex;
+  flex-direction: column;
+}
+@keyframes t321-mkt-report-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes t321-mkt-report-pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .t321-mkt-report,
+  .t321-mkt-report__panel { animation: none; }
+}
+
+.t321-mkt-report__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: #5E5C57;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.t321-mkt-report__close:hover { background: #F2F0EA; color: #0F0F0E; }
+.t321-mkt-report__close:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
+
+/* Head and foot stay put while only the form body scrolls, so the submit
+   button is never stranded off-screen on a short viewport. */
+.t321-mkt-report__head {
+  padding: 1.5rem 1.75rem 1.1rem;
+  border-bottom: 1px solid var(--t321-mkt-line, #E8E4DB);
+}
+.t321-mkt-report__title {
+  margin: 0 0 0.3rem;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--t321-mkt-ink, #0F0F0E);
+}
+.t321-mkt-report__title em {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--t321-mkt-accent, #00B4DB);
+}
+.t321-mkt-report__lede {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--t321-mkt-ink-muted, #5E5C57);
+}
+
+.t321-mkt-report__body {
+  padding: 1.35rem 1.75rem;
+  overflow-y: auto;
+}
+.t321-mkt-report__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.25rem;
+}
+
+.t321-mkt-report__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.t321-mkt-report__field--full { margin-top: 1rem; }
+.t321-mkt-report__field > span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--t321-mkt-ink, #0F0F0E);
+}
+.t321-mkt-report__field > span b {
+  color: #d33;
+  font-weight: 700;
+  margin-left: 2px;
+}
+.t321-mkt-report__field input,
+.t321-mkt-report__field select,
+.t321-mkt-report__field textarea {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  font: inherit;
+  font-size: 0.92rem;
+  color: var(--t321-mkt-ink, #0F0F0E);
+  background: #fff;
+  border: 1px solid var(--t321-mkt-line, #E8E4DB);
+  border-radius: 9px;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+.t321-mkt-report__field textarea { resize: vertical; min-height: 118px; }
+.t321-mkt-report__field input:focus,
+.t321-mkt-report__field select:focus,
+.t321-mkt-report__field textarea:focus {
+  outline: none;
+  border-color: var(--t321-mkt-accent, #00B4DB);
+  box-shadow: 0 0 0 3px rgba(0, 180, 219, 0.15);
+}
+.t321-mkt-report__field input[type="file"] { padding: 0.5rem; font-size: 0.85rem; }
+
+.t321-mkt-report__error {
+  margin: 0.9rem 0 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 9px;
+  background: #fdecec;
+  color: #a12020;
+  font-size: 0.86rem;
+}
+
+.t321-mkt-report__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 1.1rem 1.75rem 1.35rem;
+  border-top: 1px solid var(--t321-mkt-line, #E8E4DB);
+}
+
+.t321-mkt-report__done {
+  padding: 2.25rem 1.75rem 2rem;
+  text-align: center;
+}
+.t321-mkt-report__done i {
+  font-size: 2.4rem;
+  color: var(--t321-mkt-positive, #2e9e5b);
+}
+.t321-mkt-report__done p {
+  margin: 0.85rem 0 1.35rem;
+  color: var(--t321-mkt-ink-muted, #5E5C57);
+}
+
+@media (max-width: 640px) {
+  .t321-mkt-report__grid { grid-template-columns: 1fr; }
+  .t321-mkt-report__head { padding: 1.25rem 1.15rem 1rem; }
+  .t321-mkt-report__body { padding: 1.1rem 1.15rem; }
+  .t321-mkt-report__foot { padding: 1rem 1.15rem 1.15rem; }
+  /* Full-width buttons stacked, so neither is a small target on a phone. */
+  .t321-mkt-report__foot { flex-direction: column-reverse; }
+  .t321-mkt-report__foot .t321-mkt-btn { width: 100%; justify-content: center; }
+}

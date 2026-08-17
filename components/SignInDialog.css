@@ -172,16 +172,28 @@
   text-align: center;
   font-size: 0.8rem;
 }
-.t321-mkt-signin__report a {
+/* A button, since it opens a dialog rather than navigating — styled to read
+   like the quiet link it replaced. */
+.t321-mkt-signin__report-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 0.8rem;
   color: var(--t321-mkt-ink-muted, #5E5C57);
-  text-decoration: none;
+  cursor: pointer;
 }
-.t321-mkt-signin__report a:hover {
+.t321-mkt-signin__report-btn:hover {
   color: var(--t321-mkt-ink, #0F0F0E);
   text-decoration: underline;
+}
+.t321-mkt-signin__report-btn:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 .t321-mkt-signin__report i { font-size: 0.85rem; }
 

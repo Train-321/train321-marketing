@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import ReportIssueDialog from "./ReportIssueDialog";
 import "./SignInDialog.css";
 
 type Props = {
@@ -32,6 +33,7 @@ export default function SignInDialog({
   const [mode, setMode] = useState<Mode>("signin");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [reportOpen, setReportOpen] = useState(false);
 
   /**
    * Credentials go to our own /api/auth/login, which forwards them to the
@@ -120,6 +122,7 @@ export default function SignInDialog({
   const forgotAction = `${loginUrl}${loginUrl.includes("?") ? "&" : "?"}forgot=1`;
 
   return (
+    <>
     <div
       className="t321-mkt-signin"
       role="dialog"
@@ -210,12 +213,18 @@ export default function SignInDialog({
               <Link href="/legal/privacy-policy" onClick={onClose}>Privacy Policy</Link>.
             </p>
 
-            {/* Marketing has no bug-report tool of its own, so this points at
-                the contact page rather than inventing a second support channel. */}
+            {/* Opens the same report form the LMS login screen uses, posting to
+                the same endpoint — rather than sending someone to /contact and
+                losing which screen they were stuck on. Kept as a button, not a
+                link, because it opens a dialog and goes nowhere. */}
             <p className="t321-mkt-signin__report">
-              <Link href="/contact" onClick={onClose}>
+              <button
+                type="button"
+                className="t321-mkt-signin__report-btn"
+                onClick={() => setReportOpen(true)}
+              >
                 <i className="fas fa-question-circle" aria-hidden="true" /> Report an Issue
-              </Link>
+              </button>
             </p>
 
             <p className="t321-mkt-signin__foot">
@@ -268,5 +277,11 @@ export default function SignInDialog({
         )}
       </div>
     </div>
+
+    {/* Sibling, not a child: inside the overlay above, any click within it
+        would bubble to that overlay's onClick and close the sign-in dialog
+        underneath while the user was still typing their report. */}
+    <ReportIssueDialog open={reportOpen} onClose={() => setReportOpen(false)} />
+    </>
   );
 }
