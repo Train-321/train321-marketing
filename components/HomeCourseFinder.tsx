@@ -140,7 +140,7 @@ export function HomeFinderProvider({
             candidates.push({
               params: new URLSearchParams(),
               label: "Popular courses from our other categories",
-              hint: "Available in every state — pick anything, or browse the full catalog."
+              hint: "From across the catalog — pick anything, or browse the full list."
             });
           }
 
@@ -245,8 +245,8 @@ export function FinderControls() {
         />
         {!stateName && (
           <p className="t321-hcf__hint">
-            Showing courses accepted in every state — pick yours to see
-            everything available there.
+            Showing every course, each badged with where it&rsquo;s accepted —
+            pick your state to narrow the list.
           </p>
         )}
       </div>
@@ -297,12 +297,18 @@ export function FinderResults() {
         <div className="t321-mkt-section__head">
           <span className="t321-mkt-eyebrow">
             <i className="fas fa-map-marker-alt" aria-hidden="true" />
-            {stateName ? ` Available in ${stateName}` : " Available everywhere"}
+            {stateName ? ` Available in ${stateName}` : " Browse by state"}
           </span>
+          {/* Before a state is picked this grid is the whole catalog, badged
+              per course — including state-only ones like the Florida and New
+              York variants. Saying "available in every state" here claimed
+              the opposite of what the cards underneath show. */}
           <h2 className="t321-mkt-h2">
             {stateName
               ? `${categoryName || "Courses"} in ${stateName}`
-              : `${categoryName || "Courses"} available in every state`}
+              : categoryName
+                ? `All ${categoryName} courses`
+                : "All courses"}
           </h2>
         </div>
 
