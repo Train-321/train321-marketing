@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Course, Testimonial, FaqGroup, TrustLogo, HomePage as HomePageDoc } from "@/lib/sanity";
 import TrustLogosCarousel from "./TrustLogosCarousel";
+import TestimonialQuotes from "./TestimonialQuotes";
 import {
   HomeFinderProvider,
   FinderControls,
@@ -157,15 +158,6 @@ function moduleIcon(m: HeroModule) {
   return "fas fa-lock";
 }
 
-function initials(name: string) {
-  return (name || "")
-    .split(" ")
-    .map((p) => p[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
-
 type HomePageProps = {
   forcedAudience?: Audience | null;
   courses: Course[];
@@ -242,7 +234,13 @@ export default function HomePage({
     [courses, popularSlugsResolved]
   );
 
-  const featuredTestimonials = useMemo(() => testimonials.slice(0, 3), [testimonials]);
+  // The "featured" toggle in Studio is what picks the homepage set; the
+  // carousel pages through however many an editor flags. Falls back to the
+  // whole list so the section is never empty if nobody has ticked any.
+  const featuredTestimonials = useMemo(() => {
+    const featured = testimonials.filter((t) => t.featured);
+    return featured.length ? featured : testimonials;
+  }, [testimonials]);
   const homeFaqs = useMemo(() => faqs[0]?.items?.slice(0, 4) || [], [faqs]);
 
   const activeCourse = HERO_COURSES[courseIndex] || HERO_COURSES[0];
@@ -653,25 +651,7 @@ export default function HomePage({
             <span className="t321-mkt-eyebrow"><i className={home?.opinionsHead?.icon || "fas fa-quote-right"} /> {home?.opinionsHead?.eyebrow || "What operators say"}</span>
             <h2 className="t321-mkt-h2">{home?.opinionsHead?.heading || "Real quotes from real customers"}</h2>
           </div>
-          <div className="t321-mkt-quotes">
-            {featuredTestimonials.map((t) => (
-              <figure key={t.id} className="t321-mkt-quote t321-mkt-card">
-                <blockquote>&ldquo;{t.quote}&rdquo;</blockquote>
-                <figcaption>
-                  <div className="t321-mkt-quote__avatar" aria-hidden="true">{initials(t.name)}</div>
-                  <div className="t321-mkt-quote__meta">
-                    <strong>{t.name}</strong>
-                    <span>{t.role} · {t.company}</span>
-                  </div>
-                </figcaption>
-                {t.stat && (
-                  <p className="t321-mkt-quote__stat">
-                    <strong>{t.stat.value}</strong> {t.stat.label}
-                  </p>
-                )}
-              </figure>
-            ))}
-          </div>
+          <TestimonialQuotes items={featuredTestimonials} />
         </div>
       </section>
 

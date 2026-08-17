@@ -977,13 +977,77 @@
 }
 
 /* Quotes */
+/* Scroll-snap rail rather than a grid: touch swiping is native, and the
+   arrows just drive scrollBy. Three cards fill a desktop row exactly, so with
+   three or fewer this looks and behaves like the old static row — the
+   controls only appear once something is off-screen. */
 .t321-mkt-quotes {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 1.25rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  /* Room for the card shadow and focus ring, which a clipped track would cut. */
+  padding: 0.25rem;
+  margin: -0.25rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.t321-mkt-quotes::-webkit-scrollbar { display: none; }
+.t321-mkt-quote {
+  /* figure carries a default 40px side margin, which the grid absorbed but a
+     fixed flex basis does not — it pushed the third card out of the row. */
+  margin: 0;
+  flex: 0 0 calc((100% - 2.5rem) / 3);
+  scroll-snap-align: start;
+}
+.t321-mkt-quotes__controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+.t321-mkt-quotes__arrow {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--t321-mkt-line);
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--t321-mkt-ink);
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease;
+}
+.t321-mkt-quotes__arrow:hover:not(:disabled) {
+  border-color: var(--t321-mkt-accent);
+  color: var(--t321-mkt-accent);
+}
+.t321-mkt-quotes__arrow:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+@media (prefers-reduced-motion: reduce) {
+  .t321-mkt-quotes { scroll-behavior: auto; }
+}
+/* Quotes run from 20 to 60+ words. Letting the longest set the row height
+   left the short cards half empty, so the quote is clamped and every box
+   stays the same compact size; anything cut off offers a "Read more" that
+   opens the full text in a dialog. margin-top:auto on the caption keeps the
+   attribution and stat pill on the bottom edge when a quote is shorter than
+   the clamp. */
+.t321-mkt-quote {
+  display: flex;
+  flex-direction: column;
 }
 .t321-mkt-quote blockquote {
   margin: 0 0 1.25rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
+  overflow: hidden;
   font-family: var(--font-fraunces), Georgia, serif;
   font-weight: 400;
   font-size: 1.05rem;
@@ -991,10 +1055,26 @@
   color: var(--t321-mkt-ink);
   letter-spacing: -0.01em;
 }
+.t321-mkt-quote__more {
+  align-self: flex-start;
+  margin: -0.75rem 0 1rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--t321-mkt-accent);
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.t321-mkt-quote__more:hover { color: var(--t321-mkt-accent-bright); }
 .t321-mkt-quote figcaption {
   display: flex;
   align-items: center;
   gap: 0.7rem;
+  margin-top: auto;
   padding-top: 1rem;
   border-top: 1px solid var(--t321-mkt-line);
 }
@@ -1036,6 +1116,84 @@
 .t321-mkt-quotes__foot {
   text-align: center;
   margin-top: 1.75rem;
+}
+
+/* Names the "Read more" for screen readers without repeating it on screen. */
+.t321-mkt-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Full-review dialog, opened from "Read more". */
+.t321-mkt-quote-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(15, 15, 14, 0.6);
+  animation: t321-quote-modal-in 140ms ease;
+}
+@keyframes t321-quote-modal-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.t321-mkt-quote-modal__panel {
+  position: relative;
+  width: min(600px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 30px 60px rgba(15, 15, 14, 0.25);
+}
+.t321-mkt-quote-modal__close {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--t321-mkt-line);
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--t321-mkt-ink-muted);
+  cursor: pointer;
+}
+.t321-mkt-quote-modal__close:hover {
+  color: var(--t321-mkt-ink);
+  border-color: var(--t321-mkt-ink-muted);
+}
+.t321-mkt-quote-modal__quote {
+  margin: 0.5rem 0 1.25rem;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 400;
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: var(--t321-mkt-ink);
+  letter-spacing: -0.01em;
+}
+.t321-mkt-quote-modal__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--t321-mkt-line);
+}
+@media (max-width: 600px) {
+  .t321-mkt-quote-modal__panel { padding: 1.5rem; }
 }
 
 /* FAQ teaser */
@@ -1107,10 +1265,10 @@
   .t321-mkt-hero__visual { height: 420px; max-width: 560px; margin: 0 auto; width: 100%; padding-left: 0; }
   .t321-mkt-pillars,
   .t321-mkt-steps,
-  .t321-mkt-stats,
-  .t321-mkt-quotes {
+  .t321-mkt-stats {
     grid-template-columns: 1fr 1fr;
   }
+  .t321-mkt-quote { flex-basis: calc((100% - 1.25rem) / 2); }
   .t321-mkt-faq-teaser,
   .t321-mkt-cta {
     grid-template-columns: 1fr;
@@ -1122,9 +1280,18 @@
   .t321-mkt-pillars,
   .t321-mkt-steps,
   .t321-mkt-stats,
-  .t321-mkt-quotes,
   .t321-mkt-popular {
     grid-template-columns: 1fr;
+  }
+  /* One card per swipe, with the next one peeking so the rail reads as
+     swipeable rather than as a single stranded card. */
+  .t321-mkt-quote { flex-basis: 87%; }
+  /* A single narrow column cuts off even the short quotes at six lines, and
+     there is no shared row height to protect here, so allow more before
+     "Read more" takes over. */
+  .t321-mkt-quote blockquote {
+    -webkit-line-clamp: 10;
+    line-clamp: 10;
   }
 }
 
