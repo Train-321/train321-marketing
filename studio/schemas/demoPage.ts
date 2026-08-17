@@ -88,7 +88,17 @@ export default defineType({
               name: 'videoUrl',
               type: 'url',
               title: 'Video URL',
-              description: 'Vimeo link or id, e.g. https://vimeo.com/123456789'
+              description:
+                'The Vimeo link for this demo, e.g. https://vimeo.com/123456789. Copy it from the address bar on the video’s Vimeo page.',
+              // The player is Vimeo-only and pulls the numeric id out of the
+              // URL. Without one the card is dropped at render, so catch it
+              // here rather than letting it vanish from the page unexplained.
+              validation: (R) =>
+                R.required().custom((url?: string) =>
+                  !url || /(\d{6,})/.test(url)
+                    ? true
+                    : 'This card will not appear on the page — no Vimeo video id found in the link. Paste the full Vimeo URL (e.g. https://vimeo.com/123456789). YouTube and other hosts are not supported yet.'
+                )
             },
             {
               name: 'image',
