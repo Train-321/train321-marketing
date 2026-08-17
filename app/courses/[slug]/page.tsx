@@ -193,7 +193,10 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
         </div>
       </section>
 
-      {course.modules && (
+      {/* An empty array is truthy, which rendered a "Curriculum" block
+          announcing "0 modules" on entries that have none — the service
+          pages (Licensing, White-Label) in particular. */}
+      {course.modules && course.modules.length > 0 && (
         <section className="t321-mkt-section t321-mkt-section--sunk">
           <div className="t321-mkt-container">
             <div className="t321-mkt-section__head">
