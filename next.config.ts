@@ -22,7 +22,6 @@ const nextConfig: NextConfig = {
       ...[
         "food-handler",
         "food-manager",
-        "accredited-food-handler",
         "alcohol",
         "bar-basics",
         "service-basics",
@@ -64,7 +63,56 @@ const nextConfig: NextConfig = {
       // → the canonical legal documents.
       { source: "/legal/terms", destination: "/legal/terms-conditions", permanent: true },
       { source: "/legal/terms-of-service", destination: "/legal/terms-conditions", permanent: true },
-      { source: "/legal/privacy", destination: "/legal/privacy-policy", permanent: true }
+      { source: "/legal/privacy", destination: "/legal/privacy-policy", permanent: true },
+      // There is no accredited-food-handler course document; the accredited
+      // program lives on the food-handler page.
+      { source: "/accredited-food-handler", destination: "/courses/food-handler", permanent: true },
+      // The pre-2026 static train321.com served bare .html files (mostly
+      // underscore-named). One entry per old URL so search results and
+      // inbound links keep resolving after the Vercel cutover.
+      ...Object.entries({
+        "index.html": "/",
+        "index-1.html": "/",
+        "index_old.html": "/",
+        "home.html": "/",
+        "about_us.html": "/about",
+        "testimonials.html": "/",
+        "faqs.html": "/faq",
+        "contact.html": "/contact",
+        "demo.html": "/demo",
+        "services.html": "/services",
+        "licensing.html": "/services/licensing",
+        "white_labeling.html": "/services/white-labeling",
+        "custom_courses.html": "/courses/custom-courses",
+        "additional-courses.html": "/courses/additional-courses",
+        "food_handler.html": "/courses/food-handler",
+        "accredited-food-handler.html": "/courses/food-handler",
+        "food_manager.html": "/courses/food-manager",
+        "alcohol.html": "/courses/alcohol",
+        // ATAP = the old Alcohol Training Awareness Program page.
+        "atap.html": "/courses/alcohol",
+        "bar_basics.html": "/courses/bar-basics",
+        "safety_basics.html": "/courses/safety-basics",
+        "service_basics.html": "/courses/service-basics",
+        "security_host.html": "/courses/security-host",
+        "human_resources.html": "/courses/human-resources",
+        "human_trafficking.html": "/courses/human-trafficking",
+        "sexual_harassment.html": "/courses/sexual-harassment",
+        "california-sexual-harassment.html": "/courses/california-sexual-harassment",
+        "illinois-sexual-harassment.html": "/courses/illinois-sexual-harassment",
+        "new-york-sexual-harassment.html": "/courses/new-york-sexual-harassment",
+        "privacy-policy.html": "/legal/privacy-policy",
+        "terms-conditions.html": "/legal/terms-conditions",
+        // No refund-policy document on the new site; terms covers refunds.
+        "refund-policy.html": "/legal/terms-conditions",
+        "accessibility.html": "/legal/accessibility",
+        "non-discrimination.html": "/legal/non-discrimination",
+        "complaints-appeals.html": "/legal/complaints-appeals"
+      }).map(([src, destination]) => ({
+        source: `/${src}`,
+        destination,
+        permanent: true
+      }))
     ];
   }
 };
