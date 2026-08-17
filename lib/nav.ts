@@ -32,18 +32,25 @@ export const marketingNav: NavItem[] = [
           { label: "Human Trafficking", to: "/courses/human-trafficking", icon: "fas fa-hands-helping" },
           { label: "Security Host", to: "/courses/security-host", icon: "fas fa-user-shield" }
         ]
-      },
+      }
+    ]
+  },
+  {
+    label: "Services",
+    children: [
       {
         heading: "For business",
         links: [
+          // A nav item with children renders as a dropdown trigger rather than
+          // a link, so the overview page needs its own entry here to stay
+          // reachable from the bar.
+          { label: "Services overview", to: "/services", icon: "fas fa-briefcase" },
           { label: "Licensing", to: "/courses/licensing", icon: "fas fa-id-card" },
-          { label: "White Labeling", to: "/courses/white-labeling", icon: "fas fa-paint-brush" },
-          { label: "Browse all courses", to: "/catalog", icon: "fas fa-th" }
+          { label: "White Labeling", to: "/courses/white-labeling", icon: "fas fa-paint-brush" }
         ]
       }
     ]
   },
-  { label: "Services", to: "/services" },
   { label: "Demos", to: "/demo" },
   { label: "Blog", to: "/blog" },
   { label: "FAQ", to: "/faq" },

@@ -125,13 +125,16 @@
   left: 50%;
   top: calc(100% + 6px);
   transform: translateX(-50%);
-  min-width: 520px;
+  /* One group per menu since the business links moved to Services, so the
+     panel is a single column sized to its links rather than the old
+     two-column, 520px sheet with an empty half. */
+  min-width: 232px;
   background: #ffffff;
   border: 1px solid var(--t321-mkt-line, #E8E4DB);
   border-radius: 14px;
-  padding: 1rem 1.1rem;
+  padding: 0.8rem 0.85rem;
   display: none;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
   box-shadow: 0 18px 40px rgba(15, 15, 14, 0.12);
 }

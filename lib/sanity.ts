@@ -911,3 +911,114 @@ export async function getDetailPagesCopy(): Promise<DetailPagesCopy | null> {
     )) ?? null
   );
 }
+
+// ── Service detail pages ────────────────────────────────────────────────────
+// Services (custom course development, white labeling, licensing) are NOT
+// courses: no enrollment, price, modules, curriculum or certificate. They used
+// to reuse the course document and inherited all of it. These types mirror the
+// service schema so app/services/[slug] can render service-only sections.
+
+/** Minimal shape of a Sanity portable-text block — enough to render the
+    overview as paragraphs without pulling in a renderer dependency. */
+export type ServiceBlock = {
+  _type?: string;
+  _key?: string;
+  style?: string;
+  children?: Array<{ text?: string }>;
+};
+
+export type ServiceCard = { title?: string; body?: string; icon?: string };
+export type ServiceStep = { title?: string; body?: string };
+export type ServiceExample = { title?: string; body?: string; imageUrl?: string; to?: string };
+export type ServiceCta = { label?: string; to?: string };
+
+export type ServiceDetail = {
+  slug: string;
+  title: string;
+  icon?: string;
+  eyebrow?: string;
+  heading?: string;
+  lede?: string;
+  primaryCta?: ServiceCta;
+  secondaryCta?: ServiceCta;
+  imageUrl?: string;
+  overviewHeading?: string;
+  overview?: ServiceBlock[];
+  features?: string[];
+  benefitsHeading?: string;
+  benefits?: ServiceCard[];
+  capabilitiesHeading?: string;
+  capabilities?: ServiceCard[];
+  processHeading?: string;
+  process?: ServiceStep[];
+  deliveryHeading?: string;
+  deliveryOptions?: ServiceCard[];
+  examplesHeading?: string;
+  examples?: ServiceExample[];
+  faqHeading?: string;
+  faqs?: FaqItem[];
+  finalCta?: {
+    heading?: string;
+    lede?: string;
+    primaryLabel?: string;
+    primaryTo?: string;
+    secondaryLabel?: string;
+    secondaryTo?: string;
+  };
+  seo?: { title?: string; description?: string };
+};
+
+const SERVICE_PROJECTION = `
+  "slug": slug.current,
+  title,
+  icon,
+  eyebrow,
+  heading,
+  lede,
+  primaryCta,
+  secondaryCta,
+  "imageUrl": image.asset->url,
+  overviewHeading,
+  "overview": longDescription,
+  features,
+  benefitsHeading,
+  benefits,
+  capabilitiesHeading,
+  capabilities,
+  processHeading,
+  process,
+  deliveryHeading,
+  deliveryOptions,
+  examplesHeading,
+  "examples": examples[]{ title, body, to, "imageUrl": image.asset->url },
+  faqHeading,
+  faqs,
+  finalCta,
+  seo
+`;
+
+/** Every service that has a slug — used for static params on /services/[slug]. */
+export async function getServiceSlugs(): Promise<string[]> {
+  try {
+    const rows: Array<{ slug?: string }> = await (await getClient()).fetch(
+      `*[_type == "service" && defined(slug.current)]{ "slug": slug.current }`
+    );
+    return rows.map((r) => r.slug).filter((s): s is string => Boolean(s));
+  } catch {
+    // A missing dataset shouldn't fail the build — the route just renders
+    // nothing until services exist.
+    return [];
+  }
+}
+
+export async function getServiceDetail(slug: string): Promise<ServiceDetail | null> {
+  try {
+    const row: ServiceDetail | null = await (await getClient()).fetch(
+      `*[_type == "service" && slug.current == $slug][0]{ ${SERVICE_PROJECTION} }`,
+      { slug }
+    );
+    return row?.slug ? row : null;
+  } catch {
+    return null;
+  }
+}
