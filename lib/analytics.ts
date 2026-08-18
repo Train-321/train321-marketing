@@ -32,10 +32,59 @@ function gtag(): GtagFn | null {
   return typeof fn === "function" ? fn : null;
 }
 
+/**
+ * Events raised before gtag.js has run.
+ *
+ * @next/third-parties loads the tag with Next's afterInteractive strategy, so
+ * anything fired from an effect during hydration — a view_item on a course
+ * page, most obviously — gets there first and would otherwise be dropped on
+ * the floor. Holding them here and flushing once gtag appears keeps them,
+ * and waiting for the real gtag (rather than queueing onto dataLayer
+ * ourselves) means our events can never land ahead of the config command
+ * that tells GA which property they belong to.
+ */
+const pending: Array<[string, Record<string, unknown>]> = [];
+let waiting = false;
+
+function flushPending(g: GtagFn) {
+  while (pending.length) {
+    const next = pending.shift();
+    if (next) g("event", next[0], next[1]);
+  }
+}
+
+function waitForGtag() {
+  if (waiting) return;
+  waiting = true;
+  let tries = 0;
+  const tick = () => {
+    const g = gtag();
+    if (g) {
+      waiting = false;
+      flushPending(g);
+      return;
+    }
+    // ~10s. Past that the tag is blocked or absent and holding events only
+    // grows memory.
+    if (++tries > 40) {
+      waiting = false;
+      pending.length = 0;
+      return;
+    }
+    setTimeout(tick, 250);
+  };
+  tick();
+}
+
 function send(eventName: string, params: Record<string, unknown>) {
+  if (typeof window === "undefined") return;
   const g = gtag();
-  if (!g) return;
-  g("event", eventName, params);
+  if (g) {
+    g("event", eventName, params);
+    return;
+  }
+  pending.push([eventName, params]);
+  waitForGtag();
 }
 
 /** Cart line → GA4 item. Seat-based courses carry their seat count as
