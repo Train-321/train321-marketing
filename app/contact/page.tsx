@@ -3,7 +3,8 @@ import ContactClient from "./ContactClient";
 
 export const metadata = {
   title: "Contact — Train 321",
-  description: "Talk to a real human at Train 321."
+  description: "Talk to a real human at Train 321.",
+  alternates: { canonical: "/contact" }
 };
 
 export default async function ContactPage() {

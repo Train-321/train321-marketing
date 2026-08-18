@@ -26,7 +26,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!service) return { title: "Services — Train 321" };
   return {
     title: service.seo?.title || `${service.title} — Train 321`,
-    description: service.seo?.description || service.lede || ""
+    description: service.seo?.description || service.lede || "",
+    alternates: { canonical: `/services/${slug}` }
   };
 }
 

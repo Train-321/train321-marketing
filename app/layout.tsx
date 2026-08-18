@@ -11,6 +11,8 @@ import CartDrawer from "@/components/cart/CartDrawer";
 import CartToast from "@/components/cart/CartToast";
 import { SanityLive } from "@/lib/sanity";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import JsonLd from "@/components/JsonLd";
+import { ORGANIZATION_LD } from "@/lib/seo";
 import "./globals.css";
 
 // Lazy-load visual editing — only pulled into the bundle when draft mode is on.
@@ -48,16 +50,18 @@ export const metadata: Metadata = {
     siteName: "Train 321",
     type: "website"
   },
+  twitter: {
+    card: "summary_large_image"
+  },
   // Proves ownership of www.train321.com to Google Search Console. Google
   // re-checks periodically, so this has to stay put after verification.
   verification: {
     google: "Nfaulb5Oqkq4Bu-Y0KcOXafksELW3wNovEkAvL5Vioo"
-  },
-  // marketing.train321.com serves this same app; a self-referencing canonical
-  // tells Google which host is the real one.
-  alternates: {
-    canonical: "/"
   }
+  // NOTE: no `alternates.canonical` here. A layout-level canonical is
+  // inherited by every child page, which pointed the whole site's canonical
+  // at the homepage — Google was told to ignore every subpage. Each page
+  // declares its own canonical instead.
 };
 
 export const viewport: Viewport = {
@@ -108,6 +112,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </noscript>
       </head>
       <body>
+        {/* Sitewide Organization schema — course/blog/FAQ pages reference it. */}
+        <JsonLd data={ORGANIZATION_LD} />
         {/* Wraps everything so the cart survives client-side navigation and the
             drawer can be opened from any page. */}
         <CartProvider>

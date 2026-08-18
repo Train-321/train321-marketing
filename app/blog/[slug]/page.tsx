@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import BlogPortableText from "@/components/BlogPortableText";
+import JsonLd from "@/components/JsonLd";
+import { SITE_URL } from "@/lib/seo";
 import { getBlogPost, getBlogPosts, getDetailPagesCopy } from "@/lib/sanity";
 import "./article.css";
 
@@ -34,7 +36,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!post) return { title: "Article — Train 321" };
   return {
     title: `${post.title} — Train 321`,
-    description: post.excerpt || ""
+    description: post.excerpt || "",
+    alternates: { canonical: `/blog/${slug}` },
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.excerpt || "",
+      publishedTime: post.publishedAt,
+      authors: post.author?.name ? [post.author.name] : undefined,
+      // The cover image beats the sitewide branded card when the post has one.
+      images: post.coverImage ? [{ url: post.coverImage }] : undefined
+    }
   };
 }
 
@@ -70,8 +82,26 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
   const ctaSecondaryLabel = cta?.secondaryCta?.label || "Browse courses";
   const ctaSecondaryHref = cta?.secondaryCta?.to || "/catalog";
 
+  const articleLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt || "",
+    url: `${SITE_URL}/blog/${post.slug}`,
+    datePublished: post.publishedAt,
+    ...(post.coverImage ? { image: post.coverImage } : {}),
+    author: {
+      "@type": "Person",
+      name: authorName,
+      ...(post.author?.role ? { jobTitle: post.author.role } : {})
+    },
+    publisher: { "@id": `${SITE_URL}/#organization` },
+    mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`
+  };
+
   return (
     <div className="t321-mkt-article">
+      <JsonLd data={articleLd} />
       <header className={`t321-mkt-article__hero is-tone-${post.heroTone}`}>
         <div className="t321-mkt-container">
           <nav className="t321-mkt-article__crumbs" aria-label="Breadcrumb">

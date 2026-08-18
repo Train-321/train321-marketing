@@ -42,7 +42,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!page) return { title: "Legal — Train 321" };
   return {
     title: `${page.title} — Train 321`,
-    description: page.intro || ""
+    description: page.intro || "",
+    alternates: { canonical: `/legal/${slug}` }
   };
 }
 

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Suspense, cache } from "react";
 import { notFound } from "next/navigation";
 import TrackViewItem from "@/components/TrackViewItem";
+import JsonLd from "@/components/JsonLd";
+import { SITE_URL, plainText } from "@/lib/seo";
 import { getCourse, getCourses, getDetailPagesCopy, getSiteSettings } from "@/lib/sanity";
 import EnrollButton from "@/components/EnrollButton";
 import CourseCertificate from "@/components/CourseCertificate";
@@ -20,7 +22,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!course) return { title: "Course · Train 321" };
   return {
     title: `${course.title} · Train 321`,
-    description: course.summary || course.tagline || ""
+    description: course.summary || course.tagline || "",
+    alternates: { canonical: `/courses/${slug}` }
   };
 }
 
@@ -78,8 +81,37 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   const ctaSecondaryLabel = cta?.secondaryCta?.label || "See a demo";
   const ctaSecondaryHref = cta?.secondaryCta?.to || "/demo";
 
+  // Course rich-result schema. Offers are only claimed when a real numeric
+  // price exists; "custom pricing" courses stay offer-less rather than lying.
+  const courseLd = {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: course.title,
+    description: plainText(course.summary || course.tagline),
+    url: `${SITE_URL}/courses/${course.slug}`,
+    ...(course.image ? { image: course.image } : {}),
+    provider: { "@id": `${SITE_URL}/#organization` },
+    hasCourseInstance: {
+      "@type": "CourseInstance",
+      courseMode: "Online",
+      courseWorkload: course.modules?.length ? `PT${course.modules.length}H` : "PT1H"
+    },
+    ...(typeof course.priceFrom === "number" && course.priceFrom > 0
+      ? {
+          offers: {
+            "@type": "Offer",
+            price: course.priceFrom,
+            priceCurrency: "USD",
+            availability: "https://schema.org/InStock",
+            url: `${SITE_URL}/courses/${course.slug}`
+          }
+        }
+      : {})
+  };
+
   return (
     <article className="t321-mkt-course">
+      <JsonLd data={courseLd} />
       {/* GA4 view_item. Keyed on enrollId so this page's view joins the same
           product as its add_to_cart and purchase; courses with no LMS id
           aren't purchasable, so there's nothing to attribute. */}

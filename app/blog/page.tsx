@@ -7,7 +7,8 @@ export const revalidate = 60;
 
 export const metadata = {
   title: "Journal — Train 321",
-  description: "Compliance updates, operator playbooks, and field notes from the Train 321 team."
+  description: "Compliance updates, operator playbooks, and field notes from the Train 321 team.",
+  alternates: { canonical: "/blog" }
 };
 
 export default async function BlogIndexPage() {

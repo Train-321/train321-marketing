@@ -4,7 +4,8 @@ import "./about.css";
 
 export const metadata = {
   title: "About — Train 321",
-  description: "The team and mission behind Train 321."
+  description: "The team and mission behind Train 321.",
+  alternates: { canonical: "/about" }
 };
 
 export default async function AboutPage() {
