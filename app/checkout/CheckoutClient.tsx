@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Elements, CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { useCart } from "@/components/cart/CartContext";
 import { COURSE_PLACEHOLDER_IMAGE } from "@/lib/newFeatures";
 import type { CheckoutResult } from "@/lib/enroll";
+import { trackBeginCheckout, trackPurchase, lineToItem } from "@/lib/analytics";
 import { US_STATES } from "./states";
 import "./checkout.css";
 
@@ -96,6 +97,15 @@ function CheckoutForm({ stripeConfigured }: { stripeConfigured: boolean }) {
   } = useCart();
   const stripe = useStripe();
   const elements = useElements();
+
+  // Fires once, after the cart resolves — before `ready` the lines are empty
+  // and the event would carry no items or value.
+  const beganCheckout = useRef(false);
+  useEffect(() => {
+    if (beganCheckout.current || !ready || lines.length === 0) return;
+    beganCheckout.current = true;
+    trackBeginCheckout(lines.map(lineToItem), quote?.dueToday);
+  }, [ready, lines, quote]);
 
   const [form, setForm] = useState({
     first_name: "",
@@ -298,7 +308,20 @@ function CheckoutForm({ stripeConfigured }: { stripeConfigured: boolean }) {
 
       // Order is placed — empty the cart so a refresh or a back-button press
       // can't re-submit the same purchase.
-      setResult(data as CheckoutResult);
+      const order = data as CheckoutResult;
+
+      // Report before clear() empties the cart — afterwards there are no
+      // lines left to attribute the revenue against. The charge id doubles as
+      // GA4's de-duplication key, so a refreshed success panel can't count
+      // the same order twice.
+      trackPurchase({
+        transactionId: order.chargeId || order.subscription?.id || String(order.employee.id),
+        value: order.amount,
+        items: lines.map(lineToItem),
+        coupon: promoCode || undefined
+      });
+
+      setResult(order);
       clear();
     } catch (err) {
       setSubmitError(

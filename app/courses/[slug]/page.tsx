@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense, cache } from "react";
 import { notFound } from "next/navigation";
+import TrackViewItem from "@/components/TrackViewItem";
 import { getCourse, getCourses, getDetailPagesCopy, getSiteSettings } from "@/lib/sanity";
 import EnrollButton from "@/components/EnrollButton";
 import CourseCertificate from "@/components/CourseCertificate";
@@ -79,6 +80,17 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
 
   return (
     <article className="t321-mkt-course">
+      {/* GA4 view_item. Keyed on enrollId so this page's view joins the same
+          product as its add_to_cart and purchase; courses with no LMS id
+          aren't purchasable, so there's nothing to attribute. */}
+      {course.enrollId && (
+        <TrackViewItem
+          id={String(course.enrollId)}
+          name={course.title}
+          price={course.priceFrom ?? 0}
+          category={course.category}
+        />
+      )}
       <StatePickerProvider>
       <section className="t321-mkt-course__hero">
         <div className="t321-mkt-container t321-mkt-course__hero-grid">

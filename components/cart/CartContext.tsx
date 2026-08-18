@@ -16,6 +16,8 @@ import type {
   EnrollQuote,
   InvoiceCadence
 } from "@/lib/enroll";
+import { trackAddToCart, trackRemoveFromCart, lineToItem } from "@/lib/analytics";
+
 const STORAGE_KEY = "t321.cart.v1";
 const PROMO_KEY = "t321.cart.promo.v1";
 const BUYER_KEY = "t321.cart.buyer.v1";
@@ -152,6 +154,13 @@ function readStoredItems(): StoredCartItem[] {
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<StoredCartItem[]>([]);
   const [lines, setLines] = useState<CartLine[]>([]);
+  // Mirrors `lines` so remove() can report what left the cart without
+  // running a side effect inside a state updater — React may invoke those
+  // more than once, which would double-count the event.
+  const linesRef = useRef<CartLine[]>([]);
+  useEffect(() => {
+    linesRef.current = lines;
+  }, [lines]);
   const [quote, setQuote] = useState<EnrollQuote | null>(null);
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
@@ -394,11 +403,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           ? prev
           : [...prev, { ...course, users: Math.max(1, users) }]
       );
+
+      // Tracked here rather than in AddToCartButton so every entry point —
+      // button, drawer, course page — reports without being wired up twice.
+      trackAddToCart(lineToItem({ ...course, users: Math.max(1, users) }));
     },
     [buyer.audience]
   );
 
   const remove = useCallback((id: number) => {
+    // Read before the removal — afterwards there's no price or name left to
+    // attribute it to.
+    const going = linesRef.current.find((l) => l.id === id);
+    if (going) trackRemoveFromCart(lineToItem(going));
     setItems((prev) => prev.filter((i) => i.id !== id));
     setLines((prev) => prev.filter((l) => l.id !== id));
   }, []);

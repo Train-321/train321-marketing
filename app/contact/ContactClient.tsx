@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { ContactPage, SiteSettings } from "@/lib/sanity";
 import CustomSelect from "@/components/CustomSelect";
 import "./contact.css";
+import { trackGenerateLead } from "@/lib/analytics";
 
 const FALLBACK_TILES = [
   { icon: "fas fa-phone", title: "Call us", sub: "Mon-Fri · 7am-7pm CT", linkLabel: "PHONE", linkHref: "tel:+15613257300" },
@@ -78,6 +79,7 @@ export default function ContactClient({ page, settings }: Props) {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    trackGenerateLead("contact_form");
     setSent(true);
     setTimeout(() => {
       setSent(false);

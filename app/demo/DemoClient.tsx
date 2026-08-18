@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import type { DemoPage } from "@/lib/sanity";
+import { trackGenerateLead } from "@/lib/analytics";
 import CustomSelect from "@/components/CustomSelect";
 import VideoModal from "@/components/VideoModal";
 import "./demo.css";
@@ -181,7 +182,11 @@ export default function DemoClient({ page }: Props) {
     return () => { cancelled = true; };
   }, []);
 
-  const onSubmit = (e: React.FormEvent) => { e.preventDefault(); setSent(true); };
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    trackGenerateLead("demo_request");
+    setSent(true);
+  };
   const update = <K extends keyof FormState>(key: K) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
       setForm((prev) => ({ ...prev, [key]: e.target.value as FormState[K] }));
