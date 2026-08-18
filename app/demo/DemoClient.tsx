@@ -81,7 +81,7 @@ export default function DemoClient({ page }: Props) {
   const [activeVideo, setActiveVideo] = useState<VideoItem | null>(null);
 
   const heroEyebrow = page?.heroEyebrow || "Book a walkthrough";
-  const heroHeading = page?.heroHeading || "See Train321 with your courses already loaded.";
+  const heroHeading = page?.heroHeading || "See Train 321 with your courses already loaded.";
   const heroLede =
     page?.heroLede ||
     "Pick a 20-minute slot. We'll share a screen, walk through the learner flow, the manager dashboard, and the reporting you'd use on day one — using sample data that matches your operation.";

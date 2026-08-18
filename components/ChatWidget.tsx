@@ -15,7 +15,7 @@ const AGENT_INITIAL = "C";
 
 const WELCOME: ChatMessage = {
   role: "assistant",
-  content: `Hey there 👋 I'm ${AGENT_NAME} from the Train321 team. What can I help you with today?`
+  content: `Hey there 👋 I'm ${AGENT_NAME} from the Train 321 team. What can I help you with today?`
 };
 
 const QUICK_REPLIES: Array<{ label: string; prompt: string }> = [
@@ -233,7 +233,7 @@ export default function ChatWidget({ aiEnabled }: Props) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls="t321-chat-panel"
-        aria-label={open ? "Close support chat" : `Chat with ${AGENT_NAME} from Train321`}
+        aria-label={open ? "Close support chat" : `Chat with ${AGENT_NAME} from Train 321`}
       >
         {open ? (
           <i className="fas fa-chevron-down" aria-hidden="true" />

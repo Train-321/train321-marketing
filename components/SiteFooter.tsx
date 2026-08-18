@@ -64,10 +64,10 @@ export default function SiteFooter({ settings }: Props) {
     <footer className="t321-mkt-footer">
       <div className="t321-mkt-container t321-mkt-footer__inner">
         <div className="t321-mkt-footer__brand">
-          <Link href="/" className="t321-mkt-footer__logo" aria-label="Train321 home">
+          <Link href="/" className="t321-mkt-footer__logo" aria-label="Train 321 home">
             <Image
               src="/img/logos/train321_logo.png"
-              alt={settings?.siteName || "Train321"}
+              alt={settings?.siteName || "Train 321"}
               width={272}
               height={154}
             />
@@ -137,7 +137,7 @@ export default function SiteFooter({ settings }: Props) {
 
       <div className="t321-mkt-footer__meta">
         <div className="t321-mkt-container t321-mkt-footer__meta-inner">
-          <span>&copy; {year} {settings?.siteName || "Train321"}. All rights reserved.</span>
+          <span>&copy; {year} {settings?.siteName || "Train 321"}. All rights reserved.</span>
           <nav className="t321-mkt-footer__meta-nav" aria-label="Legal">
             {legalLinks.map((l) => (
               <Link key={l.href} href={l.href}>{l.label}</Link>

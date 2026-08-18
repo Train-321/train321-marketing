@@ -374,7 +374,7 @@ function CheckoutForm({ stripeConfigured }: { stripeConfigured: boolean }) {
           </span>
           <h1 className="t321-mkt-h1">Complete your enrollment</h1>
           <p className="t321-mkt-lede">
-            We&rsquo;ll create your Train321 account and give you instant access to every course
+            We&rsquo;ll create your Train 321 account and give you instant access to every course
             below.
           </p>
         </div>

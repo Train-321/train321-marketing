@@ -827,7 +827,7 @@ export async function getTeam(): Promise<TeamMember[]> {
 }
 
 const SETTINGS_DEFAULT: SiteSettings = {
-  siteName: "Train321",
+  siteName: "Train 321",
   tagline: "Online Food Safety Training",
   phone: "561-325-7300",
   email: "info@train321.com",

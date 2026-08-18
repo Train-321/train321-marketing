@@ -3,8 +3,8 @@ import { getMarketplaceCatalog } from "@/lib/newFeatures";
 import CatalogClient from "./CatalogClient";
 
 export const metadata = {
-  title: "Catalog — Train321",
-  description: "Every course Train321 offers, on a single page."
+  title: "Catalog — Train 321",
+  description: "Every course Train 321 offers, on a single page."
 };
 
 // Catalog data (courses, categories, search corpus) comes from the new-features

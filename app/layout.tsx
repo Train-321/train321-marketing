@@ -38,14 +38,14 @@ const montserrat = Montserrat({
 
 export const metadata: Metadata = {
   title: {
-    default: "Train321 — Online Food Safety Training",
-    template: "%s — Train321"
+    default: "Train 321 — Online Food Safety Training",
+    template: "%s — Train 321"
   },
   description:
     "Online food handler, food manager, and alcohol seller-server training. ANAB-accredited, state-approved.",
   metadataBase: new URL(process.env.SITE_URL || "https://train321-marketing.vercel.app"),
   openGraph: {
-    siteName: "Train321",
+    siteName: "Train 321",
     type: "website"
   },
   // Proves ownership of www.train321.com to Google Search Console. Google

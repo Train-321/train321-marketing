@@ -6,8 +6,8 @@ import BlogClient from "./BlogClient";
 export const revalidate = 60;
 
 export const metadata = {
-  title: "Journal — Train321",
-  description: "Compliance updates, operator playbooks, and field notes from the Train321 team."
+  title: "Journal — Train 321",
+  description: "Compliance updates, operator playbooks, and field notes from the Train 321 team."
 };
 
 export default async function BlogIndexPage() {

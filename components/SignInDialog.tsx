@@ -37,7 +37,7 @@ export default function SignInDialog({
 
   /**
    * Credentials go to our own /api/auth/login, which forwards them to the
-   * Train321 API and keeps the returned bearer token in an httpOnly cookie.
+   * Train 321 API and keeps the returned bearer token in an httpOnly cookie.
    * Posting the form straight at the LMS (the old behaviour) left the browser
    * on whatever that host returned — including its 500 page.
    */

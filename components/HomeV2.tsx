@@ -386,7 +386,7 @@ export default function HomeV2({
               </ul>
             </div>
             <div className="t321-v2-compare__col t321-v2-compare__col--new">
-              <span className="t321-v2-compare__tag t321-v2-compare__tag--new">With Train321</span>
+              <span className="t321-v2-compare__tag t321-v2-compare__tag--new">With Train 321</span>
               <ul>
                 <li><i className="fas fa-check" /> Under an hour, on the phone you already carry</li>
                 <li><i className="fas fa-check" /> Price shown up front — from ${foodPrice}</li>

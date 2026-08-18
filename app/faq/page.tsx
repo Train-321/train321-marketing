@@ -2,7 +2,7 @@ import { getFaqGroups, getFaqPage, getSiteSettings } from "@/lib/sanity";
 import FaqClient from "./FaqClient";
 
 export const metadata = {
-  title: "FAQ — Train321",
+  title: "FAQ — Train 321",
   description: "Answers to the questions we hear most often."
 };
 

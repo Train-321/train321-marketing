@@ -31,9 +31,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getBlogPost(slug);
-  if (!post) return { title: "Article — Train321" };
+  if (!post) return { title: "Article — Train 321" };
   return {
-    title: `${post.title} — Train321`,
+    title: `${post.title} — Train 321`,
     description: post.excerpt || ""
   };
 }
@@ -52,7 +52,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
   const crumbJournal = copy?.blogCrumbJournal || "Journal";
   const shareLabel = copy?.blogShareLabel || "Share";
   const readingMinSuffix = copy?.blogReadingMinSuffix || "min read";
-  const orgSuffix = copy?.blogAuthorOrgSuffix || "Train321";
+  const orgSuffix = copy?.blogAuthorOrgSuffix || "Train 321";
 
   const relatedEyebrow = copy?.blogRelatedHead?.eyebrow || "Keep reading";
   const relatedHeading = copy?.blogRelatedHead?.heading || "More in the journal";

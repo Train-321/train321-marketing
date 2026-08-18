@@ -23,9 +23,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const service = await getServiceDetail(slug);
-  if (!service) return { title: "Services — Train321" };
+  if (!service) return { title: "Services — Train 321" };
   return {
-    title: service.seo?.title || `${service.title} — Train321`,
+    title: service.seo?.title || `${service.title} — Train 321`,
     description: service.seo?.description || service.lede || ""
   };
 }

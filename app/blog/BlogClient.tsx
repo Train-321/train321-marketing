@@ -22,7 +22,7 @@ export default function BlogClient({ posts, page }: Props) {
   const sortedPosts = posts;
 
   const heroEyebrow = page?.heroEyebrow || "Field notes";
-  const heroHeading = page?.heroHeading || "The Train321 journal.";
+  const heroHeading = page?.heroHeading || "The Train 321 journal.";
   const heroLede =
     page?.heroLede ||
     "Compliance updates, operator playbooks, and the lessons we collect from thousands of rollouts — written by the people who run the platform.";

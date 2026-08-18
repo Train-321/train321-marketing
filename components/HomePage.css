@@ -1021,6 +1021,12 @@
    three or fewer this looks and behaves like the old static row — the
    controls only appear once something is off-screen. */
 .t321-mkt-quotes {
+  /* Positioned so absolutely-placed descendants (the sr-only span in each
+     card's "Read more") resolve against this scroller and get clipped by it.
+     Unpositioned, their containing block is the page itself, and the span in
+     an off-screen slide widened <html> — a phantom horizontal scrollbar on
+     phones and tablets. */
+  position: relative;
   display: flex;
   gap: 1.25rem;
   overflow-x: auto;

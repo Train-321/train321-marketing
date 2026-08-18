@@ -15,7 +15,7 @@ export const metadata = {
     "ANAB-accredited food handler, food manager, alcohol server, and harassment training. Finish on your phone in under an hour, certificate issued instantly, accepted in all 50 states. From $14.",
   alternates: { canonical: "/v3" },
   openGraph: {
-    title: "Get certified today — compliance training from $14 | Train321",
+    title: "Get certified today — compliance training from $14 | Train 321",
     description:
       "Food, alcohol, and HR compliance courses on your phone. Pass and your certificate downloads instantly. Accepted in all 50 states.",
     type: "website"
@@ -46,7 +46,7 @@ export default async function Page() {
   const org = {
     "@context": "https://schema.org",
     "@type": "EducationalOrganization",
-    name: "Train321",
+    name: "Train 321",
     url: SITE_URL,
     telephone: settings.phone || "561-325-7300",
     email: settings.email || "info@train321.com",
@@ -74,7 +74,7 @@ export default async function Page() {
         name: c.name,
         description: courses.find((x) => x.slug === c.slug)?.tagline || c.name,
         url: `${SITE_URL}/courses/${c.slug}`,
-        provider: { "@type": "Organization", name: "Train321", url: SITE_URL },
+        provider: { "@type": "Organization", name: "Train 321", url: SITE_URL },
         offers: {
           "@type": "Offer",
           category: "Paid",

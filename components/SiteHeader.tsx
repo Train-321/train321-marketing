@@ -138,7 +138,7 @@ export default function SiteHeader({ settings }: Props) {
         <Link href="/" className="t321-mkt-brand" aria-label="Train 321 home">
           <Image
             src="/img/logos/train321_logo.png"
-            alt="Train321"
+            alt="Train 321"
             width={272}
             height={154}
             priority
@@ -231,7 +231,7 @@ export default function SiteHeader({ settings }: Props) {
             <div className="t321-mkt-drawer__head">
               <Image
                 src="/img/logos/train321_logo.png"
-                alt="Train321"
+                alt="Train 321"
                 width={200}
                 height={114}
                 className="t321-mkt-brand__logo t321-mkt-brand__logo--sm"

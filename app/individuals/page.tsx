@@ -9,7 +9,7 @@ import {
 } from "@/lib/sanity";
 
 export const metadata = {
-  title: "Get certified in under an hour — Train321",
+  title: "Get certified in under an hour — Train 321",
   description:
     "ANSI-accredited courses for food safety, alcohol service, and HR compliance. Take it on your phone, get your certificate the same day. Accepted in all 50 states."
 };

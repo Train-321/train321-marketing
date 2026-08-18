@@ -39,9 +39,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const page = await getLegalPage(slug);
-  if (!page) return { title: "Legal — Train321" };
+  if (!page) return { title: "Legal — Train 321" };
   return {
-    title: `${page.title} — Train321`,
+    title: `${page.title} — Train 321`,
     description: page.intro || ""
   };
 }

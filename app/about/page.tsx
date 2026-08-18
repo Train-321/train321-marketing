@@ -3,8 +3,8 @@ import { getSiteSettings, getAboutPage } from "@/lib/sanity";
 import "./about.css";
 
 export const metadata = {
-  title: "About — Train321",
-  description: "The team and mission behind Train321."
+  title: "About — Train 321",
+  description: "The team and mission behind Train 321."
 };
 
 export default async function AboutPage() {
@@ -19,7 +19,7 @@ export default async function AboutPage() {
   const heroHeading = page?.heroHeading || "Compliance training shouldn't feel like a tax.";
   const heroLede =
     page?.heroLede ||
-    "We started Train321 in 2018 because the alternatives felt built for lawyers, not for line cooks. Six years later, we've issued over 500,000 certificates to teams who actually finished the course.";
+    "We started Train 321 in 2018 because the alternatives felt built for lawyers, not for line cooks. Six years later, we've issued over 500,000 certificates to teams who actually finished the course.";
 
   const storyEyebrow = page?.storyHead?.eyebrow || "The mission";
   const storyHeading = page?.storyHead?.heading || "Make training so good, teams finish it";

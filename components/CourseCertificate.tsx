@@ -5,7 +5,7 @@ import "./CourseCertificate.css";
  * Marketing preview of the certificate learners actually receive.
  *
  * Mirrors the production DomPDF template (`templates/generic.blade.php` in the
- * Train321 backend): Letter landscape, the navy/cyan blob background, Montserrat
+ * Train 321 backend): Letter landscape, the navy/cyan blob background, Montserrat
  * on #01154F, and the 30/40/30 footer strip of issue meta · gold seal · signature.
  * Everything below the course title is sample data — real certificates are filled
  * from the learner's enrollment record.
