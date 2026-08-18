@@ -47,6 +47,7 @@ import {
   blockCallout,
   blockQuote
 } from './objects/bodyBlock'
+import { videoEmbed, callout } from './objects/blogBody'
 
 export const schemaTypes = [
   // Singleton page documents
@@ -91,12 +92,16 @@ export const schemaTypes = [
   quickFaq,
   labeledTile,
 
-  // Body blocks (markdown-style structured content)
+  // Body blocks (markdown-style structured content — legal pages)
   blockParagraph,
   blockHeading2,
   blockHeading3,
   blockBulletList,
   blockOrderedList,
   blockCallout,
-  blockQuote
+  blockQuote,
+
+  // Rich blog body inserts
+  videoEmbed,
+  callout
 ]

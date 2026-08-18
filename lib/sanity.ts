@@ -40,9 +40,18 @@ export type Course = {
   }>;
 };
 
+/** One node of a blog post's rich body. Portable Text blocks plus the
+    custom inserts (image, videoEmbed, callout). Rendered by
+    components/BlogPortableText. */
+export type BlogBodyNode = {
+  _type: string;
+  _key?: string;
+  [k: string]: unknown;
+};
+
 export type BlogPost = {
   slug: string;
-  body: string; // markdown string (converted from typed blocks)
+  body: BlogBodyNode[]; // Portable Text (legacy typed blocks are converted)
   title: string;
   excerpt?: string;
   category?: string;
@@ -404,6 +413,14 @@ const SERVER_TOKEN =
 // draft streaming falls back to server-side refetch.
 const BROWSER_TOKEN = process.env.SANITY_API_READ_TOKEN;
 
+// Fields whose values are CODE, not prose: grouping keys, Font Awesome
+// classes, tones/colors, and link targets. Stega's invisible click-to-edit
+// characters corrupt string comparisons (FAQ items grouped by category each
+// became their own group in the Presentation tool) and class names (icons
+// vanish), so these paths are excluded from encoding in preview.
+const STEGA_SKIP =
+  /(^|\.)(category|icon|heroIcon|tone|heroTone|color|style|kind|slug|url|href|to|id|enrollId|videoUrl|linkHref)$/i;
+
 // Default published client — used by the draft route + image URL builder.
 // stega.studioUrl lets the Live API encode click-to-edit pointers in preview.
 export const sanityClient = createClient({
@@ -412,7 +429,14 @@ export const sanityClient = createClient({
   apiVersion: "2025-01-01",
   useCdn: true,
   perspective: "published",
-  stega: { studioUrl: STUDIO_URL }
+  stega: {
+    studioUrl: STUDIO_URL,
+    filter: (props) => {
+      const last = String(props.sourcePath[props.sourcePath.length - 1] ?? "");
+      if (STEGA_SKIP.test(last)) return false;
+      return props.filterDefault(props);
+    }
+  }
 });
 
 // Live Content API. sanityFetch streams real-time updates to the browser
@@ -505,6 +529,86 @@ function blocksToMarkdown(blocks: AnyBlock[] | undefined | null): string {
     }
   }
   return out.join("\n\n");
+}
+
+// ── Legacy blog blocks → Portable Text ───────────────────────────────────
+// Blog bodies used to be arrays of custom typed objects (blockParagraph,
+// blockHeading2, …). The Studio now edits real Portable Text, and existing
+// posts were migrated — but any straggler (an old draft, an import) still
+// converts on read so it renders identically.
+
+let legacyKeySeq = 0;
+const legacyKey = () => `legacy${(legacyKeySeq++).toString(36)}`;
+
+function textBlock(
+  text: string,
+  style: string,
+  listItem?: "bullet" | "number"
+): BlogBodyNode {
+  return {
+    _type: "block",
+    _key: legacyKey(),
+    style,
+    ...(listItem ? { listItem, level: 1 } : {}),
+    markDefs: [],
+    children: [{ _type: "span", _key: legacyKey(), text, marks: [] }]
+  };
+}
+
+const LEGACY_BLOCK_TYPES = new Set([
+  "blockParagraph",
+  "blockHeading2",
+  "blockHeading3",
+  "blockBulletList",
+  "blockOrderedList",
+  "blockCallout",
+  "blockQuote"
+]);
+
+export function legacyBlocksToPortableText(
+  blocks: AnyBlock[] | null | undefined
+): BlogBodyNode[] {
+  if (!blocks || !blocks.length) return [];
+  const out: BlogBodyNode[] = [];
+  for (const b of blocks) {
+    const c = b.content;
+    switch (b._type) {
+      case "blockHeading2":
+        out.push(textBlock(String(c ?? ""), "h2"));
+        break;
+      case "blockHeading3":
+        out.push(textBlock(String(c ?? ""), "h3"));
+        break;
+      case "blockBulletList":
+        for (const item of (c as string[]) || []) out.push(textBlock(item, "normal", "bullet"));
+        break;
+      case "blockOrderedList":
+        for (const item of (c as string[]) || []) out.push(textBlock(item, "normal", "number"));
+        break;
+      case "blockCallout":
+        out.push({ _type: "callout", _key: legacyKey(), text: String(c ?? "") });
+        break;
+      case "blockQuote":
+        out.push(textBlock(String(c ?? ""), "blockquote"));
+        break;
+      case "blockParagraph":
+        out.push(textBlock(String(c ?? ""), "normal"));
+        break;
+      default:
+        // Already Portable Text (or an insert type) — pass through untouched.
+        out.push(b as unknown as BlogBodyNode);
+        break;
+    }
+  }
+  return out;
+}
+
+function normalizeBlogBody(raw: AnyBlock[] | null | undefined): BlogBodyNode[] {
+  if (!raw || !raw.length) return [];
+  const hasLegacy = raw.some((b) => LEGACY_BLOCK_TYPES.has(b._type));
+  return hasLegacy
+    ? legacyBlocksToPortableText(raw)
+    : (raw as unknown as BlogBodyNode[]);
 }
 
 // ── Public helpers ───────────────────────────────────────────────────────
@@ -603,7 +707,12 @@ const BLOG_PROJECTION = `
   },
   "coverImage": coverImage.asset->url + "?w=1600&auto=format",
   "coverImageAlt": coverImage.alt,
-  "rawBody": body
+  // Inline images resolve their CDN url here so the renderer needs no extra
+  // lookup; every other node passes through as stored.
+  "rawBody": body[]{
+    ...,
+    _type == "image" => { "url": asset->url, alt, caption }
+  }
 `;
 
 type BlogPostRow = Omit<BlogPost, "body"> & { rawBody: AnyBlock[] | null };
@@ -612,7 +721,7 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
   const rows: BlogPostRow[] = await (await getClient()).fetch(
     `*[_type == "blogPost" && defined(slug.current)] | order(publishedAt desc) { ${BLOG_PROJECTION} }`
   );
-  return rows.map((r) => ({ ...r, body: blocksToMarkdown(r.rawBody) }));
+  return rows.map((r) => ({ ...r, body: normalizeBlogBody(r.rawBody) }));
 }
 
 export async function getBlogPost(slug: string): Promise<BlogPost | null> {
@@ -621,7 +730,7 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
     { slug }
   );
   if (!r) return null;
-  return { ...r, body: blocksToMarkdown(r.rawBody) };
+  return { ...r, body: normalizeBlogBody(r.rawBody) };
 }
 
 const LEGAL_PROJECTION = `

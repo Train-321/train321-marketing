@@ -131,6 +131,8 @@ type RawVariant = {
   state_codes?: string[];
   state_exclude?: number;
   state_redirect_url?: string | null;
+  /** The variant's own marketplace Overview. Older backends omit it. */
+  marketplace_description?: string;
 };
 
 type RawCourse = {
@@ -228,11 +230,12 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
           all.push({
             id,
             name: v.name,
-            // Variants have no marketplace_description of their own, so they
-            // inherit the group's Overview — the copy an admin wrote for this
-            // family of courses. Still never the variant's own `description`,
-            // which is the in-course instructions page.
-            description: c.marketplace_description || "",
+            // Prefer the variant's own marketplace Overview (e.g. the Florida
+            // course's state-specific copy), falling back to the group's when
+            // the variant has none — or when the backend predates the field.
+            // Still never the variant's `description`, which is the in-course
+            // instructions page.
+            description: v.marketplace_description || c.marketplace_description || "",
             image: secureImageUrl(v.image),
             categoryId: c.category_id ?? null,
             price: Number(v.price ?? 0),

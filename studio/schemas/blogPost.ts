@@ -1,5 +1,5 @@
 import { defineType, defineField } from 'sanity'
-import { bodyBlockTypes } from './objects/bodyBlock'
+import { blogBodyMembers } from './objects/blogBody'
 
 // One post shows in the big hero card at the top of /blog. Editors tick
 // "featured" to choose it; without a pick the newest post takes the slot.
@@ -97,8 +97,9 @@ export default defineType({
       title: 'Body',
       type: 'array',
       group: 'content',
-      description: 'Add blocks in the order they should read. Drag to reorder.',
-      of: bodyBlockTypes
+      description:
+        'Write like a document: style text with the toolbar, and use the + button to insert images, videos, or callout boxes anywhere.',
+      of: blogBodyMembers
     }),
 
     defineField({

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import ReactMarkdown from "react-markdown";
+import BlogPortableText from "@/components/BlogPortableText";
 import { getBlogPost, getBlogPosts, getDetailPagesCopy } from "@/lib/sanity";
 import "./article.css";
 
@@ -135,23 +135,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
           </aside>
 
           <article className="t321-mkt-article__prose t321-mkt-prose">
-            <ReactMarkdown
-              components={{
-                blockquote: ({ children, ...props }) => {
-                  const text = String(children).trim();
-                  if (text.startsWith("💡")) {
-                    return (
-                      <aside className="t321-mkt-article__callout">
-                        {text.replace(/^💡\s*/, "")}
-                      </aside>
-                    );
-                  }
-                  return <blockquote {...props}>{children}</blockquote>;
-                }
-              }}
-            >
-              {post.body}
-            </ReactMarkdown>
+            <BlogPortableText value={post.body} />
 
             <div className="t321-mkt-article__sign">
               <div className="t321-mkt-article__avatar t321-mkt-article__avatar--lg" aria-hidden="true">
