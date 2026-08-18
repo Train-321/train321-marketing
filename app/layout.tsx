@@ -10,6 +10,7 @@ import { CartProvider } from "@/components/cart/CartContext";
 import CartDrawer from "@/components/cart/CartDrawer";
 import CartToast from "@/components/cart/CartToast";
 import { SanityLive } from "@/lib/sanity";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
 // Lazy-load visual editing — only pulled into the bundle when draft mode is on.
@@ -46,12 +47,26 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: "Train321",
     type: "website"
+  },
+  // Proves ownership of www.train321.com to Google Search Console. Google
+  // re-checks periodically, so this has to stay put after verification.
+  verification: {
+    google: "Nfaulb5Oqkq4Bu-Y0KcOXafksELW3wNovEkAvL5Vioo"
+  },
+  // marketing.train321.com serves this same app; a self-referencing canonical
+  // tells Google which host is the real one.
+  alternates: {
+    canonical: "/"
   }
 };
 
 export const viewport: Viewport = {
   themeColor: "#0B1F33"
 };
+
+// Google Analytics 4. Set only in production on Vercel, so preview
+// deployments and local dev never pollute the property's data.
+const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 const FA_HREF =
   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css";
@@ -116,6 +131,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <DisableDraftMode />
           </>
         )}
+        {GA_ID && <GoogleAnalytics gaId={GA_ID} />}
       </body>
     </html>
   );
