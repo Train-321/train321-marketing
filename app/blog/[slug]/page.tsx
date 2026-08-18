@@ -44,8 +44,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: post.excerpt || "",
       publishedTime: post.publishedAt,
       authors: post.author?.name ? [post.author.name] : undefined,
-      // The cover image beats the sitewide branded card when the post has one.
-      images: post.coverImage ? [{ url: post.coverImage }] : undefined
+      // The cover image when the post has one. Declaring openGraph here
+      // replaces the layout's file-convention image, so coverless posts must
+      // name the branded card explicitly or they'd ship with no og:image.
+      images: [{ url: post.coverImage || `${SITE_URL}/opengraph-image` }]
     }
   };
 }
