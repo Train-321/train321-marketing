@@ -1,4 +1,6 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 // Site-wide social share card (og:image). Rendered once at build; every route
 // without its own image inherits it. Blog posts override with their cover
@@ -8,7 +10,15 @@ export const alt = "Train 321 — Online compliance training";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OgImage() {
+export default async function OgImage() {
+  // The real logo, inlined as a data URI — satori can't fetch relative URLs.
+  // It carries navy elements that disappear on the navy background, so it
+  // sits on a white panel.
+  const logo = await readFile(
+    join(process.cwd(), "public", "img", "logos", "train321_logo.png")
+  );
+  const logoSrc = `data:image/png;base64,${logo.toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -24,31 +34,25 @@ export default function OgImage() {
           fontFamily: "sans-serif"
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 96,
-              height: 96,
-              borderRadius: 24,
-              background: "#00B4DB",
-              color: "#0B1F33",
-              fontSize: 52,
-              fontWeight: 800
-            }}
-          >
-            321
-          </div>
-          <div style={{ display: "flex", fontSize: 72, fontWeight: 800, letterSpacing: -2 }}>
-            TRAIN <span style={{ color: "#00B4DB", marginLeft: 18 }}>321</span>
-          </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            alignSelf: "flex-start",
+            background: "#ffffff",
+            borderRadius: 28,
+            padding: "36px 48px",
+            boxShadow: "0 12px 40px rgba(0,0,0,0.35)"
+          }}
+        >
+          {/* 1453×837 source — rendered at 380×219 keeps the aspect ratio. */}
+          <img src={logoSrc} width={380} height={219} alt="" />
         </div>
-        <div style={{ display: "flex", fontSize: 38, marginTop: 48, color: "#cfe9f5" }}>
+        <div style={{ display: "flex", fontSize: 40, marginTop: 52, color: "#e9f6fc", fontWeight: 700 }}>
           Online food safety, alcohol &amp; HR compliance training
         </div>
-        <div style={{ display: "flex", fontSize: 28, marginTop: 24, color: "#7fa8bf" }}>
+        <div style={{ display: "flex", fontSize: 28, marginTop: 20, color: "#8fb3c9" }}>
           ANAB-accredited · Instant certificates · train321.com
         </div>
       </div>
