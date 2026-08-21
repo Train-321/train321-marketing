@@ -16,6 +16,13 @@ import {
   resolveAvailability,
   type Availability
 } from "@/lib/states";
+import {
+  applyInferredState,
+  dedupeByName,
+  groupIdForCourse,
+  summarizeGroups,
+  type CourseGroupSummary
+} from "@/lib/courseGroups";
 
 const API_BASE = process.env.NEW_FEATURES_API_BASE || "https://api.train321.com";
 
@@ -61,6 +68,12 @@ export type MarketplaceCategory = {
 export type MarketplaceCatalog = {
   courses: MarketplaceCourse[];
   categories: MarketplaceCategory[];
+  /**
+   * The merged category+group taxonomy the storefront browses by. Always
+   * summarized from the FULL corrected result set, so it stays complete even
+   * when the courses array itself is filtered down to one group.
+   */
+  groups: CourseGroupSummary[];
   total: number;
   page: number;
   perPage: number;
@@ -119,6 +132,12 @@ export type CatalogQuery = {
    * nothing in the everywhere baseline.
    */
   anyState?: boolean;
+  /**
+   * Course-group slug (see lib/courseGroups.ts) — the merged category+group
+   * taxonomy the home finder browses by. Applied locally after the backend
+   * responds, because a group can claim courses the LMS left uncategorised.
+   */
+  groupId?: string | null;
 };
 
 type RawVariant = {
@@ -213,7 +232,11 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
       total?: number;
     };
 
-    const all: MarketplaceCourse[] = [];
+    // Everything the backend returned, before any state or group filtering —
+    // title-based state inference has to run over the whole set first, or a
+    // course whose state only exists in its title gets filtered out by the
+    // very tags we're about to correct.
+    const parsed: MarketplaceCourse[] = [];
     const seen = new Set<number>();
 
     for (const c of data.courses || []) {
@@ -225,9 +248,8 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
           if (v.state_redirect_url || !v.name) continue;
           if (!Number.isInteger(id) || id <= 0 || seen.has(id)) continue;
           const availability = resolveAvailability(v.state_label, v.state_codes, v.state_exclude);
-          if (!matches(availability)) continue;
           seen.add(id);
-          all.push({
+          parsed.push({
             id,
             name: v.name,
             // Prefer the variant's own marketplace Overview (e.g. the Florida
@@ -250,9 +272,8 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
       const id = Number(c.id);
       if (!Number.isInteger(id) || id <= 0 || seen.has(id)) continue;
       const availability = resolveAvailability(c.state_label, c.state_codes, c.state_exclude);
-      if (!matches(availability)) continue;
       seen.add(id);
-      all.push({
+      parsed.push({
         id,
         name: c.name || "",
         // Marketplace Overview ONLY — no fallback to the instructions
@@ -272,6 +293,19 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
       name: c.name
     }));
 
+    // Correct state tags the LMS never filled in, reading the state out of the
+    // course title. Narrowly scoped — see applyInferredState().
+    const corrected = parsed.map(applyInferredState);
+
+    // Group filter runs on the corrected set. A group can claim courses the
+    // backend left uncategorised, so this can't be pushed up into the
+    // marketplace_category_id the request already sent.
+    const scoped = query.groupId
+      ? corrected.filter((c) => groupIdForCourse(c) === query.groupId)
+      : corrected;
+
+    let all = scoped.filter((c) => matches(c.availability));
+
     // With a state picked, that state's own versions lead and the broadly
     // available courses (everywhere / everywhere-except) follow. Stable
     // sort, so the backend's ordering is kept within each bucket.
@@ -280,15 +314,21 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
       all.sort((a, b) => Number(specific(b)) - Number(specific(a)));
     }
 
+    // Collapse cards that read identically — the LMS ships one course per
+    // state bucket under a single name. Runs AFTER the sort so the version
+    // that survives is the one most relevant to the picked state.
+    all = dedupeByName(all);
+
     return {
       courses: all.slice((page - 1) * perPage, page * perPage),
       categories,
+      groups: summarizeGroups(corrected),
       total: all.length,
       page,
       perPage
     };
   } catch {
     // Network/backend hiccup — render an empty catalog rather than crash the page.
-    return { courses: [], categories: [], total: 0, page, perPage };
+    return { courses: [], categories: [], groups: [], total: 0, page, perPage };
   }
 }

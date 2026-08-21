@@ -1,10 +1,17 @@
 "use client";
 
-// The home hero's course finder: category chips + a state picker where the
-// old "Find my course / See how it works" buttons stood, driving a live
+// The home hero's course finder: course-group chips + a state picker where
+// the old "Find my course / See how it works" buttons stood, driving a live
 // course grid in its own section right below the hero. Cards match the
 // /catalog page exactly (same classes, same add-to-cart), and the section
 // always ends in a link out to the full catalog carrying the picked state.
+//
+// The chips are COURSE GROUPS, not raw LMS categories — see lib/courseGroups.ts
+// for why the two were merged. Picking a state-regulated group (alcohol, food
+// handler, harassment) opens the state dialog first, because those courses
+// don't mean anything until we know where the buyer works. Role-training
+// groups (front/back of house) filter straight through: the same course
+// applies in every state, so a prompt would be pure friction.
 //
 // The controls live inside the hero body while the results section sits
 // outside the hero entirely, so — like the course page's state picker — the
@@ -22,12 +29,13 @@ import {
 } from "react";
 import type {
   MarketplaceCatalog,
-  MarketplaceCategory,
   MarketplaceCourse
 } from "@/lib/newFeatures";
+import type { CourseGroupSummary } from "@/lib/courseGroups";
 import { US_STATES } from "@/lib/states";
 import CustomSelect from "./CustomSelect";
 import CourseCard from "./CourseCard";
+import GroupStateDialog from "./GroupStateDialog";
 import { CourseModalProvider } from "./CourseModal";
 import "@/app/catalog/catalog.css";
 import "./HomeCourseFinder.css";
@@ -36,19 +44,23 @@ import "./HomeCourseFinder.css";
 const ALL_STATES_OPTION = "All states";
 const STATE_OPTIONS = [ALL_STATES_OPTION, ...US_STATES.map((s) => s.name)];
 
+/** Sentinel group id for the unfiltered everything view. */
+const ALL_GROUPS = "all";
+
 /** How many cards the home section shows — the catalog handles the rest. */
 const HOME_PAGE_SIZE = 6;
 
 export type HomeMarketplace = {
   courses: MarketplaceCourse[];
-  categories: MarketplaceCategory[];
+  groups: CourseGroupSummary[];
   total: number;
 };
 
 type FinderState = {
-  categories: MarketplaceCategory[];
-  activeCategory: string;
-  setActiveCategory: (id: string) => void;
+  groups: CourseGroupSummary[];
+  activeGroup: string;
+  /** Chip click — may open the state dialog before the filter actually moves. */
+  pickGroup: (id: string) => void;
   stateName: string;
   setStateName: (name: string) => void;
   courses: MarketplaceCourse[];
@@ -56,7 +68,7 @@ type FinderState = {
   loading: boolean;
   /**
    * Upsell shown when the main result is empty: with a state picked, other
-   * courses available in that state; with only a category, that category's
+   * courses available in that state; with only a group, that group's
    * state-specific courses. Null when the main result has content (or the
    * fallback itself came back empty).
    */
@@ -71,6 +83,18 @@ function useFinder() {
   return ctx;
 }
 
+/** Anchor the group chips scroll to, so a pick shows its own results. */
+const FINDER_RESULTS_ID = "course-results";
+
+/** Picking a filter moves a list that's below the fold on desktop — without
+    this the chip looks like it did nothing. */
+function scrollToResults() {
+  const results = document.getElementById(FINDER_RESULTS_ID);
+  if (!results) return;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  results.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+}
+
 export function HomeFinderProvider({
   marketplace,
   children
@@ -78,12 +102,14 @@ export function HomeFinderProvider({
   marketplace: HomeMarketplace;
   children: React.ReactNode;
 }) {
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [activeGroup, setActiveGroup] = useState(ALL_GROUPS);
   const [stateName, setStateName] = useState("");
   const [courses, setCourses] = useState(marketplace.courses.slice(0, HOME_PAGE_SIZE));
   const [total, setTotal] = useState(marketplace.total);
   const [loading, setLoading] = useState(false);
   const [fallback, setFallback] = useState<FinderState["fallback"]>(null);
+  /** The group awaiting a state answer. Non-null == dialog is up. */
+  const [pendingGroup, setPendingGroup] = useState<CourseGroupSummary | null>(null);
 
   const fetchPage = useCallback(async (params: URLSearchParams) => {
     params.set("perPage", String(HOME_PAGE_SIZE));
@@ -93,11 +119,11 @@ export function HomeFinderProvider({
   }, []);
 
   const refetch = useCallback(
-    async (category: string, state: string) => {
+    async (group: string, state: string) => {
       setLoading(true);
       try {
         const params = new URLSearchParams();
-        if (category !== "all") params.set("categoryId", category);
+        if (group !== ALL_GROUPS) params.set("groupId", group);
         const code = US_STATES.find((s) => s.name === state)?.code;
         if (code) params.set("stateCode", code);
 
@@ -107,28 +133,26 @@ export function HomeFinderProvider({
 
         // Empty result → upsell what IS available instead of a dead end,
         // trying the most relevant pool first. A buyer's state is fixed but
-        // their category isn't, so a picked state falls back to that state's
-        // other courses; a bare category falls back to its state-specific
-        // versions; and a category with nothing at all (or a fallback that
+        // their group isn't, so a picked state falls back to that state's
+        // other courses; a bare group falls back to its state-specific
+        // versions; and a group with nothing at all (or a fallback that
         // itself came back empty) falls back to courses from the other
-        // categories so there's always something on screen next to the
+        // groups so there's always something on screen next to the
         // catalog CTA.
         if (data.total === 0) {
-          const catName = marketplace.categories.find(
-            (c) => String(c.id) === category
-          )?.name;
+          const groupName = marketplace.groups.find((g) => g.id === group)?.name;
 
           const candidates: Array<{ params: URLSearchParams; label: string; hint: string }> = [];
           if (code) {
             candidates.push({
               params: new URLSearchParams({ stateCode: code }),
               label: `Other courses available in ${state}`,
-              hint: `More training approved for ${state}, from every category.`
+              hint: `More training approved for ${state}, from every group.`
             });
-          } else if (category !== "all") {
+          } else if (group !== ALL_GROUPS) {
             candidates.push({
-              params: new URLSearchParams({ categoryId: category, anyState: "1" }),
-              label: `${catName || "These"} courses for specific states`,
+              params: new URLSearchParams({ groupId: group, anyState: "1" }),
+              label: `${groupName || "These"} courses for specific states`,
               hint: "Offered state by state — pick yours above to confirm what applies."
             });
           }
@@ -136,10 +160,10 @@ export function HomeFinderProvider({
           // main query actually had a filter; if THAT query was already
           // unfiltered and still empty, the LMS is down and there's nothing
           // to fetch.
-          if (code || category !== "all") {
+          if (code || group !== ALL_GROUPS) {
             candidates.push({
               params: new URLSearchParams(),
-              label: "Popular courses from our other categories",
+              label: "Popular courses from our other groups",
               hint: "From across the catalog — pick anything, or browse the full list."
             });
           }
@@ -162,7 +186,41 @@ export function HomeFinderProvider({
         setLoading(false);
       }
     },
-    [fetchPage, marketplace.categories]
+    [fetchPage, marketplace.groups]
+  );
+
+  /**
+   * Chip click. A state-regulated group with no state on file asks first;
+   * everything else filters immediately.
+   *
+   * We ask ONCE, not once per chip: after the buyer has told us their state,
+   * moving between groups keeps it and re-prompting would be nagging. The
+   * state dropdown under the chips is always there to change it.
+   */
+  const pickGroup = useCallback(
+    (id: string) => {
+      const group = marketplace.groups.find((g) => g.id === id);
+      if (group?.stateAware && !stateName) {
+        setPendingGroup(group);
+        return;
+      }
+      setActiveGroup(id);
+      scrollToResults();
+    },
+    [marketplace.groups, stateName]
+  );
+
+  /** Dialog answered — commit the group and the state together. */
+  const confirmPending = useCallback(
+    (picked: string) => {
+      if (!pendingGroup) return;
+      setActiveGroup(pendingGroup.id);
+      setStateName(picked);
+      setPendingGroup(null);
+      // Let the dialog unmount and the grid re-render before moving the page.
+      requestAnimationFrame(scrollToResults);
+    },
+    [pendingGroup]
   );
 
   // Refetch when a filter changes; the server-rendered first page covers the
@@ -173,14 +231,14 @@ export function HomeFinderProvider({
       firstRender.current = false;
       return;
     }
-    refetch(activeCategory, stateName);
-  }, [activeCategory, stateName, refetch]);
+    refetch(activeGroup, stateName);
+  }, [activeGroup, stateName, refetch]);
 
   const value = useMemo(
     () => ({
-      categories: marketplace.categories,
-      activeCategory,
-      setActiveCategory,
+      groups: marketplace.groups,
+      activeGroup,
+      pickGroup,
       stateName,
       setStateName,
       courses,
@@ -188,46 +246,43 @@ export function HomeFinderProvider({
       loading,
       fallback
     }),
-    [marketplace.categories, activeCategory, stateName, courses, total, loading, fallback]
+    [marketplace.groups, activeGroup, pickGroup, stateName, courses, total, loading, fallback]
   );
 
-  return <FinderCtx.Provider value={value}>{children}</FinderCtx.Provider>;
+  return (
+    <FinderCtx.Provider value={value}>
+      {children}
+      {/* Owned by the provider, not by FinderControls — the controls render
+          twice (hero + mobile) and would otherwise mount two dialogs. */}
+      <GroupStateDialog
+        group={pendingGroup}
+        onConfirm={confirmPending}
+        onClose={() => setPendingGroup(null)}
+      />
+    </FinderCtx.Provider>
+  );
 }
 
-/** Anchor the category chips scroll to, so a pick shows its own results. */
-const FINDER_RESULTS_ID = "course-results";
-
-/** Hero-body half: category chips + the searchable state dropdown. */
+/** Hero-body half: course-group chips + the searchable state dropdown. */
 export function FinderControls() {
-  const { categories, activeCategory, setActiveCategory, stateName, setStateName } =
-    useFinder();
-
-  // Picking a category filters a list further down the page, which on desktop
-  // is below the fold — without this the chip looks like it did nothing.
-  const pickCategory = (id: string) => {
-    setActiveCategory(id);
-    const results = document.getElementById(FINDER_RESULTS_ID);
-    if (!results) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    results.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
-  };
+  const { groups, activeGroup, pickGroup, stateName, setStateName } = useFinder();
 
   const chips = [
-    { id: "all", label: "All courses" },
-    ...categories.map((c) => ({ id: String(c.id), label: c.name }))
+    { id: ALL_GROUPS, label: "All courses" },
+    ...groups.map((g) => ({ id: g.id, label: g.name }))
   ];
 
   return (
     <div className="t321-hcf">
-      <div className="t321-hcf__cats" role="tablist" aria-label="Course category">
+      <div className="t321-hcf__cats" role="tablist" aria-label="Course group">
         {chips.map((c) => (
           <button
             key={c.id}
             type="button"
             role="tab"
-            aria-selected={activeCategory === c.id}
-            className={`t321-mkt-catalog__chip${activeCategory === c.id ? " is-active" : ""}`}
-            onClick={() => pickCategory(c.id)}
+            aria-selected={activeGroup === c.id}
+            className={`t321-mkt-catalog__chip${activeGroup === c.id ? " is-active" : ""}`}
+            onClick={() => pickGroup(c.id)}
           >
             {c.label}
           </button>
@@ -280,12 +335,12 @@ function SkeletonCards({ count = 3 }: { count?: number }) {
 
 /** Below-hero half: the filtered course grid + the path into the catalog. */
 export function FinderResults() {
-  const { categories, activeCategory, stateName, courses, total, loading, fallback } =
+  const { groups, activeGroup, stateName, courses, total, loading, fallback } =
     useFinder();
 
   const stateCode = US_STATES.find((s) => s.name === stateName)?.code;
   const catalogHref = stateCode ? `/catalog?state=${stateCode}` : "/catalog";
-  const categoryName = categories.find((c) => String(c.id) === activeCategory)?.name;
+  const groupName = groups.find((g) => g.id === activeGroup)?.name;
 
   return (
     <CourseModalProvider>
@@ -305,9 +360,9 @@ export function FinderResults() {
               the opposite of what the cards underneath show. */}
           <h2 className="t321-mkt-h2">
             {stateName
-              ? `${categoryName || "Courses"} in ${stateName}`
-              : categoryName
-                ? `All ${categoryName} courses`
+              ? `${groupName || "Courses"} in ${stateName}`
+              : groupName
+                ? `All ${groupName} courses`
                 : "All courses"}
           </h2>
         </div>
@@ -327,7 +382,7 @@ export function FinderResults() {
               aria-hidden="true"
             />
             <h3>
-              No {categoryName ? `${categoryName.toLowerCase()} courses` : "courses"}
+              No {groupName ? `${groupName.toLowerCase()} courses` : "courses"}
               {stateName ? ` in ${stateName}` : ""} yet
             </h3>
             {fallback ? (
@@ -339,8 +394,8 @@ export function FinderResults() {
               <>
                 <p>
                   {stateName
-                    ? "Try another category or state — or see everything we offer in one place."
-                    : "Try another category — or see everything we offer in one place."}
+                    ? "Try another group or state — or see everything we offer in one place."
+                    : "Try another group — or see everything we offer in one place."}
                 </p>
                 <Link href={catalogHref} className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg">
                   Browse the full catalog
@@ -358,7 +413,7 @@ export function FinderResults() {
         )}
 
         {/* Upsell grid for an empty result — other courses in the picked
-            state, or the category's state-specific versions. */}
+            state, or the group's state-specific versions. */}
         {courses.length === 0 && !loading && fallback && (
           <div className="t321-hcf__fallback">
             <h3 className="t321-mkt-h3">{fallback.label}</h3>

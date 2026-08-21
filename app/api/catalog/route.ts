@@ -16,7 +16,8 @@ export async function GET(request: Request) {
     page: Number(searchParams.get("page") || 1),
     perPage: perPageParam > 0 ? Math.min(50, perPageParam) : undefined,
     stateCode: searchParams.get("stateCode") || null,
-    anyState: searchParams.get("anyState") === "1"
+    anyState: searchParams.get("anyState") === "1",
+    groupId: searchParams.get("groupId") || null
   });
 
   return NextResponse.json(data);

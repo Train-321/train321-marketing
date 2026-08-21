@@ -35,7 +35,7 @@ export default async function IndividualsPage() {
       home={home}
       marketplace={{
         courses: catalog.courses,
-        categories: catalog.categories,
+        groups: catalog.groups,
         total: catalog.total
       }}
     />
