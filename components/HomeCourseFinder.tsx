@@ -417,7 +417,7 @@ function SkeletonCards({ count = 3 }: { count?: number }) {
 
 /** Below-hero half: the filtered course grid + the path into the catalog. */
 export function FinderResults() {
-  const { groups, activeGroup, activeCategory, stateName, courses, total, loading, fallback } =
+  const { groups, activeGroup, categories, activeCategory, stateName, courses, total, loading, fallback } =
     useFinder();
 
   const stateCode = US_STATES.find((s) => s.name === stateName)?.code;
@@ -430,7 +430,10 @@ export function FinderResults() {
   if (activeCategory !== ALL_GROUPS) catalogParams.set("category", activeCategory);
   if (stateCode) catalogParams.set("state", stateCode);
   const catalogHref = catalogParams.toString() ? `/catalog?${catalogParams.toString()}` : "/catalog";
-  const groupName = groups.find((g) => g.id === activeGroup)?.name;
+  // The heading names whichever filter is active — group or category chip.
+  const groupName =
+    groups.find((g) => g.id === activeGroup)?.name ??
+    categories.find((c) => String(c.id) === activeCategory)?.name;
 
   return (
     <CourseModalProvider>

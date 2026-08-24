@@ -194,6 +194,26 @@ const normalizeName = (name: string) =>
   name.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
 /**
+ * LMS test data — "Test course Group", "TESTING - Back of House 101" — that
+ * must never reach the storefront. A guard, not the fix: the real cleanup is
+ * deleting these entries in the LMS admin. Matching "test"/"testing" as a
+ * whole word keeps names like "Contest" safe.
+ */
+export const isTestName = (name: string): boolean => /\btest(?:ing)?\b/i.test(name);
+
+/**
+ * Does an LMS group's name subsume a category's? ("Sexual Harassment
+ * Prevention" covers "Sexual Harassment".) Chip dedup can't rely on ids
+ * alone because a group doesn't always carry a category_id — the Sexual
+ * Harassment Prevention group's is null in the LMS today.
+ */
+export function groupNameCoversCategory(groupName: string, categoryName: string): boolean {
+  const g = normalizeName(groupName);
+  const c = normalizeName(categoryName);
+  return !!c && (g === c || g.startsWith(`${c} `));
+}
+
+/**
  * Collapse courses that read identically on a card.
  *
  * The LMS ships the same product once per state bucket — two separate courses

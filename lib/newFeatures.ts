@@ -19,6 +19,8 @@ import {
 import {
   applyInferredState,
   dedupeByName,
+  groupNameCoversCategory,
+  isTestName,
   type CourseGroupSummary
 } from "@/lib/courseGroups";
 
@@ -314,9 +316,20 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
       });
     }
 
+    // Strip LMS test data before anything downstream sees it: a test-named
+    // group takes its variants with it, and stray test courses go too.
+    const testGroupIds = new Set(
+      Array.from(groupMeta.entries())
+        .filter(([, meta]) => isTestName(meta.name))
+        .map(([gid]) => gid)
+    );
+    const kept = parsed.filter(
+      (c) => !isTestName(c.name) && !(c.lmsGroupId && testGroupIds.has(c.lmsGroupId))
+    );
+
     // Correct state tags the LMS never filled in, reading the state out of the
     // course title. Narrowly scoped — see applyInferredState().
-    const corrected = parsed.map(applyInferredState);
+    const corrected = kept.map(applyInferredState);
 
     // Enrich each category with its state info, derived from its own courses —
     // so a category chip can open the same state dialog a group does. Built
@@ -345,6 +358,7 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
     // variants: a group with state-specific versions opens the state dialog; a
     // nationwide one filters straight through.
     const lmsGroups: CourseGroupSummary[] = Array.from(groupMeta.entries())
+      .filter(([, meta]) => !isTestName(meta.name))
       .map(([gid, meta]) => {
         const members = corrected.filter((c) => c.lmsGroupId === gid);
         const stateCodes = new Set<string>();
@@ -369,6 +383,25 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
       })
       .filter((g) => g.count > 0);
 
+    // One chip per concept: a category is hidden when an LMS group already
+    // fronts the same courses, so the buyer never sees "Alcohol Safety" twice.
+    // Coverage is matched by the category id the group's variants carry, or by
+    // name when the LMS left the group's category_id null (see
+    // groupNameCoversCategory). Categories no group covers — Back of House,
+    // Front of House — keep their chips. Managed entirely in the LMS: creating
+    // a Course Group there replaces its category chip here automatically.
+    const coveredCategoryIds = new Set<number>();
+    for (const g of lmsGroups) {
+      for (const m of corrected) {
+        if (m.lmsGroupId === g.id && m.categoryId !== null) coveredCategoryIds.add(m.categoryId);
+      }
+    }
+    const visibleCategories = categories.filter(
+      (cat) =>
+        !coveredCategoryIds.has(cat.id) &&
+        !lmsGroups.some((g) => groupNameCoversCategory(g.name, cat.name))
+    );
+
     // Group filter runs on the corrected set, matching the course's LMS group
     // id — the same ids the chips carry.
     const scoped = query.groupId
@@ -392,7 +425,7 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
 
     return {
       courses: all.slice((page - 1) * perPage, page * perPage),
-      categories,
+      categories: visibleCategories,
       groups: lmsGroups,
       total: all.length,
       page,
