@@ -60,6 +60,14 @@
   animation: t321MktSelectIn 140ms ease-out;
 }
 
+/* Opened upward — pinned above the control instead of below, for when there
+   isn't room beneath it (e.g. the hero's state picker near the fold). */
+.t321-mkt-select__menu.is-up {
+  top: auto;
+  bottom: calc(100% + 6px);
+  transform-origin: bottom center;
+}
+
 .t321-mkt-select__search {
   display: flex;
   align-items: center;

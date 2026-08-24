@@ -365,7 +365,12 @@ export function FinderControls() {
           value={stateName}
           options={STATE_OPTIONS}
           placeholder="Choose your state…"
-          onChange={(v) => setStateName(v === ALL_STATES_OPTION ? "" : v)}
+          onChange={(v) => {
+            setStateName(v === ALL_STATES_OPTION ? "" : v);
+            // Picking a state narrows the list below the fold — take the
+            // visitor to it, the same as a chip does.
+            scrollToResults();
+          }}
           ariaLabel="Your state"
           searchable
           searchPlaceholder="Search states…"

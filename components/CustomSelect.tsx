@@ -25,6 +25,10 @@ export default function CustomSelect({
   searchPlaceholder = "Type to search…"
 }: CustomSelectProps) {
   const [open, setOpen] = useState(false);
+  // Whether the menu opens upward — decided when it opens, from the space
+  // available below the control. Near the bottom of the viewport (e.g. the
+  // hero's state picker) it flips up instead of being clipped.
+  const [dropUp, setDropUp] = useState(false);
   const [highlight, setHighlight] = useState(-1);
   const [query, setQuery] = useState("");
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -82,6 +86,19 @@ export default function CustomSelect({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
+  // Decide drop direction the moment the menu opens: if there isn't room for
+  // the menu below the control but there is above, open upward.
+  const openMenu = () => {
+    const rect = wrapRef.current?.getBoundingClientRect();
+    if (rect) {
+      const MENU_MAX = 320; // menu max-height (300) + a little breathing room
+      const below = window.innerHeight - rect.bottom;
+      const above = rect.top;
+      setDropUp(below < MENU_MAX && above > below);
+    }
+    setOpen(true);
+  };
+
   const choose = (opt: string) => {
     onChange(opt);
     setOpen(false);
@@ -127,7 +144,7 @@ export default function CustomSelect({
   const onButtonKey = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      setOpen(true);
+      openMenu();
     }
   };
 
@@ -139,14 +156,14 @@ export default function CustomSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={ariaLabel}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => (open ? setOpen(false) : openMenu())}
         onKeyDown={onButtonKey}
       >
         <span className="t321-mkt-select__label">{value || placeholder}</span>
         <i className="fas fa-chevron-down" aria-hidden="true" />
       </button>
       {open && (
-        <div className="t321-mkt-select__menu" role="presentation">
+        <div className={`t321-mkt-select__menu${dropUp ? " is-up" : ""}`} role="presentation">
           {searchable && (
             <div className="t321-mkt-select__search">
               <i className="fas fa-search" aria-hidden="true" />
