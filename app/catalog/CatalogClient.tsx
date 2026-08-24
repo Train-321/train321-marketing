@@ -161,13 +161,25 @@ export default function CatalogClient({
     return () => clearTimeout(t);
   }, [query, activeGroup, activeCategory, stateName, fetchPage]);
 
-  // Deep links from the home course finder ("/catalog?state=OH") preselect
-  // the state. Read once on mount — defined AFTER the reload effect so the
-  // resulting state change triggers a normal filtered fetch.
+  // Deep links from the home course finder preselect the group AND state the
+  // visitor was looking at ("/catalog?group=group-8&state=OH"), so the catalog
+  // opens on the same filtered view. Read once on mount — defined AFTER the
+  // reload effect so the resulting state change triggers a normal filtered
+  // fetch. The group is set directly (not via pickGroup) so it never re-opens
+  // the state dialog: the state is already in hand.
   useEffect(() => {
-    const code = new URLSearchParams(window.location.search).get("state");
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("state");
     const match = code && US_STATES.find((s) => s.code === code.toUpperCase());
     if (match) setStateName(match.name);
+
+    const group = params.get("group");
+    if (group && groups.some((g) => g.id === group)) {
+      setActiveCategory(ALL);
+      setActiveGroup(group);
+    }
+    // groups is server-provided and stable for the page; this runs once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const resetFilters = () => {

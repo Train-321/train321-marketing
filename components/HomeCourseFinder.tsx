@@ -380,7 +380,13 @@ export function FinderResults() {
     useFinder();
 
   const stateCode = US_STATES.find((s) => s.name === stateName)?.code;
-  const catalogHref = stateCode ? `/catalog?state=${stateCode}` : "/catalog";
+  // Carry the active group AND state into the catalog, so "Explore the full
+  // catalog" lands there with the same filter the visitor was looking at —
+  // the group's courses in their state, not the whole catalog.
+  const catalogParams = new URLSearchParams();
+  if (activeGroup !== ALL_GROUPS) catalogParams.set("group", activeGroup);
+  if (stateCode) catalogParams.set("state", stateCode);
+  const catalogHref = catalogParams.toString() ? `/catalog?${catalogParams.toString()}` : "/catalog";
   const groupName = groups.find((g) => g.id === activeGroup)?.name;
 
   return (
