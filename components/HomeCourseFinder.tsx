@@ -29,6 +29,7 @@ import {
 } from "react";
 import type {
   MarketplaceCatalog,
+  MarketplaceCategory,
   MarketplaceCourse
 } from "@/lib/newFeatures";
 import type { CourseGroupSummary } from "@/lib/courseGroups";
@@ -53,6 +54,8 @@ const HOME_PAGE_SIZE = 6;
 export type HomeMarketplace = {
   courses: MarketplaceCourse[];
   groups: CourseGroupSummary[];
+  /** Marketplace categories, shown as chips AFTER the group chips. */
+  categories: MarketplaceCategory[];
   total: number;
 };
 
@@ -61,6 +64,10 @@ type FinderState = {
   activeGroup: string;
   /** Chip click — may open the state dialog before the filter actually moves. */
   pickGroup: (id: string) => void;
+  categories: MarketplaceCategory[];
+  activeCategory: string;
+  /** Category chip click — filters straight through, no dialog. */
+  pickCategory: (id: string) => void;
   stateName: string;
   setStateName: (name: string) => void;
   courses: MarketplaceCourse[];
@@ -103,6 +110,9 @@ export function HomeFinderProvider({
   children: React.ReactNode;
 }) {
   const [activeGroup, setActiveGroup] = useState(ALL_GROUPS);
+  // A group and a category are mutually exclusive; picking one clears the
+  // other, so a request never carries both. Shares the "all" sentinel.
+  const [activeCategory, setActiveCategory] = useState(ALL_GROUPS);
   const [stateName, setStateName] = useState("");
   const [courses, setCourses] = useState(marketplace.courses.slice(0, HOME_PAGE_SIZE));
   const [total, setTotal] = useState(marketplace.total);
@@ -119,11 +129,12 @@ export function HomeFinderProvider({
   }, []);
 
   const refetch = useCallback(
-    async (group: string, state: string) => {
+    async (group: string, category: string, state: string) => {
       setLoading(true);
       try {
         const params = new URLSearchParams();
         if (group !== ALL_GROUPS) params.set("groupId", group);
+        if (category !== ALL_GROUPS) params.set("categoryId", category);
         const code = US_STATES.find((s) => s.name === state)?.code;
         if (code) params.set("stateCode", code);
 
@@ -199,21 +210,36 @@ export function HomeFinderProvider({
    */
   const pickGroup = useCallback(
     (id: string) => {
+      if (id === ALL_GROUPS) {
+        setActiveGroup(ALL_GROUPS);
+        setActiveCategory(ALL_GROUPS);
+        scrollToResults();
+        return;
+      }
       const group = marketplace.groups.find((g) => g.id === id);
       if (group?.stateAware && !stateName) {
         setPendingGroup(group);
         return;
       }
+      setActiveCategory(ALL_GROUPS);
       setActiveGroup(id);
       scrollToResults();
     },
     [marketplace.groups, stateName]
   );
 
+  /** Category chip — filters straight through, clearing any active group. */
+  const pickCategory = useCallback((id: string) => {
+    setActiveGroup(ALL_GROUPS);
+    setActiveCategory(id);
+    scrollToResults();
+  }, []);
+
   /** Dialog answered — commit the group and the state together. */
   const confirmPending = useCallback(
     (picked: string) => {
       if (!pendingGroup) return;
+      setActiveCategory(ALL_GROUPS);
       setActiveGroup(pendingGroup.id);
       setStateName(picked);
       setPendingGroup(null);
@@ -231,14 +257,17 @@ export function HomeFinderProvider({
       firstRender.current = false;
       return;
     }
-    refetch(activeGroup, stateName);
-  }, [activeGroup, stateName, refetch]);
+    refetch(activeGroup, activeCategory, stateName);
+  }, [activeGroup, activeCategory, stateName, refetch]);
 
   const value = useMemo(
     () => ({
       groups: marketplace.groups,
       activeGroup,
       pickGroup,
+      categories: marketplace.categories,
+      activeCategory,
+      pickCategory,
       stateName,
       setStateName,
       courses,
@@ -246,7 +275,7 @@ export function HomeFinderProvider({
       loading,
       fallback
     }),
-    [marketplace.groups, activeGroup, pickGroup, stateName, courses, total, loading, fallback]
+    [marketplace.groups, activeGroup, pickGroup, marketplace.categories, activeCategory, pickCategory, stateName, courses, total, loading, fallback]
   );
 
   return (
@@ -265,28 +294,40 @@ export function HomeFinderProvider({
 
 /** Hero-body half: course-group chips + the searchable state dropdown. */
 export function FinderControls() {
-  const { groups, activeGroup, pickGroup, stateName, setStateName } = useFinder();
+  const { groups, activeGroup, pickGroup, categories, activeCategory, pickCategory, stateName, setStateName } =
+    useFinder();
 
-  const chips = [
-    { id: ALL_GROUPS, label: "All courses" },
-    ...groups.map((g) => ({ id: g.id, label: g.name }))
+  // One row: All, then group chips, then category chips. Same order and same
+  // behaviour as the catalog page.
+  const chips: Array<{ id: string; label: string; kind: "all" | "group" | "category" }> = [
+    { id: ALL_GROUPS, label: "All courses", kind: "all" },
+    ...groups.map((g) => ({ id: g.id, label: g.name, kind: "group" as const })),
+    ...categories.map((c) => ({ id: String(c.id), label: c.name, kind: "category" as const }))
   ];
 
   return (
     <div className="t321-hcf">
-      <div className="t321-hcf__cats" role="tablist" aria-label="Course group">
-        {chips.map((c) => (
-          <button
-            key={c.id}
-            type="button"
-            role="tab"
-            aria-selected={activeGroup === c.id}
-            className={`t321-mkt-catalog__chip${activeGroup === c.id ? " is-active" : ""}`}
-            onClick={() => pickGroup(c.id)}
-          >
-            {c.label}
-          </button>
-        ))}
+      <div className="t321-hcf__cats" role="tablist" aria-label="Course group and category">
+        {chips.map((c) => {
+          const active =
+            c.kind === "all"
+              ? activeGroup === ALL_GROUPS && activeCategory === ALL_GROUPS
+              : c.kind === "group"
+                ? activeGroup === c.id
+                : activeCategory === c.id;
+          return (
+            <button
+              key={`${c.kind}:${c.id}`}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              className={`t321-mkt-catalog__chip${active ? " is-active" : ""}`}
+              onClick={() => (c.kind === "category" ? pickCategory(c.id) : pickGroup(c.id))}
+            >
+              {c.label}
+            </button>
+          );
+        })}
       </div>
       <div className="t321-hcf__state">
         <CustomSelect

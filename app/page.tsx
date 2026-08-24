@@ -36,6 +36,7 @@ export default async function Page() {
       marketplace={{
         courses: catalog.courses,
         groups: catalog.groups,
+        categories: catalog.categories,
         total: catalog.total
       }}
     />

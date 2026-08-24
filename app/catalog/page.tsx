@@ -12,7 +12,7 @@ export const metadata = {
 // LMS backend marketplace — not Sanity. The Sanity catalog page doc still
 // supplies the editorial hero copy + bottom CTA.
 export default async function CatalogPage() {
-  const [{ courses, categories, total }, page] = await Promise.all([
+  const [{ courses, categories, groups, total }, page] = await Promise.all([
     getMarketplaceCatalog(),
     getCatalogPage()
   ]);
@@ -21,6 +21,7 @@ export default async function CatalogPage() {
     <CatalogClient
       initialCourses={courses}
       categories={categories}
+      groups={groups}
       initialTotal={total}
       page={page}
     />

@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CatalogPage } from "@/lib/sanity";
 import type { MarketplaceCourse, MarketplaceCategory, MarketplaceCatalog } from "@/lib/newFeatures";
+import type { CourseGroupSummary } from "@/lib/courseGroups";
 import CustomSelect from "@/components/CustomSelect";
 import CourseCard from "@/components/CourseCard";
+import GroupStateDialog from "@/components/GroupStateDialog";
 import { CourseModalProvider } from "@/components/CourseModal";
 import { US_STATES } from "@/lib/states";
 import "./catalog.css";
@@ -14,9 +16,15 @@ import "./catalog.css";
 const ALL_STATES_OPTION = "All states";
 const STATE_OPTIONS = [ALL_STATES_OPTION, ...US_STATES.map((s) => s.name)];
 
+/** Shared "no filter" sentinel for both the group and the category selection. */
+const ALL = "all";
+
 type Props = {
   initialCourses: MarketplaceCourse[];
   categories: MarketplaceCategory[];
+  /** Course-group chips shown BEFORE the category chips (see HomeCourseFinder,
+      which uses the same summaries and the same state dialog). */
+  groups: CourseGroupSummary[];
   initialTotal: number;
   page?: CatalogPage | null;
 };
@@ -24,12 +32,21 @@ type Props = {
 export default function CatalogClient({
   initialCourses,
   categories,
+  groups,
   initialTotal,
   page
 }: Props) {
   const [query, setQuery] = useState("");
-  // activeCategory holds a marketplace category id (as string) or "all".
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+  // A group and a category are mutually exclusive — one chip row, one active
+  // filter. activeGroup holds a group slug or "all"; activeCategory holds a
+  // marketplace category id (as string) or "all". Picking one clears the other,
+  // so the request never carries both.
+  const [activeGroup, setActiveGroup] = useState<string>(ALL);
+  const [activeCategory, setActiveCategory] = useState<string>(ALL);
+  // The group awaiting a state answer. Non-null == the state dialog is up. Same
+  // flow as the home finder: a state-regulated group with no state on file asks
+  // before it filters.
+  const [pendingGroup, setPendingGroup] = useState<CourseGroupSummary | null>(null);
   // stateName holds a full state name ("Ohio") or "" for the everywhere
   // baseline. The 2-letter code is derived when building the request.
   const [stateName, setStateName] = useState("");
@@ -57,23 +74,29 @@ export default function CatalogClient({
   const ctaLabel = cta?.primaryCta?.label || "Talk to us";
   const ctaHref = cta?.primaryCta?.to || "/contact";
 
-  const categoryChips = [
-    { id: "all", label: "All" },
-    ...categories.map((c) => ({ id: String(c.id), label: c.name }))
+  // One row: All, then the group chips, then the category chips — the order
+  // the request asked for. Groups carry a `kind` so the click handler knows to
+  // route a state-regulated one through the dialog.
+  const filterChips: Array<{ id: string; label: string; kind: "all" | "group" | "category" }> = [
+    { id: ALL, label: "All", kind: "all" },
+    ...groups.map((g) => ({ id: g.id, label: g.name, kind: "group" as const })),
+    ...categories.map((c) => ({ id: String(c.id), label: c.name, kind: "category" as const }))
   ];
 
   const hasMore = courses.length < total;
 
   // Fetch a page from the proxy route. page 1 replaces the list (used on
-  // search / category / state change); higher pages append (infinite scroll).
+  // search / group / category / state change); higher pages append.
+  // group and category are mutually exclusive; at most one is ever non-"all".
   const fetchPage = useCallback(
-    async (nextPage: number, search: string, category: string, state: string) => {
+    async (nextPage: number, search: string, group: string, category: string, state: string) => {
       setLoading(true);
       setError(null);
       try {
         const params = new URLSearchParams({ page: String(nextPage) });
         if (search.trim()) params.set("search", search.trim());
-        if (category !== "all") params.set("categoryId", category);
+        if (group !== ALL) params.set("groupId", group);
+        if (category !== ALL) params.set("categoryId", category);
         const stateCode = US_STATES.find((s) => s.name === state)?.code;
         if (stateCode) params.set("stateCode", stateCode);
 
@@ -93,6 +116,39 @@ export default function CatalogClient({
     []
   );
 
+  // Selecting a group clears any category and vice versa — one active filter.
+  const pickCategory = (id: string) => {
+    setActiveGroup(ALL);
+    setActiveCategory(id);
+  };
+
+  // A state-regulated group with no state on file asks first; everything else
+  // filters immediately. Identical trigger to the home finder's pickGroup, so
+  // the same dialog appears for the same reason on both pages.
+  const pickGroup = (id: string) => {
+    if (id === ALL) {
+      setActiveGroup(ALL);
+      setActiveCategory(ALL);
+      return;
+    }
+    const group = groups.find((g) => g.id === id);
+    if (group?.stateAware && !stateName) {
+      setPendingGroup(group);
+      return;
+    }
+    setActiveCategory(ALL);
+    setActiveGroup(id);
+  };
+
+  // Dialog answered — commit the group and the state together.
+  const confirmPending = (picked: string) => {
+    if (!pendingGroup) return;
+    setActiveCategory(ALL);
+    setActiveGroup(pendingGroup.id);
+    setStateName(picked);
+    setPendingGroup(null);
+  };
+
   // Debounced reload from page 1 whenever any filter changes. Skips the very
   // first render so we reuse the server-rendered first page.
   const firstRender = useRef(true);
@@ -101,9 +157,9 @@ export default function CatalogClient({
       firstRender.current = false;
       return;
     }
-    const t = setTimeout(() => fetchPage(1, query, activeCategory, stateName), 300);
+    const t = setTimeout(() => fetchPage(1, query, activeGroup, activeCategory, stateName), 300);
     return () => clearTimeout(t);
-  }, [query, activeCategory, stateName, fetchPage]);
+  }, [query, activeGroup, activeCategory, stateName, fetchPage]);
 
   // Deep links from the home course finder ("/catalog?state=OH") preselect
   // the state. Read once on mount — defined AFTER the reload effect so the
@@ -116,7 +172,8 @@ export default function CatalogClient({
 
   const resetFilters = () => {
     setQuery("");
-    setActiveCategory("all");
+    setActiveGroup(ALL);
+    setActiveCategory(ALL);
     setStateName("");
   };
 
@@ -158,19 +215,27 @@ export default function CatalogClient({
             </div>
           </div>
 
-          <div className="t321-mkt-catalog__filters" role="tablist" aria-label="Category filter">
-            {categoryChips.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                role="tab"
-                className={`t321-mkt-catalog__chip${activeCategory === c.id ? " is-active" : ""}`}
-                aria-selected={activeCategory === c.id}
-                onClick={() => setActiveCategory(c.id)}
-              >
-                {c.label}
-              </button>
-            ))}
+          <div className="t321-mkt-catalog__filters" role="tablist" aria-label="Course group and category filter">
+            {filterChips.map((c) => {
+              const active =
+                c.kind === "all"
+                  ? activeGroup === ALL && activeCategory === ALL
+                  : c.kind === "group"
+                    ? activeGroup === c.id
+                    : activeCategory === c.id;
+              return (
+                <button
+                  key={`${c.kind}:${c.id}`}
+                  type="button"
+                  role="tab"
+                  className={`t321-mkt-catalog__chip${active ? " is-active" : ""}`}
+                  aria-selected={active}
+                  onClick={() => (c.kind === "category" ? pickCategory(c.id) : pickGroup(c.id))}
+                >
+                  {c.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -200,7 +265,7 @@ export default function CatalogClient({
                   <button
                     type="button"
                     className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg"
-                    onClick={() => fetchPage(pageNum + 1, query, activeCategory, stateName)}
+                    onClick={() => fetchPage(pageNum + 1, query, activeGroup, activeCategory, stateName)}
                     disabled={loading}
                   >
                     {loading ? (
@@ -245,6 +310,14 @@ export default function CatalogClient({
         </div>
       </section>
     </div>
+
+    {/* Same dialog, same trigger as the home finder: a state-regulated group
+        clicked with no state on file asks for one before filtering. */}
+    <GroupStateDialog
+      group={pendingGroup}
+      onConfirm={confirmPending}
+      onClose={() => setPendingGroup(null)}
+    />
     </CourseModalProvider>
   );
 }
