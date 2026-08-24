@@ -198,7 +198,16 @@ export default function CatalogClient({
       setActiveCategory(ALL);
       setActiveGroup(group);
     }
-    // groups is server-provided and stable for the page; this runs once.
+
+    // Category carry-over, mirroring the group one. Set directly (not via
+    // pickCategory) so a state-regulated category never re-opens the state
+    // dialog here — the state, if any, arrived in the URL alongside it.
+    const category = params.get("category");
+    if (category && categories.some((c) => String(c.id) === category)) {
+      setActiveGroup(ALL);
+      setActiveCategory(category);
+    }
+    // groups/categories are server-provided and stable for the page; runs once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

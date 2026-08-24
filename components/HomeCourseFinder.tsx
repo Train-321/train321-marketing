@@ -417,15 +417,17 @@ function SkeletonCards({ count = 3 }: { count?: number }) {
 
 /** Below-hero half: the filtered course grid + the path into the catalog. */
 export function FinderResults() {
-  const { groups, activeGroup, stateName, courses, total, loading, fallback } =
+  const { groups, activeGroup, activeCategory, stateName, courses, total, loading, fallback } =
     useFinder();
 
   const stateCode = US_STATES.find((s) => s.name === stateName)?.code;
-  // Carry the active group AND state into the catalog, so "Explore the full
-  // catalog" lands there with the same filter the visitor was looking at —
-  // the group's courses in their state, not the whole catalog.
+  // Carry the active filter — group OR category — AND state into the catalog,
+  // so "Explore the full catalog" lands there on the same view the visitor was
+  // looking at, not the whole catalog. Group and category are mutually
+  // exclusive, so at most one is ever set.
   const catalogParams = new URLSearchParams();
   if (activeGroup !== ALL_GROUPS) catalogParams.set("group", activeGroup);
+  if (activeCategory !== ALL_GROUPS) catalogParams.set("category", activeCategory);
   if (stateCode) catalogParams.set("state", stateCode);
   const catalogHref = catalogParams.toString() ? `/catalog?${catalogParams.toString()}` : "/catalog";
   const groupName = groups.find((g) => g.id === activeGroup)?.name;
