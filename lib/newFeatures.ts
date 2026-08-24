@@ -19,8 +19,6 @@ import {
 import {
   applyInferredState,
   dedupeByName,
-  groupIdForCourse,
-  summarizeGroups,
   type CourseGroupSummary
 } from "@/lib/courseGroups";
 
@@ -58,6 +56,13 @@ export type MarketplaceCourse = {
    * every state decision (filtering, ordering, badges) should read.
    */
   availability: Availability;
+  /**
+   * The LMS Course Group this course belongs to ("group-8"), or null for an
+   * ungrouped course. Set when a group entry is flattened into its variants,
+   * and what the group chips filter by — so the marketing groups are driven by
+   * the LMS admin, not a hardcoded list.
+   */
+  lmsGroupId: string | null;
 };
 
 export type MarketplaceCategory = {
@@ -238,11 +243,21 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
     // very tags we're about to correct.
     const parsed: MarketplaceCourse[] = [];
     const seen = new Set<number>();
+    // LMS Course Group meta, keyed by the "group-N" id, captured as the group
+    // entries are flattened. The chip list is built from this — so the groups
+    // shown on the storefront are exactly the ones managed in the LMS admin.
+    const groupMeta = new Map<string, { name: string; description: string }>();
 
     for (const c of data.courses || []) {
       if (c.entry_type === "group") {
+        const gid = String(c.id); // "group-8"
+        groupMeta.set(gid, {
+          name: c.name || "Courses",
+          description: c.marketplace_description || ""
+        });
         // A group is a container, not a product — surface its variants that
-        // fit the state instead of an unbuyable "group-6" card.
+        // fit the state instead of an unbuyable "group-6" card. Each variant
+        // carries the group id so the group chip can filter to it.
         for (const v of c.variants || []) {
           const id = Number(v.id);
           if (v.state_redirect_url || !v.name) continue;
@@ -263,7 +278,8 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
             price: Number(v.price ?? 0),
             isSeatBased: Number(v.is_seat_based ?? 0) === 1,
             stateLabel: v.state_label || null,
-            availability
+            availability,
+            lmsGroupId: gid
           });
         }
         continue;
@@ -284,7 +300,8 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
         price: Number(c.price ?? 0),
         isSeatBased: Number(c.is_seat_based ?? 0) === 1,
         stateLabel: c.state_label || null,
-        availability
+        availability,
+        lmsGroupId: null
       });
     }
 
@@ -297,11 +314,40 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
     // course title. Narrowly scoped — see applyInferredState().
     const corrected = parsed.map(applyInferredState);
 
-    // Group filter runs on the corrected set. A group can claim courses the
-    // backend left uncategorised, so this can't be pushed up into the
-    // marketplace_category_id the request already sent.
+    // Chip summaries for the LMS Course Groups, built from the FULL corrected
+    // set so the chip row stays complete even when the courses are filtered
+    // down to a single group. State-awareness is derived from the group's own
+    // variants: a group with state-specific versions opens the state dialog; a
+    // nationwide one filters straight through.
+    const lmsGroups: CourseGroupSummary[] = Array.from(groupMeta.entries())
+      .map(([gid, meta]) => {
+        const members = corrected.filter((c) => c.lmsGroupId === gid);
+        const stateCodes = new Set<string>();
+        let stateAware = false;
+        for (const m of members) {
+          if (m.availability.kind === "in") {
+            stateAware = true;
+            for (const code of m.availability.codes) stateCodes.add(code);
+          }
+        }
+        const prices = members.map((m) => m.price).filter((p) => p > 0);
+        return {
+          id: gid,
+          name: meta.name,
+          blurb: meta.description ? toBlurb(meta.description) : "",
+          icon: "fas fa-layer-group",
+          stateAware,
+          count: members.length,
+          priceFrom: prices.length ? Math.min(...prices) : 0,
+          stateCodes: Array.from(stateCodes).sort()
+        };
+      })
+      .filter((g) => g.count > 0);
+
+    // Group filter runs on the corrected set, matching the course's LMS group
+    // id — the same ids the chips carry.
     const scoped = query.groupId
-      ? corrected.filter((c) => groupIdForCourse(c) === query.groupId)
+      ? corrected.filter((c) => c.lmsGroupId === query.groupId)
       : corrected;
 
     let all = scoped.filter((c) => matches(c.availability));
@@ -322,7 +368,7 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
     return {
       courses: all.slice((page - 1) * perPage, page * perPage),
       categories,
-      groups: summarizeGroups(corrected),
+      groups: lmsGroups,
       total: all.length,
       page,
       perPage
