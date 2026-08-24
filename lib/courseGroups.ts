@@ -281,3 +281,27 @@ export function countForState(
     )
   ).length;
 }
+
+/**
+ * Shape a marketplace category as a CourseGroupSummary so it can reuse the
+ * exact GroupStateDialog a course group uses. The dialog only reads name,
+ * blurb, icon and stateCodes; count/priceFrom are unused for a category and
+ * left at 0.
+ */
+export function categoryGroupSummary(cat: {
+  id: number;
+  name: string;
+  stateAware: boolean;
+  stateCodes: string[];
+}): CourseGroupSummary {
+  return {
+    id: String(cat.id),
+    name: cat.name,
+    blurb: "",
+    icon: "fas fa-tag",
+    stateAware: cat.stateAware,
+    count: 0,
+    priceFrom: 0,
+    stateCodes: cat.stateCodes
+  };
+}

@@ -32,7 +32,7 @@ import type {
   MarketplaceCategory,
   MarketplaceCourse
 } from "@/lib/newFeatures";
-import type { CourseGroupSummary } from "@/lib/courseGroups";
+import { categoryGroupSummary, type CourseGroupSummary } from "@/lib/courseGroups";
 import { US_STATES } from "@/lib/states";
 import CustomSelect from "./CustomSelect";
 import CourseCard from "./CourseCard";
@@ -120,6 +120,8 @@ export function HomeFinderProvider({
   const [fallback, setFallback] = useState<FinderState["fallback"]>(null);
   /** The group awaiting a state answer. Non-null == dialog is up. */
   const [pendingGroup, setPendingGroup] = useState<CourseGroupSummary | null>(null);
+  /** Same, for a state-regulated category — separate slot, group flow untouched. */
+  const [pendingCategory, setPendingCategory] = useState<CourseGroupSummary | null>(null);
 
   const fetchPage = useCallback(async (params: URLSearchParams) => {
     params.set("perPage", String(HOME_PAGE_SIZE));
@@ -228,12 +230,35 @@ export function HomeFinderProvider({
     [marketplace.groups, stateName]
   );
 
-  /** Category chip — filters straight through, clearing any active group. */
-  const pickCategory = useCallback((id: string) => {
-    setActiveGroup(ALL_GROUPS);
-    setActiveCategory(id);
-    scrollToResults();
-  }, []);
+  /** Category chip. A state-regulated category asks for the state first — same
+      dialog and "ask once" rule as a group; a nationwide one (or one clicked
+      after a state is set) filters straight through, clearing any group. */
+  const pickCategory = useCallback(
+    (id: string) => {
+      const cat = marketplace.categories.find((c) => String(c.id) === id);
+      if (cat?.stateAware && !stateName) {
+        setPendingCategory(categoryGroupSummary(cat));
+        return;
+      }
+      setActiveGroup(ALL_GROUPS);
+      setActiveCategory(id);
+      scrollToResults();
+    },
+    [marketplace.categories, stateName]
+  );
+
+  /** Category dialog answered — commit the category and state together. */
+  const confirmPendingCategory = useCallback(
+    (picked: string) => {
+      if (!pendingCategory) return;
+      setActiveGroup(ALL_GROUPS);
+      setActiveCategory(pendingCategory.id);
+      setStateName(picked);
+      setPendingCategory(null);
+      requestAnimationFrame(scrollToResults);
+    },
+    [pendingCategory]
+  );
 
   /** Dialog answered — commit the group and the state together. */
   const confirmPending = useCallback(
@@ -287,6 +312,12 @@ export function HomeFinderProvider({
         group={pendingGroup}
         onConfirm={confirmPending}
         onClose={() => setPendingGroup(null)}
+      />
+      {/* Same dialog for a state-regulated category. */}
+      <GroupStateDialog
+        group={pendingCategory}
+        onConfirm={confirmPendingCategory}
+        onClose={() => setPendingCategory(null)}
       />
     </FinderCtx.Provider>
   );

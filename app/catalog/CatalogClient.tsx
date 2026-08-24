@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CatalogPage } from "@/lib/sanity";
 import type { MarketplaceCourse, MarketplaceCategory, MarketplaceCatalog } from "@/lib/newFeatures";
-import type { CourseGroupSummary } from "@/lib/courseGroups";
+import { categoryGroupSummary, type CourseGroupSummary } from "@/lib/courseGroups";
 import CustomSelect from "@/components/CustomSelect";
 import CourseCard from "@/components/CourseCard";
 import GroupStateDialog from "@/components/GroupStateDialog";
@@ -47,6 +47,9 @@ export default function CatalogClient({
   // flow as the home finder: a state-regulated group with no state on file asks
   // before it filters.
   const [pendingGroup, setPendingGroup] = useState<CourseGroupSummary | null>(null);
+  // Same, for a state-regulated category — a separate slot so the group flow is
+  // untouched. Only one is ever non-null at a time.
+  const [pendingCategory, setPendingCategory] = useState<CourseGroupSummary | null>(null);
   // stateName holds a full state name ("Ohio") or "" for the everywhere
   // baseline. The 2-letter code is derived when building the request.
   const [stateName, setStateName] = useState("");
@@ -116,10 +119,27 @@ export default function CatalogClient({
     []
   );
 
-  // Selecting a group clears any category and vice versa — one active filter.
+  // Selecting a category clears any group. A state-regulated category asks for
+  // the state first — same dialog, same "ask once" rule as a group; a
+  // nationwide category (or one asked after a state is already set) filters
+  // straight through, exactly as before.
   const pickCategory = (id: string) => {
+    const cat = categories.find((c) => String(c.id) === id);
+    if (cat?.stateAware && !stateName) {
+      setPendingCategory(categoryGroupSummary(cat));
+      return;
+    }
     setActiveGroup(ALL);
     setActiveCategory(id);
+  };
+
+  // Category dialog answered — commit the category and state together.
+  const confirmPendingCategory = (picked: string) => {
+    if (!pendingCategory) return;
+    setActiveGroup(ALL);
+    setActiveCategory(pendingCategory.id);
+    setStateName(picked);
+    setPendingCategory(null);
   };
 
   // A state-regulated group with no state on file asks first; everything else
@@ -329,6 +349,12 @@ export default function CatalogClient({
       group={pendingGroup}
       onConfirm={confirmPending}
       onClose={() => setPendingGroup(null)}
+    />
+    {/* Same dialog for a state-regulated category. */}
+    <GroupStateDialog
+      group={pendingCategory}
+      onConfirm={confirmPendingCategory}
+      onClose={() => setPendingCategory(null)}
     />
     </CourseModalProvider>
   );

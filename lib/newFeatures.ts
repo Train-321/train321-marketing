@@ -68,6 +68,15 @@ export type MarketplaceCourse = {
 export type MarketplaceCategory = {
   id: number;
   name: string;
+  /**
+   * Whether this category's courses are written per state — derived from its
+   * courses, the same way a group's is from its variants. A state-regulated
+   * category opens the state dialog before it filters; a nationwide one filters
+   * straight through.
+   */
+  stateAware: boolean;
+  /** States this category has a course written specifically for. */
+  stateCodes: string[];
 };
 
 export type MarketplaceCatalog = {
@@ -305,14 +314,30 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
       });
     }
 
-    const categories: MarketplaceCategory[] = (data.categories || []).map((c) => ({
-      id: c.id,
-      name: c.name
-    }));
-
     // Correct state tags the LMS never filled in, reading the state out of the
     // course title. Narrowly scoped — see applyInferredState().
     const corrected = parsed.map(applyInferredState);
+
+    // Enrich each category with its state info, derived from its own courses —
+    // so a category chip can open the same state dialog a group does. Built
+    // over the full corrected set, so it's independent of any active filter.
+    const categories: MarketplaceCategory[] = (data.categories || []).map((c) => {
+      const members = corrected.filter((m) => m.categoryId === c.id);
+      const stateCodes = new Set<string>();
+      let stateAware = false;
+      for (const m of members) {
+        if (m.availability.kind === "in") {
+          stateAware = true;
+          for (const code of m.availability.codes) stateCodes.add(code);
+        }
+      }
+      return {
+        id: c.id,
+        name: c.name,
+        stateAware,
+        stateCodes: Array.from(stateCodes).sort()
+      };
+    });
 
     // Chip summaries for the LMS Course Groups, built from the FULL corrected
     // set so the chip row stays complete even when the courses are filtered
