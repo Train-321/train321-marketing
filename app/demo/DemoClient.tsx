@@ -204,8 +204,8 @@ export default function DemoClient({ page }: Props) {
   return (
     <div className="t321-mkt-demo">
       <section className="t321-mkt-demo__hero">
-        <div className="t321-mkt-container t321-mkt-demo__hero-grid">
-          <div>
+        <div className="t321-mkt-container">
+          <div className="t321-mkt-demo__hero-intro">
             <span className="t321-mkt-eyebrow"><i className="fas fa-play-circle" /> {heroEyebrow}</span>
             <h1 className="t321-mkt-h1">{heroHeading}</h1>
             <p className="t321-mkt-lede">{heroLede}</p>
@@ -215,83 +215,6 @@ export default function DemoClient({ page }: Props) {
               ))}
             </ul>
           </div>
-
-          <form className="t321-mkt-demo__form" onSubmit={onSubmit}>
-            <h2 className="t321-mkt-h3">{formHeading}</h2>
-
-            <div className="t321-mkt-demo__row">
-              <label className="t321-mkt-demo__field">
-                <span>Full name</span>
-                <input value={form.name} onChange={update("name")} type="text" required autoComplete="name" placeholder="Jane Doe" />
-              </label>
-              <label className="t321-mkt-demo__field">
-                <span>Work email</span>
-                <input value={form.email} onChange={update("email")} type="email" required autoComplete="email" placeholder="you@work.com" />
-              </label>
-            </div>
-
-            <div className="t321-mkt-demo__row">
-              <label className="t321-mkt-demo__field">
-                <span>Company</span>
-                <input value={form.company} onChange={update("company")} type="text" required autoComplete="organization" placeholder="Coastal Hospitality Group" />
-              </label>
-              <label className="t321-mkt-demo__field">
-                <span>Team size</span>
-                <CustomSelect
-                  value={form.seats}
-                  options={teamSizes}
-                  placeholder="Pick a range"
-                  ariaLabel="Team size"
-                  onChange={(v) => setForm((prev) => ({ ...prev, seats: v }))}
-                />
-              </label>
-            </div>
-
-            <label className="t321-mkt-demo__field">
-              <span>Which courses are you most interested in?</span>
-              <div className="t321-mkt-demo__chips">
-                {interests.map((opt) => (
-                  <label key={opt} className="t321-mkt-demo__chip">
-                    <input type="checkbox" value={opt} checked={form.interests.includes(opt)} onChange={() => toggleInterest(opt)} />
-                    <span className="t321-mkt-demo__chip-label">{opt}</span>
-                  </label>
-                ))}
-              </div>
-            </label>
-
-            <label className="t321-mkt-demo__field">
-              <span>Best time to meet</span>
-              <CustomSelect
-                value={form.timeslot}
-                options={timeslots}
-                placeholder="Choose a window"
-                ariaLabel="Best time to meet"
-                onChange={(v) => setForm((prev) => ({ ...prev, timeslot: v }))}
-              />
-            </label>
-
-            <label className="t321-mkt-demo__field">
-              <span>Anything we should know?</span>
-              <textarea
-                value={form.notes}
-                onChange={update("notes")}
-                rows={3}
-                placeholder={notesPlaceholder}
-              />
-            </label>
-
-            <button type="submit" className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg" disabled={sent}>
-              <i className="fas fa-calendar-check" aria-hidden="true" />
-              {sent ? ` ${submitSendingLabel}` : ` ${submitLabel}`}
-            </button>
-            {sent ? (
-              <p className="t321-mkt-demo__ok">
-                <i className="fas fa-check-circle" /> {successFilled}
-              </p>
-            ) : (
-              <p className="t321-mkt-demo__disclaim">{disclaimer}</p>
-            )}
-          </form>
         </div>
       </section>
 
@@ -372,6 +295,87 @@ export default function DemoClient({ page }: Props) {
               </details>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="t321-mkt-section t321-mkt-section--sunk t321-mkt-demo__form-section">
+        <div className="t321-mkt-container">
+          <form className="t321-mkt-demo__form" onSubmit={onSubmit}>
+            <h2 className="t321-mkt-h3">{formHeading}</h2>
+
+            <div className="t321-mkt-demo__row">
+              <label className="t321-mkt-demo__field">
+                <span>Full name</span>
+                <input value={form.name} onChange={update("name")} type="text" required autoComplete="name" placeholder="Jane Doe" />
+              </label>
+              <label className="t321-mkt-demo__field">
+                <span>Work email</span>
+                <input value={form.email} onChange={update("email")} type="email" required autoComplete="email" placeholder="you@work.com" />
+              </label>
+            </div>
+
+            <div className="t321-mkt-demo__row">
+              <label className="t321-mkt-demo__field">
+                <span>Company</span>
+                <input value={form.company} onChange={update("company")} type="text" required autoComplete="organization" placeholder="Coastal Hospitality Group" />
+              </label>
+              <label className="t321-mkt-demo__field">
+                <span>Team size</span>
+                <CustomSelect
+                  value={form.seats}
+                  options={teamSizes}
+                  placeholder="Pick a range"
+                  ariaLabel="Team size"
+                  onChange={(v) => setForm((prev) => ({ ...prev, seats: v }))}
+                />
+              </label>
+            </div>
+
+            <label className="t321-mkt-demo__field">
+              <span>Which courses are you most interested in?</span>
+              <div className="t321-mkt-demo__chips">
+                {interests.map((opt) => (
+                  <label key={opt} className="t321-mkt-demo__chip">
+                    <input type="checkbox" value={opt} checked={form.interests.includes(opt)} onChange={() => toggleInterest(opt)} />
+                    <span className="t321-mkt-demo__chip-label">{opt}</span>
+                  </label>
+                ))}
+              </div>
+            </label>
+
+            <label className="t321-mkt-demo__field">
+              <span>Best time to meet</span>
+              <CustomSelect
+                value={form.timeslot}
+                options={timeslots}
+                placeholder="Choose a window"
+                ariaLabel="Best time to meet"
+                onChange={(v) => setForm((prev) => ({ ...prev, timeslot: v }))}
+              />
+            </label>
+
+            <label className="t321-mkt-demo__field">
+              <span>Anything we should know?</span>
+              <textarea
+                value={form.notes}
+                onChange={update("notes")}
+                rows={3}
+                placeholder={notesPlaceholder}
+              />
+            </label>
+
+            <button type="submit" className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--lg" disabled={sent}>
+              <i className="fas fa-calendar-check" aria-hidden="true" />
+              {sent ? ` ${submitSendingLabel}` : ` ${submitLabel}`}
+            </button>
+            {sent ? (
+              <p className="t321-mkt-demo__ok">
+                <i className="fas fa-check-circle" /> {successFilled}
+              </p>
+            ) : (
+              <p className="t321-mkt-demo__disclaim">{disclaimer}</p>
+            )}
+          </form>
         </div>
       </section>
 

@@ -48,6 +48,17 @@
 }
 .t321-mkt-demo__form .t321-mkt-h3 { margin-bottom: 0.25rem; }
 
+/* The form now sits in its own full-width section at the end of the page,
+   rather than a hero grid column, so centre it and cap its width so it doesn't
+   stretch across the whole container. */
+.t321-mkt-demo__form-section .t321-mkt-demo__form {
+  max-width: 640px;
+  margin: 0 auto;
+}
+/* Hero is single-column now the form has moved out — keep the intro readable
+   rather than letting the lede run the full container width. */
+.t321-mkt-demo__hero-intro { max-width: 42rem; }
+
 .t321-mkt-demo__row {
   display: grid;
   grid-template-columns: 1fr 1fr;
