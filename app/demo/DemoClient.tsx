@@ -203,21 +203,6 @@ export default function DemoClient({ page }: Props) {
 
   return (
     <div className="t321-mkt-demo">
-      <section className="t321-mkt-demo__hero">
-        <div className="t321-mkt-container">
-          <div className="t321-mkt-demo__hero-intro">
-            <span className="t321-mkt-eyebrow"><i className="fas fa-play-circle" /> {heroEyebrow}</span>
-            <h1 className="t321-mkt-h1">{heroHeading}</h1>
-            <p className="t321-mkt-lede">{heroLede}</p>
-            <ul className="t321-mkt-demo__hero-list">
-              {heroBullets.map((b, i) => (
-                <li key={i}><i className="fas fa-check" /> {b}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
       {(videosLoading || videos.length > 0) && (
         <section className="t321-mkt-section t321-mkt-demo__videos-section">
           <div className="t321-mkt-container">
@@ -299,7 +284,20 @@ export default function DemoClient({ page }: Props) {
       </section>
 
       <section className="t321-mkt-section t321-mkt-section--sunk t321-mkt-demo__form-section">
-        <div className="t321-mkt-container">
+        <div className="t321-mkt-container t321-mkt-demo__hero-grid">
+          <div className="t321-mkt-demo__hero-intro">
+            <span className="t321-mkt-eyebrow"><i className="fas fa-play-circle" /> {heroEyebrow}</span>
+            {/* Element stays an h1 — the page's single top-level heading — but
+                wears the h2 style so it reads like the other section heads. */}
+            <h1 className="t321-mkt-h2">{heroHeading}</h1>
+            <p className="t321-mkt-lede">{heroLede}</p>
+            <ul className="t321-mkt-demo__hero-list">
+              {heroBullets.map((b, i) => (
+                <li key={i}><i className="fas fa-check" /> {b}</li>
+              ))}
+            </ul>
+          </div>
+
           <form className="t321-mkt-demo__form" onSubmit={onSubmit}>
             <h2 className="t321-mkt-h3">{formHeading}</h2>
 
