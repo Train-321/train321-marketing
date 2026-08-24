@@ -204,14 +204,19 @@ export default function DemoClient({ page }: Props) {
   return (
     <div className="t321-mkt-demo">
       {(videosLoading || videos.length > 0) && (
+        <>
+        {/* Left-aligned page hero, matching the blog and other pages' heads —
+            the page's single h1. Reuses the demo hero band (gradient + rule). */}
+        <section className="t321-mkt-demo__hero">
+          <div className="t321-mkt-container">
+            <span className="t321-mkt-eyebrow"><i className={demoIcon} /> {demoEyebrow}</span>
+            <h1 className="t321-mkt-h1">{demoHeading}</h1>
+            <p className="t321-mkt-lede">{demoLede}</p>
+          </div>
+        </section>
+
         <section className="t321-mkt-section t321-mkt-demo__videos-section">
           <div className="t321-mkt-container">
-            <div className="t321-mkt-section__head">
-              <span className="t321-mkt-eyebrow"><i className={demoIcon} /> {demoEyebrow}</span>
-              <h2 className="t321-mkt-h2">{demoHeading}</h2>
-              <p className="t321-mkt-lede">{demoLede}</p>
-            </div>
-
             {videosLoading ? (
               <div className="t321-mkt-demo__videos" aria-hidden="true">
                 {[1, 2, 3, 4, 5, 6].map((n) => (
@@ -242,6 +247,7 @@ export default function DemoClient({ page }: Props) {
             )}
           </div>
         </section>
+        </>
       )}
 
       <section className="t321-mkt-section t321-mkt-section--sunk">
@@ -287,9 +293,7 @@ export default function DemoClient({ page }: Props) {
         <div className="t321-mkt-container t321-mkt-demo__hero-grid">
           <div className="t321-mkt-demo__hero-intro">
             <span className="t321-mkt-eyebrow"><i className="fas fa-play-circle" /> {heroEyebrow}</span>
-            {/* Element stays an h1 — the page's single top-level heading — but
-                wears the h2 style so it reads like the other section heads. */}
-            <h1 className="t321-mkt-h2">{heroHeading}</h1>
+            <h2 className="t321-mkt-h2">{heroHeading}</h2>
             <p className="t321-mkt-lede">{heroLede}</p>
             <ul className="t321-mkt-demo__hero-list">
               {heroBullets.map((b, i) => (
