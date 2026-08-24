@@ -13,6 +13,11 @@ export type CustomSelectProps = {
       (e.g. 50 states) where scrolling alone is a chore. */
   searchable?: boolean;
   searchPlaceholder?: string;
+  /** Show a clear (×) affordance on hover once a value is set, so the control
+      can be reset without opening the menu. */
+  clearable?: boolean;
+  /** What "cleared" does. Defaults to onChange("") when clearable and unset. */
+  onClear?: () => void;
 };
 
 export default function CustomSelect({
@@ -22,7 +27,9 @@ export default function CustomSelect({
   onChange,
   ariaLabel,
   searchable = false,
-  searchPlaceholder = "Type to search…"
+  searchPlaceholder = "Type to search…",
+  clearable = false,
+  onClear
 }: CustomSelectProps) {
   const [open, setOpen] = useState(false);
   // Whether the menu opens upward — decided when it opens, from the space
@@ -162,6 +169,23 @@ export default function CustomSelect({
         <span className="t321-mkt-select__label">{value || placeholder}</span>
         <i className="fas fa-chevron-down" aria-hidden="true" />
       </button>
+      {/* Separate button, not nested in the one above (a button inside a
+          button is invalid). Sits over the chevron on hover; stops propagation
+          so clearing never opens the menu. */}
+      {clearable && value && (
+        <button
+          type="button"
+          className="t321-mkt-select__clear"
+          aria-label="Clear selection"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onClear) onClear();
+            else onChange("");
+          }}
+        >
+          <i className="fas fa-times" aria-hidden="true" />
+        </button>
+      )}
       {open && (
         <div className={`t321-mkt-select__menu${dropUp ? " is-up" : ""}`} role="presentation">
           {searchable && (

@@ -374,6 +374,11 @@ export function FinderControls() {
           ariaLabel="Your state"
           searchable
           searchPlaceholder="Search states…"
+          clearable
+          onClear={() => {
+            setStateName("");
+            scrollToResults();
+          }}
         />
         {!stateName && (
           <p className="t321-hcf__hint">

@@ -243,6 +243,8 @@ export default function CatalogClient({
                 ariaLabel="Filter by state"
                 searchable
                 searchPlaceholder="Search states…"
+                clearable
+                onClear={() => setStateName("")}
               />
             </div>
           </div>
