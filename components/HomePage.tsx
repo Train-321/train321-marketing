@@ -77,87 +77,6 @@ const AUDIENCE_COPY: Record<Audience, AudienceCopy> = {
   }
 };
 
-type ModuleState = "done" | "active" | "locked";
-type HeroModule = { label: string; state: ModuleState; icon?: string };
-type HeroCourse = {
-  urlTitle: string;
-  badge: string;
-  title: string;
-  time: string;
-  progress: number;
-  modules: HeroModule[];
-};
-
-const HERO_COURSES: HeroCourse[] = [
-  {
-    urlTitle: "Food Handler",
-    badge: "Module 4 of 6",
-    title: "Cleaning & Sanitizing",
-    time: "06:42 / 10:48",
-    progress: 62,
-    modules: [
-      { label: "Intro to food safety", state: "done" },
-      { label: "Personal hygiene", state: "done" },
-      { label: "Time & temperature", state: "done" },
-      { label: "Cleaning & sanitizing", state: "active" },
-      { label: "Allergen awareness", state: "locked" },
-      { label: "Final exam", state: "locked", icon: "fa-award" }
-    ]
-  },
-  {
-    urlTitle: "Alcohol Safety",
-    badge: "Module 3 of 6",
-    title: "Checking IDs & Refusal",
-    time: "04:18 / 09:12",
-    progress: 48,
-    modules: [
-      { label: "Alcohol laws by state", state: "done" },
-      { label: "Signs of intoxication", state: "done" },
-      { label: "Checking IDs & refusal", state: "active" },
-      { label: "Incident documentation", state: "locked" },
-      { label: "Server responsibilities", state: "locked" },
-      { label: "Final exam", state: "locked", icon: "fa-award" }
-    ]
-  },
-  {
-    urlTitle: "Sexual Harassment",
-    badge: "Module 5 of 6",
-    title: "Bystander Intervention",
-    time: "08:04 / 11:36",
-    progress: 78,
-    modules: [
-      { label: "Defining harassment", state: "done" },
-      { label: "Protected classes", state: "done" },
-      { label: "Reporting channels", state: "done" },
-      { label: "Retaliation rules", state: "done" },
-      { label: "Bystander intervention", state: "active" },
-      { label: "Final exam", state: "locked", icon: "fa-award" }
-    ]
-  },
-  {
-    urlTitle: "Food Manager",
-    badge: "Module 4 of 6",
-    title: "HACCP Principles",
-    time: "11:22 / 18:50",
-    progress: 55,
-    modules: [
-      { label: "Foodborne illness", state: "done" },
-      { label: "Receiving & storage", state: "done" },
-      { label: "Prep & cooking temps", state: "done" },
-      { label: "HACCP principles", state: "active" },
-      { label: "Pest control", state: "locked" },
-      { label: "Final exam", state: "locked", icon: "fa-award" }
-    ]
-  }
-];
-
-function moduleIcon(m: HeroModule) {
-  if (m.icon) return "fas " + m.icon;
-  if (m.state === "done") return "fas fa-check";
-  if (m.state === "active") return "fas fa-play";
-  return "fas fa-lock";
-}
-
 type HomePageProps = {
   forcedAudience?: Audience | null;
   courses: Course[];
@@ -181,7 +100,6 @@ export default function HomePage({
   marketplace
 }: HomePageProps) {
   const [audience, setAudience] = useState<Audience>(forcedAudience || "self");
-  const [courseIndex, setCourseIndex] = useState(0);
   const { setAudience: setCartAudience, buyer, ready: cartReady } = useCart();
 
   // Hydrate audience from localStorage when not pinned by prop.
@@ -212,19 +130,6 @@ export default function HomePage({
     }
   }, [buyer.audience, cartReady, forcedAudience]);
 
-  // Course-cycle timer (skipped when reduced motion is preferred).
-  useEffect(() => {
-    const reduced =
-      typeof window !== "undefined" &&
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
-    const id = window.setInterval(() => {
-      setCourseIndex((i) => (i + 1) % HERO_COURSES.length);
-    }, 4200);
-    return () => window.clearInterval(id);
-  }, []);
-
   const popularSlugsResolved = home?.popularSlugs?.length ? home.popularSlugs : POPULAR_SLUGS;
   const popularCourses = useMemo(
     () =>
@@ -243,7 +148,6 @@ export default function HomePage({
   }, [testimonials]);
   const homeFaqs = useMemo(() => faqs[0]?.items?.slice(0, 4) || [], [faqs]);
 
-  const activeCourse = HERO_COURSES[courseIndex] || HERO_COURSES[0];
   const baseCopy = AUDIENCE_COPY[audience] || AUDIENCE_COPY.team;
   const sanityAudience = audience === "team" ? home?.audienceTeam : home?.audienceSelf;
   // Resolution order, highest -> lowest priority:
@@ -307,8 +211,6 @@ export default function HomePage({
     // buyer-sync effect above.
     setCartAudience(val === "team" ? "company" : "individual");
   };
-
-  const setCourse = (i: number) => setCourseIndex(i);
 
   return (
     <div className="t321-mkt-home">
@@ -423,7 +325,9 @@ export default function HomePage({
 
           <aside
             className={`t321-mkt-hero__visual${audience === "self" ? " t321-mkt-hero__visual--figure" : ""}`}
-            aria-hidden="true"
+            /* Self view is a decorative photo — hidden from AT. Team view now
+               holds a real, playable video, so it must NOT be hidden. */
+            aria-hidden={audience === "self" ? true : undefined}
           >
             <span className="t321-mkt-hero__glow" />
             <span className="t321-mkt-hero__grid" />
@@ -437,64 +341,13 @@ export default function HomePage({
                 className="t321-mkt-hero__photo"
               />
             ) : (
-            <div className="t321-mkt-hero__stage t321-mkt-hero__float--a">
-              <div className="t321-mkt-hero__stage-chrome">
-                <span className="t321-mkt-hero__dot" />
-                <span className="t321-mkt-hero__dot" />
-                <span className="t321-mkt-hero__dot" />
-                <span className="t321-mkt-hero__url">
-                  <i className="fas fa-lock" /> train321.com · {activeCourse.urlTitle}
-                </span>
-              </div>
-              <div className="t321-mkt-hero__stage-body">
-                {/* NOTE: Vue's <transition name="t321-hero-swap"> was dropped in the React port.
-                    The crossfade between courses is now a hard cut. Functionally equivalent. */}
-                <div key={activeCourse.urlTitle} className="t321-mkt-hero__stage-frame">
-                  <div className="t321-mkt-hero__lesson-head">
-                    <span className="t321-mkt-hero__badge t321-mkt-hero__badge--soft">
-                      <i className="fas fa-layer-group" /> {activeCourse.badge}
-                    </span>
-                    <span className="t321-mkt-hero__live">
-                      <span className="t321-mkt-hero__live-dot" /> Live now
-                    </span>
-                  </div>
-                  <strong className="t321-mkt-hero__lesson-title">{activeCourse.title}</strong>
-                  <div className="t321-mkt-hero__player">
-                    <span className="t321-mkt-hero__player-play"><i className="fas fa-play" /></span>
-                    <div className="t321-mkt-hero__player-meta">
-                      <div className="t321-mkt-hero__player-track">
-                        <span
-                          className="t321-mkt-hero__player-fill"
-                          style={{ width: activeCourse.progress + "%" }}
-                        />
-                      </div>
-                      <div className="t321-mkt-hero__player-time">
-                        <span>{activeCourse.time}</span>
-                        <span><i className="fas fa-closed-captioning" /> CC</span>
-                      </div>
-                    </div>
-                  </div>
-                  <ul className="t321-mkt-hero__modules">
-                    {activeCourse.modules.map((m) => (
-                      <li key={m.label} className={"is-" + m.state}>
-                        <i className={moduleIcon(m)} /> {m.label}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="t321-mkt-hero__stage-dots" role="tablist" aria-label="Course preview">
-                  {HERO_COURSES.map((c, i) => (
-                    <button
-                      key={c.urlTitle}
-                      type="button"
-                      className={`t321-mkt-hero__stage-dot${i === courseIndex ? " is-active" : ""}`}
-                      aria-label={"Show " + c.urlTitle}
-                      aria-selected={i === courseIndex}
-                      onClick={() => setCourse(i)}
-                    />
-                  ))}
-                </div>
-              </div>
+            <div className="t321-mkt-hero__video">
+              <iframe
+                src="https://player.vimeo.com/video/1218899074?title=0&byline=0&portrait=0"
+                title="See Train 321 in action"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+              />
             </div>
             )}
 
