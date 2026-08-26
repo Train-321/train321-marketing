@@ -350,20 +350,6 @@ export default function HomePage({
               />
             </div>
             )}
-
-            <div className="t321-mkt-hero__cert t321-mkt-hero__float--b">
-              <div className="t321-mkt-hero__cert-seal">
-                <svg viewBox="0 0 64 64">
-                  <circle className="ring" cx="32" cy="32" r="26" />
-                  <path className="tick" d="M20 33 l8 8 l16 -17" />
-                </svg>
-              </div>
-              <div className="t321-mkt-hero__cert-body">
-                <span className="t321-mkt-hero__cert-eyebrow">Certificate issued</span>
-                <strong>Food Handler Certificate</strong>
-                <span className="t321-mkt-hero__cert-sub">Valid through 2029 · #FH-384201</span>
-              </div>
-            </div>
           </aside>
         </div>
       </section>

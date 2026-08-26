@@ -120,22 +120,14 @@
 @media (prefers-reduced-motion: reduce) {
   .t321-mkt-hero__photo { animation: none; opacity: 1; transform: none; }
 }
-/* Depth: both cards sit BEHIND the person for a layered 3D look — the
-   reviews card peeks past her right shoulder, the certificate past her left.
-   She overlaps the inner edge of each. */
-/* Photo variant: tuck the cards into opposite corners so they peek over the
-   edges of the landscape photo instead of covering the people in the center. */
+/* Depth: the reviews card sits BEHIND the person for a layered 3D look,
+   peeking past her right shoulder. She overlaps its inner edge. */
+/* Photo variant: tuck the card into the corner so it peeks over the edge of
+   the landscape photo instead of covering the people in the center. */
 .t321-mkt-hero__visual--figure .t321-mkt-hero__rating {
   top: -64px;
   right: -92px;
   width: 200px;
-  z-index: 5;
-}
-.t321-mkt-hero__visual--figure .t321-mkt-hero__cert {
-  top: auto;
-  bottom: -22px;
-  left: -26px;
-  right: auto;
   z-index: 5;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -172,22 +164,21 @@
    the old course-player mockup. 16:9, framed like the stage it replaced. */
 .t321-mkt-hero__video {
   position: absolute;
-  top: 6%;
-  left: 1.25rem;
-  right: 1.25rem;
-  aspect-ratio: 16 / 9;
-  border-radius: 18px;
+  /* Fills the visual box exactly like .t321-mkt-hero__photo does — same inset,
+     radius, and shadow — so toggling myself/team swaps the contents without the
+     frame changing size or position. The 16:9 player letterboxes inside against
+     the black ground rather than resizing the box. */
+  inset: 0;
+  border-radius: 22px;
   overflow: hidden;
   background: #000;
-  box-shadow:
-    0 30px 60px -20px rgba(15, 15, 14, 0.28),
-    0 8px 20px -10px rgba(11, 67, 124, 0.18);
+  box-shadow: 0 26px 42px rgba(15, 15, 14, 0.20);
   z-index: 3;
   transition: transform 300ms cubic-bezier(0.22, 0.61, 0.36, 1),
     box-shadow 300ms ease;
 }
-/* On hover the video grows a touch and lifts ABOVE the certificate card, so it
-   becomes the focus and the card no longer overlaps its corner. */
+/* On hover the video grows a touch and lifts above the floating cards, so it
+   becomes the focus and nothing overlaps its corner. */
 .t321-mkt-hero__video:hover {
   transform: scale(1.045);
   z-index: 6;
@@ -405,91 +396,6 @@
   animation: t321Hero-pulseRing 2s ease-out infinite;
 }
 
-/* Certificate card */
-.t321-mkt-hero__cert {
-  position: absolute;
-  bottom: 3%;
-  right: -10px;
-  width: 280px;
-  padding: 1rem 1.1rem;
-  background: #ffffff;
-  border: 1px solid var(--t321-mkt-line);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  box-shadow:
-    0 24px 60px -20px rgba(15, 15, 14, 0.22),
-    0 6px 16px -8px rgba(45, 106, 79, 0.2);
-  z-index: 4;
-  overflow: hidden;
-}
-.t321-mkt-hero__cert::before {
-  content: "";
-  position: absolute;
-  top: -40%;
-  left: -30%;
-  width: 40%;
-  height: 200%;
-  background: linear-gradient(110deg, transparent, rgba(255, 255, 255, 0.75), transparent);
-  transform: skewX(-18deg);
-  animation: t321Hero-shimmer 5s ease-in-out 2s infinite;
-  pointer-events: none;
-}
-.t321-mkt-hero__cert-seal {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: var(--t321-mkt-positive-wash);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.t321-mkt-hero__cert-seal svg { width: 44px; height: 44px; overflow: visible; }
-.t321-mkt-hero__cert-seal .ring {
-  fill: none;
-  stroke: var(--t321-mkt-positive);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-dasharray: 164;
-  stroke-dashoffset: 164;
-  transform: rotate(-90deg);
-  transform-origin: center;
-  animation: t321Hero-ringDraw 1.6s ease-out 0.4s forwards;
-}
-.t321-mkt-hero__cert-seal .tick {
-  fill: none;
-  stroke: var(--t321-mkt-positive);
-  stroke-width: 4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 36;
-  stroke-dashoffset: 36;
-  animation: t321Hero-tickDraw 0.55s ease-out 1.7s forwards;
-}
-.t321-mkt-hero__cert-body { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
-.t321-mkt-hero__cert-eyebrow {
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--t321-mkt-positive);
-}
-.t321-mkt-hero__cert-body strong {
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--t321-mkt-ink);
-}
-.t321-mkt-hero__cert-sub {
-  font-size: 0.74rem;
-  color: var(--t321-mkt-ink-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 /* Course pagination dots */
 .t321-mkt-hero__stage-dots {
   display: flex;
@@ -670,17 +576,11 @@
 
 /* Fade-in (opacity) + idle bob (transform). Split so they don't collide. */
 .t321-mkt-hero__float--a,
-.t321-mkt-hero__float--b,
 .t321-mkt-hero__float--e { opacity: 0; }
 .t321-mkt-hero__float--a {
   animation:
     t321Hero-fade 0.65s ease-out 0.1s both,
     t321Hero-bobA 7s ease-in-out 0.75s infinite;
-}
-.t321-mkt-hero__float--b {
-  animation:
-    t321Hero-fade 0.65s ease-out 0.3s both,
-    t321Hero-bobB 8s ease-in-out 0.95s infinite;
 }
 .t321-mkt-hero__float--e {
   animation:
@@ -695,10 +595,6 @@
 @keyframes t321Hero-bobA {
   0%, 100% { transform: translateY(0) rotate(-1.5deg); }
   50% { transform: translateY(-6px) rotate(-1.2deg); }
-}
-@keyframes t321Hero-bobB {
-  0%, 100% { transform: translateY(0) rotate(2deg); }
-  50% { transform: translateY(-5px) rotate(2.4deg); }
 }
 @keyframes t321Hero-bobE {
   0%, 100% { transform: translateY(0) rotate(-1deg); }
@@ -737,7 +633,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .t321-mkt-hero__float--a { animation: none; opacity: 1; transform: rotate(-1.5deg); }
-  .t321-mkt-hero__float--b { animation: none; opacity: 1; transform: rotate(2deg); }
   .t321-mkt-hero__float--e { animation: none; opacity: 1; transform: rotate(-1deg); }
   .t321-mkt-hero__rating-track span { animation: none; transform: scaleX(1); }
   .t321-mkt-hero__player-fill { transition: none; }
@@ -746,13 +641,10 @@
   .t321-hero-swap-enter-active .t321-mkt-hero__player-fill { animation: none; }
   .t321-hero-swap-enter-active .t321-mkt-hero__modules li,
   .t321-hero-swap-enter-active .t321-mkt-hero__modules li i { animation: none; }
-  .t321-mkt-hero__cert::before,
   .t321-mkt-hero__live-dot,
   .t321-mkt-hero__modules li.is-active i,
   .t321-mkt-hero__player-play,
   .t321-mkt-hero__glow { animation: none; }
-  .t321-mkt-hero__cert-seal .ring,
-  .t321-mkt-hero__cert-seal .tick { stroke-dashoffset: 0; animation: none; }
 }
 
 /* Trust band */
