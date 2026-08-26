@@ -100,7 +100,16 @@ export default function HomePage({
   marketplace
 }: HomePageProps) {
   const [audience, setAudience] = useState<Audience>(forcedAudience || "self");
+  // The team hero shows a poster until it's clicked, so the Vimeo player only
+  // loads on intent — no third-party embed on first paint.
+  const [heroVideoPlaying, setHeroVideoPlaying] = useState(false);
   const { setAudience: setCartAudience, buyer, ready: cartReady } = useCart();
+
+  // Leaving the team view drops the player back to its poster, so coming back
+  // later doesn't relaunch an autoplaying embed the visitor didn't ask for.
+  useEffect(() => {
+    if (audience !== "team") setHeroVideoPlaying(false);
+  }, [audience]);
 
   // Hydrate audience from localStorage when not pinned by prop.
   useEffect(() => {
@@ -342,12 +351,31 @@ export default function HomePage({
               />
             ) : (
             <div className="t321-mkt-hero__video">
-              <iframe
-                src="https://player.vimeo.com/video/1218899074?title=0&byline=0&portrait=0"
-                title="See Train 321 in action"
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowFullScreen
-              />
+              {heroVideoPlaying ? (
+                <iframe
+                  src="https://player.vimeo.com/video/1218899074?title=0&byline=0&portrait=0&autoplay=1"
+                  title="See Train 321 in action"
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="t321-mkt-hero__video-poster"
+                  onClick={() => setHeroVideoPlaying(true)}
+                  aria-label="Play video: See Train 321 in action"
+                >
+                  <img
+                    src="/img/hero-team-video-poster.jpg"
+                    alt=""
+                    width={1200}
+                    height={820}
+                  />
+                  <span className="t321-mkt-hero__video-play" aria-hidden="true">
+                    <i className="fas fa-play" />
+                  </span>
+                </button>
+              )}
             </div>
             )}
           </aside>
