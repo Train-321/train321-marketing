@@ -616,9 +616,10 @@ function normalizeBlogBody(raw: AnyBlock[] | null | undefined): BlogBodyNode[] {
 const COURSE_PROJECTION = `
   "slug": slug.current,
   title, eyebrow, tagline, category, color, icon,
-  // Prefer a Studio-uploaded image; fall back to the external Image URL field.
-  // Drives both the OG/meta image and the hero card visual on the course page.
-  "image": coalesce(image.asset->url + "?w=1200&auto=format", imageUrl),
+  // ONLY a Studio-uploaded image shows on the page — no default. The external
+  // "Image URL" field is intentionally ignored here so courses stay image-less
+  // until the client uploads one in Studio. Drives the hero visual + OG image.
+  "image": image.asset->url + "?w=1200&auto=format",
   overviewHeading,
   summary,
   "hero": { "stats": heroStats[]{ value, label } },

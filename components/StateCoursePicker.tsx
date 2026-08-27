@@ -79,6 +79,7 @@ export function StateSelect({
         ariaLabel="Your state"
         searchable
         searchPlaceholder="Search states…"
+        clearable
       />
       {!stateName && (
         <p className="t321-spc__hint">
