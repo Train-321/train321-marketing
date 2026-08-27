@@ -145,6 +145,17 @@
   position: relative;
   aspect-ratio: 16 / 9;
   background: var(--t321-mkt-paper-sunk);
+  overflow: hidden;
+}
+/* An aspect-ratio box is only a PREFERRED size — in-flow content taller than
+   16/9 (a portrait course image) stretches it and blows the card up. Pinning
+   the shimmer wrapper absolute takes it out of flow, so the box always stays
+   16/9 and the image covers it. Scoped here; the other SkeletonImage spots
+   (catalog card, course modal, cart) size their wrapper with a fixed height
+   and don't need this. */
+.t321-sr__card-media .t321-imgskel {
+  position: absolute;
+  inset: 0;
 }
 .t321-sr__card-media img {
   width: 100%;
