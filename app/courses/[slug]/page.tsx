@@ -8,6 +8,7 @@ import { getCourse, getCourses, getDetailPagesCopy, getSiteSettings } from "@/li
 import { STATIC_COURSES } from "@/lib/staticCourses";
 import EnrollButton from "@/components/EnrollButton";
 import CourseCertificate from "@/components/CourseCertificate";
+import TabcCertificate from "@/components/TabcCertificate";
 import { StatePickerProvider, StateSelect, StateResults } from "@/components/StateCoursePicker";
 import { getGroupPicker, resolveEnrollCourse } from "@/lib/enroll";
 import "./course.css";
@@ -243,7 +244,11 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
         <section className="t321-mkt-section">
           <div className="t321-mkt-container t321-mkt-course__cert">
             <div className="t321-mkt-course__cert-visual">
-              <CourseCertificate courseTitle={course.title} />
+              {course.certificateVariant === "tabc" ? (
+                <TabcCertificate />
+              ) : (
+                <CourseCertificate courseTitle={course.title} />
+              )}
             </div>
             <div>
               <span className="t321-mkt-eyebrow">{certEyebrow}</span>

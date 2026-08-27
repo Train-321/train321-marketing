@@ -17,6 +17,8 @@ export type Course = {
   color?: "amber" | "plum" | "emerald" | "neutral";
   icon?: string;
   image?: string; // URL string
+  /** Which certificate preview to show. Defaults to the generic Train 321 one. */
+  certificateVariant?: "tabc";
   overviewHeading?: string;
   summary?: string;
   hero?: { stats?: Array<{ value: string; label: string }> };

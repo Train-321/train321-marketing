@@ -46,6 +46,9 @@ export const STATIC_COURSES: Record<string, Course> = {
       validity: "2 years",
       accepted: "Texas Alcoholic Beverage Commission"
     },
+    // Show the TABC seller/server certificate design (with sample data) in the
+    // certificate section instead of the generic Train 321 one.
+    certificateVariant: "tabc",
     priceFrom: 15,
     // LMS "TABC Seller Server Training" — drives the live price and what the
     // Enroll button adds to the cart. Confirm this id exists in the production
