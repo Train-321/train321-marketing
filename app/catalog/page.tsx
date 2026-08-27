@@ -3,7 +3,7 @@ import { getMarketplaceCatalog } from "@/lib/newFeatures";
 import CatalogClient from "./CatalogClient";
 
 export const metadata = {
-  title: "Catalog — Train 321",
+  title: "Catalog",
   description: "Every course Train 321 offers, on a single page.",
   alternates: { canonical: "/catalog" }
 };

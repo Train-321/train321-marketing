@@ -4,7 +4,7 @@ import { plainText } from "@/lib/seo";
 import FaqClient from "./FaqClient";
 
 export const metadata = {
-  title: "FAQ — Train 321",
+  title: "FAQ",
   description: "Answers to the questions we hear most often.",
   alternates: { canonical: "/faq" }
 };

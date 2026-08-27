@@ -5,6 +5,7 @@ import {
   getLegalPages,
   getServiceSlugs
 } from "@/lib/sanity";
+import { STATIC_COURSES } from "@/lib/staticCourses";
 
 /**
  * Sitemap for Google Search Console.
@@ -67,6 +68,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: 0.9
     })),
+    // Code-defined course pages (TABC, RBS) that have no Sanity document.
+    ...Object.keys(STATIC_COURSES)
+      .filter((slug) => !ok(courses).some((c) => c.slug === slug))
+      .map((slug) => ({
+        url: `${SITE}/courses/${slug}`,
+        lastModified: now,
+        changeFrequency: "monthly" as const,
+        priority: 0.9
+      })),
     ...ok(services).map((slug) => ({
       url: `${SITE}/services/${slug}`,
       lastModified: now,

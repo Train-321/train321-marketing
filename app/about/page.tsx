@@ -3,7 +3,7 @@ import { getSiteSettings, getAboutPage } from "@/lib/sanity";
 import "./about.css";
 
 export const metadata = {
-  title: "About — Train 321",
+  title: "About",
   description: "The team and mission behind Train 321.",
   alternates: { canonical: "/about" }
 };

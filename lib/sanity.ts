@@ -19,6 +19,20 @@ export type Course = {
   image?: string; // URL string
   /** Which certificate preview to show. Defaults to the generic Train 321 one. */
   certificateVariant?: "tabc";
+  /**
+   * Sell THIS course directly even when its LMS course belongs to a group —
+   * the page keeps a plain Enroll button instead of the choose-your-state
+   * picker. For single-state landing pages (e.g. the California RBS link)
+   * where the state is already decided.
+   */
+  directEnroll?: boolean;
+  /**
+   * Force the cart's buyer audience when this page loads. A campaign page
+   * aimed at individual sign-ups sets "individual" so a visitor who once
+   * toggled "for my team" (persisted in localStorage) still gets the
+   * individual checkout flow from this link.
+   */
+  forceAudience?: "individual" | "company";
   overviewHeading?: string;
   summary?: string;
   hero?: { stats?: Array<{ value: string; label: string }> };

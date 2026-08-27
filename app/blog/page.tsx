@@ -6,7 +6,7 @@ import BlogClient from "./BlogClient";
 export const revalidate = 60;
 
 export const metadata = {
-  title: "Journal — Train 321",
+  title: "Journal",
   description: "Compliance updates, operator playbooks, and field notes from the Train 321 team.",
   alternates: { canonical: "/blog" }
 };

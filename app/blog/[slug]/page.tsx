@@ -33,9 +33,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getBlogPost(slug);
-  if (!post) return { title: "Article — Train 321" };
+  if (!post) return { title: "Article" };
   return {
-    title: `${post.title} — Train 321`,
+    title: `${post.title}`,
     description: post.excerpt || "",
     alternates: { canonical: `/blog/${slug}` },
     openGraph: {

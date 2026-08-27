@@ -67,6 +67,10 @@ const nextConfig: NextConfig = {
       // There is no accredited-food-handler course document; the accredited
       // program lives on the food-handler page.
       { source: "/accredited-food-handler", destination: "/courses/food-handler", permanent: true },
+      // Short shareable link for the California RBS sign-up page. Temporary on
+      // purpose — the campaign target can be repointed without waiting out
+      // browser-cached permanent redirects.
+      { source: "/rbs", destination: "/courses/rbs", permanent: false },
       // The pre-2026 static train321.com served bare .html files (mostly
       // underscore-named). One entry per old URL so search results and
       // inbound links keep resolving after the Vercel cutover.

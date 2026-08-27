@@ -61,7 +61,7 @@ const FALLBACK_ADDONS: PillarCard[] = [
 ];
 
 export const metadata = {
-  title: "Services & Pricing — Train 321",
+  title: "Services & Pricing",
   description: "Plans for individuals, teams, and enterprises.",
   alternates: { canonical: "/services" }
 };

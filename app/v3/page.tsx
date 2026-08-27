@@ -15,7 +15,7 @@ export const metadata = {
     "ANAB-accredited food handler, food manager, alcohol server, and harassment training. Finish on your phone in under an hour, certificate issued instantly, accepted in all 50 states. From $14.",
   alternates: { canonical: "/v3" },
   openGraph: {
-    title: "Get certified today — compliance training from $14 | Train 321",
+    title: "Get certified today — compliance training from $14",
     description:
       "Food, alcohol, and HR compliance courses on your phone. Pass and your certificate downloads instantly. Accepted in all 50 states.",
     type: "website"

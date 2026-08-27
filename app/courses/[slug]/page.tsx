@@ -7,6 +7,7 @@ import { SITE_URL, plainText } from "@/lib/seo";
 import { getCourse, getCourses, getDetailPagesCopy, getSiteSettings } from "@/lib/sanity";
 import { resolveCourse } from "@/lib/staticCourses";
 import EnrollButton from "@/components/EnrollButton";
+import ForceAudience from "@/components/ForceAudience";
 import CourseCertificate from "@/components/CourseCertificate";
 import TabcCertificate from "@/components/TabcCertificate";
 import { StatePickerProvider, StateSelect, StateResults } from "@/components/StateCoursePicker";
@@ -21,9 +22,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const course = resolveCourse(slug, await getCourse(slug));
-  if (!course) return { title: "Course · Train 321" };
+  if (!course) return { title: "Course" };
   return {
-    title: `${course.title} · Train 321`,
+    title: `${course.title}`,
     description: course.summary || course.tagline || "",
     alternates: { canonical: `/courses/${slug}` }
   };
@@ -49,7 +50,12 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   // share ONE round-trip per render. An explicit enrollUrl override skips
   // the LMS entirely — that's an editor saying "send buyers here".
   const skipLms = Boolean(course.enrollUrl);
-  const lms = { enrollId: course.enrollId, skipLms, enrollHref };
+  const lms = {
+    enrollId: course.enrollId,
+    skipLms,
+    enrollHref,
+    directEnroll: Boolean(course.directEnroll)
+  };
 
   // Chrome copy with fallbacks.
   const crumbHome = copy?.courseCrumbHome || "Home";
@@ -113,6 +119,9 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   return (
     <article className="t321-mkt-course">
       <JsonLd data={courseLd} />
+      {/* Campaign pages can pin who the checkout is for (e.g. the RBS
+          sign-up link always starts as an individual purchase). */}
+      {course.forceAudience && <ForceAudience audience={course.forceAudience} />}
       {/* GA4 view_item. Keyed on enrollId so this page's view joins the same
           product as its add_to_cart and purchase; courses with no LMS id
           aren't purchasable, so there's nothing to attribute. */}
@@ -312,13 +321,20 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
 const cachedCourse = cache((enrollId?: string) => resolveEnrollCourse(enrollId));
 const cachedPicker = cache((enrollId?: string) => getGroupPicker(enrollId));
 
-type LmsProps = { enrollId?: string; skipLms: boolean; enrollHref: string };
+type LmsProps = {
+  enrollId?: string;
+  skipLms: boolean;
+  enrollHref: string;
+  /** Sell this course directly even when its LMS course sits in a group —
+      no choose-your-state picker (single-state landing pages). */
+  directEnroll?: boolean;
+};
 
-async function lookup({ enrollId, skipLms }: LmsProps) {
+async function lookup({ enrollId, skipLms, directEnroll }: LmsProps) {
   if (skipLms) return { cartCourse: null, picker: null };
   const [cartCourse, picker] = await Promise.all([
     cachedCourse(enrollId),
-    cachedPicker(enrollId)
+    directEnroll ? null : cachedPicker(enrollId)
   ]);
   return { cartCourse, picker };
 }

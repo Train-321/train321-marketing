@@ -23,9 +23,12 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const service = await getServiceDetail(slug);
-  if (!service) return { title: "Services — Train 321" };
+  if (!service) return { title: "Services" };
   return {
-    title: service.seo?.title || `${service.title} — Train 321`,
+    // A Studio-authored SEO title is the editor's exact choice — used as-is,
+    // outside the layout's "%s — Train 321" template. The fallback gets the
+    // template suffix like every other page.
+    title: service.seo?.title ? { absolute: service.seo.title } : service.title,
     description: service.seo?.description || service.lede || "",
     alternates: { canonical: `/services/${slug}` }
   };

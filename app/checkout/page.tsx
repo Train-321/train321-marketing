@@ -1,7 +1,7 @@
 import CheckoutClient from "./CheckoutClient";
 
 export const metadata = {
-  title: "Checkout — Train 321",
+  title: "Checkout",
   description: "Complete your enrollment.",
   // Nothing here should ever be indexed — it's a transactional page whose
   // content depends entirely on the visitor's own cart.
