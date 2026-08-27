@@ -16,11 +16,8 @@ export const STATIC_COURSES: Record<string, Course> = {
     category: "alcohol",
     color: "amber",
     icon: "fas fa-wine-bottle",
-    // Shown in the hero's right-hand panel, the same way food-handler uses its
-    // image. Easy to swap for another URL, or override entirely by publishing a
-    // TABC course in Studio and uploading an image there.
-    image:
-      "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=1200&auto=format",
+    // No default image. Like every other course, the hero image only appears
+    // if the client uploads one in Studio (or sets an Image URL there).
     summary:
       "The TABC-approved seller/server course every Texas bar, restaurant, and store relies on. Learn to check IDs, spot fake identification, recognize intoxication, and refuse a sale the right way — then download your certificate the same day.",
     hero: {
