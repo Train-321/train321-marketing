@@ -30,7 +30,8 @@ export const marketingNav: NavItem[] = [
           { label: "Alcohol Safety", to: "/courses/alcohol", icon: "fas fa-wine-glass-alt" },
           { label: "Sexual Harassment", to: "/courses/sexual-harassment", icon: "fas fa-shield-alt" },
           { label: "Human Trafficking", to: "/courses/human-trafficking", icon: "fas fa-hands-helping" },
-          { label: "Security Host", to: "/courses/security-host", icon: "fas fa-user-shield" }
+          { label: "Security Host", to: "/courses/security-host", icon: "fas fa-user-shield" },
+          { label: "TABC", to: "/courses/tabc", icon: "fas fa-wine-bottle" }
         ]
       }
     ]
