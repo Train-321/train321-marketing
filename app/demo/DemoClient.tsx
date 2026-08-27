@@ -79,6 +79,9 @@ export default function DemoClient({ page }: Props) {
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [videosLoading, setVideosLoading] = useState(true);
   const [activeVideo, setActiveVideo] = useState<VideoItem | null>(null);
+  // Show a first page of videos, then reveal more on demand.
+  const VIDEO_PAGE = 6;
+  const [visibleCount, setVisibleCount] = useState(VIDEO_PAGE);
 
   const heroEyebrow = page?.heroEyebrow || "Book a walkthrough";
   const heroHeading = page?.heroHeading || "See Train 321 with your courses already loaded.";
@@ -225,7 +228,7 @@ export default function DemoClient({ page }: Props) {
               </div>
             ) : (
               <div className="t321-mkt-demo__videos">
-                {videos.map((v) => (
+                {videos.slice(0, visibleCount).map((v) => (
                   <article key={v.id} className="t321-mkt-demo__video-card t321-mkt-card">
                     <div className="t321-mkt-demo__video-frame">
                       <button
@@ -243,6 +246,17 @@ export default function DemoClient({ page }: Props) {
                     </div>
                   </article>
                 ))}
+              </div>
+            )}
+            {!videosLoading && videos.length > visibleCount && (
+              <div className="t321-mkt-demo__videos-more">
+                <button
+                  type="button"
+                  className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg"
+                  onClick={() => setVisibleCount((c) => c + VIDEO_PAGE)}
+                >
+                  Load more
+                </button>
               </div>
             )}
           </div>
