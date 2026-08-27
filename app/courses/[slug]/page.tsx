@@ -5,7 +5,7 @@ import TrackViewItem from "@/components/TrackViewItem";
 import JsonLd from "@/components/JsonLd";
 import { SITE_URL, plainText } from "@/lib/seo";
 import { getCourse, getCourses, getDetailPagesCopy, getSiteSettings } from "@/lib/sanity";
-import { STATIC_COURSES } from "@/lib/staticCourses";
+import { resolveCourse } from "@/lib/staticCourses";
 import EnrollButton from "@/components/EnrollButton";
 import CourseCertificate from "@/components/CourseCertificate";
 import TabcCertificate from "@/components/TabcCertificate";
@@ -20,7 +20,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const course = (await getCourse(slug)) || STATIC_COURSES[slug];
+  const course = resolveCourse(slug, await getCourse(slug));
   if (!course) return { title: "Course · Train 321" };
   return {
     title: `${course.title} · Train 321`,
@@ -35,7 +35,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   // Fall back to a code-defined course (e.g. TABC) when Sanity has none for
   // this slug — same layout, no CMS document required. Sanity always wins if
   // it has one, so publishing a real doc later transparently takes over.
-  const course = sanityCourse || STATIC_COURSES[slug];
+  const course = resolveCourse(slug, sanityCourse);
   if (!course) notFound();
 
   const enrollBase = settings.enrollBaseUrl || "http://new-features.train321.com/#/enroll";

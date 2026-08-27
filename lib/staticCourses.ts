@@ -7,6 +7,33 @@ import type { Course } from "@/lib/sanity";
 //
 // Keyed by slug. enrollId is the LMS course the Enroll button adds to the cart
 // (and the source of the live "from $X" price), same as a Sanity course's.
+/**
+ * Resolve the course to render for a slug, merging a Sanity document OVER its
+ * code-defined base when one exists.
+ *
+ * - Slug has no static base (every normal course) → return the Sanity course
+ *   untouched.
+ * - Slug has a static base (e.g. TABC) and no Sanity doc → pure code version.
+ * - Slug has a static base AND a Sanity doc → static is the base and only the
+ *   fields the Studio doc actually sets override it. So a minimal TABC document
+ *   (title + an uploaded image) adds just the image while the modules, FAQs and
+ *   the TABC certificate keep coming from code — instead of a half-empty Studio
+ *   doc blanking the page.
+ */
+export function resolveCourse(slug: string, sanityCourse: Course | null): Course | null {
+  const base = STATIC_COURSES[slug];
+  if (!base) return sanityCourse;
+  if (!sanityCourse) return base;
+  const merged: Course = { ...base };
+  for (const [key, value] of Object.entries(sanityCourse)) {
+    if (value == null) continue;
+    if (typeof value === "string" && value.trim() === "") continue;
+    if (Array.isArray(value) && value.length === 0) continue;
+    (merged as Record<string, unknown>)[key] = value;
+  }
+  return merged;
+}
+
 export const STATIC_COURSES: Record<string, Course> = {
   tabc: {
     slug: "tabc",
