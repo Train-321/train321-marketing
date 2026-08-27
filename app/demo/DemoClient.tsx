@@ -248,15 +248,26 @@ export default function DemoClient({ page }: Props) {
                 ))}
               </div>
             )}
-            {!videosLoading && videos.length > visibleCount && (
+            {!videosLoading && videos.length > VIDEO_PAGE && (
               <div className="t321-mkt-demo__videos-more">
-                <button
-                  type="button"
-                  className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg"
-                  onClick={() => setVisibleCount((c) => c + VIDEO_PAGE)}
-                >
-                  Load more
-                </button>
+                {visibleCount < videos.length && (
+                  <button
+                    type="button"
+                    className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg"
+                    onClick={() => setVisibleCount((c) => c + VIDEO_PAGE)}
+                  >
+                    Load more
+                  </button>
+                )}
+                {visibleCount > VIDEO_PAGE && (
+                  <button
+                    type="button"
+                    className="t321-mkt-btn t321-mkt-btn--ghost t321-mkt-btn--lg"
+                    onClick={() => setVisibleCount(VIDEO_PAGE)}
+                  >
+                    Show less
+                  </button>
+                )}
               </div>
             )}
           </div>

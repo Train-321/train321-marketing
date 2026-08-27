@@ -171,6 +171,8 @@
 .t321-mkt-demo__videos-more {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   margin-top: 2rem;
 }
 .t321-mkt-demo__video-card {
