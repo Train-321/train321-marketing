@@ -97,6 +97,19 @@
 .t321-mkt-course__hero-card-body {
   padding: 1.5rem;
 }
+/* When a course has an uploaded/URL image, it replaces the price card and
+   fills the panel. Rounds just inside the card's 1px border. */
+.t321-mkt-course__hero-media {
+  border-radius: 15px;
+  overflow: hidden;
+  line-height: 0;
+}
+.t321-mkt-course__hero-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
 
 .t321-mkt-course__price {
   display: flex;

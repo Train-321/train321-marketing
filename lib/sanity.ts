@@ -616,7 +616,9 @@ function normalizeBlogBody(raw: AnyBlock[] | null | undefined): BlogBodyNode[] {
 const COURSE_PROJECTION = `
   "slug": slug.current,
   title, eyebrow, tagline, category, color, icon,
-  "image": imageUrl,
+  // Prefer a Studio-uploaded image; fall back to the external Image URL field.
+  // Drives both the OG/meta image and the hero card visual on the course page.
+  "image": coalesce(image.asset->url + "?w=1200&auto=format", imageUrl),
   overviewHeading,
   summary,
   "hero": { "stats": heroStats[]{ value, label } },

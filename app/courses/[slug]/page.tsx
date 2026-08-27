@@ -173,6 +173,16 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
           </div>
 
           <aside className="t321-mkt-course__hero-card" aria-label="Course summary">
+            {course.image ? (
+              // A Studio-uploaded (or URL) image takes the place of the price
+              // card entirely — the client controls this from the CMS. Enroll
+              // still lives in the hero body on the left, so nothing is lost.
+              <div className="t321-mkt-course__hero-media">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={course.image} alt={course.title} />
+              </div>
+            ) : (
+            <>
             <div className={`t321-mkt-course__hero-card-head is-tone-${course.color || "accent"}`}>
               <i className={course.icon || "fas fa-book"} aria-hidden="true" />
             </div>
@@ -214,6 +224,8 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                 <CardWidget {...lms} getStartedLabel={getStartedLabel} />
               </Suspense>
             </div>
+            </>
+            )}
           </aside>
         </div>
       </section>
