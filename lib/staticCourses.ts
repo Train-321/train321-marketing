@@ -16,6 +16,11 @@ export const STATIC_COURSES: Record<string, Course> = {
     category: "alcohol",
     color: "amber",
     icon: "fas fa-wine-bottle",
+    // Shown in the hero's right-hand panel, the same way food-handler uses its
+    // image. Easy to swap for another URL, or override entirely by publishing a
+    // TABC course in Studio and uploading an image there.
+    image:
+      "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=1200&auto=format",
     summary:
       "The TABC-approved seller/server course every Texas bar, restaurant, and store relies on. Learn to check IDs, spot fake identification, recognize intoxication, and refuse a sale the right way — then download your certificate the same day.",
     hero: {
@@ -30,6 +35,13 @@ export const STATIC_COURSES: Record<string, Course> = {
       "Recognize the signs of intoxication before they become a problem",
       "Refuse a sale calmly and within the law",
       "Understand seller/server liability under Texas law"
+    ],
+    modules: [
+      { title: "Alcohol laws and seller/server responsibility", duration: "25 min" },
+      { title: "Checking IDs and spotting fake identification", duration: "30 min" },
+      { title: "Recognizing the signs of intoxication", duration: "25 min" },
+      { title: "Refusing a sale and handling difficult situations", duration: "20 min" },
+      { title: "Final assessment and certificate", duration: "20 min" }
     ],
     accreditations: ["TABC-approved", "Accepted statewide in Texas"],
     certificate: {

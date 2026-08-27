@@ -11,6 +11,10 @@
   gap: 3rem;
   align-items: start;
 }
+/* No course image → no right-hand card, so the hero body spans full width. */
+.t321-mkt-course__hero-grid--solo {
+  grid-template-columns: 1fr;
+}
 
 .t321-mkt-course__crumbs {
   display: flex;

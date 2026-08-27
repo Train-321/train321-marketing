@@ -55,11 +55,6 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   const crumbCourses = copy?.courseCrumbCourses || "Courses";
   const enrollLabel = copy?.courseEnrollLabel || "Enroll now";
   const browseLabel = copy?.courseBrowseLabel || "Browse all courses";
-  const getStartedLabel = copy?.courseGetStartedLabel || "Get started";
-  const priceFromLabel = copy?.coursePriceFromLabel || "From";
-  const priceUnitLabel = copy?.coursePriceUnitLabel || "per seat";
-  const priceCustomAmt = copy?.coursePriceCustomAmt || "Custom";
-  const priceCustomUnit = copy?.coursePriceCustomUnit || "pricing";
   const overviewEyebrow = copy?.courseOverviewEyebrow || "Course overview";
   const overviewHeading = course.overviewHeading || copy?.courseOverviewHeading || "What you'll get";
   const outcomesHeading = copy?.courseOutcomesHeading || "By the end, you'll be able to";
@@ -130,7 +125,11 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       )}
       <StatePickerProvider>
       <section className="t321-mkt-course__hero">
-        <div className="t321-mkt-container t321-mkt-course__hero-grid">
+        <div
+          className={`t321-mkt-container t321-mkt-course__hero-grid${
+            course.image ? "" : " t321-mkt-course__hero-grid--solo"
+          }`}
+        >
           <div className="t321-mkt-course__hero-body">
             <div className="t321-mkt-course__crumbs">
               <Link href="/">{crumbHome}</Link>
@@ -172,61 +171,17 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             )}
           </div>
 
-          <aside className="t321-mkt-course__hero-card" aria-label="Course summary">
-            {course.image ? (
-              // A Studio-uploaded (or URL) image takes the place of the price
-              // card entirely — the client controls this from the CMS. Enroll
-              // still lives in the hero body on the left, so nothing is lost.
+          {/* The right column is purely a Studio-managed image now. No image →
+              no card at all (the hero goes full-width). The price/stats/cart
+              block was removed; enrolling lives in the hero body on the left. */}
+          {course.image && (
+            <aside className="t321-mkt-course__hero-card" aria-label="Course image">
               <div className="t321-mkt-course__hero-media">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={course.image} alt={course.title} />
               </div>
-            ) : (
-            <>
-            <div className={`t321-mkt-course__hero-card-head is-tone-${course.color || "accent"}`}>
-              <i className={course.icon || "fas fa-book"} aria-hidden="true" />
-            </div>
-            <div className="t321-mkt-course__hero-card-body">
-              {course.priceFrom != null ? (
-                <div className="t321-mkt-course__price">
-                  <span className="t321-mkt-course__price-from">{priceFromLabel}</span>
-                  <span className="t321-mkt-course__price-amt">${course.priceFrom}</span>
-                  <span className="t321-mkt-course__price-unit">{priceUnitLabel}</span>
-                </div>
-              ) : (
-                <div className="t321-mkt-course__price t321-mkt-course__price--custom">
-                  <span className="t321-mkt-course__price-amt">{priceCustomAmt}</span>
-                  <span className="t321-mkt-course__price-unit">{priceCustomUnit}</span>
-                </div>
-              )}
-              {course.priceNote && <p className="t321-mkt-course__price-note">{course.priceNote}</p>}
-              {/* Empty array is truthy again: the stats list carries a border
-                  top and bottom, so with no stats it drew two rules across
-                  the price card with nothing between them. */}
-              {course.hero?.stats && course.hero.stats.length > 0 && (
-                <ul className="t321-mkt-course__stats">
-                  {course.hero.stats.map((s) => (
-                    <li key={s.label}>
-                      <strong>{s.value}</strong>
-                      <span>{s.label}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {/* Ungrouped course → the plain add-to-cart button. Grouped
-                  courses render nothing here; their state picker lives in the
-                  hero body. Streams in behind a button-shaped skeleton. */}
-              <Suspense
-                fallback={
-                  <span className="t321-skel t321-skel--btn-block" aria-hidden="true" />
-                }
-              >
-                <CardWidget {...lms} getStartedLabel={getStartedLabel} />
-              </Suspense>
-            </div>
-            </>
-            )}
-          </aside>
+            </aside>
+          )}
         </div>
       </section>
 
@@ -414,23 +369,6 @@ async function HeroWidget(
         {props.browseLabel}
       </Link>
     </div>
-  );
-}
-
-/** Hero price-card widget: add-to-cart for ungrouped courses. Grouped courses
-    render nothing — their picker moved to the hero body. */
-async function CardWidget(props: LmsProps & { getStartedLabel: string }) {
-  const { cartCourse, picker } = await lookup(props);
-  if (picker) return null;
-  return (
-    <EnrollButton
-      href={props.enrollHref}
-      label={cartCourse ? "Add to cart" : props.getStartedLabel}
-      className="t321-mkt-btn t321-mkt-btn--primary t321-mkt-btn--block"
-      course={cartCourse}
-      mode="add"
-      showArrow={false}
-    />
   );
 }
 
