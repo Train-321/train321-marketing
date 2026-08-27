@@ -181,12 +181,15 @@
   margin-top: 0.15em;
 }
 
-/* ── Legal / sample caption ───────────────────────────────────────── */
+/* ── Legal / sample caption — printed inside the certificate, matching the
+      generic CourseCertificate (em-scaled, black, justified). ───────────── */
 .t321-tabc__legal {
-  margin: 1.1rem 0 0;
-  font-size: 0.72rem;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
-  color: var(--t321-mkt-ink-muted, #6b6b6b);
-  text-align: center;
+  margin: 1.6em auto 0;
+  width: 90%;
+  font-size: 0.95em;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: #141414;
+  text-align: justify;
 }

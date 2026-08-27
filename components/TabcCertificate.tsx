@@ -148,9 +148,9 @@ export default function TabcCertificate({
             <span className="t321-tabc__foot-label">Trainer Signature</span>
           </div>
         </div>
-      </div>
 
-      <p className="t321-tabc__legal">{legalText}</p>
+        <p className="t321-tabc__legal">{legalText}</p>
+      </div>
     </div>
   );
 }
