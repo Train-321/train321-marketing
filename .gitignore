@@ -48,6 +48,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# Opted in: build-time only, and holds nothing secret — just the public URL the
+# deployed Studio previews. Without it, every `sanity deploy` bakes in whatever
+# local dev URL happens to be in studio/.env.local.
+!studio/.env.production
 
 # vercel
 .vercel
