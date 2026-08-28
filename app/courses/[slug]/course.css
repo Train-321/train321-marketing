@@ -7,7 +7,11 @@
 }
 .t321-mkt-course__hero-grid {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  /* The right column carries a hero image now, not the old price card, so it
+     scales with the viewport instead of sitting at one fixed width — 380px
+     read as a thumbnail on a wide screen. Clamped at both ends so it can't
+     crowd the copy on a small laptop or balloon on an ultrawide. */
+  grid-template-columns: 1fr clamp(360px, 34vw, 480px);
   gap: 3rem;
   align-items: start;
 }
@@ -73,8 +77,10 @@
      of being clipped inside it; the head rounds its own top corners. */
   overflow: visible;
   box-shadow: 0 10px 32px rgba(15, 15, 14, 0.06);
-  position: sticky;
-  top: 120px;
+  /* Centred against the hero copy, which is normally the taller column — a
+     top-aligned image left an obvious gap under it. Sticky went with the
+     price card this replaced; an image has nothing to follow the scroll for. */
+  align-self: center;
 }
 .t321-mkt-course__hero-card-head {
   padding: 1.5rem;
@@ -395,5 +401,6 @@
     grid-template-columns: 1fr;
     gap: 2rem;
   }
-  .t321-mkt-course__hero-card { position: static; }
+  /* Stacked under the copy at this width, so the desktop centring is moot. */
+  .t321-mkt-course__hero-card { align-self: stretch; }
 }
