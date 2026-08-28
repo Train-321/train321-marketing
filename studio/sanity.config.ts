@@ -3,6 +3,7 @@ import { structureTool } from 'sanity/structure'
 import { presentationTool } from 'sanity/presentation'
 import { visionTool } from '@sanity/vision'
 import { schemaTypes } from './schemas'
+import { pexelsAssetSource } from './components/PexelsAssetSource'
 
 const previewUrl = process.env.SANITY_STUDIO_PREVIEW_URL || 'http://localhost:3000'
 
@@ -134,5 +135,14 @@ export default defineConfig({
 
   schema: {
     types: schemaTypes
+  },
+
+  form: {
+    image: {
+      // Adds a "Pexels" tab alongside Upload and Media library in every image
+      // field, so a course hero can be filled from stock without a download /
+      // re-upload round trip.
+      assetSources: (prev) => [...prev, pexelsAssetSource]
+    }
   }
 })

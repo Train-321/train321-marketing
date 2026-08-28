@@ -70,7 +70,10 @@ export const STATIC_COURSES: Record<string, Course> = {
     certificate: {
       delivery: "Completion reported to California ABC within 24 hours",
       validity: "Per California ABC certification terms",
-      accepted: "California Department of Alcoholic Beverage Control (ABC)"
+      accepted: "California Department of Alcoholic Beverage Control (ABC)",
+      // RBS certification runs on the ABC's own cycle — the course completion
+      // certificate carries no expiration date, so the preview shows none.
+      hideExpiration: true
     },
     priceFrom: 15,
     // LMS "California Responsible Beverage Service (RBS) Training" — drives

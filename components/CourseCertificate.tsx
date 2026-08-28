@@ -17,6 +17,13 @@ export type CourseCertificateProps = {
   learnerName?: string;
   completionDate?: string;
   expirationDate?: string;
+  /**
+   * Some certificates don't expire on their own terms — California RBS, for
+   * one, is governed by the ABC's certification cycle rather than a date this
+   * certificate prints. Those pages hide the row instead of showing a date the
+   * learner's real certificate won't carry.
+   */
+  showExpiration?: boolean;
   certificateNo?: string;
   signatureName?: string;
   signatureTitle?: string;
@@ -28,11 +35,20 @@ export default function CourseCertificate({
   learnerName = "Maria Gonzalez",
   completionDate = "03-14-2026",
   expirationDate = "03-14-2029",
+  showExpiration = true,
   certificateNo = "2026-100426",
   signatureName = "Train 321 Learning Team",
   signatureTitle = "Train 321, LLC",
-  legalText = "SAMPLE CERTIFICATE — SHOWN FOR ILLUSTRATION. STUDENT CERTIFICATION: BY COMPLETING THIS PROGRAM THE STUDENT CERTIFIES THAT THEY COMPLETED ALL LESSONS, QUIZZES AND THE FINAL EXAM REQUIRED TO DEMONSTRATE MASTERY OF ALL MATERIAL. ISSUED CERTIFICATES CARRY THE LEARNER'S NAME, COMPLETION AND EXPIRATION DATES, AND A UNIQUE CERTIFICATE NUMBER."
+  legalText
 }: CourseCertificateProps) {
+  // The closing sentence lists what an issued certificate carries, so it has to
+  // track the rows above it — promising an expiration date the certificate
+  // doesn't print would be the same error twice.
+  const legal =
+    legalText ??
+    `SAMPLE CERTIFICATE — SHOWN FOR ILLUSTRATION. STUDENT CERTIFICATION: BY COMPLETING THIS PROGRAM THE STUDENT CERTIFIES THAT THEY COMPLETED ALL LESSONS, QUIZZES AND THE FINAL EXAM REQUIRED TO DEMONSTRATE MASTERY OF ALL MATERIAL. ISSUED CERTIFICATES CARRY THE LEARNER'S NAME, ${
+      showExpiration ? "COMPLETION AND EXPIRATION DATES" : "COMPLETION DATE"
+    }, AND A UNIQUE CERTIFICATE NUMBER.`;
   return (
     <div className="t321-cert">
       <div className="t321-cert__page">
@@ -58,11 +74,15 @@ export default function CourseCertificate({
 
         <div className="t321-cert__foot">
           <div className="t321-cert__meta">
-            <div className="t321-cert__meta-row t321-cert__meta-row--strong">
-              <span>Expiration Date:</span>
-              <span>{expirationDate}</span>
-            </div>
-            <div className="t321-cert__meta-row">
+            {showExpiration && (
+              <div className="t321-cert__meta-row t321-cert__meta-row--strong">
+                <span>Expiration Date:</span>
+                <span>{expirationDate}</span>
+              </div>
+            )}
+            {/* With no expiration above it, the completion date is the lead
+                line and takes the emphasis the strip is designed around. */}
+            <div className={`t321-cert__meta-row${showExpiration ? "" : " t321-cert__meta-row--strong"}`}>
               <span>Date Completed:</span>
               <span>{completionDate}</span>
             </div>
@@ -82,7 +102,7 @@ export default function CourseCertificate({
           </div>
         </div>
 
-        <p className="t321-cert__legal">{legalText}</p>
+        <p className="t321-cert__legal">{legal}</p>
       </div>
     </div>
   );

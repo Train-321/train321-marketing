@@ -256,7 +256,10 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
               {course.certificateVariant === "tabc" ? (
                 <TabcCertificate />
               ) : (
-                <CourseCertificate courseTitle={course.title} />
+                <CourseCertificate
+                  courseTitle={course.title}
+                  showExpiration={!course.certificate.hideExpiration}
+                />
               )}
             </div>
             <div>

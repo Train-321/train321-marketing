@@ -39,7 +39,14 @@ export type Course = {
   outcomes?: string[];
   modules?: Array<{ title: string; duration?: string }>;
   accreditations?: string[];
-  certificate?: { delivery?: string; validity?: string; accepted?: string };
+  certificate?: {
+    delivery?: string;
+    validity?: string;
+    accepted?: string;
+    /** Drop the expiration row from the certificate preview — for courses
+        whose real certificate doesn't print one (e.g. California RBS). */
+    hideExpiration?: boolean;
+  };
   priceFrom?: number;
   priceNote?: string;
   faqs?: Array<{ q: string; a: string }>;
@@ -632,10 +639,11 @@ function normalizeBlogBody(raw: AnyBlock[] | null | undefined): BlogBodyNode[] {
 const COURSE_PROJECTION = `
   "slug": slug.current,
   title, eyebrow, tagline, category, color, icon,
-  // ONLY a Studio-uploaded image shows on the page — no default. The external
-  // "Image URL" field is intentionally ignored here so courses stay image-less
-  // until the client uploads one in Studio. Drives the hero visual + OG image.
-  "image": image.asset->url + "?w=1200&auto=format",
+  // Still no default image — a course stays image-less until someone sets one
+  // in Studio. But BOTH Studio fields now count: the upload wins, and a typed
+  // "Image URL" is honoured as a fallback rather than silently doing nothing.
+  // Drives the hero visual + OG image.
+  "image": coalesce(image.asset->url + "?w=1200&auto=format", imageUrl),
   overviewHeading,
   summary,
   "hero": { "stats": heroStats[]{ value, label } },
