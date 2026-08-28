@@ -112,6 +112,31 @@ export default defineType({
     }),
 
     defineField({
+      name: 'directEnroll',
+      title: 'Skip the state picker',
+      type: 'boolean',
+      group: 'enroll',
+      description:
+        'For single-state landing pages. When the linked Course ID belongs to a group (e.g. Alcohol Safety), the Enroll buttons normally ask the learner to choose a state first. Tick this to sell this course directly instead — the state is already decided by the page.',
+      initialValue: false
+    }),
+    defineField({
+      name: 'forceAudience',
+      title: 'Start checkout as',
+      type: 'string',
+      group: 'enroll',
+      description:
+        'Optional. Pins who this page\'s checkout is for, whichever way the visitor last browsed the site. Use "An individual" on a sign-up link you send to one person. Leave blank to keep whatever the visitor already chose.',
+      options: {
+        list: [
+          { title: 'An individual', value: 'individual' },
+          { title: 'A company / team', value: 'company' }
+        ],
+        layout: 'radio'
+      }
+    }),
+
+    defineField({
       name: 'stateVariants',
       title: 'State / regional versions',
       type: 'array',

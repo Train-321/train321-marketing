@@ -35,67 +35,6 @@ export function resolveCourse(slug: string, sanityCourse: Course | null): Course
 }
 
 export const STATIC_COURSES: Record<string, Course> = {
-  // Dedicated California RBS sign-up page — a shareable link for individual
-  // servers/bartenders. Sells LMS course 692 directly (directEnroll skips the
-  // Alcohol Safety group's state picker: the state is already decided), and
-  // the cart starts in individual mode for everyone who lands here.
-  rbs: {
-    slug: "rbs",
-    title: "California Responsible Beverage Service (RBS) Training",
-    eyebrow: "Alcohol Service · California",
-    tagline:
-      "The RBS training California servers, bartenders, and managers need before the ABC exam — online, from any device.",
-    category: "alcohol",
-    color: "amber",
-    icon: "fas fa-wine-glass-alt",
-    summary:
-      "Need to serve alcohol in California? Complete your required Responsible Beverage Service training online from your phone, tablet, or computer. Built for busy servers, bartenders, and managers who need California RBS training before taking the ABC Alcohol Server Certification Exam. When you finish, your completion is reported to California ABC within 24 hours — then you take the ABC exam in the RBS Portal and pass with 70% or higher within 30 days.",
-    hero: {
-      stats: [
-        { value: "Online", label: "Self-paced, any device" },
-        { value: "24 hrs", label: "Reported to CA ABC" },
-        { value: "70%+", label: "ABC exam pass mark" }
-      ]
-    },
-    outcomes: [
-      "Meet California's RBS training requirement for alcohol servers and managers",
-      "Check IDs and spot false identification",
-      "Recognize signs of intoxication and refuse service responsibly",
-      "Walk into the ABC certification exam prepared to pass"
-    ],
-    accreditations: [
-      "Completion reported to California ABC within 24 hours",
-      "Take the ABC exam in the RBS Portal after training"
-    ],
-    certificate: {
-      delivery: "Completion reported to California ABC within 24 hours",
-      validity: "Per California ABC certification terms",
-      accepted: "California Department of Alcoholic Beverage Control (ABC)",
-      // RBS certification runs on the ABC's own cycle — the course completion
-      // certificate carries no expiration date, so the preview shows none.
-      hideExpiration: true
-    },
-    priceFrom: 15,
-    // LMS "California Responsible Beverage Service (RBS) Training" — drives
-    // the live price and what the Enroll button adds to the cart.
-    enrollId: "692",
-    directEnroll: true,
-    forceAudience: "individual",
-    faqs: [
-      {
-        q: "Who needs RBS training in California?",
-        a: "Anyone who serves alcoholic beverages — or manages people who do — at an ABC-licensed on-premises business needs to be RBS certified."
-      },
-      {
-        q: "What happens after I finish the course?",
-        a: "Your completion is reported to California ABC within 24 hours. You then log in to the ABC's RBS Portal and pass the certification exam with a score of 70% or higher within 30 days."
-      },
-      {
-        q: "Can I take it on my phone?",
-        a: "Yes — the course works on your phone, tablet, or computer, and your progress saves automatically so you can stop and pick back up anytime."
-      }
-    ]
-  },
   tabc: {
     slug: "tabc",
     title: "TABC Certification",

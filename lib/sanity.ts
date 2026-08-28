@@ -650,10 +650,13 @@ const COURSE_PROJECTION = `
   outcomes,
   modules[]{ title, duration },
   accreditations,
-  certificate{ delivery, validity, accepted },
+  certificate{ delivery, validity, accepted, hideExpiration },
   priceFrom, priceNote,
   faqs[]{ q, a },
   enrollId, enrollUrl,
+  // Landing-page behaviour, editable in Studio: skip the group's state picker,
+  // and pin who the checkout is for. Both drive the RBS sign-up link.
+  directEnroll, forceAudience,
   "stateVariants": stateVariants[]{
     state,
     "title": course->title,
