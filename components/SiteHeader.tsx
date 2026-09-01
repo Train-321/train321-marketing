@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { marketingNav } from "@/lib/nav";
+import type { NavItem } from "@/lib/nav";
 import type { SiteSettings } from "@/lib/sanity";
 import SignInDialog from "./SignInDialog";
 import CartButton from "./cart/CartButton";
@@ -32,6 +33,27 @@ type Props = { settings?: SiteSettings };
 export default function SiteHeader({ settings }: Props) {
   const phone = settings?.phone || "561-325-7300";
   const email = settings?.email || "info@train321.com";
+
+  // Menu bar: a Studio-managed menu (Site Settings → Menu bar) replaces the
+  // built-in one when it has entries; otherwise lib/nav.ts renders exactly as
+  // before. The CMS shape is mapped into NavItem here so every consumer below
+  // stays untouched.
+  const nav: NavItem[] = settings?.mainNav?.length
+    ? settings.mainNav.map((item) => ({
+        label: item.label,
+        to: item.groups?.length ? undefined : item.href || "/",
+        children: item.groups?.length
+          ? item.groups.map((g) => ({
+              heading: g.heading || "",
+              links: (g.links || []).map((l) => ({
+                label: l.label,
+                to: l.href || "/",
+                icon: l.icon
+              }))
+            }))
+          : undefined
+      }))
+    : marketingNav;
   const phoneHref = `tel:+1${phone.replace(/\D/g, "")}`;
   const pathname = usePathname();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -148,7 +170,7 @@ export default function SiteHeader({ settings }: Props) {
 
         <nav className="t321-mkt-nav" aria-label="Primary">
           <ul className="t321-mkt-nav__list">
-            {marketingNav.map((item) => (
+            {nav.map((item) => (
               <li
                 key={item.label}
                 className={`t321-mkt-nav__item${item.children ? " has-children" : ""}${openMenu === item.label ? " is-open" : ""}`}
@@ -246,7 +268,7 @@ export default function SiteHeader({ settings }: Props) {
               </button>
             </div>
             <div className="t321-mkt-drawer__body">
-              {marketingNav.map((item) =>
+              {nav.map((item) =>
                 !item.children && item.to ? (
                   <Link
                     key={item.label}

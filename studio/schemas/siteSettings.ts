@@ -7,6 +7,7 @@ export default defineType({
   groups: [
     { name: 'identity', title: 'Identity' },
     { name: 'contact', title: 'Contact' },
+    { name: 'menu', title: 'Menu bar' },
     { name: 'footer', title: 'Footer' },
     { name: 'misc', title: 'Misc' }
   ],
@@ -27,6 +28,76 @@ export default defineType({
         { name: 'linkedin', type: 'url' },
         { name: 'instagram', type: 'url' },
         { name: 'youtube', type: 'url' }
+      ]
+    }),
+
+    defineField({
+      name: 'mainNav',
+      title: 'Menu bar (header navigation)',
+      type: 'array',
+      group: 'menu',
+      description:
+        'Leave EMPTY to use the built-in menu. When filled, this REPLACES the entire ' +
+        'menu bar, so include every item you want shown (Home, Courses, Services, …). ' +
+        'An item with dropdown groups renders as a dropdown; an item with just a URL ' +
+        'renders as a plain link.',
+      of: [
+        {
+          type: 'object',
+          name: 'mainNavItem',
+          title: 'Menu item',
+          fields: [
+            { name: 'label', type: 'string' },
+            {
+              name: 'href',
+              type: 'string',
+              title: 'URL or path',
+              description: 'For a plain link, e.g. /demo or /blog. Ignored when dropdown groups are set below.'
+            },
+            {
+              name: 'groups',
+              title: 'Dropdown groups',
+              type: 'array',
+              description: 'Adding a group turns this item into a dropdown menu.',
+              of: [
+                {
+                  type: 'object',
+                  name: 'mainNavGroup',
+                  title: 'Dropdown group',
+                  fields: [
+                    { name: 'heading', type: 'string', description: 'Small heading above the links, e.g. "Compliance courses".' },
+                    {
+                      name: 'links',
+                      type: 'array',
+                      of: [
+                        {
+                          type: 'object',
+                          name: 'mainNavLink',
+                          fields: [
+                            { name: 'label', type: 'string' },
+                            { name: 'href', type: 'string', title: 'URL or path', description: 'e.g. /courses/tabc' },
+                            { name: 'icon', type: 'string', description: 'Optional Font Awesome class, e.g. fas fa-utensils' }
+                          ],
+                          preview: { select: { title: 'label', subtitle: 'href' } }
+                        }
+                      ]
+                    }
+                  ],
+                  preview: { select: { title: 'heading' } }
+                }
+              ]
+            }
+          ],
+          preview: {
+            select: { title: 'label', subtitle: 'href', groups: 'groups' },
+            prepare({ title, subtitle, groups }: { title?: string; subtitle?: string; groups?: unknown[] }) {
+              return {
+                title: title || 'Menu item',
+                subtitle: groups?.length ? 'Dropdown menu' : subtitle || ''
+              }
+            }
+          }
+        }
       ]
     }),
 

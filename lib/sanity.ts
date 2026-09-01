@@ -142,6 +142,16 @@ export type TrustLogo = {
   url?: string;
 };
 
+/** A Studio-managed header menu item — plain link or dropdown. */
+export type MainNavItem = {
+  label: string;
+  href?: string;
+  groups?: Array<{
+    heading?: string;
+    links?: Array<{ label: string; href?: string; icon?: string }>;
+  }>;
+};
+
 export type SiteSettings = {
   siteName: string;
   tagline?: string;
@@ -162,6 +172,8 @@ export type SiteSettings = {
   companyStats?: Array<{ value: string; label: string }>;
   trustLogos?: TrustLogo[];
   enrollBaseUrl?: string;
+  /** Studio-managed menu bar; empty/absent → the built-in lib/nav.ts menu. */
+  mainNav?: MainNavItem[];
 };
 
 // ── Reusable shapes used across page documents ──────────────────────────
@@ -870,6 +882,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   const r: SiteSettings | null = await (await getClient()).fetch(
     `*[_id == "siteSettings"][0] {
       siteName, tagline, phone, email, supportEmail, social,
+      mainNav[]{ label, href, groups[]{ heading, links[]{ label, href, icon } } },
       footerTagline,
       footerColumns[]{ title, links[]{ label, href } },
       footerLegalLinks[]{ label, href },
