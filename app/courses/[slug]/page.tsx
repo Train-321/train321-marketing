@@ -36,11 +36,14 @@ const CERT_SECTION_COPY: Record<
     validityLabel: string;
     acceptedLabel: string;
     extraRows?: Array<{ label: string; text: string }>;
+    /** Shorter course name printed on the certificate preview itself. */
+    certTitle?: string;
   }
 > = {
   rbs: {
     eyebrow: "Your training completion",
     heading: "Course Completion Recorded Immediately",
+    certTitle: "California RBS Training",
     deliveryLabel: "Train 321 Record",
     validityLabel: "ABC Reporting",
     acceptedLabel: "Next Steps",
@@ -294,7 +297,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                 <TabcCertificate />
               ) : (
                 <CourseCertificate
-                  courseTitle={course.title}
+                  courseTitle={certCopy?.certTitle || course.title}
                   showExpiration={!course.certificate.hideExpiration}
                 />
               )}
