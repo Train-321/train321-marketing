@@ -19,6 +19,40 @@ export async function generateStaticParams() {
   return courses.map((c) => ({ slug: c.slug }));
 }
 
+/**
+ * Per-course overrides for the certificate section's chrome copy, keyed by
+ * slug. On RBS the completion certificate is NOT the state certification —
+ * training is only one step, so the shared "Your certificate / Issued
+ * immediately" framing overpromises. The row VALUES still come from the
+ * course document; only the labels around them change, and only for the
+ * slugs listed here. Every other course keeps the shared Detail Pages copy.
+ */
+const CERT_SECTION_COPY: Record<
+  string,
+  {
+    eyebrow: string;
+    heading: string;
+    deliveryLabel: string;
+    validityLabel: string;
+    acceptedLabel: string;
+    extraRows?: Array<{ label: string; text: string }>;
+  }
+> = {
+  rbs: {
+    eyebrow: "Your training completion",
+    heading: "Course Completion Recorded Immediately",
+    deliveryLabel: "Train 321 Record",
+    validityLabel: "ABC Reporting",
+    acceptedLabel: "Next Steps",
+    extraRows: [
+      {
+        label: "Certification",
+        text: "Your official California Alcohol Server Certification is issued by California ABC after you pass the state exam."
+      }
+    ]
+  }
+};
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const course = resolveCourse(slug, await getCourse(slug));
@@ -70,11 +104,14 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   const curriculumLedeTpl =
     copy?.courseCurriculumLedeTpl || "{n} modules — self-paced, with progress that saves automatically.";
   const curriculumLede = curriculumLedeTpl.replace("{n}", String(course.modules?.length || 0));
-  const certEyebrow = copy?.courseCertEyebrow || "Your certificate";
-  const certHeading = copy?.courseCertHeading || "Official, instant, accepted";
-  const certDeliveryLabel = copy?.courseCertDeliveryLabel || "Delivery";
-  const certValidityLabel = copy?.courseCertValidityLabel || "Validity";
-  const certAcceptedLabel = copy?.courseCertAcceptedLabel || "Accepted by";
+  // A slug listed in CERT_SECTION_COPY re-words this section; everyone else
+  // gets the shared chrome copy exactly as before.
+  const certCopy = CERT_SECTION_COPY[slug];
+  const certEyebrow = certCopy?.eyebrow || copy?.courseCertEyebrow || "Your certificate";
+  const certHeading = certCopy?.heading || copy?.courseCertHeading || "Official, instant, accepted";
+  const certDeliveryLabel = certCopy?.deliveryLabel || copy?.courseCertDeliveryLabel || "Delivery";
+  const certValidityLabel = certCopy?.validityLabel || copy?.courseCertValidityLabel || "Validity";
+  const certAcceptedLabel = certCopy?.acceptedLabel || copy?.courseCertAcceptedLabel || "Accepted by";
   const faqEyebrow = copy?.courseFaqEyebrow || "FAQ";
   const faqHeading = copy?.courseFaqHeading || "Common questions";
 
@@ -269,6 +306,9 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                 <div><dt>{certDeliveryLabel}</dt><dd>{course.certificate.delivery}</dd></div>
                 <div><dt>{certValidityLabel}</dt><dd>{course.certificate.validity}</dd></div>
                 <div><dt>{certAcceptedLabel}</dt><dd>{course.certificate.accepted}</dd></div>
+                {certCopy?.extraRows?.map((row) => (
+                  <div key={row.label}><dt>{row.label}</dt><dd>{row.text}</dd></div>
+                ))}
               </dl>
             </div>
           </div>
