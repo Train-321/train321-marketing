@@ -9,6 +9,8 @@ import { resolveCourse } from "@/lib/staticCourses";
 import EnrollButton from "@/components/EnrollButton";
 import ForceAudience from "@/components/ForceAudience";
 import CourseCertificate from "@/components/CourseCertificate";
+import CourseHeroMedia from "@/components/CourseHeroMedia";
+import { vimeoId, vimeoThumbnail } from "@/lib/vimeo";
 import TabcCertificate from "@/components/TabcCertificate";
 import { StatePickerProvider, StateSelect, StateResults } from "@/components/StateCoursePicker";
 import { getGroupPicker, resolveEnrollCourse } from "@/lib/enroll";
@@ -86,6 +88,13 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   // LMS answers. cache() dedupes the lookups so all four islands below
   // share ONE round-trip per render. An explicit enrollUrl override skips
   // the LMS entirely — that's an editor saying "send buyers here".
+  // Hero visual. A Vimeo link/id in Studio turns the image slot into a player;
+  // the course image, when there is one, becomes its poster. With a video but
+  // no image we borrow Vimeo's own thumbnail rather than showing a blank frame.
+  const heroVideoId = vimeoId(course.heroVideo);
+  const heroVideoPoster =
+    heroVideoId && !course.image ? await vimeoThumbnail(heroVideoId) : null;
+
   const skipLms = Boolean(course.enrollUrl);
   const lms = {
     enrollId: course.enrollId,
@@ -177,7 +186,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       <section className="t321-mkt-course__hero">
         <div
           className={`t321-mkt-container t321-mkt-course__hero-grid${
-            course.image ? "" : " t321-mkt-course__hero-grid--solo"
+            course.image || heroVideoId ? "" : " t321-mkt-course__hero-grid--solo"
           }`}
         >
           <div className="t321-mkt-course__hero-body">
@@ -221,14 +230,22 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             )}
           </div>
 
-          {/* The right column is purely a Studio-managed image now. No image →
-              no card at all (the hero goes full-width). The price/stats/cart
-              block was removed; enrolling lives in the hero body on the left. */}
-          {course.image && (
-            <aside className="t321-mkt-course__hero-card" aria-label="Course image">
+          {/* The right column is purely Studio-managed media now — an image, a
+              Vimeo video, or a video over the image. Neither set → no card at
+              all (the hero goes full-width). The price/stats/cart block was
+              removed; enrolling lives in the hero body on the left. */}
+          {(course.image || heroVideoId) && (
+            <aside
+              className="t321-mkt-course__hero-card"
+              aria-label={heroVideoId ? "Course video" : "Course image"}
+            >
               <div className="t321-mkt-course__hero-media">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={course.image} alt={course.title} />
+                <CourseHeroMedia
+                  image={course.image}
+                  videoId={heroVideoId}
+                  videoPoster={heroVideoPoster || undefined}
+                  title={course.title}
+                />
               </div>
             </aside>
           )}

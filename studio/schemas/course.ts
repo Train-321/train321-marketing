@@ -50,6 +50,22 @@ export default defineType({
     defineField({ name: 'icon', type: 'string', description: 'Font Awesome class, e.g. fas fa-utensils', group: 'content' }),
     defineField({ name: 'imageUrl', type: 'url', title: 'Image URL', description: 'Use this for external image URLs (e.g. Unsplash). Leave blank if uploading via the field below.', group: 'content' }),
     defineField({ name: 'image', type: 'image', title: 'Image (uploaded)', options: { hotspot: true }, group: 'content' }),
+    defineField({
+      name: 'heroVideo',
+      title: 'Hero video (Vimeo)',
+      type: 'string',
+      group: 'content',
+      description:
+        'Optional. Paste the Vimeo link (https://vimeo.com/123456789) or just the video id. When set, the course page plays this video where the image sits — the image above becomes its cover frame, and Vimeo\'s own thumbnail is used if there is no image. Leave blank to show the image on its own.',
+      // Nothing plays without a numeric id, and a typo would just silently
+      // fall back to the image. Say so here rather than on the live page.
+      validation: (R) =>
+        R.custom((value?: string) =>
+          !value || /(\d{6,})/.test(value)
+            ? true
+            : 'No Vimeo video id found — the page will fall back to the image. Paste the full Vimeo URL (e.g. https://vimeo.com/123456789) or the id on its own. YouTube and other hosts are not supported.'
+        )
+    }),
     defineField({ name: 'overviewHeading', title: 'Overview heading', type: 'string', description: 'Optional. Heading above the Course Overview summary on this course only. Leave blank to use the shared default from Detail Pages (chrome copy).', group: 'content' }),
     defineField({ name: 'summary', type: 'text', rows: 4, group: 'content' }),
     defineField({

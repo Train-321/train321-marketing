@@ -76,11 +76,31 @@
   /* Visible so the state-picker dropdown menu can overhang the card instead
      of being clipped inside it; the head rounds its own top corners. */
   overflow: visible;
-  box-shadow: 0 10px 32px rgba(15, 15, 14, 0.06);
+  /* Layered rather than one soft blur: a tight contact shadow to seat the card
+     on the page, a wide ambient one to lift it off, and a cool cast picking up
+     the brand navy. The old single 6%-opacity blur read as no shadow at all,
+     leaving the image looking pasted onto the hero. */
+  box-shadow:
+    0 1px 2px rgba(15, 15, 14, 0.06),
+    0 18px 40px -18px rgba(15, 15, 14, 0.28),
+    0 10px 24px -14px rgba(11, 67, 124, 0.24);
   /* Centred against the hero copy, which is normally the taller column — a
      top-aligned image left an obvious gap under it. Sticky went with the
      price card this replaced; an image has nothing to follow the scroll for. */
   align-self: center;
+  transition: transform 300ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    box-shadow 300ms ease;
+}
+.t321-mkt-course__hero-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 1px 2px rgba(15, 15, 14, 0.06),
+    0 34px 66px -22px rgba(15, 15, 14, 0.34),
+    0 16px 34px -16px rgba(11, 67, 124, 0.3);
+}
+@media (prefers-reduced-motion: reduce) {
+  .t321-mkt-course__hero-card { transition: box-shadow 300ms ease; }
+  .t321-mkt-course__hero-card:hover { transform: none; }
 }
 .t321-mkt-course__hero-card-head {
   padding: 1.5rem;
@@ -107,18 +127,90 @@
 .t321-mkt-course__hero-card-body {
   padding: 1.5rem;
 }
-/* When a course has an uploaded/URL image, it replaces the price card and
-   fills the panel. Rounds just inside the card's 1px border. */
+/* When a course has an uploaded/URL image (or a Vimeo video) it replaces the
+   price card and fills the panel. Rounds just inside the card's 1px border.
+
+   Pinned to 16/9 whatever the media's own shape is. With height: auto the card
+   was as tall as the upload happened to be — a portrait photo made the hero
+   column twice as tall as a landscape one, so the page reflowed course to
+   course and while an image loaded. Every course now reserves the same box and
+   the media crops into it. */
 .t321-mkt-course__hero-media {
+  position: relative;
+  aspect-ratio: 16 / 9;
   border-radius: 15px;
   overflow: hidden;
   line-height: 0;
+  /* Shows through while the image loads, and behind a player that letterboxes
+     — a dark ground reads as intentional where white reads as broken. */
+  background: #0B1F33;
+}
+/* aspect-ratio is only a PREFERRED size: in-flow content taller than 16/9
+   stretches the box straight back open. Taking the media out of flow is what
+   actually holds the frame. */
+.t321-mkt-course__hero-media > * {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 .t321-mkt-course__hero-media img {
   display: block;
-  width: 100%;
-  height: auto;
   object-fit: cover;
+}
+.t321-mkt-course__hero-frame {
+  border: 0;
+  display: block;
+}
+
+/* Click-to-play facade for a course video: nothing third-party loads, and
+   nothing starts playing, until the visitor asks for it. */
+.t321-mkt-course__hero-poster {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.t321-mkt-course__hero-poster img {
+  position: absolute;
+  inset: 0;
+}
+/* Stand-in ground for a video with no poster frame of its own. */
+.t321-mkt-course__hero-poster-ground {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0B1F33, #00B4DB);
+}
+.t321-mkt-course__hero-play {
+  position: relative;
+  z-index: 1;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--t321-mkt-accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  box-shadow: 0 12px 32px -8px rgba(15, 15, 14, 0.4);
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+.t321-mkt-course__hero-play i { margin-left: 4px; }
+.t321-mkt-course__hero-poster:hover .t321-mkt-course__hero-play,
+.t321-mkt-course__hero-poster:focus-visible .t321-mkt-course__hero-play {
+  transform: scale(1.08);
+  box-shadow: 0 18px 40px -6px rgba(15, 15, 14, 0.45);
+}
+@media (prefers-reduced-motion: reduce) {
+  .t321-mkt-course__hero-play { transition: none; }
+  .t321-mkt-course__hero-poster:hover .t321-mkt-course__hero-play,
+  .t321-mkt-course__hero-poster:focus-visible .t321-mkt-course__hero-play {
+    transform: none;
+  }
 }
 
 .t321-mkt-course__price {

@@ -17,6 +17,12 @@ export type Course = {
   color?: "amber" | "plum" | "emerald" | "neutral";
   icon?: string;
   image?: string; // URL string
+  /**
+   * Vimeo video for the hero visual, as the editor typed it — a full vimeo.com
+   * link or a bare id. When set, the hero shows a click-to-play player in the
+   * image's place (the image, if any, becomes its poster frame).
+   */
+  heroVideo?: string;
   /** Which certificate preview to show. Defaults to the generic Train 321 one. */
   certificateVariant?: "tabc";
   /**
@@ -656,6 +662,9 @@ const COURSE_PROJECTION = `
   // "Image URL" is honoured as a fallback rather than silently doing nothing.
   // Drives the hero visual + OG image.
   "image": coalesce(image.asset->url + "?w=1200&auto=format", imageUrl),
+  // Optional Vimeo link/id. Takes the hero visual's slot when set; the id is
+  // pulled out of whatever shape was pasted at render time.
+  heroVideo,
   overviewHeading,
   summary,
   "hero": { "stats": heroStats[]{ value, label } },
