@@ -6,6 +6,7 @@ export default defineType({
   type: 'document',
   groups: [
     { name: 'identity', title: 'Identity' },
+    { name: 'seo', title: 'Search & social sharing' },
     { name: 'contact', title: 'Contact' },
     { name: 'menu', title: 'Menu bar' },
     { name: 'footer', title: 'Footer' },
@@ -164,6 +165,18 @@ export default defineType({
       initialValue: 'http://new-features.train321.com/#/enroll',
       description: 'Base URL for all "Enroll now" buttons. Query params like ?add=<id>&checkout=1 are appended automatically.'
     }),
-    defineField({ name: 'defaultSeo', type: 'seo', title: 'Default SEO', group: 'misc' })
+    defineField({
+      name: 'defaultSeo',
+      type: 'seo',
+      title: 'Search & social sharing',
+      group: 'seo',
+      description:
+        'What people see when the train321.com link is shared on WhatsApp, Facebook, ' +
+        'LinkedIn or iMessage, and what Google shows for the home page. The title and ' +
+        'description apply to the home page and to any page that does not set its own. ' +
+        'Add a share image to replace the default Train 321 card (1200×630 works best). ' +
+        'Changes go live within about a minute — but apps that already showed the link ' +
+        'keep their cached preview for a while.'
+    })
   ]
 })

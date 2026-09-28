@@ -180,7 +180,25 @@ export type SiteSettings = {
   enrollBaseUrl?: string;
   /** Studio-managed menu bar; empty/absent → the built-in lib/nav.ts menu. */
   mainNav?: MainNavItem[];
+  /**
+   * Site-wide title / description / share image, edited under Site Settings →
+   * "Search & social sharing". Drives the home page's <title>, meta
+   * description and Open Graph tags (what WhatsApp, Facebook, LinkedIn show
+   * for the bare train321.com link), and is the fallback for pages that set
+   * no title of their own. Absent fields fall back to the code defaults.
+   */
+  defaultSeo?: DefaultSeo;
 };
+
+export type DefaultSeo = {
+  metaTitle?: string;
+  metaDescription?: string;
+  /** Raw Sanity image (asset ref + hotspot/crop) — pass through urlFor(). */
+  ogImage?: SanityImageSource | null;
+};
+
+// Projection shared by getSiteSettings and the share-card image route.
+export const DEFAULT_SEO_PROJ = `defaultSeo{ metaTitle, metaDescription, ogImage }`;
 
 // ── Reusable shapes used across page documents ──────────────────────────
 
@@ -905,7 +923,8 @@ export async function getSiteSettings(): Promise<SiteSettings> {
         // the browser supports it. ~70% smaller than the original 512px PNG.
         "imageUrl": image.asset->url + "?w=400&auto=format"
       },
-      enrollBaseUrl
+      enrollBaseUrl,
+      ${DEFAULT_SEO_PROJ}
     }`
   );
   return r ?? SETTINGS_DEFAULT;

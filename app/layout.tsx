@@ -9,7 +9,7 @@ import DisableDraftMode from "@/components/DisableDraftMode";
 import { CartProvider } from "@/components/cart/CartContext";
 import CartDrawer from "@/components/cart/CartDrawer";
 import CartToast from "@/components/cart/CartToast";
-import { SanityLive } from "@/lib/sanity";
+import { SanityLive, getSiteSettings } from "@/lib/sanity";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import JsonLd from "@/components/JsonLd";
 import { ORGANIZATION_LD } from "@/lib/seo";
@@ -38,31 +38,46 @@ const montserrat = Montserrat({
   display: "swap"
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Train 321 — Online Food Safety Training",
-    template: "%s — Train 321"
-  },
-  description:
-    "Online food handler, food manager, and alcohol seller-server training. ANAB-accredited, state-approved.",
-  metadataBase: new URL(process.env.SITE_URL || "https://train321-marketing.vercel.app"),
-  openGraph: {
-    siteName: "Train 321",
-    type: "website"
-  },
-  twitter: {
-    card: "summary_large_image"
-  },
-  // Proves ownership of www.train321.com to Google Search Console. Google
-  // re-checks periodically, so this has to stay put after verification.
-  verification: {
-    google: "Nfaulb5Oqkq4Bu-Y0KcOXafksELW3wNovEkAvL5Vioo"
-  }
-  // NOTE: no `alternates.canonical` here. A layout-level canonical is
-  // inherited by every child page, which pointed the whole site's canonical
-  // at the homepage — Google was told to ignore every subpage. Each page
-  // declares its own canonical instead.
-};
+// Code defaults for the site-wide title/description. Studio's Site Settings →
+// "Search & social sharing" overrides them when filled in; these only show
+// while those fields are empty (or if Sanity is unreachable).
+const DEFAULT_SITE_TITLE = "Train 321 — Online Food Safety Training";
+const DEFAULT_SITE_DESCRIPTION =
+  "Online food handler, food manager, and alcohol seller-server training. ANAB-accredited, state-approved.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  const seo = settings.defaultSeo;
+  const siteName = settings.siteName || "Train 321";
+  return {
+    title: {
+      default: seo?.metaTitle || DEFAULT_SITE_TITLE,
+      template: `%s — ${siteName}`
+    },
+    description: seo?.metaDescription || DEFAULT_SITE_DESCRIPTION,
+    metadataBase: new URL(process.env.SITE_URL || "https://train321-marketing.vercel.app"),
+    // The share image itself comes from app/opengraph-image.tsx, which uses
+    // the Studio share image when one is set and draws the default card
+    // otherwise. File-based images beat anything declared here, so it is
+    // deliberately not repeated.
+    openGraph: {
+      siteName,
+      type: "website"
+    },
+    twitter: {
+      card: "summary_large_image"
+    },
+    // Proves ownership of www.train321.com to Google Search Console. Google
+    // re-checks periodically, so this has to stay put after verification.
+    verification: {
+      google: "Nfaulb5Oqkq4Bu-Y0KcOXafksELW3wNovEkAvL5Vioo"
+    }
+    // NOTE: no `alternates.canonical` here. A layout-level canonical is
+    // inherited by every child page, which pointed the whole site's canonical
+    // at the homepage — Google was told to ignore every subpage. Each page
+    // declares its own canonical instead.
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#0B1F33"
