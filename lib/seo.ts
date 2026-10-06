@@ -18,6 +18,35 @@ export const ORGANIZATION_LD = {
   }
 };
 
+/**
+ * Tells Google the site's name (what it shows above the URL in results) and
+ * ties it to the Organization. Home page only; one WebSite node per site.
+ * No SearchAction: /catalog doesn't read a query parameter.
+ */
+export const WEBSITE_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${SITE_URL}/#website`,
+  name: "Train 321",
+  url: SITE_URL,
+  publisher: { "@id": `${SITE_URL}/#organization` }
+};
+
+/** What the layout's title template appends; counted when fitting a title. */
+export const TITLE_SUFFIX = " — Train 321";
+
+/**
+ * Keep a page title inside what a search result shows (~60 chars). Titles
+ * that fit get the layout's " — Train 321" template as usual. Long ones —
+ * course names like "California Responsible Beverage Service (RBS)
+ * Training", most blog headlines — go out verbatim with no suffix rather
+ * than having the brand push the real words off the end.
+ */
+export function fitTitle(title: string, max = 60): string | { absolute: string } {
+  const t = title.trim();
+  return t.length + TITLE_SUFFIX.length <= max ? t : { absolute: t };
+}
+
 /** Strip HTML tags and collapse whitespace — JSON-LD text fields must be plain. */
 export function plainText(html: string | undefined | null): string {
   return (html || "")

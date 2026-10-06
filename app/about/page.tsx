@@ -3,8 +3,9 @@ import { getSiteSettings, getAboutPage } from "@/lib/sanity";
 import "./about.css";
 
 export const metadata = {
-  title: "About",
-  description: "The team and mission behind Train 321.",
+  title: "About Us: Our Mission & Team",
+  description:
+    "Train 321 builds online compliance training for restaurants and bars: accredited courses from industry experts, priced up front, finished in about an hour.",
   alternates: { canonical: "/about" }
 };
 

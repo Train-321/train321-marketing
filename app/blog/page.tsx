@@ -6,8 +6,11 @@ import BlogClient from "./BlogClient";
 export const revalidate = 60;
 
 export const metadata = {
-  title: "Journal",
-  description: "Compliance updates, operator playbooks, and field notes from the Train 321 team.",
+  // "Journal" is the in-site name; nobody searches for a journal, so the
+  // search title says blog.
+  title: "Compliance Blog for Restaurant Operators",
+  description:
+    "Food code changes, state training laws, certification tips and field notes from the Train 321 team, written for restaurant and bar operators.",
   alternates: { canonical: "/blog" }
 };
 

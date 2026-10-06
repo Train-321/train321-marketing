@@ -3,8 +3,9 @@ import { getMarketplaceCatalog } from "@/lib/newFeatures";
 import CatalogClient from "./CatalogClient";
 
 export const metadata = {
-  title: "Catalog",
-  description: "Every course Train 321 offers, on a single page.",
+  title: "Course Catalog & Pricing",
+  description:
+    "Every Train 321 course with prices up front: food handler and food manager certification, TABC and RBS alcohol server training, harassment prevention and more.",
   alternates: { canonical: "/catalog" }
 };
 

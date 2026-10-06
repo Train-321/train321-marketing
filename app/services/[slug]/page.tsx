@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getServiceDetail, getServiceSlugs, type ServiceBlock } from "@/lib/sanity";
+import JsonLd from "@/components/JsonLd";
+import { fitTitle, breadcrumbLd } from "@/lib/seo";
 import "./service.css";
 
 /**
@@ -28,7 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     // A Studio-authored SEO title is the editor's exact choice — used as-is,
     // outside the layout's "%s — Train 321" template. The fallback gets the
     // template suffix like every other page.
-    title: service.seo?.title ? { absolute: service.seo.title } : service.title,
+    title: service.seo?.title ? { absolute: service.seo.title } : fitTitle(service.title),
     description: service.seo?.description || service.lede || "",
     alternates: { canonical: `/services/${slug}` }
   };
@@ -57,8 +59,16 @@ export default async function ServiceDetailPage({
   const overview = blocksToParagraphs(service.overview);
   const cta = service.finalCta;
 
+  // The crumb trail below, for Google.
+  const crumbsLd = breadcrumbLd([
+    { name: "Home", path: "/" },
+    { name: "Services", path: "/services" },
+    { name: service.title, path: `/services/${service.slug}` }
+  ]);
+
   return (
     <article className="t321-mkt-service">
+      <JsonLd data={crumbsLd} />
       {/* Breadcrumb says Services — not Courses. */}
       <section className="t321-mkt-service__hero">
         <div className="t321-mkt-container">

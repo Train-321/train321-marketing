@@ -3,7 +3,7 @@ import { Suspense, cache } from "react";
 import { notFound } from "next/navigation";
 import TrackViewItem from "@/components/TrackViewItem";
 import JsonLd from "@/components/JsonLd";
-import { SITE_URL, plainText, clampDescription, breadcrumbLd, faqLd } from "@/lib/seo";
+import { SITE_URL, TITLE_SUFFIX, plainText, clampDescription, fitTitle, breadcrumbLd, faqLd } from "@/lib/seo";
 import { STATIC_COURSES } from "@/lib/staticCourses";
 import { CATCH_ALL_SLUGS, courseRank } from "@/lib/courseOrder";
 import { getCourse, getCourses, getDetailPagesCopy, getSiteSettings } from "@/lib/sanity";
@@ -73,8 +73,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     course.seo?.metaDescription ||
     clampDescription(course.summary || course.tagline) ||
     `${course.title} — online, self-paced training from Train 321 with a certificate you can download as soon as you finish.`;
+  // The derived title says what the page is — "Food Handler Card Online
+  // Course" — unless the name already says course, or that would push the
+  // result past ~60 characters, in which case the bare name goes out.
+  const withKind = /course/i.test(course.title) ? course.title : `${course.title} Online Course`;
+  const derivedTitle =
+    withKind.length + TITLE_SUFFIX.length <= 60 ? withKind : fitTitle(course.title);
   return {
-    title: course.seo?.metaTitle ? { absolute: course.seo.metaTitle } : `${course.title}`,
+    title: course.seo?.metaTitle ? { absolute: course.seo.metaTitle } : derivedTitle,
     description,
     alternates: { canonical: `/courses/${slug}` },
     ...(course.seo?.noIndex ? { robots: { index: false, follow: true } } : {})
@@ -185,6 +191,8 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       ? {
           offers: {
             "@type": "Offer",
+            // Google's Course rich result requires the offer category.
+            category: "Paid",
             price: course.priceFrom,
             priceCurrency: "USD",
             availability: "https://schema.org/InStock",
