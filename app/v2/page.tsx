@@ -14,6 +14,8 @@ export const metadata = {
   description:
     "ANAB-accredited food handler, food manager, alcohol server, and sexual harassment training. Done in under an hour on your phone, certificate issued instantly, accepted in all 50 states. Prices shown up front, from $14.",
   alternates: { canonical: "/v2" },
+  // Internal preview of a home-page design — duplicate content against "/".
+  robots: { index: false, follow: true },
   openGraph: {
     title: "Compliance training, certified in under an hour — from $14",
     description:

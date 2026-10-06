@@ -61,8 +61,9 @@ const FALLBACK_ADDONS: PillarCard[] = [
 ];
 
 export const metadata = {
-  title: "Services & Pricing",
-  description: "Plans for individuals, teams, and enterprises.",
+  title: "Team Plans, Custom Courses & White-Labeling",
+  description:
+    "Training for restaurant groups and associations: team seats tracked from one dashboard, custom course production, white-label delivery and catalog licensing.",
   alternates: { canonical: "/services" }
 };
 

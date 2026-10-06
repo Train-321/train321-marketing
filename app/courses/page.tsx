@@ -15,7 +15,8 @@ import "./courses.css";
 export const revalidate = 3600;
 
 export const metadata = {
-  title: "Online Compliance Courses: Food Handler, Alcohol & Harassment Training",
+  // Fits a search result with the " — Train 321" suffix (≤ 60 chars).
+  title: "Compliance Training Courses: Food, Alcohol & HR",
   description:
     "Every Train 321 course in one place: food handler and food manager certification, alcohol server training (TABC, California RBS), harassment prevention and more.",
   alternates: { canonical: "/courses" }

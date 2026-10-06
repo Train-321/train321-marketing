@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import { getLegalPage, getLegalPages, getDetailPagesCopy } from "@/lib/sanity";
+import { clampDescription } from "@/lib/seo";
 import "./legal.css";
 
 function formatDate(iso: string) {
@@ -42,7 +43,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!page) return { title: "Legal" };
   return {
     title: `${page.title}`,
-    description: page.intro || "",
+    // Intros are a full paragraph; cut to what a search result shows.
+    description: clampDescription(page.intro),
     alternates: { canonical: `/legal/${slug}` }
   };
 }

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import HomePage from "@/components/HomePage";
+import JsonLd from "@/components/JsonLd";
+import { WEBSITE_LD } from "@/lib/seo";
 import { getMarketplaceCatalog } from "@/lib/newFeatures";
 import {
   getCourses,
@@ -34,20 +36,24 @@ export default async function Page() {
     getMarketplaceCatalog()
   ]);
   return (
-    <HomePage
-      forcedAudience={null}
-      courses={courses}
-      testimonials={testimonials}
-      faqs={faqs}
-      companyStats={settings.companyStats || []}
-      trustLogos={settings.trustLogos || []}
-      home={home}
-      marketplace={{
-        courses: catalog.courses,
-        groups: catalog.groups,
-        categories: catalog.categories,
-        total: catalog.total
-      }}
-    />
+    <>
+      {/* WebSite node lives on the home page only; Organization is in the layout. */}
+      <JsonLd data={WEBSITE_LD} />
+      <HomePage
+        forcedAudience={null}
+        courses={courses}
+        testimonials={testimonials}
+        faqs={faqs}
+        companyStats={settings.companyStats || []}
+        trustLogos={settings.trustLogos || []}
+        home={home}
+        marketplace={{
+          courses: catalog.courses,
+          groups: catalog.groups,
+          categories: catalog.categories,
+          total: catalog.total
+        }}
+      />
+    </>
   );
 }

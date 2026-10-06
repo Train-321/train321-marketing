@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import BlogPortableText from "@/components/BlogPortableText";
 import JsonLd from "@/components/JsonLd";
 import BrandIcon from "@/components/BrandIcon";
-import { SITE_URL } from "@/lib/seo";
+import { SITE_URL, fitTitle, breadcrumbLd } from "@/lib/seo";
 import { getBlogPost, getBlogPosts, getDetailPagesCopy } from "@/lib/sanity";
 import "./article.css";
 
@@ -36,7 +36,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = await getBlogPost(slug);
   if (!post) return { title: "Article" };
   return {
-    title: `${post.title}`,
+    // Headlines run 50–70 chars; a long one goes out without " — Train 321"
+    // rather than losing its last words to the brand.
+    title: fitTitle(post.title),
     description: post.excerpt || "",
     alternates: { canonical: `/blog/${slug}` },
     openGraph: {
@@ -92,6 +94,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
     description: post.excerpt || "",
     url: `${SITE_URL}/blog/${post.slug}`,
     datePublished: post.publishedAt,
+    ...(post.updatedAt ? { dateModified: post.updatedAt } : {}),
     ...(post.coverImage ? { image: post.coverImage } : {}),
     author: {
       "@type": "Person",
@@ -102,9 +105,18 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
     mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`
   };
 
+  // Same trail as the crumbs rendered below; the category is a label there,
+  // not a page, so it is left out.
+  const crumbsLd = breadcrumbLd([
+    { name: "Home", path: "/" },
+    { name: crumbJournal, path: "/blog" },
+    { name: post.title, path: `/blog/${post.slug}` }
+  ]);
+
   return (
     <div className="t321-mkt-article">
       <JsonLd data={articleLd} />
+      <JsonLd data={crumbsLd} />
       <header className={`t321-mkt-article__hero is-tone-${post.heroTone}`}>
         <div className="t321-mkt-container">
           <nav className="t321-mkt-article__crumbs" aria-label="Breadcrumb">
