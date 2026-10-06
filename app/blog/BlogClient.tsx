@@ -118,7 +118,7 @@ export default function BlogClient({ posts, page }: Props) {
               <div className={`t321-mkt-blog__featured-art is-tone-${featured.heroTone}`}>
                 {featured.coverImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={featured.coverImage} alt={featured.coverImageAlt || ""} />
+                  <img src={featured.coverImage} alt={featured.coverImageAlt || featured.title} />
                 ) : (
                   <i className={featured.heroIcon} aria-hidden="true" />
                 )}
@@ -163,7 +163,7 @@ export default function BlogClient({ posts, page }: Props) {
                   <div className={`t321-mkt-blog__card-art is-tone-${p.heroTone}`}>
                     {p.coverImage ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.coverImage} alt={p.coverImageAlt || ""} />
+                      <img src={p.coverImage} alt={p.coverImageAlt || p.title} loading="lazy" />
                     ) : (
                       <i className={p.heroIcon} aria-hidden="true" />
                     )}

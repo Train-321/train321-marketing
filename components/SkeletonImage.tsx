@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { COURSE_PLACEHOLDER_IMAGE } from "@/lib/newFeatures";
+import { sizedImage, sizedSrcSet } from "@/lib/images";
 import "./SkeletonImage.css";
 
 type Props = {
@@ -11,6 +12,12 @@ type Props = {
   className?: string;
   /** Swapped in when `src` is missing or fails to load. */
   fallback?: string;
+  /**
+   * Roughly how wide the image renders, in CSS px. Sources we can resize (LMS
+   * thumbnails, Sanity) are requested at this width (and 2x) instead of at
+   * their uploaded size. Defaults to a catalog card.
+   */
+  width?: number;
 };
 
 /**
@@ -25,15 +32,21 @@ export default function SkeletonImage({
   src,
   alt,
   className = "",
-  fallback = COURSE_PLACEHOLDER_IMAGE
+  fallback = COURSE_PLACEHOLDER_IMAGE,
+  width = 384
 }: Props) {
   const [current, setCurrent] = useState(src || fallback);
+  // Whether to ask for the resized copy. Turned off for this image if the
+  // optimizer ever fails, so a resize problem degrades to the original file
+  // rather than to the placeholder.
+  const [optimize, setOptimize] = useState(true);
   const [loaded, setLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement | null>(null);
 
   // A new src (e.g. the cart re-resolving a line) restarts the cycle.
   useEffect(() => {
     setCurrent(src || fallback);
+    setOptimize(true);
     setLoaded(false);
   }, [src, fallback]);
 
@@ -50,12 +63,19 @@ export default function SkeletonImage({
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         ref={imgRef}
-        src={current}
+        src={optimize ? sizedImage(current, width) : current}
+        srcSet={optimize ? sizedSrcSet(current, width) : undefined}
         alt={alt}
         loading="lazy"
+        decoding="async"
         onLoad={() => setLoaded(true)}
         onError={() => {
-          if (current !== fallback) {
+          if (optimize && sizedImage(current, width) !== current) {
+            // The resized copy failed — retry with the original before
+            // giving up on the picture altogether.
+            setOptimize(false);
+            setLoaded(false);
+          } else if (current !== fallback) {
             setCurrent(fallback);
             setLoaded(false);
           } else {

@@ -132,7 +132,7 @@
   letter-spacing: -0.01em;
   font-weight: 500;
 }
-.t321-mkt-faq__empty a { color: var(--t321-mkt-accent); }
+.t321-mkt-faq__empty a { color: var(--t321-mkt-accent-ink); }
 
 .t321-mkt-faq__cta {
   display: grid;

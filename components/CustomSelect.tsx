@@ -162,7 +162,10 @@ export default function CustomSelect({
         className={`t321-mkt-select__btn${value ? " has-value" : ""}`}
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={ariaLabel}
+        // The visible text (the value, or the placeholder) has to be part of
+        // the accessible name, or voice-control users can't target the button
+        // by what they see: "Your state: Choose your state…".
+        aria-label={ariaLabel ? `${ariaLabel}: ${value || placeholder}` : undefined}
         onClick={() => (open ? setOpen(false) : openMenu())}
         onKeyDown={onButtonKey}
       >

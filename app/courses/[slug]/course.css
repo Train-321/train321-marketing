@@ -361,7 +361,7 @@
 .t321-mkt-course__mod-num {
   font-family: var(--font-fraunces), Georgia, serif;
   font-size: 1.1rem;
-  color: var(--t321-mkt-accent);
+  color: var(--t321-mkt-accent-ink);
   font-weight: 500;
   min-width: 32px;
 }
@@ -495,4 +495,58 @@
   }
   /* Stacked under the copy at this width, so the desktop centring is moot. */
   .t321-mkt-course__hero-card { align-self: stretch; }
+}
+
+/* ── Related courses ───────────────────────────────────── */
+.t321-mkt-course__related {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+.t321-mkt-course__related a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  height: 100%;
+  padding: 1.25rem;
+  color: var(--t321-mkt-ink);
+  text-decoration: none;
+}
+.t321-mkt-course__related strong {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 500;
+  font-size: 1.1rem;
+  line-height: 1.25;
+}
+.t321-mkt-course__related a > span:last-child {
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--t321-mkt-ink-muted);
+}
+.t321-mkt-course__related-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--t321-mkt-accent-wash);
+  color: var(--t321-mkt-accent-ink);
+}
+.t321-mkt-course__related-all {
+  margin: 1.5rem 0 0;
+  text-align: center;
+}
+.t321-mkt-course__related-all a {
+  color: var(--t321-mkt-accent-ink);
+  font-weight: 600;
+}
+@media (max-width: 991.98px) {
+  .t321-mkt-course__related { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 479.98px) {
+  .t321-mkt-course__related { grid-template-columns: 1fr; }
 }

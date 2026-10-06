@@ -105,7 +105,7 @@ export default async function ServiceDetailPage({
 
             {service.imageUrl && (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img className="t321-mkt-service__hero-img" src={service.imageUrl} alt="" />
+              <img className="t321-mkt-service__hero-img" src={service.imageUrl} alt={service.title || ""} />
             )}
           </div>
         </div>
@@ -242,7 +242,7 @@ export default async function ServiceDetailPage({
                   <>
                     {e.imageUrl && (
                       /* eslint-disable-next-line @next/next/no-img-element */
-                      <img className="t321-mkt-service__example-img" src={e.imageUrl} alt="" />
+                      <img className="t321-mkt-service__example-img" src={e.imageUrl} alt={e.title || ""} loading="lazy" />
                     )}
                     <div className="t321-mkt-service__example-body">
                       {e.title && <h3 className="t321-mkt-h3">{e.title}</h3>}

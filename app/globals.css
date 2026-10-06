@@ -161,7 +161,7 @@ a { color: inherit; }
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--t321-mkt-accent);
+  color: var(--t321-mkt-accent-ink);
   margin-bottom: 0.75rem;
 }
 .t321-mkt-eyebrow i { font-size: 0.7rem; }
@@ -264,4 +264,17 @@ a { color: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
   .t321-mkt-btn, .t321-mkt-card { transition: none; }
+}
+
+/* Present for assistive tech and document outline, invisible on screen. */
+.t321-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

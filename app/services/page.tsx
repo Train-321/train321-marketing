@@ -33,7 +33,7 @@ const FALLBACK_TIERS: ServicesTier[] = [
       "Phone & chat support"
     ],
     ctaLabel: "Start a team plan",
-    ctaTo: "/enroll"
+    ctaTo: "/catalog"
   },
   {
     name: "Business",

@@ -808,7 +808,7 @@
 .t321-mkt-pillar__link {
   margin-top: auto;
   padding-top: 0.8rem;
-  color: var(--t321-mkt-accent);
+  color: var(--t321-mkt-accent-ink);
   font-size: 0.85rem;
   font-weight: 500;
   display: inline-flex;
@@ -909,7 +909,7 @@
   flex: 1;
 }
 .t321-mkt-popular__link {
-  color: var(--t321-mkt-accent);
+  color: var(--t321-mkt-accent-ink);
   font-size: 0.85rem;
   font-weight: 500;
   display: inline-flex;
@@ -1017,6 +1017,12 @@
   /* Room for the card shadow and focus ring, which a clipped track would cut. */
   padding: 0.25rem;
   margin: -0.25rem;
+  /* Match the padding, so the first card's snap position is scrollLeft 0.
+     Without it the rail snapped itself 4px sideways at first layout whenever
+     the cards overflowed (every phone) — and because the rail scrolls
+     smoothly, that counted as a scroll before first paint, which makes
+     Chrome stop measuring Largest Contentful Paint for the whole page. */
+  scroll-padding-inline: 0.25rem;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -1090,7 +1096,7 @@
   background: none;
   font: inherit;
   font-size: 0.85rem;
-  color: var(--t321-mkt-accent);
+  color: var(--t321-mkt-accent-ink);
   font-weight: 500;
   cursor: pointer;
   text-decoration: underline;
@@ -1150,7 +1156,7 @@
   color: var(--t321-mkt-ink-muted);
 }
 .t321-mkt-quote__stat strong {
-  color: var(--t321-mkt-accent);
+  color: var(--t321-mkt-accent-ink);
   font-weight: 600;
 }
 .t321-mkt-quotes__foot {
@@ -1453,7 +1459,7 @@
   .t321-mkt-hero__rail-all {
     font-size: 0.8rem;
     font-weight: 600;
-    color: var(--t321-mkt-accent);
+    color: var(--t321-mkt-accent-ink);
     text-decoration: none;
     white-space: nowrap;
   }
@@ -1516,7 +1522,7 @@
     font-style: normal;
     font-size: 0.78rem;
     font-weight: 700;
-    color: var(--t321-mkt-accent);
+    color: var(--t321-mkt-accent-ink);
   }
 
   /* ── Section tiles ── */

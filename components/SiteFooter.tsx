@@ -3,7 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { footerNav } from "@/lib/nav";
+import { footerNav, marketingNav } from "@/lib/nav";
+import BrandIcon, { type BrandIconName } from "./BrandIcon";
 import type { SiteSettings } from "@/lib/sanity";
 import "./SiteFooter.css";
 
@@ -30,18 +31,33 @@ export default function SiteFooter({ settings }: Props) {
         { title: "Support", links: footerNav.support.map((l) => ({ label: l.label, href: l.to })) }
       ];
 
+  // A Courses column on every page, whatever Studio's footer holds: most
+  // course pages were reachable only through the catalog, so they had a
+  // single internal link each. Skipped if an editor already built one.
+  const courseLinks = [
+    ...(marketingNav.find((n) => n.label === "Courses")?.children?.[0]?.links || []).map((l) => ({
+      label: l.label,
+      href: l.to
+    })),
+    { label: "All courses", href: "/courses" }
+  ];
+  const hasCoursesColumn = columns.some((c) => (c.title || "").trim().toLowerCase() === "courses");
+  const allColumns = hasCoursesColumn ? columns : [{ title: "Courses", links: courseLinks }, ...columns];
+
   const legalLinks = settings?.footerLegalLinks?.length
     ? settings.footerLegalLinks
     : footerNav.legal.map((l) => ({ label: l.label, href: l.to }));
 
   const social = settings?.social || {};
-  const socialItems: Array<{ icon: string; href?: string; label: string }> = [
-    { icon: "fab fa-facebook-f", href: social.facebook, label: "Facebook" },
-    { icon: "fab fa-twitter", href: social.twitter, label: "Twitter" },
-    { icon: "fab fa-linkedin-in", href: social.linkedin, label: "LinkedIn" },
-    { icon: "fab fa-instagram", href: social.instagram, label: "Instagram" },
-    { icon: "fab fa-youtube", href: social.youtube, label: "YouTube" }
-  ].filter((s): s is { icon: string; href: string; label: string } => Boolean(s.href));
+  const socialItems = (
+    [
+      { icon: "facebook", href: social.facebook, label: "Facebook" },
+      { icon: "twitter", href: social.twitter, label: "Twitter" },
+      { icon: "linkedin", href: social.linkedin, label: "LinkedIn" },
+      { icon: "instagram", href: social.instagram, label: "Instagram" },
+      { icon: "youtube", href: social.youtube, label: "YouTube" }
+    ] as Array<{ icon: BrandIconName; href?: string; label: string }>
+  ).filter((s): s is { icon: BrandIconName; href: string; label: string } => Boolean(s.href));
 
   const news = settings?.newsletter || {};
   const newsHeading = news.heading || "Stay in the loop";
@@ -62,7 +78,10 @@ export default function SiteFooter({ settings }: Props) {
 
   return (
     <footer className="t321-mkt-footer">
-      <div className="t321-mkt-container t321-mkt-footer__inner">
+      <div
+        className="t321-mkt-container t321-mkt-footer__inner"
+        style={{ "--t321-footer-cols": allColumns.length } as React.CSSProperties}
+      >
         <div className="t321-mkt-footer__brand">
           <Link href="/" className="t321-mkt-footer__logo" aria-label="Train 321 home">
             <Image
@@ -77,16 +96,16 @@ export default function SiteFooter({ settings }: Props) {
             <div className="t321-mkt-footer__social" aria-label="Social">
               {socialItems.map((s) => (
                 <a key={s.label} href={s.href} aria-label={s.label} target="_blank" rel="noopener noreferrer">
-                  <i className={s.icon} />
+                  <BrandIcon name={s.icon} />
                 </a>
               ))}
             </div>
           )}
         </div>
 
-        {columns.map((col) => (
+        {allColumns.map((col) => (
           <div key={col.title} className="t321-mkt-footer__col">
-            <h4>{col.title}</h4>
+            <h3>{col.title}</h3>
             <ul>
               {(col.links || []).map((l) => (
                 <li key={`${col.title}-${l.href}`}>
@@ -98,7 +117,7 @@ export default function SiteFooter({ settings }: Props) {
         ))}
 
         <div className="t321-mkt-footer__col t321-mkt-footer__col--wide">
-          <h4>{newsHeading}</h4>
+          <h3>{newsHeading}</h3>
           <p className="t321-mkt-footer__news-sub">{newsSub}</p>
           <form className="t321-mkt-footer__news" onSubmit={onSubscribe}>
             <label className="t321-mkt-footer__news-label" htmlFor="t321-footer-email">Email</label>

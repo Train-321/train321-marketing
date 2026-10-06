@@ -3,7 +3,9 @@ import { Suspense, cache } from "react";
 import { notFound } from "next/navigation";
 import TrackViewItem from "@/components/TrackViewItem";
 import JsonLd from "@/components/JsonLd";
-import { SITE_URL, plainText } from "@/lib/seo";
+import { SITE_URL, plainText, clampDescription, breadcrumbLd, faqLd } from "@/lib/seo";
+import { STATIC_COURSES } from "@/lib/staticCourses";
+import { CATCH_ALL_SLUGS, courseRank } from "@/lib/courseOrder";
 import { getCourse, getCourses, getDetailPagesCopy, getSiteSettings } from "@/lib/sanity";
 import { resolveCourse } from "@/lib/staticCourses";
 import EnrollButton from "@/components/EnrollButton";
@@ -62,11 +64,37 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const course = resolveCourse(slug, await getCourse(slug));
   if (!course) return { title: "Course" };
+  // Studio's SEO tab wins outright — an editor-written title is used verbatim
+  // (no " — Train 321" suffix appended, so they control every character).
+  // Otherwise derive both from the course itself. Summaries run long, so the
+  // derived description is cut to what a search result shows; a course with
+  // no summary or tagline still gets a real sentence rather than nothing.
+  const description =
+    course.seo?.metaDescription ||
+    clampDescription(course.summary || course.tagline) ||
+    `${course.title} — online, self-paced training from Train 321 with a certificate you can download as soon as you finish.`;
   return {
-    title: `${course.title}`,
-    description: course.summary || course.tagline || "",
-    alternates: { canonical: `/courses/${slug}` }
+    title: course.seo?.metaTitle ? { absolute: course.seo.metaTitle } : `${course.title}`,
+    description,
+    alternates: { canonical: `/courses/${slug}` },
+    ...(course.seo?.noIndex ? { robots: { index: false, follow: true } } : {})
   };
+}
+
+/** Up to four other courses to link from the foot of a course page — same
+    category first, so a food handler page points at food manager before HR. */
+async function relatedCourses(current: { slug: string; category?: string }) {
+  const sanity = await getCourses();
+  const all = [
+    ...sanity,
+    ...Object.values(STATIC_COURSES).filter((s) => !sanity.some((c) => c.slug === s.slug))
+  ].filter((c) => c.slug !== current.slug);
+  const byRank = (a: { slug: string }, b: { slug: string }) => courseRank(a.slug) - courseRank(b.slug);
+  const same = all
+    .filter((c) => current.category && c.category === current.category && !CATCH_ALL_SLUGS.has(c.slug))
+    .sort(byRank);
+  const rest = all.filter((c) => !same.includes(c)).sort(byRank);
+  return [...same, ...rest].slice(0, 4);
 }
 
 export default async function CoursePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -77,6 +105,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   // it has one, so publishing a real doc later transparently takes over.
   const course = resolveCourse(slug, sanityCourse);
   if (!course) notFound();
+  const related = await relatedCourses(course);
 
   const enrollBase = settings.enrollBaseUrl || "http://new-features.train321.com/#/enroll";
   const enrollHref = course.enrollUrl
@@ -165,9 +194,20 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       : {})
   };
 
+  // The crumb trail is rendered below; this is the same trail for Google.
+  const crumbsLd = breadcrumbLd([
+    { name: crumbHome, path: "/" },
+    { name: crumbCourses, path: "/courses" },
+    { name: course.title, path: `/courses/${course.slug}` }
+  ]);
+  // Only the questions actually shown on the page are marked up.
+  const faqsLd = faqLd(course.faqs);
+
   return (
     <article className="t321-mkt-course">
       <JsonLd data={courseLd} />
+      <JsonLd data={crumbsLd} />
+      {faqsLd && <JsonLd data={faqsLd} />}
       {/* Campaign pages can pin who the checkout is for (e.g. the RBS
           sign-up link always starts as an individual purchase). */}
       {course.forceAudience && <ForceAudience audience={course.forceAudience} />}
@@ -193,7 +233,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             <div className="t321-mkt-course__crumbs">
               <Link href="/">{crumbHome}</Link>
               <i className="fas fa-angle-right" aria-hidden="true" />
-              <Link href="/catalog">{crumbCourses}</Link>
+              <Link href="/courses">{crumbCourses}</Link>
               <i className="fas fa-angle-right" aria-hidden="true" />
               <span>{course.title}</span>
             </div>
@@ -351,6 +391,33 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                 <p>{f.a}</p>
               </details>
             ))}
+          </div>
+        </section>
+      )}
+
+      {related.length > 0 && (
+        <section className="t321-mkt-section">
+          <div className="t321-mkt-container">
+            <div className="t321-mkt-section__head">
+              <span className="t321-mkt-eyebrow">Keep going</span>
+              <h2 className="t321-mkt-h2">Related courses</h2>
+            </div>
+            <ul className="t321-mkt-course__related">
+              {related.map((c) => (
+                <li key={c.slug}>
+                  <Link href={`/courses/${c.slug}`} className="t321-mkt-card t321-mkt-card--hover">
+                    <span className="t321-mkt-course__related-icon" aria-hidden="true">
+                      <i className={c.icon || "fas fa-book"} />
+                    </span>
+                    <strong>{c.title}</strong>
+                    {c.tagline && <span>{c.tagline}</span>}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p className="t321-mkt-course__related-all">
+              <Link href="/courses">See all courses</Link>
+            </p>
           </div>
         </section>
       )}
