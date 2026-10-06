@@ -41,7 +41,7 @@ const montserrat = Montserrat({
 // Code defaults for the site-wide title/description. Studio's Site Settings →
 // "Search & social sharing" overrides them when filled in; these only show
 // while those fields are empty (or if Sanity is unreachable).
-const DEFAULT_SITE_TITLE = "Train 321 — Online Food Safety Training";
+const DEFAULT_SITE_TITLE = "Online Food Handler, Alcohol & Compliance Training for Restaurants | Train 321";
 const DEFAULT_SITE_DESCRIPTION =
   "Online food handler, food manager, and alcohol seller-server training. ANAB-accredited, state-approved.";
 
@@ -52,7 +52,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: {
       default: seo?.metaTitle || DEFAULT_SITE_TITLE,
-      template: `%s — ${siteName}`
+      // "|" rather than an em dash: matches the approved title list, and
+      // lib/seo.ts TITLE_SUFFIX counts the same 12 characters.
+      template: `%s | ${siteName}`
     },
     description: seo?.metaDescription || DEFAULT_SITE_DESCRIPTION,
     metadataBase: new URL(process.env.SITE_URL || "https://train321-marketing.vercel.app"),

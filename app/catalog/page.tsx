@@ -3,7 +3,8 @@ import { getMarketplaceCatalog } from "@/lib/newFeatures";
 import CatalogClient from "./CatalogClient";
 
 export const metadata = {
-  title: "Course Catalog & Pricing",
+  // Approved title (Week 1 on-site SEO document, section 4).
+  title: "All Courses by State: Food Handler, Alcohol, Harassment & More",
   description:
     "Every Train 321 course with prices up front: food handler and food manager certification, TABC and RBS alcohol server training, harassment prevention and more.",
   alternates: { canonical: "/catalog" }

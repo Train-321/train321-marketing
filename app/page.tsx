@@ -18,10 +18,10 @@ import {
 export async function generateMetadata(): Promise<Metadata> {
   const { defaultSeo: seo } = await getSiteSettings();
   return {
-    title: seo?.metaTitle || "Train 321 — Compliance training your team actually finishes",
+    title: seo?.metaTitle || "Online Food Handler, Alcohol & Compliance Training for Restaurants | Train 321",
     description:
       seo?.metaDescription ||
-      "ANSI-accredited courses for food safety, alcohol service, and HR compliance. Rolled out across your team in under an hour. Accepted in all 50 states.",
+      "ANSI-accredited courses for food safety, alcohol service, and HR compliance. Rolled out across your team in under an hour, with certificates the same day.",
     alternates: { canonical: "/" }
   };
 }
