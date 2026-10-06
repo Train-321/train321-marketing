@@ -61,7 +61,8 @@ const FALLBACK_ADDONS: PillarCard[] = [
 ];
 
 export const metadata = {
-  title: "Team Plans, Custom Courses & White-Labeling",
+  // Approved title (Week 1 on-site SEO document, section 4).
+  title: "Team Training Plans & Pricing for Restaurants",
   description:
     "Training for restaurant groups and associations: team seats tracked from one dashboard, custom course production, white-label delivery and catalog licensing.",
   alternates: { canonical: "/services" }
