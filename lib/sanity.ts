@@ -58,6 +58,11 @@ export type Course = {
   faqs?: Array<{ q: string; a: string }>;
   enrollId?: string;
   enrollUrl?: string;
+  /**
+   * Studio's SEO tab. When filled in, these replace the title/description the
+   * page would otherwise derive from the course title and summary.
+   */
+  seo?: { metaTitle?: string; metaDescription?: string; noIndex?: boolean };
   // Course group: when set, this course is a parent that enrolls into
   // per-state versions. Each entry resolves the linked course's enroll target.
   stateVariants?: Array<{
@@ -696,6 +701,8 @@ const COURSE_PROJECTION = `
   // Landing-page behaviour, editable in Studio: skip the group's state picker,
   // and pin who the checkout is for. Both drive the RBS sign-up link.
   directEnroll, forceAudience,
+  // Studio's SEO tab — an editor-written title/description beats the derived one.
+  seo{ metaTitle, metaDescription, noIndex },
   "stateVariants": stateVariants[]{
     state,
     "title": course->title,

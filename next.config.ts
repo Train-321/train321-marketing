@@ -1,6 +1,22 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Course thumbnails are uploaded to the LMS at whatever size the editor had
+  // (145–400 KB JPEGs for a 300px card). Routing them through the Next image
+  // optimizer serves a right-sized WebP/AVIF instead; see lib/images.ts.
+  images: {
+    formats: ["image/avif", "image/webp"],
+    // Thumbnails rarely change once uploaded — keep optimized copies for a
+    // month rather than the 60s default, so repeat views never re-encode.
+    minimumCacheTTL: 2678400,
+    remotePatterns: [
+      { protocol: "https", hostname: "api.train321.com" },
+      { protocol: "https", hostname: "new-features-api.train321.com" },
+      { protocol: "https", hostname: "cdn.sanity.io" },
+      { protocol: "https", hostname: "images.unsplash.com" }
+    ]
+  },
+
   // Tina's auth + datalayer ship CommonJS deps (color-string, mongodb-level
   // transitive deps) that Turbopack mis-bundles for the server runtime —
   // marking them external makes Node load them directly from node_modules,
@@ -71,6 +87,12 @@ const nextConfig: NextConfig = {
       // purpose — the campaign target can be repointed without waiting out
       // browser-cached permanent redirects.
       { source: "/rbs", destination: "/courses/rbs", permanent: false },
+      // Addresses that are linked (from Studio-managed footer/CTA copy) or
+      // guessed by visitors but have no page of their own. /testimonials used
+      // to be a route; the quotes now live on the home page. /enroll was the
+      // old "start a plan" target — buying starts from the catalog.
+      { source: "/testimonials", destination: "/#testimonials", permanent: true },
+      { source: "/enroll", destination: "/catalog", permanent: true },
       // The pre-2026 static train321.com served bare .html files (mostly
       // underscore-named). One entry per old URL so search results and
       // inbound links keep resolving after the Vercel cutover.
@@ -80,8 +102,16 @@ const nextConfig: NextConfig = {
         "index_old.html": "/",
         "home.html": "/",
         "about_us.html": "/about",
+        "about.html": "/about",
         "testimonials.html": "/",
         "faqs.html": "/faq",
+        "faq.html": "/faq",
+        // Still in Google's index from the old site (found in the Sept 2026
+        // SEO audit) — each was returning 404.
+        "tabc.html": "/courses/tabc",
+        "rbs.html": "/courses/rbs",
+        "blog.html": "/blog",
+        "pricing.html": "/services",
         "contact.html": "/contact",
         "demo.html": "/demo",
         "services.html": "/services",

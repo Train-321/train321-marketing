@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { sizedImage } from "@/lib/images";
 
 export type CourseHeroMediaProps = {
   /** Course image URL. Used on its own, or as the video's poster frame. */
@@ -36,8 +37,23 @@ export default function CourseHeroMedia({
 
   if (!videoId) {
     if (!image) return null;
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={image} alt={title} />;
+    // This is the course page's largest paint. Ask for it at the size it
+    // renders (the frame is ~560px on desktop, full-width on phones) and at
+    // top priority, instead of the editor's original at default priority.
+    const widths = [640, 828, 1200];
+    const srcSet = widths.map((w) => `${sizedImage(image, w)} ${w}w`).join(", ");
+    const resizable = sizedImage(image, 828) !== image;
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={resizable ? sizedImage(image, 828) : image}
+        srcSet={resizable ? srcSet : undefined}
+        sizes={resizable ? "(max-width: 991px) 100vw, 560px" : undefined}
+        alt={title}
+        fetchPriority="high"
+        decoding="async"
+      />
+    );
   }
 
   if (playing) {

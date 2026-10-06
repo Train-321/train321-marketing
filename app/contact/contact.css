@@ -46,7 +46,7 @@
 }
 .t321-mkt-contact__tile a {
   font-size: 0.9rem;
-  color: var(--t321-mkt-accent);
+  color: var(--t321-mkt-accent-ink);
   text-decoration: none;
   font-weight: 500;
 }

@@ -9,8 +9,9 @@
 }
 .t321-mkt-footer__inner {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1.8fr;
-  gap: 3rem;
+  /* Brand, one track per link column (count set inline by SiteFooter), newsletter. */
+  grid-template-columns: 1.5fr repeat(var(--t321-footer-cols, 2), minmax(0, 1fr)) 1.7fr;
+  gap: 2.25rem;
   align-items: start;
 }
 
@@ -56,7 +57,7 @@
   transform: translateY(-1px);
 }
 
-.t321-mkt-footer__col h4 {
+.t321-mkt-footer__col h3 {
   font-family: var(--font-fraunces), Georgia, serif;
   font-size: 0.95rem;
   font-weight: 600;
@@ -171,7 +172,7 @@
   align-items: center;
   gap: 1.25rem;
   font-size: 0.8rem;
-  color: #6E6C67;
+  color: #918E87;
   flex-wrap: wrap;
 }
 .t321-mkt-footer__meta-nav {

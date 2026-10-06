@@ -27,12 +27,14 @@ export default function CourseCard({ course }: { course: MarketplaceCourse }) {
   const stateBadge = availabilityShort(course.availability);
 
   return (
-    <article
+    // A <div>, not an <article>: ARIA doesn't allow role="button" on an
+    // article. No aria-label either — the card's own text (name, blurb,
+    // price) is its accessible name, so what's announced matches what's shown.
+    <div
       className="t321-mkt-catalog__card t321-mkt-card t321-mkt-card--click"
       role="button"
       tabIndex={0}
       aria-haspopup="dialog"
-      aria-label={`${course.name} — view details`}
       style={
         {
           viewTransitionName: isMorphSource ? COURSE_MORPH_NAME : undefined,
@@ -101,6 +103,6 @@ export default function CourseCard({ course }: { course: MarketplaceCourse }) {
           </div>
         </div>
       </div>
-    </article>
+    </div>
   );
 }

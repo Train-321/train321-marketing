@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import BlogPortableText from "@/components/BlogPortableText";
 import JsonLd from "@/components/JsonLd";
+import BrandIcon from "@/components/BrandIcon";
 import { SITE_URL } from "@/lib/seo";
 import { getBlogPost, getBlogPosts, getDetailPagesCopy } from "@/lib/sanity";
 import "./article.css";
@@ -136,7 +137,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
         <div className="t321-mkt-container">
           <figure className="t321-mkt-article__cover">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={post.coverImage} alt={post.coverImageAlt || ""} />
+            <img src={post.coverImage} alt={post.coverImageAlt || post.title} />
           </figure>
         </div>
       )}
@@ -154,7 +155,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
               rel="noopener"
               aria-label="Share on Twitter"
             >
-              <i className="fab fa-twitter" />
+              <BrandIcon name="twitter" />
             </a>
             <a
               href="https://www.linkedin.com/sharing/share-offsite/"
@@ -162,7 +163,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
               rel="noopener"
               aria-label="Share on LinkedIn"
             >
-              <i className="fab fa-linkedin-in" />
+              <BrandIcon name="linkedin" />
             </a>
           </aside>
 
@@ -199,7 +200,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
                   <div className={`t321-mkt-article__related-art is-tone-${p.heroTone}`}>
                     {p.coverImage ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.coverImage} alt={p.coverImageAlt || ""} />
+                      <img src={p.coverImage} alt={p.coverImageAlt || p.title} loading="lazy" />
                     ) : (
                       <i className={p.heroIcon} aria-hidden="true" />
                     )}

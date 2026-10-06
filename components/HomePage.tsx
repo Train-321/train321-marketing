@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Course, Testimonial, FaqGroup, TrustLogo, HomePage as HomePageDoc } from "@/lib/sanity";
 import TrustLogosCarousel from "./TrustLogosCarousel";
 import TestimonialQuotes from "./TestimonialQuotes";
+import { sizedImage, sizedSrcSet } from "@/lib/images";
 import {
   HomeFinderProvider,
   FinderControls,
@@ -229,7 +230,19 @@ export default function HomePage({
             which left the fold as plain copy on white. Hidden at every desktop
             width, so it costs the two-column layout nothing. */}
         <div className="t321-mkt-hero__backdrop" aria-hidden="true">
-          <img src="/img/hero-restaurant.png" alt="" className="t321-mkt-hero__backdrop-img" />
+          {/* Same candidates and sizes as the desktop hero photo below, so
+              whichever one the viewport shows, the browser fetches one file. */}
+          <img
+            src="/img/hero-restaurant-1536.webp"
+            srcSet="/img/hero-restaurant-768.webp 768w, /img/hero-restaurant-1536.webp 1536w"
+            sizes="(max-width: 767px) 100vw, 50vw"
+            alt=""
+            width={1536}
+            height={1022}
+            fetchPriority="high"
+            decoding="async"
+            className="t321-mkt-hero__backdrop-img"
+          />
           <span className="t321-mkt-hero__backdrop-shade" />
         </div>
         <div className="t321-mkt-container t321-mkt-hero__inner">
@@ -343,10 +356,14 @@ export default function HomePage({
 
             {audience === "self" ? (
               <img
-                src="/img/hero-restaurant.png"
+                src="/img/hero-restaurant-1536.webp"
+                srcSet="/img/hero-restaurant-768.webp 768w, /img/hero-restaurant-1536.webp 1536w"
+                sizes="(max-width: 767px) 100vw, 50vw"
                 alt=""
-                width={1537}
-                height={1023}
+                width={1536}
+                height={1022}
+                fetchPriority="high"
+                decoding="async"
                 className="t321-mkt-hero__photo"
               />
             ) : (
@@ -366,10 +383,13 @@ export default function HomePage({
                   aria-label="Play video: See Train 321 in action"
                 >
                   <img
-                    src="/img/hero-team-video-poster.jpg"
+                    src="/img/hero-team-video-poster-1200.webp"
+                    srcSet="/img/hero-team-video-poster-600.webp 600w, /img/hero-team-video-poster-1200.webp 1200w"
+                    sizes="(max-width: 767px) 100vw, 50vw"
                     alt=""
                     width={1200}
                     height={820}
+                    decoding="async"
                   />
                   <span className="t321-mkt-hero__video-play" aria-hidden="true">
                     <i className="fas fa-play" />
@@ -412,7 +432,14 @@ export default function HomePage({
                 >
                   {c.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={c.image} alt="" className="t321-mkt-popular__thumb" />
+                    <img
+                      src={sizedImage(c.image, 384)}
+                      srcSet={sizedSrcSet(c.image, 384)}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      className="t321-mkt-popular__thumb"
+                    />
                   ) : (
                     <i className={c.icon} aria-hidden="true" />
                   )}
@@ -528,7 +555,8 @@ export default function HomePage({
         </div>
       </section>
 
-      <section className="t321-mkt-section t321-mkt-section--sunk">
+      {/* id: /testimonials redirects here (next.config.ts). */}
+      <section id="testimonials" className="t321-mkt-section t321-mkt-section--sunk" style={{ scrollMarginTop: "5rem" }}>
         <div className="t321-mkt-container">
           <div className="t321-mkt-section__head">
             <span className="t321-mkt-eyebrow"><i className={home?.opinionsHead?.icon || "fas fa-quote-right"} /> {home?.opinionsHead?.eyebrow || "What operators say"}</span>

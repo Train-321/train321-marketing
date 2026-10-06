@@ -295,6 +295,8 @@ export default function CatalogClient({
 
           {courses.length ? (
             <>
+              {/* Course cards are h3s; without this the outline jumped h1 → h3. */}
+              <h2 className="t321-sr-only">Courses</h2>
               <div className="t321-mkt-catalog__grid">
                 {courses.map((c) => (
                   <CourseCard key={c.id} course={c} />

@@ -19,7 +19,7 @@
   margin-bottom: 1rem;
 }
 .t321-mkt-article__crumbs a {
-  color: var(--t321-mkt-accent);
+  color: var(--t321-mkt-accent-ink);
   text-decoration: none;
 }
 .t321-mkt-article__crumbs a:hover { text-decoration: underline; }
@@ -288,7 +288,7 @@
 }
 .t321-mkt-article__related-link {
   padding-bottom: 1.25rem;
-  color: var(--t321-mkt-accent);
+  color: var(--t321-mkt-accent-ink);
   font-weight: 500;
   font-size: 0.85rem;
   display: inline-flex;

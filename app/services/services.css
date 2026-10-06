@@ -118,7 +118,7 @@
   line-height: 1.55;
 }
 .t321-mkt-services__addon-link {
-  color: var(--t321-mkt-accent);
+  color: var(--t321-mkt-accent-ink);
   font-size: 0.85rem;
   font-weight: 500;
   display: inline-flex;
