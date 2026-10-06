@@ -3,7 +3,7 @@ import {
   getCourses,
   getBlogPosts,
   getLegalPages,
-  getServiceSlugs
+  getServiceIndex
 } from "@/lib/sanity";
 import { STATIC_COURSES } from "@/lib/staticCourses";
 
@@ -14,8 +14,13 @@ import { STATIC_COURSES } from "@/lib/staticCourses";
  * legal page added in Studio appears here without a code change. Revalidated
  * on the same window as the rest of the site.
  *
+ * lastModified is the document's real Sanity edit time, or left out. It used
+ * to be "now" on every entry, which tells Google the whole site changed every
+ * hour — it learns to ignore that, and then ignores it on the pages that
+ * really did change.
+ *
  * Deliberately excluded: /checkout (transactional, nothing to index) and the
- * /v2 and /v3 design variants, which are internal previews.
+ * /v2 and /v3 design variants, which are noindex internal previews.
  */
 
 export const revalidate = 3600;
@@ -41,6 +46,9 @@ const STATIC_ROUTES: Array<{
   { path: "/blog", priority: 0.6, changeFrequency: "weekly" }
 ];
 
+/** A Sanity timestamp as a Date, or nothing — never a made-up "now". */
+const when = (iso?: string) => (iso ? { lastModified: new Date(iso) } : {});
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // One slow source shouldn't cost us the whole sitemap — settle each
   // independently and emit whatever resolved.
@@ -48,24 +56,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getCourses(),
     getBlogPosts(),
     getLegalPages(),
-    getServiceSlugs()
+    getServiceIndex()
   ]);
 
   const ok = <T,>(r: PromiseSettledResult<T[]>): T[] =>
     r.status === "fulfilled" ? r.value : [];
 
-  const now = new Date();
-
   return [
     ...STATIC_ROUTES.map((r) => ({
       url: `${SITE}${r.path}`,
-      lastModified: now,
       changeFrequency: r.changeFrequency,
       priority: r.priority
     })),
     ...ok(courses).map((c) => ({
       url: `${SITE}/courses/${c.slug}`,
-      lastModified: now,
+      ...when(c.updatedAt),
       changeFrequency: "monthly" as const,
       priority: 0.9
     })),
@@ -74,26 +79,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .filter((slug) => !ok(courses).some((c) => c.slug === slug))
       .map((slug) => ({
         url: `${SITE}/courses/${slug}`,
-        lastModified: now,
         changeFrequency: "monthly" as const,
         priority: 0.9
       })),
-    ...ok(services).map((slug) => ({
-      url: `${SITE}/services/${slug}`,
-      lastModified: now,
+    ...ok(services).map((s) => ({
+      url: `${SITE}/services/${s.slug}`,
+      ...when(s.updatedAt),
       changeFrequency: "monthly" as const,
       priority: 0.8
     })),
     ...ok(posts).map((p) => ({
       url: `${SITE}/blog/${p.slug}`,
-      // Real publish date, so Google can tell fresh posts from old ones.
-      lastModified: p.publishedAt ? new Date(p.publishedAt) : now,
+      // The last edit when there is one, else the publish date.
+      ...when(p.updatedAt || p.publishedAt),
       changeFrequency: "yearly" as const,
       priority: 0.5
     })),
     ...ok(legal).map((l) => ({
       url: `${SITE}/legal/${l.slug}`,
-      lastModified: now,
+      ...when(l.updatedAt),
       changeFrequency: "yearly" as const,
       priority: 0.3
     }))

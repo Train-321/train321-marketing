@@ -11,6 +11,8 @@ import type { SanityImageSource } from "@sanity/image-url";
 export type Course = {
   slug: string;
   title: string;
+  /** Sanity _updatedAt — the sitemap's lastmod. Absent on code-defined courses. */
+  updatedAt?: string;
   eyebrow?: string;
   tagline?: string;
   category?: "food" | "alcohol" | "hr";
@@ -91,6 +93,7 @@ export type BlogPost = {
   category?: string;
   author: { name: string; role?: string };
   publishedAt: string;
+  updatedAt?: string; // Sanity _updatedAt — dateModified + sitemap lastmod
   readMinutes?: number;
   featured?: boolean;
   coverImage?: string; // URL string
@@ -104,6 +107,7 @@ export type LegalPage = {
   body: string; // markdown
   title: string;
   effectiveDate?: string;
+  updatedAt?: string; // Sanity _updatedAt — sitemap lastmod
   intro?: string;
 };
 
@@ -679,6 +683,7 @@ function normalizeBlogBody(raw: AnyBlock[] | null | undefined): BlogBodyNode[] {
 
 const COURSE_PROJECTION = `
   "slug": slug.current,
+  "updatedAt": _updatedAt,
   title, eyebrow, tagline, category, color, icon,
   // Still no default image — a course stays image-less until someone sets one
   // in Studio. But BOTH Studio fields now count: the upload wins, and a typed
@@ -773,6 +778,7 @@ export async function getCourse(slug: string): Promise<Course | null> {
 
 const BLOG_PROJECTION = `
   "slug": slug.current,
+  "updatedAt": _updatedAt,
   title, excerpt, category, publishedAt, readMinutes, heroTone, heroIcon,
   "featured": featured == true,
   // A linked team member wins; the free-text fields are the fallback for
@@ -812,6 +818,7 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
 const LEGAL_PROJECTION = `
   "slug": slug.current,
   title, effectiveDate, intro,
+  "updatedAt": _updatedAt,
   "rawSections": sections[]{ heading, blocks }
 `;
 
@@ -836,6 +843,7 @@ export async function getLegalPages(): Promise<LegalPage[]> {
     slug: r.slug,
     title: r.title,
     effectiveDate: r.effectiveDate,
+    updatedAt: r.updatedAt,
     intro: r.intro,
     body: legalSectionsToMarkdown(r.rawSections)
   }));
@@ -851,6 +859,7 @@ export async function getLegalPage(slug: string): Promise<LegalPage | null> {
     slug: r.slug,
     title: r.title,
     effectiveDate: r.effectiveDate,
+    updatedAt: r.updatedAt,
     intro: r.intro,
     body: legalSectionsToMarkdown(r.rawSections)
   };
@@ -1226,6 +1235,18 @@ export async function getServiceSlugs(): Promise<string[]> {
   } catch {
     // A missing dataset shouldn't fail the build — the route just renders
     // nothing until services exist.
+    return [];
+  }
+}
+
+/** Slug + last edit of every service — what the sitemap needs and no more. */
+export async function getServiceIndex(): Promise<Array<{ slug: string; updatedAt?: string }>> {
+  try {
+    const rows: Array<{ slug?: string; updatedAt?: string }> = await (await getClient()).fetch(
+      `*[_type == "service" && defined(slug.current)]{ "slug": slug.current, "updatedAt": _updatedAt }`
+    );
+    return rows.filter((r): r is { slug: string; updatedAt?: string } => Boolean(r.slug));
+  } catch {
     return [];
   }
 }
