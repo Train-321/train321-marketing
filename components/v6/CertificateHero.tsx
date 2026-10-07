@@ -1,45 +1,34 @@
 "use client";
 
-// Hero: the finder IS the hero. Audience toggle, headline, a search-bar style
-// "Where do you work? / What do you need?" row that drives the explorer, a
-// proof row, and the industry accordion on the right.
+// v6 hero: same job as the v5 hero (audience toggle, headline, finder bar,
+// proof) with the live certificate as the visual.
 
 import { useCart } from "@/components/cart/CartContext";
-import FinderBar from "./FinderBar";
-import IndustrySpotlight from "./IndustrySpotlight";
-import { useFinderV5 } from "./FinderContext";
-
-export type Audience = "self" | "team";
+import FinderBar from "@/components/v5/FinderBar";
+import { useFinderV5 } from "@/components/v5/FinderContext";
+import type { Audience } from "@/components/v5/HeroV5";
+import LiveCertificate from "./LiveCertificate";
 
 type Stat = { value: string; label: string };
 
-const COPY: Record<
-  Audience,
-  { eyebrow: string; h1Pre: string; h1Em: string; lede: string; cta: string }
-> = {
+const COPY: Record<Audience, { eyebrow: string; h1Pre: string; h1Em: string; lede: string }> = {
   self: {
     eyebrow: "ANSI-accredited · Accepted in all 50 states · Certificate the same day",
     h1Pre: "The certificate your job needs,",
-    h1Em: "before your next shift.",
+    h1Em: "issued the moment you pass.",
     lede:
-      "Food handler, food manager, alcohol server and workplace compliance courses that take about an hour on your phone. Pass, and your certificate downloads instantly.",
-    cta: "Search courses"
+      "Food handler, food manager, alcohol server and workplace compliance courses that take about an hour on your phone. Pick your state and we show only what's accepted there."
   },
   team: {
     eyebrow: "One account · Every location · One invoice",
-    h1Pre: "Train the whole team",
-    h1Em: "before the dinner rush.",
+    h1Pre: "Every certificate your team needs,",
+    h1Em: "on one dashboard by Friday.",
     lede:
-      "Assign ANSI-accredited courses in minutes, watch certificates roll in the same day, and keep every location inspection-ready from one dashboard.",
-    cta: "Search courses"
+      "Assign ANSI-accredited courses by role, watch certificates land the same day, and keep every location inspection-ready without chasing paper."
   }
 };
 
-function findStat(stats: Stat[], re: RegExp): Stat | undefined {
-  return stats.find((s) => re.test(s.label) || re.test(s.value));
-}
-
-export default function HeroV5({
+export default function CertificateHero({
   audience,
   onAudience,
   companyStats
@@ -49,15 +38,14 @@ export default function HeroV5({
   companyStats: Stat[];
 }) {
   const copy = COPY[audience];
-  const { stateName, setStateCode, stateSource, detectError } = useFinderV5();
+  const { stateName, stateSource, setStateCode, detectError } = useFinderV5();
   const { buyer } = useCart();
-
-  const rating = findStat(companyStats, /rating/i);
-  const certs = findStat(companyStats, /certificate/i);
-  const locations = findStat(companyStats, /location/i);
+  const rating = companyStats.find((s) => /rating/i.test(s.label));
+  const certs = companyStats.find((s) => /certificate/i.test(s.label));
+  const locations = companyStats.find((s) => /location/i.test(s.label));
 
   return (
-    <section className="v5-hero" aria-labelledby="v5-hero-title">
+    <section className="v5-hero v6-hero" aria-labelledby="v6-hero-title">
       <div className="v5-hero__bg" aria-hidden="true">
         <span className="v5-hero__blob v5-hero__blob--a" />
         <span className="v5-hero__blob v5-hero__blob--b" />
@@ -97,7 +85,7 @@ export default function HeroV5({
             {copy.eyebrow}
           </p>
 
-          <h1 className="v5-h1" id="v5-hero-title" key={`h1-${audience}`}>
+          <h1 className="v5-h1" id="v6-hero-title" key={`h1-${audience}`}>
             <span className="v5-h1__line">
               <span>{copy.h1Pre}</span>
             </span>{" "}
@@ -109,7 +97,7 @@ export default function HeroV5({
             {copy.lede}
           </p>
 
-          <FinderBar cta={copy.cta} />
+          <FinderBar />
 
           {(detectError || (stateName && stateSource !== "user" && stateSource !== "none")) && (
             <p className="v5-hero__geo" aria-live="polite">
@@ -157,8 +145,8 @@ export default function HeroV5({
           </ul>
         </div>
 
-        <div className="v5-hero__visual">
-          <IndustrySpotlight />
+        <div className="v5-hero__visual v6-hero__visual">
+          <LiveCertificate />
         </div>
       </div>
     </section>

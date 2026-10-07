@@ -120,7 +120,7 @@ const HINT_PATTERNS: Record<Exclude<FilterHint, "all">, RegExp> = {
   foh: /front of house/i
 };
 
-function filterCourses(all: MarketplaceCourse[], stateCode: string | null, chip: string): MarketplaceCourse[] {
+export function filterCourses(all: MarketplaceCourse[], stateCode: string | null, chip: string): MarketplaceCourse[] {
   let list = all;
   if (chip.startsWith("group:")) {
     const id = chip.slice(6);
