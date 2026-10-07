@@ -6,6 +6,10 @@
     never count as "the same category" as a real course. */
 export const CATCH_ALL_SLUGS = new Set(["additional-courses", "custom-courses"]);
 
+/** Course slugs whose URL redirects to another course (see the redirects in
+    next.config.ts). Still present in Studio, but hidden from every listing. */
+export const REDIRECTED_COURSE_SLUGS = new Set(["california-alcohol-safety-training"]);
+
 export const LEAD_ORDER = [
   "food-handler",
   "food-manager",
