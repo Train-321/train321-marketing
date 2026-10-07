@@ -154,6 +154,13 @@ export type CatalogQuery = {
    * responds, because a group can claim courses the LMS left uncategorised.
    */
   groupId?: string | null;
+  /**
+   * Keep same-named state variants instead of collapsing them with
+   * dedupeByName(). For callers that filter by state on the client (the /v5
+   * course finder holds the whole catalog in memory and dedupes after its
+   * own state filter, so the surviving variant is the picked state's).
+   */
+  keepVariants?: boolean;
 };
 
 type RawVariant = {
@@ -421,7 +428,7 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
     // Collapse cards that read identically — the LMS ships one course per
     // state bucket under a single name. Runs AFTER the sort so the version
     // that survives is the one most relevant to the picked state.
-    all = dedupeByName(all);
+    if (!query.keepVariants) all = dedupeByName(all);
 
     return {
       courses: all.slice((page - 1) * perPage, page * perPage),

@@ -167,3 +167,26 @@
 .t321-mkt-select__opt.is-active { background: var(--t321-mkt-accent-wash); }
 .t321-mkt-select__opt.is-selected { color: var(--t321-mkt-accent); font-weight: 500; }
 .t321-mkt-select__opt i { font-size: 0.78rem; color: var(--t321-mkt-accent); }
+
+/* Pinned action row above the search/list (see the `action` prop) — the
+   "Use my location" shortcut on state pickers. */
+.t321-mkt-select__action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem 0.9rem;
+  border: 0;
+  border-bottom: 1px solid var(--t321-mkt-line, #e2e8ef);
+  background: var(--t321-mkt-accent-wash, #e0f7fc);
+  color: var(--t321-mkt-accent-ink, #006b8a);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+.t321-mkt-select__action:hover { background: var(--t321-mkt-cyan-wash, #d0f0fa); }
+.t321-mkt-select__action:disabled { opacity: 0.6; cursor: progress; }
+.t321-mkt-select__action i { width: 1rem; text-align: center; }

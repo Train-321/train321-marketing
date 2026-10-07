@@ -18,6 +18,18 @@ export type CustomSelectProps = {
   clearable?: boolean;
   /** What "cleared" does. Defaults to onChange("") when clearable and unset. */
   onClear?: () => void;
+  /**
+   * A pinned action row at the top of the menu, above the search — e.g.
+   * "Use my location" on a state picker. Not an option: choosing it runs
+   * `onSelect` and closes the menu, and the caller sets the value itself.
+   */
+  action?: { label: string; icon?: string; busy?: boolean; onSelect: () => void };
+  /**
+   * "auto" (default) opens upward when there's no room below. "down" always
+   * opens below — for controls sitting over content that a flipped menu
+   * would cover (e.g. a hero headline); the page can scroll instead.
+   */
+  direction?: "auto" | "down";
 };
 
 export default function CustomSelect({
@@ -29,7 +41,9 @@ export default function CustomSelect({
   searchable = false,
   searchPlaceholder = "Type to search…",
   clearable = false,
-  onClear
+  onClear,
+  action,
+  direction = "auto"
 }: CustomSelectProps) {
   const [open, setOpen] = useState(false);
   // Whether the menu opens upward — decided when it opens, from the space
@@ -77,8 +91,9 @@ export default function CustomSelect({
     if (open) {
       setQuery("");
       setHighlight(Math.max(0, options.indexOf(value)));
-      if (searchable) searchRef.current?.focus();
-      else listRef.current?.focus();
+      // preventScroll: opening a menu must never move the page under it.
+      if (searchable) searchRef.current?.focus({ preventScroll: true });
+      else listRef.current?.focus({ preventScroll: true });
     }
     // Deliberately keyed to `open` alone: options/value are often rebuilt on
     // every parent render, and refiring on their identity would wipe an
@@ -97,7 +112,9 @@ export default function CustomSelect({
   // the menu below the control but there is above, open upward.
   const openMenu = () => {
     const rect = wrapRef.current?.getBoundingClientRect();
-    if (rect) {
+    if (direction === "down") {
+      setDropUp(false);
+    } else if (rect) {
       const MENU_MAX = 320; // menu max-height (300) + a little breathing room
       const below = window.innerHeight - rect.bottom;
       const above = rect.top;
@@ -191,6 +208,23 @@ export default function CustomSelect({
       )}
       {open && (
         <div className={`t321-mkt-select__menu${dropUp ? " is-up" : ""}`} role="presentation">
+          {action && (
+            <button
+              type="button"
+              className="t321-mkt-select__action"
+              disabled={action.busy}
+              onClick={() => {
+                setOpen(false);
+                action.onSelect();
+              }}
+            >
+              <i
+                className={`fas ${action.busy ? "fa-circle-notch fa-spin" : action.icon || "fa-location-arrow"}`}
+                aria-hidden="true"
+              />
+              {action.label}
+            </button>
+          )}
           {searchable && (
             <div className="t321-mkt-select__search">
               <i className="fas fa-search" aria-hidden="true" />

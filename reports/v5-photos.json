@@ -1,0 +1,146 @@
+[
+  {
+    "key": "restaurant",
+    "id": "1719573019827-d06944a0c2be",
+    "url": "https://images.unsplash.com/photo-1719573019827-d06944a0c2be",
+    "photographer": "Roshan Chakkeeri",
+    "photoPageUrl": "https://unsplash.com/photos/a-man-in-a-tuxedo-carrying-a-tray-of-food-H9q_XcRpHNo",
+    "description": "Waiter in a tuxedo carrying a tray of plates through a busy outdoor dining room; face visible, candid",
+    "orientation": "portrait"
+  },
+  {
+    "key": "bar",
+    "id": "1647776112336-72f4c30fafc1",
+    "url": "https://images.unsplash.com/photo-1647776112336-72f4c30fafc1",
+    "photographer": "Olena Bohovyk",
+    "photoPageUrl": "https://unsplash.com/photos/a-man-is-making-a-drink-at-a-bar-HN2ukPUF_og",
+    "description": "Bartender pouring a cocktail from a shaker into a glass behind a warm wooden bar; face visible, subject centered",
+    "orientation": "landscape"
+  },
+  {
+    "key": "hotel",
+    "id": "1580842402762-6f5868c17412",
+    "url": "https://images.unsplash.com/photo-1580842402762-6f5868c17412",
+    "photographer": "Ashwini Chaudhary(Monty)",
+    "photoPageUrl": "https://unsplash.com/photos/man-in-blue-dress-shirt-and-blue-denim-jeans-holding-green-plastic-bag--4KzDiyZjgw",
+    "description": "Hotel housekeeper pushing a housekeeping cart down a carpeted hotel corridor; candid, face visible",
+    "orientation": "portrait"
+  },
+  {
+    "key": "cafe",
+    "id": "1507914372368-b2b085b925a1",
+    "url": "https://images.unsplash.com/photo-1507914372368-b2b085b925a1",
+    "photographer": "Brooke Cagle",
+    "photoPageUrl": "https://unsplash.com/photos/woman-holding-portafilter-in-coffee-shop-8jp-6SjVibM",
+    "description": "Smiling barista in a mustard beanie holding a portafilter at the espresso machine in a coffee shop; shallow depth of field",
+    "orientation": "landscape"
+  },
+  {
+    "key": "grocery",
+    "id": "1774978612876-967903f8ab82",
+    "url": "https://images.unsplash.com/photo-1774978612876-967903f8ab82",
+    "photographer": "Adhitya Sibikumar",
+    "photoPageUrl": "https://unsplash.com/photos/a-man-in-a-hairnet-stocks-produce-in-a-supermarket-ltQ0PaMoU3A",
+    "description": "Grocery worker in a hairnet and gloves stocking produce from a crate in a supermarket aisle; candid",
+    "orientation": "portrait"
+  },
+  {
+    "key": "catering",
+    "id": "1779683609997-b541b697d0c2",
+    "url": "https://images.unsplash.com/photo-1779683609997-b541b697d0c2",
+    "photographer": "Lens Fables",
+    "photoPageUrl": "https://unsplash.com/photos/smiling-man-serves-a-dark-drink-on-a-tray-LPUVEb4k0ok",
+    "description": "Smiling event server in a black uniform carrying a drink on a tray at a banquet/event; subject centered",
+    "orientation": "portrait"
+  },
+  {
+    "key": "kitchen",
+    "id": "1581349485608-9469926a8e5e",
+    "url": "https://images.unsplash.com/photo-1581349485608-9469926a8e5e",
+    "photographer": "Sebastian Coman Photography",
+    "photoPageUrl": "https://unsplash.com/photos/man-in-black-t-shirt-holding-stainless-steel-bowl-eBmyH7oO5wY",
+    "description": "Chef in a commercial kitchen plating a row of dishes from a steel pot under the pass lights; face visible, shallow depth of field",
+    "orientation": "portrait"
+  },
+  {
+    "key": "foodtruck",
+    "id": "1565524622405-171b921788ca",
+    "url": "https://images.unsplash.com/photo-1565524622405-171b921788ca",
+    "photographer": "Should Wang",
+    "photoPageUrl": "https://unsplash.com/photos/man-inside-food-stall-ye5T5R0G-GA",
+    "description": "Food truck/stall operator at the serving window under warm string lights; face centered",
+    "orientation": "portrait"
+  },
+  {
+    "key": "manager",
+    "id": "1778791672994-34708641cb9d",
+    "url": "https://images.unsplash.com/photo-1778791672994-34708641cb9d",
+    "photographer": "SpotOn",
+    "photoPageUrl": "https://unsplash.com/photos/server-shows-digital-menu-to-customers-at-a-bar-yKAimws433Y",
+    "description": "Restaurant staff member holding a tablet while talking with two people at a bar table; bright and natural (the two listeners are guests, not staff)",
+    "orientation": "landscape"
+  },
+  {
+    "key": "host",
+    "id": "1758519289791-ffce8889ca8c",
+    "url": "https://images.unsplash.com/photo-1758519289791-ffce8889ca8c",
+    "photographer": "Vitaly Gariev",
+    "photoPageUrl": "https://unsplash.com/photos/woman-in-apron-holding-tablet-in-restaurant-0e2eYxBiP6A",
+    "description": "Host in an apron holding a tablet at the front of a restaurant, looking to camera; subject centered so a vertical crop works",
+    "orientation": "landscape"
+  },
+  {
+    "key": "dishwasher",
+    "id": "1788999423969-793af406874e",
+    "url": "https://images.unsplash.com/photo-1788999423969-793af406874e",
+    "photographer": "Ali Aziz",
+    "photoPageUrl": "https://unsplash.com/photos/woman-washing-cup-in-cafe-EgntSpBqDDQ",
+    "description": "Back-of-house worker washing a cup at a cafe sink; candid profile, well lit",
+    "orientation": "portrait"
+  },
+  {
+    "key": "brewery",
+    "id": "1574521091464-a55e7763c1e5",
+    "url": "https://images.unsplash.com/photo-1574521091464-a55e7763c1e5",
+    "photographer": "Louis Hansel",
+    "photoPageUrl": "https://unsplash.com/photos/a-bartender-pours-a-glass-of-beer-at-a-bar-vm4g1MBZUv4",
+    "description": "Bartender pouring a glass of beer from a row of taps at a taproom bar; warm light (hands and torso, no face)",
+    "orientation": "portrait"
+  },
+  {
+    "key": "delivery",
+    "id": "1778825628168-31dc884db219",
+    "url": "https://images.unsplash.com/photo-1778825628168-31dc884db219",
+    "photographer": "Roman",
+    "photoPageUrl": "https://unsplash.com/photos/delivery-person-with-a-blue-insulated-bag-on-a-bicycle-3z4ooHkl2f4",
+    "description": "Food delivery courier on a bicycle with a blue insulated delivery bag on a city street; face visible, candid, no brand logos",
+    "orientation": "portrait"
+  },
+  {
+    "key": "hotelbar",
+    "id": "1436018626274-89acd1d6ec9d",
+    "url": "https://images.unsplash.com/photo-1436018626274-89acd1d6ec9d",
+    "photographer": "Taylor Davidson",
+    "photoPageUrl": "https://unsplash.com/photos/bartender-standing-beside-table-iwWJFIlnDm4",
+    "description": "Bartender in a white shirt and tie behind an upscale backlit hotel bar; warm, moody lounge",
+    "orientation": "landscape"
+  },
+  {
+    "key": "team",
+    "id": "1779591211588-f0302902a53f",
+    "url": "https://images.unsplash.com/photo-1779591211588-f0302902a53f",
+    "photographer": "Lens Fables",
+    "photoPageUrl": "https://unsplash.com/photos/three-smiling-restaurant-staff-members-stand-behind-a-counter-5Xnv2np708c",
+    "description": "Three smiling restaurant staff members standing together behind a counter; diverse, well lit",
+    "orientation": "landscape"
+  },
+  {
+    "key": "certificate",
+    "id": "1737162878337-4b767dd107ea",
+    "url": "https://images.unsplash.com/photo-1737162878337-4b767dd107ea",
+    "photographer": "Alina Belogolova",
+    "photoPageUrl": "https://unsplash.com/photos/a-man-standing-in-a-kitchen-looking-at-his-cell-phone-U4wh1FmpqUs",
+    "description": "Fallback: cook in a restaurant kitchen holding and reading his phone (no convincing free 'holding a certificate' hospitality photo exists on Unsplash)",
+    "orientation": "portrait"
+  }
+]
