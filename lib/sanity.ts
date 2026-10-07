@@ -8,6 +8,8 @@ import type { SanityImageSource } from "@sanity/image-url";
 
 // ── Types ────────────────────────────────────────────────────────────────
 
+import { REDIRECTED_COURSE_SLUGS } from "./courseOrder";
+
 export type Course = {
   slug: string;
   title: string;
@@ -761,7 +763,12 @@ export async function getCourses(): Promise<Course[]> {
     ),
     getLmsPriceMap()
   ]);
-  return courses.map((c) => applyLmsPrice(c, prices));
+  // A course whose URL now redirects elsewhere (next.config.ts) must not be
+  // listed anywhere — hub, sitemap, footer, related courses — or every list
+  // would link to a redirect.
+  return courses
+    .filter((c) => !REDIRECTED_COURSE_SLUGS.has(c.slug))
+    .map((c) => applyLmsPrice(c, prices));
 }
 
 export async function getCourse(slug: string): Promise<Course | null> {

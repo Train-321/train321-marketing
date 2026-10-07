@@ -93,6 +93,10 @@ const nextConfig: NextConfig = {
       // old "start a plan" target — buying starts from the catalog.
       { source: "/testimonials", destination: "/#testimonials", permanent: true },
       { source: "/enroll", destination: "/catalog", permanent: true },
+      // Duplicated the RBS course page; Christina chose to fold it in
+      // (7 Oct 2026). Keep lib/courseOrder.ts REDIRECTED_COURSE_SLUGS in sync
+      // so the page drops out of the hub, sitemap and footer.
+      { source: "/courses/california-alcohol-safety-training", destination: "/courses/rbs", permanent: true },
       // The pre-2026 static train321.com served bare .html files (mostly
       // underscore-named). One entry per old URL so search results and
       // inbound links keep resolving after the Vercel cutover.
