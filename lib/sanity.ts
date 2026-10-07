@@ -806,16 +806,22 @@ const BLOG_PROJECTION = `
 
 type BlogPostRow = Omit<BlogPost, "body"> & { rawBody: AnyBlock[] | null };
 
+// Scheduled publishing: a post whose publish date is still in the future is
+// not listed, not in the sitemap, and its URL 404s until that time. Editors
+// can load several articles at once and stagger them by date alone. Pages
+// revalidate every 60s, so a post appears within a minute of its date.
+const BLOG_LIVE = `!(defined(publishedAt) && publishedAt > now())`;
+
 export async function getBlogPosts(): Promise<BlogPost[]> {
   const rows: BlogPostRow[] = await (await getClient()).fetch(
-    `*[_type == "blogPost" && defined(slug.current)] | order(publishedAt desc) { ${BLOG_PROJECTION} }`
+    `*[_type == "blogPost" && defined(slug.current) && ${BLOG_LIVE}] | order(publishedAt desc) { ${BLOG_PROJECTION} }`
   );
   return rows.map((r) => ({ ...r, body: normalizeBlogBody(r.rawBody) }));
 }
 
 export async function getBlogPost(slug: string): Promise<BlogPost | null> {
   const r: BlogPostRow | null = await (await getClient()).fetch(
-    `*[_type == "blogPost" && slug.current == $slug][0] { ${BLOG_PROJECTION} }`,
+    `*[_type == "blogPost" && slug.current == $slug && ${BLOG_LIVE}][0] { ${BLOG_PROJECTION} }`,
     { slug }
   );
   if (!r) return null;
