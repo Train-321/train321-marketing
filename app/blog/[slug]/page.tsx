@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import BlogPortableText from "@/components/BlogPortableText";
 import JsonLd from "@/components/JsonLd";
-import BrandIcon from "@/components/BrandIcon";
+import ShareBar from "@/components/ShareBar";
 import { SITE_URL, fitTitle, breadcrumbLd } from "@/lib/seo";
 import { getBlogPost, getBlogPosts, getDetailPagesCopy } from "@/lib/sanity";
 import "./article.css";
@@ -156,28 +156,12 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
 
       <section className="t321-mkt-section">
         <div className="t321-mkt-container t321-mkt-article__body">
-          <aside className="t321-mkt-article__share" aria-label={shareLabel}>
-            <span>{shareLabel}</span>
-            <a href={`/blog/${post.slug}`} aria-label="Copy link">
-              <i className="fas fa-link" />
-            </a>
-            <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}`}
-              target="_blank"
-              rel="noopener"
-              aria-label="Share on Twitter"
-            >
-              <BrandIcon name="twitter" />
-            </a>
-            <a
-              href="https://www.linkedin.com/sharing/share-offsite/"
-              target="_blank"
-              rel="noopener"
-              aria-label="Share on LinkedIn"
-            >
-              <BrandIcon name="linkedin" />
-            </a>
-          </aside>
+          <ShareBar
+            url={`${SITE_URL}/blog/${post.slug}`}
+            title={post.title}
+            summary={post.excerpt}
+            label={shareLabel}
+          />
 
           <article className="t321-mkt-article__prose t321-mkt-prose">
             <BlogPortableText value={post.body} />
