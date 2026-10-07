@@ -77,6 +77,15 @@ export default function ShareBar({ url, title, summary, label }: Props) {
       >
         <BrandIcon name="twitter" />
       </a>
+      <a
+        href={`https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}`}
+        target="_blank"
+        rel="noopener"
+        aria-label="Share on WhatsApp"
+        title="WhatsApp"
+      >
+        <BrandIcon name="whatsapp" />
+      </a>
       <a href={`mailto:?subject=${t}&body=${mailBody}`} aria-label="Share by email" title="Email">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <rect x="3" y="5" width="18" height="14" rx="2" />
