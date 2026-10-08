@@ -275,6 +275,24 @@
   transition: background 120ms ease;
 }
 .t321-mkt-cart__qty button:hover:not(:disabled) { background: var(--t321-mkt-paper-sunk); }
+.t321-mkt-cart__line-seatnote {
+  margin: 0.4rem 0 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--t321-mkt-warn);
+}
+.t321-mkt-cart__line-seatnote i { margin-right: 0.3rem; }
+.t321-mkt-cart__line-seatnote button {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--t321-mkt-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
 .t321-mkt-cart__qty button:disabled { opacity: 0.4; cursor: not-allowed; }
 .t321-mkt-cart__qty input {
   width: 2.6rem;

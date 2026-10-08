@@ -531,6 +531,26 @@
 .t321-mkt-checkout__qty button:disabled { opacity: 0.4; cursor: not-allowed; }
 .t321-mkt-checkout__qty span { font-size: 0.82rem; font-weight: 600; min-width: 1rem; text-align: center; }
 
+/* Seat count below headcount — quiet amber note with an inline fix. */
+.t321-mkt-checkout__line-seatnote {
+  margin: 0.4rem 0 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--t321-mkt-warn);
+}
+.t321-mkt-checkout__line-seatnote i { margin-right: 0.3rem; }
+.t321-mkt-checkout__line-seatnote button {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--t321-mkt-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
 .t321-mkt-checkout__line-remove {
   width: 1.6rem;
   height: 1.6rem;

@@ -182,7 +182,13 @@ export default function CartDrawer() {
                     )}
                     <p className="t321-mkt-cart__line-price">
                       {money(line.price)}
-                      {line.isSeatBased && isCompany && <span> / seat</span>}
+                      {line.isSeatBased && isCompany && (
+                        <span>
+                          {" "}
+                          / seat · {line.users} {line.users === 1 ? "seat" : "seats"} ={" "}
+                          {money(line.price * line.users)}
+                        </span>
+                      )}
                     </p>
 
                     {/* Seat steppers are a team concept — an individual buys
@@ -214,6 +220,16 @@ export default function CartDrawer() {
                           <i className="fas fa-plus" aria-hidden="true" />
                         </button>
                       </div>
+                    )}
+                    {/* Same under-coverage note as checkout — see there. */}
+                    {line.isSeatBased && isCompany && line.users < buyer.employees && (
+                      <p className="t321-mkt-cart__line-seatnote" role="status">
+                        <i className="fas fa-circle-info" aria-hidden="true" />
+                        Covers {line.users} of {buyer.employees} employees.{" "}
+                        <button type="button" onClick={() => setUsers(line.id, buyer.employees)}>
+                          Use {buyer.employees}
+                        </button>
+                      </p>
                     )}
                   </div>
 
@@ -389,7 +405,11 @@ export default function CartDrawer() {
 
             <dl className="t321-mkt-cart__totals">
               <div>
-                <dt>{isCompany ? `Subtotal (first ${buyer.cadence} invoice)` : "Subtotal"}</dt>
+                <dt>
+                  {isCompany && quote?.hasRecurring
+                    ? `Subtotal (first ${buyer.cadence} invoice)`
+                    : "Subtotal"}
+                </dt>
                 <dd>{quote ? money(shownSubtotal ?? 0) : "—"}</dd>
               </div>
               {quote && shownDiscount > 0 && (

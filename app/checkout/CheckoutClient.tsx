@@ -149,6 +149,7 @@ function CheckoutForm({ stripeConfigured }: { stripeConfigured: boolean }) {
   // which always needs a card on file — so a $0 first invoice can't be a
   // free order there. Individual (and company seat-only) $0 carts can.
   const hasCompliance = lines.some((l) => !l.isSeatBased);
+  const hasSeatLines = lines.some((l) => l.isSeatBased);
   const needsSubscription = isCompany && hasCompliance;
   const isFree = Boolean(quote) && dueToday <= 0 && !needsSubscription;
 
@@ -430,7 +431,11 @@ function CheckoutForm({ stripeConfigured }: { stripeConfigured: boolean }) {
                           <i className="fas fa-user-group" aria-hidden="true" /> Employees
                         </>
                       }
-                      hint="People taking the compliance courses."
+                      hint={
+                        hasSeatLines
+                          ? "Seat counts in your order follow this number."
+                          : "People taking the compliance courses."
+                      }
                       required
                     >
                       <Stepper
@@ -732,7 +737,7 @@ function CheckoutForm({ stripeConfigured }: { stripeConfigured: boolean }) {
                       {!isCompany
                         ? money(line.price)
                         : line.isSeatBased
-                          ? `${money(line.price)} × ${line.users} seats · one-time`
+                          ? `${money(line.price)} × ${line.users} ${line.users === 1 ? "seat" : "seats"} = ${money(line.price * line.users)} · one-time`
                           : `${money(line.price)} / employee base`}
                     </p>
                     {line.isSeatBased && isCompany && (
@@ -754,6 +759,19 @@ function CheckoutForm({ stripeConfigured }: { stripeConfigured: boolean }) {
                           <i className="fas fa-plus" aria-hidden="true" />
                         </button>
                       </div>
+                    )}
+                    {/* Fewer seats than people is the one state that costs
+                        the buyer later (someone can't log in), so it's
+                        called out with a one-click fix. More seats than
+                        people is a normal turnover buffer — left alone. */}
+                    {line.isSeatBased && isCompany && line.users < buyer.employees && (
+                      <p className="t321-mkt-checkout__line-seatnote" role="status">
+                        <i className="fas fa-circle-info" aria-hidden="true" />
+                        Covers {line.users} of your {buyer.employees} employees.{" "}
+                        <button type="button" onClick={() => setUsers(line.id, buyer.employees)}>
+                          Use {buyer.employees} seats
+                        </button>
+                      </p>
                     )}
                   </div>
                   <button
@@ -829,7 +847,10 @@ function CheckoutForm({ stripeConfigured }: { stripeConfigured: boolean }) {
 
             <dl className="t321-mkt-checkout__totals">
               <div>
-                <dt>{isCompany ? `First ${buyer.cadence} invoice` : "Subtotal"}</dt>
+                {/* Seat-only team carts are a one-time charge, not an
+                    invoice in a series — "first yearly invoice" would
+                    imply a renewal that never comes. */}
+                <dt>{needsSubscription ? `First ${buyer.cadence} invoice` : "Subtotal"}</dt>
                 <dd>{quote ? money(shownSubtotal) : "—"}</dd>
               </div>
               {quote && shownDiscount > 0 && (

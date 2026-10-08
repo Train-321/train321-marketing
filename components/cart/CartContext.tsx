@@ -132,6 +132,11 @@ export function useCart(): CartContextValue {
   return ctx;
 }
 
+/** Ids of the lines the LMS marks seat-based — the only ones with a seat count. */
+function seatBasedIds(lines: CartLine[]): Set<number> {
+  return new Set(lines.filter((l) => l.isSeatBased).map((l) => l.id));
+}
+
 function readStoredItems(): StoredCartItem[] {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -168,6 +173,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [promoCode, setPromoCode] = useState("");
   const [promoError, setPromoError] = useState<string | null>(null);
   const [buyer, setBuyer] = useState<BuyerState>(DEFAULT_BUYER);
+  // Mirror for the mutations below: they need the headcount at call time
+  // (not a stale closure) to decide which seat counts should follow it.
+  const buyerRef = useRef<BuyerState>(DEFAULT_BUYER);
+  useEffect(() => {
+    buyerRef.current = buyer;
+  }, [buyer]);
   const [toast, setToast] = useState<{ id: number; name: string } | null>(null);
 
   // Nothing is read from storage during render — that would desync the server
@@ -380,7 +391,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // ── Mutations ──────────────────────────────────────────────────────────
 
   const add = useCallback(
-    (course: CartCourse, users = 1) => {
+    (course: CartCourse, users?: number) => {
+      // A seat-based course added to a team cart starts at one seat per
+      // employee: the buyer already said how many people need training, so
+      // "add" means "add it for all of them". A $15 line that quietly covers
+      // one person on a 12-person team is how the price gets misread as the
+      // team price. Everything else is a single seat.
+      const seats = Math.max(
+        1,
+        users ?? (course.isSeatBased && buyer.audience === "company" ? buyer.employees : 1)
+      );
       setItems((prev) => {
         const existing = prev.find((i) => i.id === course.id);
         if (existing) {
@@ -389,26 +409,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           // only in team mode; individuals are always exactly one seat.
           if (!course.isSeatBased || buyer.audience !== "company") return prev;
           return prev.map((i) =>
-            i.id === course.id ? { ...i, users: i.users + Math.max(1, users) } : i
+            i.id === course.id ? { ...i, users: i.users + Math.max(1, users ?? 1) } : i
           );
         }
-        return [...prev, { id: course.id, users: Math.max(1, users) }];
+        return [...prev, { id: course.id, users: seats }];
       });
 
       // Optimistically show the line so the drawer isn't blank while the
       // resolve round-trips. The resolve overwrites this with authoritative
       // data.
       setLines((prev) =>
-        prev.some((l) => l.id === course.id)
-          ? prev
-          : [...prev, { ...course, users: Math.max(1, users) }]
+        prev.some((l) => l.id === course.id) ? prev : [...prev, { ...course, users: seats }]
       );
 
       // Tracked here rather than in AddToCartButton so every entry point —
       // button, drawer, course page — reports without being wired up twice.
-      trackAddToCart(lineToItem({ ...course, users: Math.max(1, users) }));
+      trackAddToCart(lineToItem({ ...course, users: seats }));
     },
-    [buyer.audience]
+    [buyer.audience, buyer.employees]
   );
 
   const remove = useCallback((id: number) => {
@@ -439,15 +457,36 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Switching audience KEEPS the cart — the same courses simply re-quote
   // under the other pricing model (the quote effect re-fires off buyerKey).
   // Individual is the default; the switch is a free back-and-forth toggle.
-  const setAudience = useCallback(
-    (audience: BuyerAudience) => setBuyer((b) => ({ ...b, audience })),
-    []
-  );
-  const setEmployees = useCallback(
-    (n: number) =>
-      setBuyer((b) => ({ ...b, employees: Math.min(9999, Math.max(1, Math.floor(n) || 1)) })),
-    []
-  );
+  const setAudience = useCallback((audience: BuyerAudience) => {
+    if (audience === "company") {
+      // Declaring a team is the moment to size seat-based lines to it. A
+      // single seat here is the individual-mode default (or a cart stored
+      // before seats followed headcount), never a deliberate team choice.
+      const { employees } = buyerRef.current;
+      const seatIds = seatBasedIds(linesRef.current);
+      setItems((prev) =>
+        prev.map((i) => (seatIds.has(i.id) && i.users === 1 ? { ...i, users: employees } : i))
+      );
+    }
+    buyerRef.current = { ...buyerRef.current, audience };
+    setBuyer((b) => ({ ...b, audience }));
+  }, []);
+  const setEmployees = useCallback((n: number) => {
+    const next = Math.min(9999, Math.max(1, Math.floor(n) || 1));
+    const prevEmployees = buyerRef.current.employees;
+    if (next === prevEmployees) return;
+    // Seat-based lines still tracking the old headcount move with it. A
+    // count the buyer set by hand on the line (so it no longer matches)
+    // stays put — they've taken over that number.
+    const seatIds = seatBasedIds(linesRef.current);
+    setItems((prev) =>
+      prev.map((i) =>
+        seatIds.has(i.id) && i.users === prevEmployees ? { ...i, users: next } : i
+      )
+    );
+    buyerRef.current = { ...buyerRef.current, employees: next };
+    setBuyer((b) => ({ ...b, employees: next }));
+  }, []);
   const setLocations = useCallback(
     (n: number) =>
       setBuyer((b) => ({ ...b, locations: Math.min(9999, Math.max(1, Math.floor(n) || 1)) })),
