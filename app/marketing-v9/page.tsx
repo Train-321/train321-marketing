@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getMarketplaceCatalog, type MarketplaceCourse } from "@/lib/newFeatures";
 import { getTestimonials, getFaqGroups, getSiteSettings, type Testimonial, type FaqItem } from "@/lib/sanity";
 import CoursesV9, { type V9Course } from "./CoursesV9";
+import TestimonialsV9 from "./TestimonialsV9";
 import "./marketing-v9.css";
 
 // "Get started" landing page: an advanced, LMS-style storefront. Courses come
@@ -50,10 +51,6 @@ function dedupeByName(list: MarketplaceCourse[]): MarketplaceCourse[] {
   return [...seen.values()];
 }
 
-function initials(name: string) {
-  return (name || "").split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
-}
-
 export default async function GetStartedLanding() {
   let courses: MarketplaceCourse[] = [];
   let categories: Array<{ id: number; name: string }> = [];
@@ -79,7 +76,7 @@ export default async function GetStartedLanding() {
   for (const c of categories) if (flat.some((f) => f.catLabel === c.name)) labels.push(c.name);
   if (flat.some((f) => f.catLabel === "More courses")) labels.push("More courses");
 
-  const quotes = (testimonials.filter((t) => t.featured).length ? testimonials.filter((t) => t.featured) : testimonials).slice(0, 3);
+  const quotes = (testimonials.filter((t) => t.featured).length ? testimonials.filter((t) => t.featured) : testimonials).slice(0, 6);
 
   return (
     <div className="t321-gs">
@@ -208,17 +205,7 @@ export default async function GetStartedLanding() {
               <span className="gs-pill"><i className="fas fa-quote-right" aria-hidden="true" /> What learners say</span>
               <h2>Trusted by thousands of workers</h2>
             </div>
-            <div className="gs-quotes">
-              {quotes.map((q) => (
-                <figure key={q.id} className="gs-quote">
-                  <blockquote>&ldquo;{q.quote}&rdquo;</blockquote>
-                  <figcaption>
-                    <span className="gs-quote__avatar">{initials(q.name)}</span>
-                    <span><strong>{q.name}</strong><span>{[q.role, q.company].filter(Boolean).join(" · ")}</span></span>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
+            <TestimonialsV9 items={quotes} />
           </div>
         </section>
       )}
