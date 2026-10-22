@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getHomePage, getSiteSettings, type PillarCard } from "@/lib/sanity";
+import { getHomePage, type PillarCard } from "@/lib/sanity";
 import "./marketing-v9.css";
 
-// "Get started" email destination hub. A new, isolated route for email
-// campaigns: the email's "Get started" button points here, and the visitor
-// picks their training. Nothing imports it and it imports no existing page, so
-// it can't affect the rest of the site. noindex keeps it out of search.
+// "Get started" landing page hub: a welcoming entry page where visitors pick
+// their training. A normal site page (keeps the site header and footer).
+// Nothing imports it and it imports no existing page, so it can't affect the
+// rest of the site. noindex keeps it out of search for now.
 export const metadata: Metadata = {
   title: "Get started — food, alcohol & workplace training | Train 321",
   description:
@@ -17,7 +17,6 @@ export const metadata: Metadata = {
 
 // Where the main "browse everything" button goes.
 const CATALOG_HREF = "/catalog";
-const PHONE = "561-325-7300";
 
 // Shown only if Studio's home document has no pillars yet. The live cards come
 // from Sanity (home.pillars), the same source the home page uses.
@@ -56,11 +55,9 @@ const STEPS = [
 
 export default async function GetStartedLanding() {
   let pillars: PillarCard[] | undefined;
-  let phone = PHONE;
   try {
-    const [home, settings] = await Promise.all([getHomePage(), getSiteSettings()]);
+    const home = await getHomePage();
     pillars = home?.pillars?.length ? home.pillars : undefined;
-    phone = settings?.phone || PHONE;
   } catch {
     /* fall back to the defaults below */
   }
@@ -68,10 +65,6 @@ export default async function GetStartedLanding() {
 
   return (
     <div className="t321-gs">
-
-      {/* Email landing page: hide the global site header + footer. This style
-          ships only in this route's HTML and unmounts on navigation away. */}
-      <style>{`.t321-mkt-header,.t321-mkt-footer{display:none !important;}`}</style>
 
       {/* ── Hero ───────────────────────────────────────────────────────── */}
       <section className="gs-hero">
@@ -141,15 +134,6 @@ export default async function GetStartedLanding() {
           </div>
         </div>
       </section>
-
-      {/* ── Footer (minimal, no nav) ───────────────────────────────────── */}
-      <footer className="gs-footer">
-        <div className="gs-container">
-          <div className="gs-fbrand">Train 321</div>
-          <p style={{ margin: "8px 0 0" }}>Food handler, alcohol and compliance training. <a href={`tel:${phone.replace(/\D/g, "")}`}>{phone}</a></p>
-          <p style={{ margin: "6px 0 0", color: "#6c8498" }}>© 2026 Train 321. All rights reserved.</p>
-        </div>
-      </footer>
 
     </div>
   );

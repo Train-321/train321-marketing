@@ -102,11 +102,6 @@
 .t321-gs .gs-final p { color: #A8BFD0; font-size: 17px; max-width: 460px; margin: 0 auto 26px; }
 .t321-gs .gs-final .gs-pill { background: rgba(0, 180, 219, .16); color: #7fe3f5; }
 
-/* ── Footer (minimal, no nav) ─────────────────────────────────────────── */
-.t321-gs .gs-footer { background: var(--t321-mkt-ink); color: #8aa2b5; text-align: center; padding: 24px 0; font-size: 13px; border-top: 1px solid rgba(255, 255, 255, .07); }
-.t321-gs .gs-footer .gs-fbrand { color: #fff; font-weight: 700; font-family: var(--gs-serif); font-size: 16px; letter-spacing: .02em; }
-.t321-gs .gs-footer a { color: #cfe0ec; }
-
 /* ── Responsive ───────────────────────────────────────────────────────── */
 @media (max-width: 860px) {
   .t321-gs .gs-hero h1 { font-size: 33px; }
