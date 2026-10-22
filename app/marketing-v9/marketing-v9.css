@@ -174,7 +174,7 @@
 .t321-gs .gs-inline-link { color: var(--t321-mkt-accent-ink); font-weight: 600; text-decoration: underline; }
 
 /* ── Testimonials section decor ───────────────────────────────────────── */
-.t321-gs .gs-tsec { position: relative; overflow: hidden; }
+.t321-gs .gs-tsec { position: relative; }
 .t321-gs .gs-tsec .gs-container { position: relative; z-index: 1; }
 .t321-gs .gs-tdeco { position: absolute; z-index: 0; pointer-events: none; opacity: .5; }
 .t321-gs .gs-tdeco--1 { left: 8%; top: 190px; font-size: 22px; color: var(--t321-mkt-accent); transform: rotate(-10deg); }
