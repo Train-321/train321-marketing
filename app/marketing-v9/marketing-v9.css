@@ -89,9 +89,41 @@
 .t321-gs .gs-course__body { display: flex; flex-direction: column; flex: 1; padding: 18px 20px 20px; }
 .t321-gs .gs-course__title { font-family: var(--gs-serif); font-weight: 600; font-size: 18px; letter-spacing: -0.01em; margin-bottom: 6px; }
 .t321-gs .gs-course__desc { font-size: 14px; color: var(--t321-mkt-ink-muted); line-height: 1.55; margin-bottom: 14px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.t321-gs .gs-course__link { margin-top: auto; display: inline-flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 600; color: var(--t321-mkt-accent-ink); }
-.t321-gs .gs-course__link i { transition: transform .2s ease; }
-.t321-gs .gs-course:hover .gs-course__link i { transform: translateX(4px); }
+.t321-gs .gs-course__badge { align-self: flex-start; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 8px; padding: 3px 9px; border-radius: 999px; background: var(--t321-mkt-accent-wash); color: var(--t321-mkt-accent-ink); font-size: 11.5px; font-weight: 600; }
+.t321-gs .gs-course__foot { margin-top: auto; display: flex; flex-direction: column; gap: 12px; padding-top: 14px; }
+.t321-gs .gs-course__price { font-size: 13px; color: var(--t321-mkt-ink-muted); display: inline-flex; align-items: baseline; gap: 5px; }
+.t321-gs .gs-course__price strong { font-family: var(--gs-serif); font-size: 22px; color: var(--t321-mkt-ink); }
+.t321-gs .gs-course__add { width: 100%; justify-content: center; padding: 12px 18px; font-size: 14.5px; }
+
+/* ── Stat band ────────────────────────────────────────────────────────── */
+.t321-gs .gs-stats { background: var(--t321-mkt-ink); color: #fff; padding: 26px 0; }
+.t321-gs .gs-stats__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; text-align: center; }
+.t321-gs .gs-stat__n { font-family: var(--gs-serif); font-size: 30px; font-weight: 700; color: #fff; }
+.t321-gs .gs-stat__l { font-size: 13px; color: #9Fb6c8; margin-top: 2px; }
+.t321-gs .gs-stat + .gs-stat { border-left: 1px solid rgba(255, 255, 255, .08); }
+
+/* ── Benefits ─────────────────────────────────────────────────────────── */
+.t321-gs .gs-benefits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.t321-gs .gs-benefit { padding: 28px 24px; border: 1px solid var(--t321-mkt-line); border-radius: 18px; background: #fff; }
+.t321-gs .gs-benefit__icon { display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 14px; font-size: 21px; color: #fff; background: var(--t321-mkt-accent); margin-bottom: 16px; }
+.t321-gs .gs-benefit h3 { font-size: 19px; margin: 0 0 8px; }
+.t321-gs .gs-benefit p { margin: 0; font-size: 14.5px; color: var(--t321-mkt-ink-muted); line-height: 1.6; }
+
+/* ── Testimonials ─────────────────────────────────────────────────────── */
+.t321-gs .gs-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.t321-gs .gs-quote { display: flex; flex-direction: column; padding: 26px 24px; border: 1px solid var(--t321-mkt-line); border-radius: 18px; background: #fff; margin: 0; }
+.t321-gs .gs-quote blockquote { margin: 0 0 16px; font-size: 15px; line-height: 1.6; color: var(--t321-mkt-ink); }
+.t321-gs .gs-quote figcaption { display: flex; align-items: center; gap: 11px; margin-top: auto; }
+.t321-gs .gs-quote__avatar { width: 40px; height: 40px; flex: 0 0 auto; border-radius: 50%; background: var(--t321-mkt-accent); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; }
+.t321-gs .gs-quote figcaption strong { display: block; font-size: 14px; }
+.t321-gs .gs-quote figcaption span span { font-size: 12.5px; color: var(--t321-mkt-ink-muted); }
+
+/* ── FAQ ──────────────────────────────────────────────────────────────── */
+.t321-gs .gs-faq { max-width: 760px; }
+.t321-gs .gs-qa { border: 1px solid var(--t321-mkt-line); border-radius: 14px; padding: 18px 22px; margin-bottom: 12px; background: #fff; }
+.t321-gs .gs-qa h3 { font-family: var(--gs-serif); font-size: 16.5px; margin: 0 0 7px; }
+.t321-gs .gs-qa p { margin: 0; font-size: 14.5px; color: var(--t321-mkt-ink-muted); line-height: 1.6; }
+.t321-gs .gs-inline-link { color: var(--t321-mkt-accent-ink); font-weight: 600; text-decoration: underline; }
 
 /* ── Steps ────────────────────────────────────────────────────────────── */
 .t321-gs .gs-sunk { background: var(--t321-mkt-paper-sunk); border-top: 1px solid var(--t321-mkt-line); border-bottom: 1px solid var(--t321-mkt-line); }
@@ -127,7 +159,11 @@
   .t321-gs .gs-hero__grid { grid-template-columns: 1fr; gap: 28px; }
   .t321-gs .gs-hero__media { aspect-ratio: 16 / 10; }
   .t321-gs .gs-hero h1 { font-size: 33px; }
-  .t321-gs .gs-steps { grid-template-columns: 1fr; }
+  .t321-gs .gs-steps,
+  .t321-gs .gs-benefits,
+  .t321-gs .gs-quotes { grid-template-columns: 1fr; }
+  .t321-gs .gs-stats__grid { grid-template-columns: repeat(2, 1fr); gap: 20px 12px; }
+  .t321-gs .gs-stat + .gs-stat { border-left: 0; }
   .t321-gs .gs-head h2, .t321-gs .gs-final h2 { font-size: 26px; }
   .t321-gs .gs-topbar__cta { padding: 9px 15px; font-size: 13px; }
 }

@@ -1,29 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getCourses, type Course } from "@/lib/sanity";
+import { getMarketplaceCatalog, toBlurb, type MarketplaceCourse } from "@/lib/newFeatures";
+import { getTestimonials, getFaqGroups, getSiteSettings, type Testimonial, type FaqItem } from "@/lib/sanity";
+import AddToCartButton from "@/components/cart/AddToCartButton";
 import "./marketing-v9.css";
 
-// "Get started" landing page hub: a professional, sectioned page that lists the
-// courses grouped by category. The course cards are DYNAMIC (getCourses from
-// Sanity), so adding a course in Studio automatically adds it here. A normal
-// site page (keeps the site header and footer). noindex keeps it out of search
-// for now.
+// "Get started" landing page: an advanced, LMS-style storefront. Courses come
+// from the marketplace catalog (same source as /catalog) so they carry prices
+// and buyable ids — the cards add straight to the cart. A minimal landing
+// header (logo + one CTA), noindex for now.
 export const metadata: Metadata = {
   title: "Get started — food, alcohol & workplace training | Train 321",
   description:
-    "Browse ANSI-accredited food, alcohol and workplace compliance courses. Finish online in about an hour, certificate the same day, accepted in all 50 states.",
+    "Browse ANSI-accredited food, alcohol and workplace compliance courses and add them to your cart. Finish online in about an hour, certificate the same day.",
   alternates: { canonical: "/marketing-v9" },
   robots: { index: false, follow: true }
 };
 
 const CATALOG_HREF = "/catalog";
 
-// Category sections, in display order. Adding a course to Studio under one of
-// these categories drops it straight into the matching section below.
-const GROUPS: Array<{ key: Course["category"]; label: string; icon: string }> = [
-  { key: "food", label: "Food safety", icon: "fas fa-utensils" },
-  { key: "alcohol", label: "Alcohol & service", icon: "fas fa-wine-glass-alt" },
-  { key: "hr", label: "Workplace compliance", icon: "fas fa-users-cog" }
+type Stat = { value: string; label: string };
+const FALLBACK_STATS: Stat[] = [
+  { value: "50,000+", label: "Workers certified" },
+  { value: "4.9/5", label: "Learner rating" },
+  { value: "50", label: "States accepted" },
+  { value: "~1 hr", label: "Average completion" }
+];
+
+const BENEFITS = [
+  { icon: "fas fa-shield-halved", title: "ANSI-accredited training", body: "Nationally recognized courses accepted by regulators in all 50 states." },
+  { icon: "fas fa-certificate", title: "Same-day certificate", body: "Pass the exam and download your official certificate instantly." },
+  { icon: "fas fa-users", title: "Train your whole team", body: "Enroll staff in bulk and track every certificate in one dashboard." }
 ];
 
 const STEPS = [
@@ -32,46 +39,95 @@ const STEPS = [
   { n: 3, title: "Get your certificate", body: "Pass the course and download your certificate the moment you are done." }
 ];
 
-function CourseCard({ course }: { course: Course }) {
+// Collapse state variants of the same course into one representative card,
+// preferring a nationwide version when one exists.
+function dedupeByName(list: MarketplaceCourse[]): MarketplaceCourse[] {
+  const seen = new Map<string, MarketplaceCourse>();
+  for (const c of list) {
+    const existing = seen.get(c.name);
+    if (!existing || (existing.stateLabel && !c.stateLabel)) seen.set(c.name, c);
+  }
+  return [...seen.values()];
+}
+
+function initials(name: string) {
+  return (name || "").split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
+}
+
+function Price({ value }: { value: number }) {
+  if (value > 0) {
+    return (
+      <span className="gs-course__price"><span>From</span> <strong>${value}</strong> <span>/ seat</span></span>
+    );
+  }
+  return <span className="gs-course__price"><strong>Custom pricing</strong></span>;
+}
+
+function CourseCardAdd({ course }: { course: MarketplaceCourse }) {
+  const blurb = course.description ? toBlurb(course.description) : "";
   return (
-    <Link href={`/courses/${course.slug}`} className={`gs-course gs-course--${course.color || "neutral"}`}>
-      <span className="gs-course__media">
+    <div className="gs-course">
+      <div className="gs-course__media">
         {course.image ? (
           <img src={course.image} alt="" />
         ) : (
-          <span className="gs-course__icon"><i className={course.icon || "fas fa-certificate"} aria-hidden="true" /></span>
+          <span className="gs-course__icon"><i className="fas fa-certificate" aria-hidden="true" /></span>
         )}
-      </span>
-      <span className="gs-course__body">
-        <span className="gs-course__title">{course.title}</span>
-        {(course.tagline || course.summary) && (
-          <span className="gs-course__desc">{course.tagline || course.summary}</span>
+      </div>
+      <div className="gs-course__body">
+        {course.stateLabel && (
+          <span className="gs-course__badge"><i className="fas fa-map-marker-alt" aria-hidden="true" /> {course.stateLabel}</span>
         )}
-        <span className="gs-course__link">View course <i className="fas fa-arrow-right" aria-hidden="true" /></span>
-      </span>
-    </Link>
+        <span className="gs-course__title">{course.name}</span>
+        {blurb && <span className="gs-course__desc">{blurb}</span>}
+        <div className="gs-course__foot">
+          <Price value={course.price} />
+          <AddToCartButton
+            course={{
+              id: course.id,
+              name: course.name,
+              price: course.price,
+              image: course.image,
+              isSeatBased: course.isSeatBased,
+              stateLabel: course.stateLabel
+            }}
+            mode="add"
+            className="gs-btn gs-btn--primary gs-course__add"
+          />
+        </div>
+      </div>
+    </div>
   );
 }
 
 export default async function GetStartedLanding() {
-  let courses: Course[] = [];
-  try {
-    courses = await getCourses();
-  } catch {
-    /* if the backend is unreachable the page still renders without the grid */
-  }
+  let courses: MarketplaceCourse[] = [];
+  let categories: Array<{ id: number; name: string }> = [];
+  let testimonials: Testimonial[] = [];
+  let faqs: FaqItem[] = [];
+  let stats: Stat[] = [];
 
-  const known = new Set(GROUPS.map((g) => g.key));
-  const sections = GROUPS.map((g) => ({ ...g, items: courses.filter((c) => c.category === g.key) })).filter(
-    (g) => g.items.length > 0
-  );
-  const other = courses.filter((c) => !c.category || !known.has(c.category));
+  try {
+    const catalog = await getMarketplaceCatalog();
+    courses = catalog.courses;
+    categories = catalog.categories.map((c) => ({ id: c.id, name: c.name }));
+  } catch { /* storefront unreachable: the grid just won't render */ }
+  try { testimonials = await getTestimonials(); } catch { /* skip social proof */ }
+  try { const g = await getFaqGroups(); faqs = (g[0]?.items || []).slice(0, 6); } catch { /* skip faq */ }
+  try { const s = await getSiteSettings(); stats = s.companyStats?.length ? s.companyStats : FALLBACK_STATS; } catch { stats = FALLBACK_STATS; }
+
+  const catName = new Map(categories.map((c) => [c.id, c.name]));
+  const sections = categories
+    .map((c) => ({ id: c.id, label: c.name, items: dedupeByName(courses.filter((x) => x.categoryId === c.id)) }))
+    .filter((s) => s.items.length > 0);
+  const other = dedupeByName(courses.filter((c) => !c.categoryId || !catName.has(c.categoryId)));
+
+  const quotes = (testimonials.filter((t) => t.featured).length ? testimonials.filter((t) => t.featured) : testimonials).slice(0, 3);
 
   return (
     <div className="t321-gs">
 
-      {/* Landing page: hide the full site header/footer and use a minimal one.
-          This style ships only in this route's HTML and unmounts on navigation. */}
+      {/* Landing page: hide the full site header/footer and use a minimal one. */}
       <style>{`.t321-mkt-header,.t321-mkt-footer{display:none !important;}`}</style>
 
       {/* ── Minimal landing header (logo + one CTA, no nav) ────────────── */}
@@ -80,13 +136,11 @@ export default async function GetStartedLanding() {
           <Link href="/" className="gs-topbar__brand" aria-label="Train 321 home">
             <img src="/img/logos/train321_logo.png" alt="Train 321" />
           </Link>
-          <Link href={CATALOG_HREF} className="gs-btn gs-btn--primary gs-topbar__cta">
-            Browse all courses <i className="fas fa-arrow-right" aria-hidden="true" />
-          </Link>
+          <Link href={CATALOG_HREF} className="gs-btn gs-btn--primary gs-topbar__cta">Browse all courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
         </div>
       </header>
 
-      {/* ── Hero (two-column landing style) ────────────────────────────── */}
+      {/* ── Hero ───────────────────────────────────────────────────────── */}
       <section className="gs-hero">
         <div className="gs-container gs-hero__grid">
           <div className="gs-hero__copy">
@@ -94,8 +148,8 @@ export default async function GetStartedLanding() {
             <h1>Get certified for work, <em>online.</em></h1>
             <p className="gs-lede">Food, alcohol, and workplace courses you finish on your phone in about an hour. Certificate the same day, accepted in all 50 states.</p>
             <div className="gs-cta-row">
-              <Link href={CATALOG_HREF} className="gs-btn gs-btn--primary">Browse all courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
-              <a href="#courses" className="gs-btn gs-btn--ghost">See courses</a>
+              <a href="#courses" className="gs-btn gs-btn--primary">Browse courses <i className="fas fa-arrow-right" aria-hidden="true" /></a>
+              <Link href={CATALOG_HREF} className="gs-btn gs-btn--ghost">Full catalog</Link>
             </div>
             <ul className="gs-trust">
               <li><i className="fas fa-shield-halved" aria-hidden="true" /> ANSI-accredited</li>
@@ -109,37 +163,72 @@ export default async function GetStartedLanding() {
         </div>
       </section>
 
-      {/* ── Courses by category (dynamic) ──────────────────────────────── */}
-      <section className="gs-section" id="courses">
+      {/* ── Stat band ──────────────────────────────────────────────────── */}
+      <div className="gs-stats">
+        <div className="gs-container gs-stats__grid">
+          {stats.slice(0, 4).map((s, i) => (
+            <div key={i} className="gs-stat"><div className="gs-stat__n">{s.value}</div><div className="gs-stat__l">{s.label}</div></div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Benefits ───────────────────────────────────────────────────── */}
+      <section className="gs-section">
+        <div className="gs-container">
+          <div className="gs-head">
+            <span className="gs-pill"><i className="fas fa-star" aria-hidden="true" /> Why Train 321</span>
+            <h2>Built for busy teams</h2>
+            <p className="gs-lede">Everything hospitality and service workers need to get certified and stay compliant.</p>
+          </div>
+          <div className="gs-benefits">
+            {BENEFITS.map((b) => (
+              <div key={b.title} className="gs-benefit">
+                <span className="gs-benefit__icon"><i className={b.icon} aria-hidden="true" /></span>
+                <h3>{b.title}</h3>
+                <p>{b.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Courses by category (dynamic, add to cart) ─────────────────── */}
+      <section className="gs-section gs-sunk" id="courses">
         <div className="gs-container">
           <div className="gs-head">
             <span className="gs-pill"><i className="fas fa-graduation-cap" aria-hidden="true" /> Our courses</span>
             <h2>Pick your training</h2>
-            <p className="gs-lede">Every course is online, mobile-friendly, and issues a certificate the moment you pass.</p>
+            <p className="gs-lede">Add a course to your cart and check out in minutes. Every course is online and issues a certificate the moment you pass.</p>
           </div>
 
           {sections.map((g) => (
-            <div key={g.key} className="gs-cat">
-              <h3 className="gs-cat__title"><i className={g.icon} aria-hidden="true" /> {g.label}</h3>
+            <div key={g.id} className="gs-cat">
+              <h3 className="gs-cat__title">{g.label}</h3>
               <div className="gs-courses">
-                {g.items.map((c) => <CourseCard key={c.slug} course={c} />)}
+                {g.items.map((c) => <CourseCardAdd key={c.id} course={c} />)}
               </div>
             </div>
           ))}
 
           {other.length > 0 && (
             <div className="gs-cat">
-              <h3 className="gs-cat__title"><i className="fas fa-layer-group" aria-hidden="true" /> More courses</h3>
+              <h3 className="gs-cat__title">More courses</h3>
               <div className="gs-courses">
-                {other.map((c) => <CourseCard key={c.slug} course={c} />)}
+                {other.map((c) => <CourseCardAdd key={c.id} course={c} />)}
               </div>
             </div>
+          )}
+
+          {sections.length === 0 && other.length === 0 && (
+            <p className="gs-lede" style={{ textAlign: "center" }}>
+              Browse the <Link href={CATALOG_HREF} className="gs-inline-link">full catalog</Link> to see every course.
+            </p>
           )}
         </div>
       </section>
 
       {/* ── How it works ───────────────────────────────────────────────── */}
-      <section className="gs-section gs-sunk">
+      <section className="gs-section">
         <div className="gs-container">
           <div className="gs-head">
             <span className="gs-pill"><i className="fas fa-wand-magic-sparkles" aria-hidden="true" /> How it works</span>
@@ -157,6 +246,47 @@ export default async function GetStartedLanding() {
         </div>
       </section>
 
+      {/* ── Testimonials ───────────────────────────────────────────────── */}
+      {quotes.length > 0 && (
+        <section className="gs-section gs-sunk">
+          <div className="gs-container">
+            <div className="gs-head">
+              <span className="gs-pill"><i className="fas fa-quote-right" aria-hidden="true" /> What learners say</span>
+              <h2>Trusted by thousands of workers</h2>
+            </div>
+            <div className="gs-quotes">
+              {quotes.map((q) => (
+                <figure key={q.id} className="gs-quote">
+                  <blockquote>&ldquo;{q.quote}&rdquo;</blockquote>
+                  <figcaption>
+                    <span className="gs-quote__avatar">{initials(q.name)}</span>
+                    <span><strong>{q.name}</strong><span>{[q.role, q.company].filter(Boolean).join(" · ")}</span></span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── FAQ ────────────────────────────────────────────────────────── */}
+      {faqs.length > 0 && (
+        <section className="gs-section">
+          <div className="gs-container gs-faq">
+            <div className="gs-head">
+              <span className="gs-pill"><i className="fas fa-circle-question" aria-hidden="true" /> Good to know</span>
+              <h2>Questions, answered</h2>
+            </div>
+            {faqs.map((f, i) => (
+              <div key={i} className="gs-qa">
+                <h3>{f.q}</h3>
+                <p>{f.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* ── Final CTA ──────────────────────────────────────────────────── */}
       <section className="gs-final">
         <div className="gs-container">
@@ -164,7 +294,7 @@ export default async function GetStartedLanding() {
           <h2 style={{ marginTop: "14px" }}>Get certified before your next shift</h2>
           <p>Pick your course and finish online today.</p>
           <div className="gs-cta-row">
-            <Link href={CATALOG_HREF} className="gs-btn gs-btn--primary">Browse all courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+            <a href="#courses" className="gs-btn gs-btn--primary">Browse courses <i className="fas fa-arrow-right" aria-hidden="true" /></a>
           </div>
         </div>
       </section>
