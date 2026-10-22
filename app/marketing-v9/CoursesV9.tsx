@@ -6,7 +6,7 @@
 
 import { useState } from "react";
 import { toBlurb, type MarketplaceCourse } from "@/lib/newFeatures";
-import AddToCartButton from "@/components/cart/AddToCartButton";
+import V9AddButton from "./cart/V9AddButton";
 
 export type V9Course = MarketplaceCourse & { catLabel: string };
 
@@ -85,16 +85,14 @@ function Card({ course }: { course: V9Course }) {
               <strong>Custom</strong>
             )}
           </span>
-          <AddToCartButton
+          <V9AddButton
             course={{
               id: course.id,
               name: course.name,
               price: course.price,
               image: course.image,
-              isSeatBased: course.isSeatBased,
               stateLabel: course.stateLabel
             }}
-            mode="add"
             className="gs-btn gs-btn--primary v9c-card__add"
           />
         </div>

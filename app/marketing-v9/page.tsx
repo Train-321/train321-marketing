@@ -4,6 +4,9 @@ import { getMarketplaceCatalog, type MarketplaceCourse } from "@/lib/newFeatures
 import { getTestimonials, getFaqGroups, getSiteSettings, type Testimonial, type FaqItem } from "@/lib/sanity";
 import CoursesV9, { type V9Course } from "./CoursesV9";
 import TestimonialsV9 from "./TestimonialsV9";
+import { V9CartProvider } from "./cart/V9CartContext";
+import V9CartBtn from "./cart/V9CartBtn";
+import V9Drawer from "./cart/V9Drawer";
 import "./marketing-v9.css";
 
 // "Get started" landing page: an advanced, LMS-style storefront. Courses come
@@ -79,6 +82,7 @@ export default async function GetStartedLanding() {
   const quotes = (testimonials.filter((t) => t.featured).length ? testimonials.filter((t) => t.featured) : testimonials).slice(0, 6);
 
   return (
+    <V9CartProvider>
     <div className="t321-gs">
 
       {/* Landing page: hide the full site header/footer and use a minimal one. */}
@@ -90,7 +94,10 @@ export default async function GetStartedLanding() {
           <Link href="/" className="gs-topbar__brand" aria-label="Train 321 home">
             <img src="/img/logos/train321_logo.png" alt="Train 321" />
           </Link>
-          <Link href={CATALOG_HREF} className="gs-btn gs-btn--primary gs-topbar__cta">Browse all courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+          <div className="gs-topbar__actions">
+            <V9CartBtn />
+            <Link href={CATALOG_HREF} className="gs-btn gs-btn--primary gs-topbar__cta">Browse all courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+          </div>
         </div>
       </header>
 
@@ -256,6 +263,8 @@ export default async function GetStartedLanding() {
         </div>
       </footer>
 
+      <V9Drawer />
     </div>
+    </V9CartProvider>
   );
 }
