@@ -232,10 +232,13 @@ export default async function GetStartedLanding() {
               <h2>Questions, answered</h2>
             </div>
             {faqs.map((f, i) => (
-              <div key={i} className="gs-qa">
-                <h3>{f.q}</h3>
-                <p>{f.a}</p>
-              </div>
+              <details key={i} className="gs-qa" open={i === 0}>
+                <summary className="gs-qa__q">
+                  <span>{f.q}</span>
+                  <i className="fas fa-chevron-down gs-qa__chev" aria-hidden="true" />
+                </summary>
+                <p className="gs-qa__a">{f.a}</p>
+              </details>
             ))}
           </div>
         </section>
