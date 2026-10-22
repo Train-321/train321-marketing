@@ -67,21 +67,23 @@ export default async function SexualHarassmentLanding() {
 
       {/* ── Hero (left-aligned, calm) ──────────────────────────────────── */}
       <header className="mld-hero">
-        <div className="mld-wrap">
-          <span className="mld-eyebrow"><i className="fas fa-shield-halved" aria-hidden="true" /> Compliance training</span>
-          <h1>Sexual harassment prevention training</h1>
-          <p className="mld-lede">
-            Online training for employees and supervisors that meets state requirements and comes with a certificate.
-          </p>
-          <div className="mld-hero-actions">
-            <Link href={CTA_HREF} className="mld-btn mld-btn--primary">Start training <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
-            <Link href={CTA_HREF} className="mld-btn mld-btn--ghost">Train your team</Link>
+        <div className="mld-wrap mld-hero-grid">
+          <div className="mld-hero-copy">
+            <span className="mld-eyebrow"><i className="fas fa-shield-halved" aria-hidden="true" /> Compliance training</span>
+            <h1>Sexual harassment prevention training</h1>
+            <p className="mld-lede">
+              Online training for employees and supervisors that meets state requirements and comes with a certificate.
+            </p>
+            <div className="mld-hero-actions">
+              <Link href={CTA_HREF} className="mld-btn mld-btn--primary">Start training <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+              <Link href={CTA_HREF} className="mld-btn mld-btn--ghost">Train your team</Link>
+            </div>
+            <ul className="mld-hero-points">
+              <li><i className="fas fa-check" aria-hidden="true" /> 100% online, any device</li>
+              <li><i className="fas fa-check" aria-hidden="true" /> Employee and supervisor versions</li>
+              <li><i className="fas fa-check" aria-hidden="true" /> Certificate on completion</li>
+            </ul>
           </div>
-          <ul className="mld-hero-points">
-            <li><i className="fas fa-check" aria-hidden="true" /> 100% online, any device</li>
-            <li><i className="fas fa-check" aria-hidden="true" /> Employee and supervisor versions</li>
-            <li><i className="fas fa-check" aria-hidden="true" /> Certificate on completion</li>
-          </ul>
           <div className="mld-hero-media">
             <img src={course?.image || "/img/hero-individual-v2.png"} alt={course?.title || "Sexual harassment prevention training"} />
           </div>
