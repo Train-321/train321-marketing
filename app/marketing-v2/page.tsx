@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import CourseCertificate from "@/components/CourseCertificate";
 import "./marketing-v2.css";
 
 // Standalone email-marketing landing page for the Food Manager course. A new,
@@ -211,7 +212,7 @@ export default function FoodManagerLanding() {
             </div>
           </div>
           <div className="mlb-final-media">
-            <img src="/img/certificate/certificate-bg.png" alt="Certified Food Protection Manager certificate" />
+            <CourseCertificate courseTitle="Certified Food Protection Manager" />
           </div>
         </div>
       </div>

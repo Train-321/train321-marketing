@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import CourseCertificate from "@/components/CourseCertificate";
 import "./marketing-v4.css";
 
 // Standalone email-marketing landing page for the Sexual Harassment Prevention
@@ -140,11 +141,9 @@ export default function SexualHarassmentLanding() {
               <p className="mld-rail-summary">
                 A clear, current course that meets training mandates and gives employees and supervisors the standard they need to prevent harassment at work.
               </p>
-              <img
-                className="mld-rail-img"
-                src="/img/certificate/certificate-bg.png"
-                alt="Example completion certificate for sexual harassment prevention training"
-              />
+              <div className="mld-rail-img">
+                <CourseCertificate courseTitle="Sexual Harassment Prevention Training" />
+              </div>
               <Link href={CTA_HREF} className="mld-btn mld-btn--primary mld-btn--block">Start training <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
               <p className="mld-rail-note"><i className="fas fa-lock" aria-hidden="true" /> Certificate issued the moment you finish</p>
             </div>
