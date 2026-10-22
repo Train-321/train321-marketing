@@ -140,40 +140,29 @@ export default async function GetStartedLanding() {
         </div>
       </header>
 
-      {/* ── Hero (modern LMS style) ────────────────────────────────────── */}
+      {/* ── Hero (centered course finder) ──────────────────────────────── */}
       <section className="gs-hero">
-        <div className="gs-container gs-hero__grid">
-          <div className="gs-hero__copy">
-            <div className="gs-hero__rating">
-              <span className="gs-stars" aria-hidden="true">★★★★★</span>
-              <span><strong>4.9/5</strong> from 50,000+ learners</span>
-            </div>
-            <h1>The fastest way to get <em>certified</em> for work.</h1>
-            <p className="gs-lede">Food, alcohol, and workplace courses you finish on your phone in about an hour. Certificate the same day, accepted in all 50 states.</p>
-            <div className="gs-cta-row">
-              <a href="#courses" className="gs-btn gs-btn--primary">Browse courses <i className="fas fa-arrow-right" aria-hidden="true" /></a>
-              <Link href={CATALOG_HREF} className="gs-btn gs-btn--ghost">Full catalog</Link>
-            </div>
-            <div className="gs-hero__social">
-              <div className="gs-hero__avatars" aria-hidden="true">
-                <span>MR</span><span>JD</span><span>AL</span><span>SK</span>
-              </div>
-              <span>Joined by <strong>50,000+</strong> hospitality &amp; service workers</span>
-            </div>
+        <div className="gs-container gs-hero__center">
+          <div className="gs-hero__rating">
+            <span className="gs-stars" aria-hidden="true">★★★★★</span>
+            <span><strong>4.9/5</strong> from 50,000+ learners</span>
           </div>
-          <div className="gs-hero__visual">
-            <div className="gs-hero__photo">
-              <img src="/img/hero-restaurant.png" alt="Food service team at work" />
+          <h1>Find your required training and <em>get certified today.</em></h1>
+          <p className="gs-lede">Food, alcohol, and workplace courses you finish on your phone in about an hour. Certificate the same day, accepted in all 50 states.</p>
+          <div className="gs-finder">
+            <span className="gs-finder__label"><i className="fas fa-magnifying-glass" aria-hidden="true" /> I need</span>
+            <div className="gs-finder__chips">
+              <a href="#courses" className="gs-finder__chip">Food safety</a>
+              <a href="#courses" className="gs-finder__chip">Alcohol &amp; service</a>
+              <a href="#courses" className="gs-finder__chip">Workplace</a>
             </div>
-            <div className="gs-hero__fcard gs-hero__fcard--cert">
-              <span className="gs-hero__fcard-ic"><i className="fas fa-circle-check" aria-hidden="true" /></span>
-              <div><strong>Certificate issued</strong><span>Same day · 50 states</span></div>
-            </div>
-            <div className="gs-hero__fcard gs-hero__fcard--stat">
-              <span className="gs-hero__fcard-n">~1 hr</span>
-              <span className="gs-hero__fcard-lbl">average to certified</span>
-            </div>
+            <a href="#courses" className="gs-btn gs-btn--primary gs-finder__go">Browse courses <i className="fas fa-arrow-right" aria-hidden="true" /></a>
           </div>
+          <ul className="gs-trust">
+            <li><i className="fas fa-shield-halved" aria-hidden="true" /> ANSI-accredited</li>
+            <li><i className="fas fa-flag-usa" aria-hidden="true" /> Accepted in 50 states</li>
+            <li><i className="fas fa-bolt" aria-hidden="true" /> Instant certificate</li>
+          </ul>
         </div>
       </section>
 
