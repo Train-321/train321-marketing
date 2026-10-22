@@ -1,0 +1,232 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import "./marketing-v8.css";
+
+// Standalone email-marketing landing page for the California RBS course
+// (Responsible Beverage Service). A new, isolated route — nothing imports it
+// and it imports no existing page, so it can't affect the rest of the site.
+// noindex keeps it out of search (the page is for campaign traffic only).
+export const metadata: Metadata = {
+  title: "California RBS certification, 100% online | Train 321",
+  description:
+    "ABC-approved Responsible Beverage Service training for California alcohol servers and managers. Self-paced online course that prepares you for the mandatory ABC exam.",
+  alternates: { canonical: "/marketing-v8" },
+  robots: { index: false, follow: true }
+};
+
+// ── Campaign settings — edit these in one place ──────────────────────────
+const CTA_HREF = "/courses/rbs"; // where every CTA button goes
+const PRICE_INDIVIDUAL = "$15"; // PLACEHOLDER - confirm before launch
+const PRICE_TEAM = "$12"; // PLACEHOLDER - confirm before launch
+const PHONE = "561-325-7300";
+// Social-proof figures. PLACEHOLDERS — replace with real numbers before launch.
+const STAT_CERTIFIED = "40,000+"; // PLACEHOLDER - confirm before launch
+const STAT_RATING = "4.8/5"; // PLACEHOLDER - confirm before launch
+const STAT_REVIEWS = "1,900+"; // PLACEHOLDER - confirm before launch
+
+const STEPS = [
+  {
+    n: "1",
+    icon: "fas fa-id-card",
+    title: "Register with CA ABC",
+    body: "Create your account on the California ABC server portal to get your unique server ID."
+  },
+  {
+    n: "2",
+    icon: "fas fa-graduation-cap",
+    title: "Take the RBS training",
+    body: "Complete our ABC-approved online course at your own pace, on any device."
+  },
+  {
+    n: "3",
+    icon: "fas fa-award",
+    title: "Pass the ABC exam",
+    body: "Take the mandatory exam administered by the ABC and get certified within 60 days of hire."
+  }
+];
+
+const FEATURES = [
+  { icon: "fas fa-circle-check", title: "ABC-approved training", body: "Our course meets California ABC requirements for Responsible Beverage Service." },
+  { icon: "fas fa-clipboard-check", title: "Built for the ABC exam", body: "Lessons map to the exam so you walk in ready to pass on your first try." },
+  { icon: "fas fa-wine-bottle", title: "Responsible service skills", body: "Learn to check IDs, spot fake identification, and prevent over-service." },
+  { icon: "fas fa-laptop", title: "Online and self-paced", body: "Start, pause, and finish whenever it suits your schedule." },
+  { icon: "fas fa-file-arrow-down", title: "Certificate for your records", body: "Download proof of training to keep on file for your employer and the ABC." },
+  { icon: "fas fa-headset", title: "Support when you need it", body: "Questions about the California process? Our team is here to help." }
+];
+
+const FAQS = [
+  { icon: "fas fa-circle-check", q: "Is this course ABC approved?", a: "Yes. Our RBS training is approved by the California ABC to prepare servers and managers for the mandatory exam." },
+  { icon: "fas fa-id-card", q: "Do I need to register with the ABC first?", a: "Yes. California requires you to register on the ABC server portal and get a server ID before you take the exam. We walk you through it." },
+  { icon: "fas fa-clock", q: "How long does the training take?", a: "The online course is self-paced. Most servers finish the training in a couple of hours." },
+  { icon: "fas fa-award", q: "Who administers the exam?", a: "The exam is administered by the California ABC. Our course prepares you for it, then you take the ABC exam to get certified." }
+];
+
+export default function CaliforniaRbsLanding() {
+  return (
+    <div className="t321-mlh">
+
+      {/* Email landing page: hide the global site header + footer. This style
+          ships only in this route's HTML and unmounts on navigation away, so
+          no other page is affected. The page renders its own minimal footer. */}
+      <style>{`.t321-mkt-header,.t321-mkt-footer{display:none !important;}`}</style>
+
+      {/* ── Split-screen two-tone hero ─────────────────────────────────── */}
+      <section className="mlh-hero">
+        <div className="mlh-hero-panel">
+          <div className="mlh-hero-inner">
+            <span className="mlh-eyebrow"><i className="fas fa-martini-glass" aria-hidden="true" /> California RBS certification</span>
+            <h1>Get RBS certified for your <em>California bar or restaurant</em></h1>
+            <p className="mlh-subhead">ABC-approved Responsible Beverage Service training for alcohol servers and their managers. Online, self-paced, and built to help you pass the mandatory ABC exam.</p>
+            <Link href={CTA_HREF} className="mlh-btn mlh-btn--primary">Start the RBS course <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+            <div className="mlh-micro">
+              <span><i className="fas fa-check" aria-hidden="true" /> ABC-approved</span>
+              <span><i className="fas fa-check" aria-hidden="true" /> Self-paced online</span>
+              <span><i className="fas fa-check" aria-hidden="true" /> Exam preparation</span>
+            </div>
+          </div>
+        </div>
+        <div className="mlh-hero-media">
+          <img src="/img/server.jpg" alt="Bartender serving a drink in a California restaurant" />
+        </div>
+      </section>
+
+      {/* ── Stepper: RBS in 3 steps ────────────────────────────────────── */}
+      <section className="mlh-section mlh-sunk">
+        <div className="mlh-container">
+          <div className="mlh-head">
+            <span className="mlh-pill"><i className="fas fa-list-ol" aria-hidden="true" /> The California process</span>
+            <h2>RBS certification in 3 steps</h2>
+            <p className="mlh-lede">California requires each step in order. Here is exactly how it works.</p>
+          </div>
+          <ol className="mlh-stepper">
+            {STEPS.map((s) => (
+              <li key={s.n} className="mlh-step">
+                <span className="mlh-step-num">{s.n}</span>
+                <span className="mlh-step-icon"><i className={s.icon} aria-hidden="true" /></span>
+                <h3>{s.title}</h3>
+                <p>{s.body}</p>
+              </li>
+            ))}
+          </ol>
+          <div className="mlh-step-cta">
+            <Link href={CTA_HREF} className="mlh-btn mlh-btn--primary">Take the RBS training <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Feature row: what's included / why us ──────────────────────── */}
+      <section className="mlh-section">
+        <div className="mlh-container">
+          <div className="mlh-head">
+            <span className="mlh-pill"><i className="fas fa-star" aria-hidden="true" /> Why Train 321</span>
+            <h2>Everything you need to get certified</h2>
+            <p className="mlh-lede">Built for California servers and the businesses that employ them.</p>
+          </div>
+          <div className="mlh-feature-grid">
+            {FEATURES.map((f) => (
+              <div key={f.title} className="mlh-feature">
+                <span className="mlh-feature-icon"><i className={f.icon} aria-hidden="true" /></span>
+                <h3>{f.title}</h3>
+                <p>{f.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Trust strip ────────────────────────────────────────────────── */}
+      <div className="mlh-trust">
+        <div className="mlh-container mlh-trust-grid">
+          <div className="mlh-trust-item"><div className="mlh-trust-n">{STAT_CERTIFIED}</div><div className="mlh-trust-l">Servers trained</div></div>
+          <div className="mlh-trust-item"><div className="mlh-trust-n">ABC</div><div className="mlh-trust-l">Approved training</div></div>
+          <div className="mlh-trust-item"><div className="mlh-trust-n">{STAT_RATING}</div><div className="mlh-trust-l">Learner rating</div></div>
+          <div className="mlh-trust-item"><div className="mlh-trust-n">{STAT_REVIEWS}</div><div className="mlh-trust-l">Reviews</div></div>
+        </div>
+      </div>
+
+      {/* ── Pricing ────────────────────────────────────────────────────── */}
+      <section className="mlh-section mlh-sunk">
+        <div className="mlh-container">
+          <div className="mlh-head">
+            <span className="mlh-pill"><i className="fas fa-tag" aria-hidden="true" /> Simple pricing</span>
+            <h2>Certify yourself or your whole team</h2>
+            <p className="mlh-lede">One clear price, with a lower per-seat rate for businesses.</p>
+          </div>
+          <div className="mlh-price-grid">
+            <div className="mlh-plan">
+              <h3>Individual</h3>
+              <p className="mlh-plan-sub">For a single server or manager</p>
+              {/* PLACEHOLDER - confirm before launch */}
+              <p className="mlh-price">{PRICE_INDIVIDUAL} <span>/ course</span></p>
+              <ul>
+                <li><i className="fas fa-check" aria-hidden="true" /> ABC-approved RBS training</li>
+                <li><i className="fas fa-check" aria-hidden="true" /> Exam preparation</li>
+                <li><i className="fas fa-check" aria-hidden="true" /> Online and self-paced</li>
+                <li><i className="fas fa-check" aria-hidden="true" /> Certificate for your records</li>
+                <li><i className="fas fa-check" aria-hidden="true" /> Mobile and desktop</li>
+              </ul>
+              <Link href={CTA_HREF} className="mlh-btn mlh-btn--light">Get certified</Link>
+            </div>
+            <div className="mlh-plan is-pop">
+              <span className="mlh-plan-tag">Best for businesses</span>
+              <h3>Team</h3>
+              <p className="mlh-plan-sub">For bars, restaurants, and venues</p>
+              {/* PLACEHOLDER - confirm before launch */}
+              <p className="mlh-price">{PRICE_TEAM} <span>/ seat</span></p>
+              <ul>
+                <li><i className="fas fa-check" aria-hidden="true" /> Everything in Individual</li>
+                <li><i className="fas fa-check" aria-hidden="true" /> Manager dashboard</li>
+                <li><i className="fas fa-check" aria-hidden="true" /> Bulk staff enrollment</li>
+                <li><i className="fas fa-check" aria-hidden="true" /> Progress tracking</li>
+                <li><i className="fas fa-check" aria-hidden="true" /> Volume discounts</li>
+              </ul>
+              <Link href={CTA_HREF} className="mlh-btn mlh-btn--primary">Train your team</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ: California specifics ──────────────────────────────────── */}
+      <section className="mlh-section">
+        <div className="mlh-narrow">
+          <div className="mlh-head">
+            <span className="mlh-pill"><i className="fas fa-circle-question" aria-hidden="true" /> California specifics</span>
+            <h2>Questions, answered</h2>
+          </div>
+          <div className="mlh-faq">
+            {FAQS.map((f) => (
+              <div key={f.q} className="mlh-qa">
+                <h3><i className={f.icon} aria-hidden="true" /> {f.q}</h3>
+                <p>{f.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Final CTA ──────────────────────────────────────────────────── */}
+      <div className="mlh-final">
+        <div className="mlh-container">
+          <span className="mlh-pill mlh-pill--dark"><i className="fas fa-martini-glass" aria-hidden="true" /> Ready when you are</span>
+          <h2>Get RBS certified before your next shift</h2>
+          <p>Join {STAT_CERTIFIED} California servers who trained the easy way.</p>
+          <Link href={CTA_HREF} className="mlh-btn mlh-btn--primary">Start the RBS course <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+          <div className="mlh-micro mlh-micro--dark">
+            <span><i className="fas fa-lock" aria-hidden="true" /> Secure checkout</span>
+            <span><i className="fas fa-circle-check" aria-hidden="true" /> ABC-approved</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Footer (minimal, no nav) ───────────────────────────────────── */}
+      <footer className="mlh-footer">
+        <div className="mlh-container">
+          <div className="mlh-fbrand">Train 321</div>
+          <p style={{ margin: "8px 0 0" }}>Food handler, alcohol, and compliance training. <a href={`tel:${PHONE.replace(/\D/g, "")}`}>{PHONE}</a></p>
+          <p style={{ margin: "6px 0 0", color: "#6c8498" }}>© 2026 Train 321. All rights reserved.</p>
+        </div>
+      </footer>
+
+    </div>
+  );
+}

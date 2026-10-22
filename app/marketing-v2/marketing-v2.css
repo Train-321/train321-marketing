@@ -1,0 +1,196 @@
+/* Email-marketing landing page (/marketing-v2), Food Manager campaign.
+   Self-contained and scoped under .t321-mlb so nothing here leaks into the
+   rest of the site. Built on the shared theme tokens from globals.css.
+   Distinct layout from v1: split hero + alternating zig-zag feature rows. */
+
+.t321-mlb {
+  --mlb-serif: var(--font-fraunces), Georgia, serif;
+  color: var(--t321-mkt-ink);
+}
+.t321-mlb h1, .t321-mlb h2, .t321-mlb h3 {
+  font-family: var(--mlb-serif);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.t321-mlb a { text-decoration: none; }
+.t321-mlb .mlb-container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+.t321-mlb .mlb-narrow { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+.t321-mlb .mlb-lede { font-size: 18px; color: var(--t321-mkt-ink-muted); line-height: 1.65; }
+
+/* Buttons */
+.t321-mlb .mlb-btn {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-size: 16px; font-weight: 600; padding: 15px 28px; border-radius: 12px;
+  cursor: pointer; border: 1px solid transparent;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.t321-mlb .mlb-btn--primary {
+  background: var(--t321-mkt-accent); color: #fff;
+  box-shadow: 0 10px 24px -8px rgba(0, 180, 219, .6);
+}
+.t321-mlb .mlb-btn--primary:hover {
+  background: var(--t321-mkt-accent-hover); transform: translateY(-1px);
+  box-shadow: 0 14px 30px -8px rgba(0, 180, 219, .7);
+}
+.t321-mlb .mlb-btn--light {
+  background: var(--t321-mkt-paper); color: var(--t321-mkt-accent-ink); border-color: var(--t321-mkt-line);
+}
+.t321-mlb .mlb-btn--light:hover { border-color: var(--t321-mkt-accent); }
+
+.t321-mlb .mlb-cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 28px; }
+
+.t321-mlb .mlb-micro {
+  font-size: 13.5px; color: var(--t321-mkt-ink-muted); margin-top: 20px;
+  display: flex; gap: 18px; flex-wrap: wrap;
+}
+.t321-mlb .mlb-micro span { display: inline-flex; align-items: center; gap: 6px; }
+.t321-mlb .mlb-micro i { color: var(--t321-mkt-positive); }
+.t321-mlb .mlb-micro--dark { color: #8aa2b5; }
+.t321-mlb .mlb-micro--dark i { color: var(--t321-mkt-positive); }
+
+.t321-mlb .mlb-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--t321-mkt-accent-wash); color: var(--t321-mkt-accent-ink);
+  font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 999px;
+}
+.t321-mlb .mlb-pill--dark { background: rgba(0, 180, 219, .16); color: var(--t321-mkt-accent); }
+
+.t321-mlb .mlb-kicker {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--t321-mkt-accent-ink); font-size: 13px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.t321-mlb .mlb-kicker i { color: var(--t321-mkt-accent); }
+
+.t321-mlb .mlb-link {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 18px;
+  color: var(--t321-mkt-accent-ink); font-weight: 600; font-size: 15px;
+  transition: gap .12s ease;
+}
+.t321-mlb .mlb-link:hover { gap: 12px; color: var(--t321-mkt-accent-hover); }
+
+/* ── Split hero (text left, image right) ──────────────────────────────── */
+.t321-mlb .mlb-hero {
+  position: relative; overflow: hidden; padding: 64px 0 60px;
+  background:
+    radial-gradient(1000px 520px at 85% -20%, #E8F8FC 0%, transparent 60%),
+    linear-gradient(180deg, var(--t321-mkt-paper-sunk) 0%, var(--t321-mkt-paper) 100%);
+}
+.t321-mlb .mlb-hero-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
+.t321-mlb .mlb-hero-copy h1 { font-size: 46px; line-height: 1.07; margin: 18px 0 16px; }
+.t321-mlb .mlb-hero-copy .mlb-lede { max-width: 540px; }
+
+.t321-mlb .mlb-hero-media { position: relative; }
+.t321-mlb .mlb-hero-photo {
+  border-radius: 22px; overflow: hidden; aspect-ratio: 4 / 5;
+  border: 1px solid var(--t321-mkt-line); background: var(--t321-mkt-ink);
+  box-shadow: 0 42px 90px -36px rgba(11, 31, 51, .55);
+}
+.t321-mlb .mlb-hero-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.t321-mlb .mlb-ribbon {
+  position: absolute; top: 16px; left: 16px; z-index: 2; background: var(--t321-mkt-ink); color: #fff;
+  font-size: 12px; font-weight: 600; padding: 8px 15px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 7px; box-shadow: 0 10px 24px -10px rgba(0, 0, 0, .5);
+}
+.t321-mlb .mlb-ribbon i { color: var(--t321-mkt-positive); }
+.t321-mlb .mlb-floatcard {
+  position: absolute; right: -14px; bottom: 24px; width: 290px; max-width: 86%;
+  background: rgba(255, 255, 255, .98); border-radius: 16px;
+  border: 1px solid var(--t321-mkt-line); padding: 12px 14px;
+  display: flex; gap: 12px; align-items: center;
+  box-shadow: 0 22px 48px -22px rgba(11, 31, 51, .5); backdrop-filter: blur(4px);
+}
+.t321-mlb .mlb-floatcard .mlb-thumb { width: 54px; height: 54px; border-radius: 12px; overflow: hidden; flex: 0 0 auto; border: 1px solid var(--t321-mkt-line); background: var(--t321-mkt-paper); display: flex; align-items: center; justify-content: center; }
+.t321-mlb .mlb-floatcard .mlb-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.t321-mlb .mlb-floatcard strong { display: flex; align-items: center; gap: 7px; font-size: 13.5px; line-height: 1.3; }
+.t321-mlb .mlb-floatcard strong i { color: var(--t321-mkt-positive); }
+.t321-mlb .mlb-floatcard span { font-size: 12.5px; color: var(--t321-mkt-ink-muted); display: block; margin-top: 3px; }
+
+/* ── Sections ─────────────────────────────────────────────────────────── */
+.t321-mlb .mlb-section { padding: 60px 0; }
+.t321-mlb .mlb-sunk { background: var(--t321-mkt-paper-sunk); border-top: 1px solid var(--t321-mkt-line); border-bottom: 1px solid var(--t321-mkt-line); }
+.t321-mlb .mlb-head { text-align: center; max-width: 640px; margin: 0 auto 44px; }
+.t321-mlb .mlb-head .mlb-pill { margin-bottom: 16px; }
+.t321-mlb .mlb-head h2 { font-size: 34px; margin: 0 0 10px; }
+.t321-mlb .mlb-head .mlb-lede { font-size: 17px; }
+
+/* ── Alternating zig-zag feature rows ─────────────────────────────────── */
+.t321-mlb .mlb-zig { display: flex; flex-direction: column; gap: 56px; }
+.t321-mlb .mlb-row { display: grid; grid-template-columns: 1fr 1fr; gap: 52px; align-items: center; }
+.t321-mlb .mlb-row.is-flip .mlb-row-media { order: 2; }
+.t321-mlb .mlb-row.is-flip .mlb-row-copy { order: 1; }
+.t321-mlb .mlb-row-media {
+  border-radius: 20px; overflow: hidden; aspect-ratio: 16 / 11;
+  border: 1px solid var(--t321-mkt-line); background: var(--t321-mkt-ink);
+  box-shadow: 0 26px 56px -28px rgba(11, 31, 51, .4);
+}
+.t321-mlb .mlb-row-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.t321-mlb .mlb-row-copy h3 { font-size: 27px; margin: 14px 0 12px; line-height: 1.15; }
+.t321-mlb .mlb-row-copy p { margin: 0; font-size: 16px; color: var(--t321-mkt-ink-muted); line-height: 1.65; }
+
+/* ── Slim stats strip ─────────────────────────────────────────────────── */
+.t321-mlb .mlb-stats { background: var(--t321-mkt-ink); color: #fff; padding: 26px 0; }
+.t321-mlb .mlb-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; text-align: center; }
+.t321-mlb .mlb-stat .mlb-n { font-family: var(--mlb-serif); font-size: 30px; font-weight: 700; color: #fff; }
+.t321-mlb .mlb-stat .mlb-l { font-size: 13px; color: #9Fb6c8; margin-top: 2px; }
+.t321-mlb .mlb-stat + .mlb-stat { border-left: 1px solid rgba(255, 255, 255, .08); }
+
+/* ── Pricing ──────────────────────────────────────────────────────────── */
+.t321-mlb .mlb-price-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; max-width: 820px; margin: 0 auto; }
+.t321-mlb .mlb-plan { border: 1px solid var(--t321-mkt-line); border-radius: 20px; padding: 32px 28px; background: var(--t321-mkt-paper); position: relative; }
+.t321-mlb .mlb-plan.is-pop { border: 2px solid var(--t321-mkt-accent); box-shadow: 0 26px 60px -30px rgba(0, 180, 219, .5); }
+.t321-mlb .mlb-plan .mlb-tag { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--t321-mkt-accent); color: #fff; font-size: 12px; font-weight: 600; padding: 5px 15px; border-radius: 999px; white-space: nowrap; }
+.t321-mlb .mlb-plan h3 { font-size: 21px; margin: 0 0 2px; }
+.t321-mlb .mlb-plan .mlb-sub { font-size: 13.5px; color: var(--t321-mkt-ink-muted); margin: 0 0 16px; }
+.t321-mlb .mlb-plan .mlb-price { font-family: var(--mlb-serif); font-size: 44px; font-weight: 700; margin: 0; line-height: 1; }
+.t321-mlb .mlb-plan .mlb-price span { font-family: inherit; font-size: 15px; color: var(--t321-mkt-ink-muted); font-weight: 500; }
+.t321-mlb .mlb-plan ul { list-style: none; margin: 22px 0 26px; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.t321-mlb .mlb-plan li { font-size: 14.5px; display: flex; gap: 10px; align-items: flex-start; }
+.t321-mlb .mlb-plan li i { color: var(--t321-mkt-positive); margin-top: 3px; font-size: 14px; }
+.t321-mlb .mlb-plan .mlb-btn { width: 100%; justify-content: center; }
+
+/* ── FAQ ──────────────────────────────────────────────────────────────── */
+.t321-mlb .mlb-faq { max-width: 760px; margin: 0 auto; }
+.t321-mlb .mlb-qa { border: 1px solid var(--t321-mkt-line); border-radius: 14px; padding: 18px 22px; margin-bottom: 12px; background: var(--t321-mkt-paper); }
+.t321-mlb .mlb-qa h3 { font-family: inherit; font-size: 16px; font-weight: 600; margin: 0 0 7px; display: flex; gap: 10px; align-items: center; }
+.t321-mlb .mlb-qa h3 i { color: var(--t321-mkt-accent); }
+.t321-mlb .mlb-qa p { margin: 0; font-size: 14.5px; color: var(--t321-mkt-ink-muted); line-height: 1.6; }
+
+/* ── Final CTA band ───────────────────────────────────────────────────── */
+.t321-mlb .mlb-final { color: #fff; padding: 66px 0; background: linear-gradient(135deg, var(--t321-mkt-ink) 0%, #15314d 100%); }
+.t321-mlb .mlb-final-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+.t321-mlb .mlb-final h2 { font-size: 36px; color: #fff; margin: 16px 0 10px; }
+.t321-mlb .mlb-final p { color: #A8BFD0; font-size: 17px; max-width: 480px; margin: 0 0 26px; }
+.t321-mlb .mlb-final-media {
+  border-radius: 18px; overflow: hidden; border: 1px solid rgba(255, 255, 255, .12);
+  background: var(--t321-mkt-paper); box-shadow: 0 30px 70px -30px rgba(0, 0, 0, .6);
+}
+.t321-mlb .mlb-final-media img { width: 100%; height: auto; display: block; }
+
+/* ── Footer (minimal, no nav) ─────────────────────────────────────────── */
+.t321-mlb .mlb-footer { background: var(--t321-mkt-ink); color: #8aa2b5; text-align: center; padding: 26px 0; font-size: 13px; border-top: 1px solid rgba(255, 255, 255, .07); }
+.t321-mlb .mlb-footer .mlb-fbrand { color: #fff; font-weight: 700; font-family: var(--mlb-serif); font-size: 16px; letter-spacing: .02em; }
+.t321-mlb .mlb-footer a { color: #cfe0ec; }
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 820px) {
+  .t321-mlb .mlb-hero-grid,
+  .t321-mlb .mlb-row,
+  .t321-mlb .mlb-price-grid,
+  .t321-mlb .mlb-stats-grid,
+  .t321-mlb .mlb-final-grid { grid-template-columns: 1fr; }
+  .t321-mlb .mlb-hero-copy h1 { font-size: 34px; }
+  .t321-mlb .mlb-hero { padding: 44px 0 48px; }
+  .t321-mlb .mlb-hero-grid { gap: 36px; }
+  .t321-mlb .mlb-hero-photo { aspect-ratio: 16 / 11; max-width: 460px; }
+  .t321-mlb .mlb-floatcard { right: 12px; }
+  .t321-mlb .mlb-row { gap: 28px; }
+  .t321-mlb .mlb-row.is-flip .mlb-row-media { order: 0; }
+  .t321-mlb .mlb-row.is-flip .mlb-row-copy { order: 0; }
+  .t321-mlb .mlb-row-media { max-width: 520px; }
+  .t321-mlb .mlb-stat + .mlb-stat { border-left: 0; border-top: 1px solid rgba(255, 255, 255, .08); padding-top: 16px; }
+  .t321-mlb .mlb-final-media { max-width: 460px; }
+  .t321-mlb .mlb-head h2,
+  .t321-mlb .mlb-final h2 { font-size: 27px; }
+}
