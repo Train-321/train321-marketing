@@ -76,10 +76,14 @@
   display: flex; gap: 12px; align-items: center;
   box-shadow: 0 22px 48px -22px rgba(11, 31, 51, .5); backdrop-filter: blur(4px);
 }
-.t321-ml .ml-floatcard .ml-thumb { width: 136px; border-radius: 8px; overflow: hidden; flex: 0 0 auto; border: 1px solid var(--t321-mkt-line); }
-/* The thumb holds a full CourseCertificate scaled down, so let it size itself
-   (its own logo/seal sizing applies) and sit flush without its own shadow. */
-.t321-ml .ml-floatcard .ml-thumb .t321-cert__page { box-shadow: none; border-radius: 0; }
+.t321-ml .ml-floatcard .ml-thumb { width: 150px; border-radius: 8px; overflow: hidden; flex: 0 0 auto; border: 1px solid var(--t321-mkt-line); }
+/* The thumb holds a mini CourseCertificate. At this size the footer meta/seal
+   row and legal line become cramped and overlap, so hide them and let the page
+   size to the clean top (logo, title, learner name, course) instead. Scoped to
+   this badge only — the full certificate on course pages is unaffected. */
+.t321-ml .ml-floatcard .ml-thumb .t321-cert__page { box-shadow: none; border-radius: 0; aspect-ratio: auto; padding-bottom: 2em; }
+.t321-ml .ml-floatcard .ml-thumb .t321-cert__foot,
+.t321-ml .ml-floatcard .ml-thumb .t321-cert__legal { display: none; }
 .t321-ml .ml-floatcard strong { display: flex; align-items: center; gap: 7px; font-size: 14px; }
 .t321-ml .ml-floatcard strong i { color: var(--t321-mkt-positive); }
 .t321-ml .ml-floatcard span { font-size: 12.5px; color: var(--t321-mkt-ink-muted); display: block; margin-top: 2px; }
