@@ -173,19 +173,23 @@
 .t321-gs .gs-qa__a { margin: 0; padding: 0 22px 20px; font-size: 14.5px; color: var(--t321-mkt-ink-muted); line-height: 1.6; }
 .t321-gs .gs-inline-link { color: var(--t321-mkt-accent-ink); font-weight: 600; text-decoration: underline; }
 
-/* ── Testimonials (compact chat / messages view) ──────────────────────── */
-.t321-gs .v9t-chat { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
-.t321-gs .v9t-msg { display: flex; gap: 10px; align-items: flex-end; max-width: 78%; }
+/* ── Testimonials (chat / messages view with tails) ───────────────────── */
+.t321-gs .v9t-chat { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.t321-gs .v9t-msg { display: flex; gap: 10px; align-items: flex-end; max-width: 80%; }
 .t321-gs .v9t-msg.is-left { align-self: flex-start; }
 .t321-gs .v9t-msg.is-right { align-self: flex-end; flex-direction: row-reverse; }
 .t321-gs .v9t-msg__avatar { width: 32px; height: 32px; flex: 0 0 auto; border-radius: 50%; background: var(--t321-mkt-accent); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 11px; }
 .t321-gs .v9t-msg.is-right .v9t-msg__avatar { background: var(--t321-mkt-accent-ink); }
 .t321-gs .v9t-msg__body { min-width: 0; }
-.t321-gs .v9t-msg__bubble { margin: 0; background: #fff; border: 1px solid var(--t321-mkt-line); border-radius: 16px; border-bottom-left-radius: 4px; padding: 11px 15px; font-size: 13.5px; line-height: 1.5; color: var(--t321-mkt-ink); box-shadow: 0 6px 16px -12px rgba(11, 31, 51, .25); }
-.t321-gs .v9t-msg.is-right .v9t-msg__bubble { background: var(--t321-mkt-accent-wash); border-color: #BDE9F3; border-bottom-left-radius: 16px; border-bottom-right-radius: 4px; }
-.t321-gs .v9t-msg__meta { margin: 5px 0 0; padding: 0 4px; font-size: 11.5px; color: var(--t321-mkt-ink-muted); }
-.t321-gs .v9t-msg__meta strong { color: var(--t321-mkt-ink); font-weight: 600; }
-.t321-gs .v9t-msg.is-right .v9t-msg__meta { text-align: right; }
+.t321-gs .v9t-msg__name { display: block; margin: 0 0 4px; padding: 0 8px; font-size: 11.5px; color: var(--t321-mkt-ink-muted); }
+.t321-gs .v9t-msg__name strong { color: var(--t321-mkt-ink); font-weight: 600; }
+.t321-gs .v9t-msg.is-right .v9t-msg__name { text-align: right; }
+.t321-gs .v9t-msg__bubble { position: relative; margin: 0; background: #fff; border: 1px solid var(--t321-mkt-line); border-radius: 16px; padding: 11px 15px; font-size: 13.5px; line-height: 1.5; color: var(--t321-mkt-ink); box-shadow: 0 6px 16px -12px rgba(11, 31, 51, .25); }
+.t321-gs .v9t-msg.is-right .v9t-msg__bubble { background: var(--t321-mkt-accent-wash); border-color: #BDE9F3; }
+/* Tail pointing to the avatar — a border-matched little diamond. */
+.t321-gs .v9t-msg__bubble::after { content: ""; position: absolute; bottom: 7px; width: 10px; height: 10px; background: #fff; transform: rotate(45deg); }
+.t321-gs .v9t-msg.is-left .v9t-msg__bubble::after { left: -5px; border-left: 1px solid var(--t321-mkt-line); border-bottom: 1px solid var(--t321-mkt-line); border-bottom-left-radius: 2px; }
+.t321-gs .v9t-msg.is-right .v9t-msg__bubble::after { right: -5px; background: var(--t321-mkt-accent-wash); border-right: 1px solid #BDE9F3; border-bottom: 1px solid #BDE9F3; border-bottom-right-radius: 2px; }
 
 /* ── Steps ────────────────────────────────────────────────────────────── */
 .t321-gs .gs-sunk { background: var(--t321-mkt-paper-sunk); border-top: 1px solid var(--t321-mkt-line); border-bottom: 1px solid var(--t321-mkt-line); }
