@@ -150,6 +150,8 @@ export default async function GetStartedLanding() {
         <span className="gs-hero__deco gs-hero__deco--4" aria-hidden="true"><i className="fas fa-paper-plane" /></span>
         <span className="gs-hero__deco gs-hero__deco--5" aria-hidden="true"><i className="fas fa-award" /></span>
         <span className="gs-hero__deco gs-hero__deco--6" aria-hidden="true"><i className="fas fa-star" /></span>
+        <span className="gs-hero__deco gs-hero__deco--7" aria-hidden="true"><i className="fas fa-shield-halved" /></span>
+        <span className="gs-hero__deco gs-hero__deco--8" aria-hidden="true"><i className="fas fa-clipboard-check" /></span>
         <div className="gs-container gs-hero__center">
           <div className="gs-hero__rating">
             <span className="gs-stars" aria-hidden="true">★★★★★</span>
