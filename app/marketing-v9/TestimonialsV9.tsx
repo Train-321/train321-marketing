@@ -1,5 +1,5 @@
-// Testimonials for /marketing-v9 shown as a chat/messages thread: each review
-// is a bubble, alternating sides with an avatar, like a group conversation.
+// Testimonials for /marketing-v9 as a compact chat/messages thread: each review
+// is a small bubble, alternating left (received) and right (sent) with an avatar.
 
 import type { Testimonial } from "@/lib/sanity";
 
@@ -17,9 +17,7 @@ export default function TestimonialsV9({ items }: { items: Testimonial[] }) {
             <span className="v9t-msg__avatar" aria-hidden="true">{initials(t.name)}</span>
             <div className="v9t-msg__body">
               <blockquote className="v9t-msg__bubble">{t.quote}</blockquote>
-              <p className="v9t-msg__meta">
-                <strong>{t.name}</strong>{who ? ` · ${who}` : ""}
-              </p>
+              <p className="v9t-msg__meta"><strong>{t.name}</strong>{who ? ` · ${who}` : ""}</p>
             </div>
           </div>
         );
