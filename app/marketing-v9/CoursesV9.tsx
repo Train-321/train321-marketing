@@ -91,6 +91,7 @@ function Card({ course }: { course: V9Course }) {
               name: course.name,
               price: course.price,
               image: course.image,
+              isSeatBased: course.isSeatBased,
               stateLabel: course.stateLabel
             }}
             className="gs-btn gs-btn--primary v9c-card__add"
