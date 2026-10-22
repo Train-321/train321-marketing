@@ -142,6 +142,14 @@ export default async function GetStartedLanding() {
 
       {/* ── Hero (centered course finder) ──────────────────────────────── */}
       <section className="gs-hero">
+        {/* Decorative accents only — aria-hidden and non-interactive so they
+            never block the finder, buttons, or any clicks. */}
+        <span className="gs-hero__deco gs-hero__deco--1" aria-hidden="true"><i className="fas fa-id-badge" /></span>
+        <span className="gs-hero__deco gs-hero__deco--2" aria-hidden="true"><i className="fas fa-certificate" /></span>
+        <span className="gs-hero__deco gs-hero__deco--3" aria-hidden="true"><i className="fas fa-graduation-cap" /></span>
+        <span className="gs-hero__deco gs-hero__deco--4" aria-hidden="true"><i className="fas fa-paper-plane" /></span>
+        <span className="gs-hero__deco gs-hero__deco--5" aria-hidden="true"><i className="fas fa-award" /></span>
+        <span className="gs-hero__deco gs-hero__deco--6" aria-hidden="true"><i className="fas fa-star" /></span>
         <div className="gs-container gs-hero__center">
           <div className="gs-hero__rating">
             <span className="gs-stars" aria-hidden="true">★★★★★</span>

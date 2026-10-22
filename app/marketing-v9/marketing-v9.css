@@ -45,8 +45,16 @@
 .t321-gs .gs-topbar__cta { padding: 11px 20px; font-size: 14.5px; }
 
 /* ── Hero (centered course finder) ────────────────────────────────────── */
-.t321-gs .gs-hero { padding: 76px 0 66px; background: var(--t321-mkt-paper-sunk); border-bottom: 1px solid var(--t321-mkt-line); text-align: center; }
-.t321-gs .gs-hero__center { max-width: 880px; margin: 0 auto; }
+.t321-gs .gs-hero { position: relative; overflow: hidden; padding: 76px 0 66px; background: var(--t321-mkt-paper-sunk); border-bottom: 1px solid var(--t321-mkt-line); text-align: center; }
+.t321-gs .gs-hero__center { position: relative; z-index: 1; max-width: 880px; margin: 0 auto; }
+/* Decorative floating vector accents (non-interactive). */
+.t321-gs .gs-hero__deco { position: absolute; z-index: 0; pointer-events: none; opacity: .9; }
+.t321-gs .gs-hero__deco--1 { left: 6%; top: 88px; font-size: 34px; color: #E07A5F; transform: rotate(-16deg); }
+.t321-gs .gs-hero__deco--2 { left: 11%; top: 228px; font-size: 24px; color: #C08A2E; transform: rotate(12deg); }
+.t321-gs .gs-hero__deco--3 { left: 3.5%; bottom: 64px; font-size: 30px; color: #5A49C6; transform: rotate(-8deg); }
+.t321-gs .gs-hero__deco--4 { right: 6%; top: 104px; font-size: 32px; color: var(--t321-mkt-accent); transform: rotate(14deg); }
+.t321-gs .gs-hero__deco--5 { right: 11%; top: 236px; font-size: 26px; color: var(--t321-mkt-positive); transform: rotate(-10deg); }
+.t321-gs .gs-hero__deco--6 { right: 4%; bottom: 72px; font-size: 24px; color: #C08A2E; transform: rotate(16deg); }
 .t321-gs .gs-hero__rating { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 14px; color: var(--t321-mkt-ink-muted); }
 .t321-gs .gs-stars { color: #E8A317; letter-spacing: 2px; font-size: 15px; }
 .t321-gs .gs-hero__rating strong { color: var(--t321-mkt-ink); font-weight: 700; }
@@ -169,6 +177,7 @@
   .t321-gs .gs-finder { width: 100%; flex-direction: column; align-items: stretch; }
   .t321-gs .gs-finder__chips { justify-content: center; }
   .t321-gs .gs-finder__go { justify-content: center; }
+  .t321-gs .gs-hero__deco { display: none; }
   .t321-gs .gs-steps,
   .t321-gs .gs-benefits,
   .t321-gs .gs-quotes { grid-template-columns: 1fr; }
