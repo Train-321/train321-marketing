@@ -174,8 +174,8 @@
 .t321-gs .gs-inline-link { color: var(--t321-mkt-accent-ink); font-weight: 600; text-decoration: underline; }
 
 /* ── Testimonials (chat / messages view with tails) ───────────────────── */
-.t321-gs .v9t-chat { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
-.t321-gs .v9t-msg { display: flex; gap: 10px; align-items: flex-end; max-width: 80%; }
+.t321-gs .v9t-chat { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.t321-gs .v9t-msg { display: flex; gap: 10px; align-items: flex-end; max-width: 90%; }
 .t321-gs .v9t-msg.is-left { align-self: flex-start; }
 .t321-gs .v9t-msg.is-right { align-self: flex-end; flex-direction: row-reverse; }
 .t321-gs .v9t-msg__avatar { width: 32px; height: 32px; flex: 0 0 auto; border-radius: 50%; background: var(--t321-mkt-accent); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 11px; }
