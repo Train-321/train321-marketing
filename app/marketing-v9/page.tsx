@@ -140,25 +140,39 @@ export default async function GetStartedLanding() {
         </div>
       </header>
 
-      {/* ── Hero ───────────────────────────────────────────────────────── */}
+      {/* ── Hero (modern LMS style) ────────────────────────────────────── */}
       <section className="gs-hero">
         <div className="gs-container gs-hero__grid">
           <div className="gs-hero__copy">
-            <span className="gs-pill"><i className="fas fa-bolt" aria-hidden="true" /> Welcome to Train 321</span>
-            <h1>Get certified for work, <em>online.</em></h1>
+            <div className="gs-hero__rating">
+              <span className="gs-stars" aria-hidden="true">★★★★★</span>
+              <span><strong>4.9/5</strong> from 50,000+ learners</span>
+            </div>
+            <h1>The fastest way to get <em>certified</em> for work.</h1>
             <p className="gs-lede">Food, alcohol, and workplace courses you finish on your phone in about an hour. Certificate the same day, accepted in all 50 states.</p>
             <div className="gs-cta-row">
               <a href="#courses" className="gs-btn gs-btn--primary">Browse courses <i className="fas fa-arrow-right" aria-hidden="true" /></a>
               <Link href={CATALOG_HREF} className="gs-btn gs-btn--ghost">Full catalog</Link>
             </div>
-            <ul className="gs-trust">
-              <li><i className="fas fa-shield-halved" aria-hidden="true" /> ANSI-accredited</li>
-              <li><i className="fas fa-flag-usa" aria-hidden="true" /> Accepted in 50 states</li>
-              <li><i className="fas fa-bolt" aria-hidden="true" /> Instant certificate</li>
-            </ul>
+            <div className="gs-hero__social">
+              <div className="gs-hero__avatars" aria-hidden="true">
+                <span>MR</span><span>JD</span><span>AL</span><span>SK</span>
+              </div>
+              <span>Joined by <strong>50,000+</strong> hospitality &amp; service workers</span>
+            </div>
           </div>
-          <div className="gs-hero__media">
-            <img src="/img/hero-restaurant.png" alt="Food service team at work" />
+          <div className="gs-hero__visual">
+            <div className="gs-hero__photo">
+              <img src="/img/hero-restaurant.png" alt="Food service team at work" />
+            </div>
+            <div className="gs-hero__fcard gs-hero__fcard--cert">
+              <span className="gs-hero__fcard-ic"><i className="fas fa-circle-check" aria-hidden="true" /></span>
+              <div><strong>Certificate issued</strong><span>Same day · 50 states</span></div>
+            </div>
+            <div className="gs-hero__fcard gs-hero__fcard--stat">
+              <span className="gs-hero__fcard-n">~1 hr</span>
+              <span className="gs-hero__fcard-lbl">average to certified</span>
+            </div>
           </div>
         </div>
       </section>
