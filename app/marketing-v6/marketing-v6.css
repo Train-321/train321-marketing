@@ -130,20 +130,6 @@
 .t321-mlf .mlf-stat .mlf-l { font-size: 13px; color: #9Fb6c8; margin-top: 2px; }
 .t321-mlf .mlf-stat + .mlf-stat { border-left: 1px solid rgba(255, 255, 255, .08); }
 
-/* ── Pricing ──────────────────────────────────────────────────────────── */
-.t321-mlf .mlf-price-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; max-width: 760px; margin: 0 auto; }
-.t321-mlf .mlf-plan { border: 1px solid var(--t321-mkt-line); border-radius: 20px; padding: 30px 28px; background: #fff; position: relative; }
-.t321-mlf .mlf-plan.is-pop { border: 2px solid var(--t321-mkt-accent); box-shadow: 0 26px 60px -30px rgba(11, 31, 51, .4); }
-.t321-mlf .mlf-plan .mlf-tag { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--t321-mkt-accent); color: #fff; font-size: 12px; font-weight: 600; padding: 5px 15px; border-radius: 999px; white-space: nowrap; }
-.t321-mlf .mlf-plan h3 { font-size: 20px; margin: 0 0 2px; }
-.t321-mlf .mlf-plan .mlf-sub { font-size: 13.5px; color: var(--t321-mkt-ink-muted); margin: 0 0 14px; }
-.t321-mlf .mlf-plan .mlf-price { font-family: var(--mlf-serif); font-size: 42px; font-weight: 700; margin: 0; line-height: 1; }
-.t321-mlf .mlf-plan .mlf-price span { font-family: inherit; font-size: 15px; color: var(--t321-mkt-ink-muted); font-weight: 500; }
-.t321-mlf .mlf-plan ul { list-style: none; margin: 20px 0 24px; padding: 0; display: flex; flex-direction: column; gap: 12px; }
-.t321-mlf .mlf-plan li { font-size: 14.5px; display: flex; gap: 10px; align-items: flex-start; }
-.t321-mlf .mlf-plan li i { color: var(--t321-mkt-positive); margin-top: 3px; font-size: 14px; }
-.t321-mlf .mlf-plan .mlf-btn { width: 100%; justify-content: center; }
-
 /* ── Certificate preview ──────────────────────────────────────────────── */
 .t321-mlf .mlf-cert-grid { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 48px; align-items: center; }
 .t321-mlf .mlf-cert-copy h2 { font-size: 32px; margin: 14px 0 10px; }
@@ -178,7 +164,6 @@
   .t321-mlf .mlf-feature-grid,
   .t321-mlf .mlf-value-grid,
   .t321-mlf .mlf-cert-grid,
-  .t321-mlf .mlf-price-grid,
   .t321-mlf .mlf-stats-grid { grid-template-columns: 1fr; }
   .t321-mlf .mlf-value-media { aspect-ratio: 16 / 10; max-width: 460px; margin: 0 auto; }
   .t321-mlf .mlf-stat + .mlf-stat { border-left: 0; border-top: 1px solid rgba(255, 255, 255, .08); padding-top: 16px; }

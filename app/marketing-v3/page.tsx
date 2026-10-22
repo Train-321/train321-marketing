@@ -18,8 +18,6 @@ export const metadata: Metadata = {
 
 // Campaign settings - edit these in one place.
 const CTA_HREF = "/courses/alcohol"; // where every CTA button goes
-const PRICE_INDIVIDUAL = "$15"; // PLACEHOLDER - confirm before launch
-const PRICE_TEAM = "$11"; // PLACEHOLDER - confirm before launch
 const PHONE = "561-325-7300";
 // Social-proof figures. PLACEHOLDERS - replace with real numbers before launch.
 const STAT_CERTIFIED = "75,000+"; // PLACEHOLDER - confirm before launch
@@ -70,7 +68,7 @@ export default async function AlcoholSafetyLanding() {
             <h1>Serve smart. Stay <em>covered.</em></h1>
             <p className="mlc-lede">Get your responsible seller-server certification online in about an hour.</p>
             <div className="mlc-hero-cta">
-              <Link href={CTA_HREF} className="mlc-btn mlc-btn--primary">Get certified for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+              <Link href={CTA_HREF} className="mlc-btn mlc-btn--primary">Get certified <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
               <span className="mlc-rating">
                 <span className="mlc-stars">★★★★★</span>
                 <span><b>{STAT_RATING}</b> from {STAT_REVIEWS} learners</span>
@@ -142,7 +140,7 @@ export default async function AlcoholSafetyLanding() {
             <span className="mlc-pill mlc-pill--light"><i className="fas fa-award" aria-hidden="true" /> Official certificate</span>
             <h2>The certificate you earn</h2>
             <p className="mlc-lede">Download, print, or email it the moment you pass.</p>
-            <Link href={CTA_HREF} className="mlc-btn mlc-btn--primary">Get certified for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+            <Link href={CTA_HREF} className="mlc-btn mlc-btn--primary">Get certified <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
           </div>
           <div className="mlc-cert-visual">
             <CourseCertificate courseTitle="Alcohol Seller-Server Certification" />
@@ -159,43 +157,6 @@ export default async function AlcoholSafetyLanding() {
           <div className="mlc-stat"><div className="mlc-n">{STAT_RATING}</div><div className="mlc-l">Learner rating</div></div>
         </div>
       </div>
-
-      {/* Pricing (2-tier) */}
-      <section className="mlc-section">
-        <div className="mlc-container">
-          <div className="mlc-head">
-            <span className="mlc-pill mlc-pill--light"><i className="fas fa-tag" aria-hidden="true" /> Simple pricing</span>
-            <h2>One price. No surprises.</h2>
-          </div>
-          <div className="mlc-price-grid">
-            <div className="mlc-plan">
-              <h3>Individual</h3>
-              <p className="mlc-sub">For a single server or clerk</p>
-              <p className="mlc-price">{PRICE_INDIVIDUAL} <span>/ course</span></p>
-              <ul>
-                <li><i className="fas fa-check" aria-hidden="true" /> Full alcohol safety course</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Final exam, free retakes</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Same-day certificate</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Mobile and desktop</li>
-              </ul>
-              <Link href={CTA_HREF} className="mlc-btn mlc-btn--light">Get certified</Link>
-            </div>
-            <div className="mlc-plan is-pop">
-              <span className="mlc-tag">Best for venues</span>
-              <h3>Team</h3>
-              <p className="mlc-sub">For bars, restaurants, and retailers</p>
-              <p className="mlc-price">{PRICE_TEAM} <span>/ seat</span></p>
-              <ul>
-                <li><i className="fas fa-check" aria-hidden="true" /> Everything in Individual</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Manager dashboard</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Bulk staff enrollment</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Volume discounts</li>
-              </ul>
-              <Link href={CTA_HREF} className="mlc-btn mlc-btn--primary">Train your team</Link>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* FAQ */}
       <section className="mlc-section mlc-sunk">
@@ -221,7 +182,7 @@ export default async function AlcoholSafetyLanding() {
           <span className="mlc-pill mlc-pill--dark"><i className="fas fa-bolt" aria-hidden="true" /> Ready when you are</span>
           <h2>Get certified before your next shift</h2>
           <p>Join {STAT_CERTIFIED} servers who trained the easy way.</p>
-          <Link href={CTA_HREF} className="mlc-btn mlc-btn--primary">Get certified for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+          <Link href={CTA_HREF} className="mlc-btn mlc-btn--primary">Get certified <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
           <div className="mlc-micro mlc-micro--dark">
             <span><i className="fas fa-lock" aria-hidden="true" /> Secure checkout</span>
             <span><i className="fas fa-shield-halved" aria-hidden="true" /> State-approved where required</span>

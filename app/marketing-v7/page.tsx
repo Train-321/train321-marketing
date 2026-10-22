@@ -20,11 +20,6 @@ export const metadata: Metadata = {
 // ── Campaign settings — edit these in one place ──────────────────────────
 const CTA_HREF = "/courses/tabc"; // where every CTA button goes
 
-// PLACEHOLDER - confirm before launch
-const PRICE_INDIVIDUAL = "$10.99";
-// PLACEHOLDER - confirm before launch
-const PRICE_TEAM = "$8.99";
-
 // Social-proof figures. PLACEHOLDER - confirm before launch.
 const STAT_CERTIFIED = "75,000+";
 const STAT_RATING = "4.9/5";
@@ -68,17 +63,13 @@ export default async function TabcLanding() {
             <div className="mlg-offer">
               <div className="mlg-offer-head">
                 <span className="mlg-badge"><i className="fas fa-check" aria-hidden="true" /> Texas approved</span>
-                <div className="mlg-offer-price">
-                  <span className="mlg-price-num">{PRICE_INDIVIDUAL}</span>
-                  <span className="mlg-price-unit">one-time, no subscription</span>
-                </div>
               </div>
               <ul className="mlg-offer-list">
                 <li><i className="fas fa-circle-check" aria-hidden="true" /> TABC-approved, accepted statewide</li>
                 <li><i className="fas fa-circle-check" aria-hidden="true" /> Official certificate the moment you pass</li>
                 <li><i className="fas fa-circle-check" aria-hidden="true" /> Satisfies your employer's requirement</li>
               </ul>
-              <Link href={CTA_HREF} className="mlg-btn mlg-btn--primary mlg-btn--block">Start for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+              <Link href={CTA_HREF} className="mlg-btn mlg-btn--primary mlg-btn--block">Get TABC certified <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
               <div className="mlg-micro">
                 <span><i className="fas fa-lock" aria-hidden="true" /> Secure checkout</span>
                 <span><i className="fas fa-rotate-right" aria-hidden="true" /> Free retakes</span>
@@ -131,30 +122,23 @@ export default async function TabcLanding() {
         </div>
       </section>
 
-      {/* ── Offer / pricing block ──────────────────────────────────────── */}
+      {/* ── Why certify with us ────────────────────────────────────────── */}
       <section className="mlg-section mlg-sunk">
         <div className="mlg-narrow">
           <div className="mlg-head">
-            <span className="mlg-pill"><i className="fas fa-tag" aria-hidden="true" /> One simple price</span>
+            <span className="mlg-pill"><i className="fas fa-shield-halved" aria-hidden="true" /> Why Train 321</span>
             <h2>Certify yourself in minutes</h2>
-            <p className="mlg-lede">No subscription, no hidden fees. Just pass and download your certificate.</p>
+            <p className="mlg-lede">The official, employer-accepted way to meet Texas requirements. Pass and download your certificate the same day.</p>
           </div>
 
           <div className="mlg-deal">
             <span className="mlg-badge mlg-badge--lg"><i className="fas fa-check" aria-hidden="true" /> Texas approved</span>
-            <div className="mlg-deal-price">
-              <span className="mlg-deal-num">{PRICE_INDIVIDUAL}</span>
-              <span className="mlg-deal-unit">per person, one-time</span>
-            </div>
             <ul className="mlg-deal-list">
               <li><i className="fas fa-circle-check" aria-hidden="true" /> Full TABC seller-server course</li>
               <li><i className="fas fa-circle-check" aria-hidden="true" /> Final exam with free retakes</li>
               <li><i className="fas fa-circle-check" aria-hidden="true" /> Instant official certificate</li>
             </ul>
-            <Link href={CTA_HREF} className="mlg-btn mlg-btn--primary mlg-btn--block">Get certified for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
-            <p className="mlg-deal-team">
-              <i className="fas fa-users" aria-hidden="true" /> Certifying a team? Seats from <strong>{PRICE_TEAM} each</strong> with a manager dashboard.
-            </p>
+            <Link href={CTA_HREF} className="mlg-btn mlg-btn--primary mlg-btn--block">Get TABC certified <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
           </div>
         </div>
       </section>
@@ -183,7 +167,7 @@ export default async function TabcLanding() {
           <span className="mlg-pill mlg-pill--dark"><i className="fas fa-bolt" aria-hidden="true" /> Ready before your next shift</span>
           <h2>Get your TABC certificate today</h2>
           <p>Join {STAT_CERTIFIED} Texas workers who certified the fast, official way.</p>
-          <Link href={CTA_HREF} className="mlg-btn mlg-btn--primary">Start for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+          <Link href={CTA_HREF} className="mlg-btn mlg-btn--primary">Get TABC certified <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
           <div className="mlg-micro mlg-micro--dark">
             <span><i className="fas fa-certificate" aria-hidden="true" /> TABC approved</span>
             <span><i className="fas fa-bolt" aria-hidden="true" /> Instant certificate</span>

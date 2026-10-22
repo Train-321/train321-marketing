@@ -154,20 +154,6 @@
 .t321-mlh .mlh-trust-l { font-size: 13px; color: #9Fb6c8; margin-top: 2px; }
 .t321-mlh .mlh-trust-item + .mlh-trust-item { border-left: 1px solid rgba(255, 255, 255, .08); }
 
-/* ── Pricing ──────────────────────────────────────────────────────────── */
-.t321-mlh .mlh-price-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; max-width: 760px; margin: 0 auto; }
-.t321-mlh .mlh-plan { border: 1px solid var(--t321-mkt-line); border-radius: 20px; padding: 30px 28px; background: var(--t321-mkt-paper); position: relative; }
-.t321-mlh .mlh-plan.is-pop { border: 2px solid var(--t321-mkt-accent); box-shadow: 0 26px 60px -30px rgba(15, 42, 68, .35); }
-.t321-mlh .mlh-plan-tag { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--t321-mkt-accent); color: #fff; font-size: 12px; font-weight: 600; padding: 5px 15px; border-radius: 999px; white-space: nowrap; }
-.t321-mlh .mlh-plan h3 { font-size: 20px; margin: 0 0 2px; }
-.t321-mlh .mlh-plan-sub { font-size: 13.5px; color: var(--t321-mkt-ink-muted); margin: 0 0 14px; }
-.t321-mlh .mlh-price { font-family: var(--mlh-serif); font-size: 42px; font-weight: 700; margin: 0; line-height: 1; }
-.t321-mlh .mlh-price span { font-family: inherit; font-size: 15px; color: var(--t321-mkt-ink-muted); font-weight: 500; }
-.t321-mlh .mlh-plan ul { list-style: none; margin: 20px 0 24px; padding: 0; display: flex; flex-direction: column; gap: 12px; }
-.t321-mlh .mlh-plan li { font-size: 14.5px; display: flex; gap: 10px; align-items: flex-start; }
-.t321-mlh .mlh-plan li i { color: var(--t321-mkt-positive); margin-top: 3px; font-size: 14px; }
-.t321-mlh .mlh-plan .mlh-btn { width: 100%; justify-content: center; }
-
 /* ── FAQ ──────────────────────────────────────────────────────────────── */
 .t321-mlh .mlh-faq { max-width: 760px; margin: 0 auto; }
 .t321-mlh .mlh-qa { border: 1px solid var(--t321-mkt-line); border-radius: 14px; padding: 18px 22px; margin-bottom: 12px; background: var(--t321-mkt-paper); }
@@ -196,7 +182,6 @@
   .t321-mlh .mlh-hero-media { aspect-ratio: 16 / 10; }
   .t321-mlh .mlh-stepper,
   .t321-mlh .mlh-feature-grid,
-  .t321-mlh .mlh-price-grid,
   .t321-mlh .mlh-trust-grid { grid-template-columns: 1fr; }
   .t321-mlh .mlh-step { margin-top: 20px; }
   .t321-mlh .mlh-step + .mlh-step::before {

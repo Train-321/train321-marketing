@@ -68,16 +68,13 @@
   border-radius: 20px; padding: 24px; max-width: 460px;
   box-shadow: 0 26px 60px -32px rgba(11, 31, 51, .45);
 }
-.t321-mlg .mlg-offer-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+.t321-mlg .mlg-offer-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
 .t321-mlg .mlg-badge {
   display: inline-flex; align-items: center; gap: 7px;
   background: var(--t321-mkt-positive); color: #fff;
   font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px;
   text-transform: uppercase; letter-spacing: .03em;
 }
-.t321-mlg .mlg-offer-price { text-align: right; }
-.t321-mlg .mlg-price-num { font-family: var(--mlg-serif); font-size: 38px; font-weight: 700; line-height: 1; color: var(--t321-mkt-ink); display: block; }
-.t321-mlg .mlg-price-unit { font-size: 12.5px; color: var(--t321-mkt-ink-muted); display: block; margin-top: 3px; }
 .t321-mlg .mlg-offer-list { list-style: none; margin: 0 0 20px; padding: 0; display: flex; flex-direction: column; gap: 11px; }
 .t321-mlg .mlg-offer-list li { font-size: 14.5px; display: flex; gap: 10px; align-items: flex-start; }
 .t321-mlg .mlg-offer-list li i { color: var(--t321-mkt-positive); margin-top: 3px; font-size: 14px; }
@@ -137,22 +134,16 @@
   background: var(--t321-mkt-accent);
 }
 
-/* ── Offer / pricing block ────────────────────────────────────────────── */
+/* ── Why certify block ────────────────────────────────────────────────── */
 .t321-mlg .mlg-deal {
   background: var(--t321-mkt-paper); border: 2px solid var(--t321-mkt-accent);
   border-radius: 22px; padding: 34px 32px; text-align: center; max-width: 480px; margin: 0 auto;
   box-shadow: 0 30px 66px -32px rgba(11, 31, 51, .35);
 }
 .t321-mlg .mlg-badge--lg { font-size: 13px; padding: 8px 16px; }
-.t321-mlg .mlg-deal-price { margin: 20px 0 6px; }
-.t321-mlg .mlg-deal-num { font-family: var(--mlg-serif); font-size: 56px; font-weight: 700; line-height: 1; color: var(--t321-mkt-ink); display: block; }
-.t321-mlg .mlg-deal-unit { font-size: 14px; color: var(--t321-mkt-ink-muted); display: block; margin-top: 8px; }
-.t321-mlg .mlg-deal-list { list-style: none; margin: 22px auto; padding: 0; max-width: 300px; display: flex; flex-direction: column; gap: 12px; text-align: left; }
+.t321-mlg .mlg-deal-list { list-style: none; margin: 24px auto; padding: 0; max-width: 300px; display: flex; flex-direction: column; gap: 12px; text-align: left; }
 .t321-mlg .mlg-deal-list li { font-size: 14.5px; display: flex; gap: 10px; align-items: flex-start; }
 .t321-mlg .mlg-deal-list li i { color: var(--t321-mkt-positive); margin-top: 3px; font-size: 14px; }
-.t321-mlg .mlg-deal-team { font-size: 13.5px; color: var(--t321-mkt-ink-muted); margin: 16px 0 0; display: inline-flex; gap: 8px; align-items: center; }
-.t321-mlg .mlg-deal-team i { color: var(--t321-mkt-accent-ink); }
-.t321-mlg .mlg-deal-team strong { color: var(--t321-mkt-ink); }
 
 /* ── FAQ ──────────────────────────────────────────────────────────────── */
 .t321-mlg .mlg-faq { max-width: 720px; margin: 0 auto; }

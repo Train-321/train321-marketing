@@ -134,20 +134,6 @@
 .t321-mlb .mlb-stat .mlb-l { font-size: 13px; color: #9Fb6c8; margin-top: 2px; }
 .t321-mlb .mlb-stat + .mlb-stat { border-left: 1px solid rgba(255, 255, 255, .08); }
 
-/* ── Pricing ──────────────────────────────────────────────────────────── */
-.t321-mlb .mlb-price-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; max-width: 820px; margin: 0 auto; }
-.t321-mlb .mlb-plan { border: 1px solid var(--t321-mkt-line); border-radius: 20px; padding: 32px 28px; background: var(--t321-mkt-paper); position: relative; }
-.t321-mlb .mlb-plan.is-pop { border: 2px solid var(--t321-mkt-accent); box-shadow: 0 26px 60px -30px rgba(11, 31, 51, .35); }
-.t321-mlb .mlb-plan .mlb-tag { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--t321-mkt-accent); color: #fff; font-size: 12px; font-weight: 600; padding: 5px 15px; border-radius: 999px; white-space: nowrap; }
-.t321-mlb .mlb-plan h3 { font-size: 21px; margin: 0 0 2px; }
-.t321-mlb .mlb-plan .mlb-sub { font-size: 13.5px; color: var(--t321-mkt-ink-muted); margin: 0 0 16px; }
-.t321-mlb .mlb-plan .mlb-price { font-family: var(--mlb-serif); font-size: 44px; font-weight: 700; margin: 0; line-height: 1; }
-.t321-mlb .mlb-plan .mlb-price span { font-family: inherit; font-size: 15px; color: var(--t321-mkt-ink-muted); font-weight: 500; }
-.t321-mlb .mlb-plan ul { list-style: none; margin: 22px 0 26px; padding: 0; display: flex; flex-direction: column; gap: 12px; }
-.t321-mlb .mlb-plan li { font-size: 14.5px; display: flex; gap: 10px; align-items: flex-start; }
-.t321-mlb .mlb-plan li i { color: var(--t321-mkt-positive); margin-top: 3px; font-size: 14px; }
-.t321-mlb .mlb-plan .mlb-btn { width: 100%; justify-content: center; }
-
 /* ── FAQ ──────────────────────────────────────────────────────────────── */
 .t321-mlb .mlb-faq { max-width: 760px; margin: 0 auto; }
 .t321-mlb .mlb-qa { border: 1px solid var(--t321-mkt-line); border-radius: 14px; padding: 18px 22px; margin-bottom: 12px; background: var(--t321-mkt-paper); }
@@ -175,7 +161,6 @@
 @media (max-width: 820px) {
   .t321-mlb .mlb-hero-grid,
   .t321-mlb .mlb-row,
-  .t321-mlb .mlb-price-grid,
   .t321-mlb .mlb-stats-grid,
   .t321-mlb .mlb-final-grid { grid-template-columns: 1fr; }
   .t321-mlb .mlb-hero-copy h1 { font-size: 34px; }

@@ -18,8 +18,6 @@ export const metadata: Metadata = {
 
 // ── Campaign settings, edit these in one place ───────────────────────────
 const CTA_HREF = "/courses/food-manager"; // where every CTA button goes
-const PRICE_INDIVIDUAL = "$35"; // PLACEHOLDER - confirm before launch
-const PRICE_TEAM = "$29"; // PLACEHOLDER - confirm before launch (per manager)
 const PHONE = "561-325-7300";
 // Social-proof figures. PLACEHOLDERS, replace with real numbers before launch.
 const STAT_MANAGERS = "18,000+"; // PLACEHOLDER
@@ -139,47 +137,8 @@ export default async function FoodManagerLanding() {
         </div>
       </div>
 
-      {/* ── Two-tier pricing ───────────────────────────────────────────── */}
-      <section className="mlb-section mlb-sunk">
-        <div className="mlb-container">
-          <div className="mlb-head">
-            <span className="mlb-pill"><i className="fas fa-tag" aria-hidden="true" /> Pricing</span>
-            <h2>Certify one manager, or your whole bench</h2>
-          </div>
-          <div className="mlb-price-grid">
-            <div className="mlb-plan">
-              <h3>Individual</h3>
-              <p className="mlb-sub">For a single manager</p>
-              <p className="mlb-price">{PRICE_INDIVIDUAL} <span>/ manager</span></p>
-              <ul>
-                <li><i className="fas fa-check" aria-hidden="true" /> Full Food Manager course</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> CFPM exam preparation</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> HACCP and compliance modules</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Study online at your own pace</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Nationally recognized credential</li>
-              </ul>
-              <Link href={CTA_HREF} className="mlb-btn mlb-btn--light">Start certification</Link>
-            </div>
-            <div className="mlb-plan is-pop">
-              <span className="mlb-tag">Best for operators</span>
-              <h3>Team</h3>
-              <p className="mlb-sub">For restaurants and multi-manager operations</p>
-              <p className="mlb-price">{PRICE_TEAM} <span>/ manager</span></p>
-              <ul>
-                <li><i className="fas fa-check" aria-hidden="true" /> Everything in Individual</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Train multiple managers at once</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Manager dashboard and progress tracking</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Certificates stored in one place</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Volume pricing for larger teams</li>
-              </ul>
-              <Link href={CTA_HREF} className="mlb-btn mlb-btn--primary">Train your team</Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ── FAQ ────────────────────────────────────────────────────────── */}
-      <section className="mlb-section">
+      <section className="mlb-section mlb-sunk">
         <div className="mlb-narrow">
           <div className="mlb-head">
             <span className="mlb-pill"><i className="fas fa-circle-question" aria-hidden="true" /> Good to know</span>
@@ -204,7 +163,7 @@ export default async function FoodManagerLanding() {
             <h2>Put a certified manager on every shift</h2>
             <p>Join {STAT_MANAGERS} managers certified with Train 321.</p>
             <div className="mlb-cta-row">
-              <Link href={CTA_HREF} className="mlb-btn mlb-btn--primary">Start certification for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+              <Link href={CTA_HREF} className="mlb-btn mlb-btn--primary">Start certification <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
             </div>
             <div className="mlb-micro mlb-micro--dark">
               <span><i className="fas fa-lock" aria-hidden="true" /> Secure checkout</span>

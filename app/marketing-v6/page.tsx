@@ -17,9 +17,7 @@ export const metadata: Metadata = {
 };
 
 // ── Campaign settings — edit these in one place ──────────────────────────
-const CTA_HREF = "/courses/security-host"; // where every CTA button goes
-const PRICE_INDIVIDUAL = "$29"; // PLACEHOLDER - confirm before launch
-const PRICE_TEAM = "$24"; // PLACEHOLDER - confirm before launch (per seat)
+const CTA_HREF = "/courses/security-host"; // where every CTA button goes (pricing lives here)
 const PHONE = "561-325-7300";
 // Social-proof figures. PLACEHOLDERS — replace with real numbers before launch.
 const STAT_TRAINED = "18,000+"; // PLACEHOLDER - confirm before launch
@@ -47,7 +45,7 @@ const COVERED = [
 const FAQS = [
   { icon: "fas fa-clock", q: "How long does it take?", a: "A few hours, at your own pace." },
   { icon: "fas fa-award", q: "Do I get a certificate?", a: "Yes, downloadable as soon as you pass." },
-  { icon: "fas fa-users", q: "Can I train my team?", a: "Yes, in bulk at a lower per-seat rate." }
+  { icon: "fas fa-users", q: "Can I train my team?", a: "Yes, you can enroll your whole crew in bulk." }
 ];
 
 export default async function SecurityHostLanding() {
@@ -74,7 +72,7 @@ export default async function SecurityHostLanding() {
             <h1>Own the <em>door</em></h1>
             <p className="mlf-lede">Online security host training for door staff at bars, clubs, and venues.</p>
             <div className="mlf-hero-cta">
-              <Link href={CTA_HREF} className="mlf-btn mlf-btn--primary">Start training for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+              <Link href={CTA_HREF} className="mlf-btn mlf-btn--primary">Start training <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
               <div className="mlf-rating">
                 <span className="mlf-stars">★★★★★</span>
                 <span><b>{STAT_RATING}</b> from {STAT_REVIEWS} door staff</span>
@@ -166,47 +164,8 @@ export default async function SecurityHostLanding() {
         </div>
       </section>
 
-      {/* ── Pricing ─────────────────────────────────────────────────────── */}
-      <section className="mlf-section mlf-sunk">
-        <div className="mlf-container">
-          <div className="mlf-head">
-            <span className="mlf-pill"><i className="fas fa-tag" aria-hidden="true" /> Simple pricing</span>
-            <h2>Train yourself, or your crew</h2>
-          </div>
-          <div className="mlf-price-grid">
-            <div className="mlf-plan">
-              <h3>Individual</h3>
-              <p className="mlf-sub">For a single security host</p>
-              <p className="mlf-price">{PRICE_INDIVIDUAL} <span>/ course</span></p>
-              <ul>
-                <li><i className="fas fa-check" aria-hidden="true" /> Full security host course</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Entry, crowd, and conflict training</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Legal limits and liability</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Certificate of completion</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Mobile and desktop access</li>
-              </ul>
-              <Link href={CTA_HREF} className="mlf-btn mlf-btn--light">Start training</Link>
-            </div>
-            <div className="mlf-plan is-pop">
-              <span className="mlf-tag">Best for venues</span>
-              <h3>Venue / Team</h3>
-              <p className="mlf-sub">For bars, clubs, and security firms</p>
-              <p className="mlf-price">{PRICE_TEAM} <span>/ seat</span></p>
-              <ul>
-                <li><i className="fas fa-check" aria-hidden="true" /> Everything in Individual</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Manager dashboard</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Bulk staff enrollment</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Progress tracking</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Volume discounts</li>
-              </ul>
-              <Link href={CTA_HREF} className="mlf-btn mlf-btn--primary">Train your team</Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ── FAQ ─────────────────────────────────────────────────────────── */}
-      <section className="mlf-section">
+      <section className="mlf-section mlf-sunk">
         <div className="mlf-narrow">
           <div className="mlf-head">
             <span className="mlf-pill"><i className="fas fa-circle-question" aria-hidden="true" /> Good to know</span>
@@ -229,7 +188,7 @@ export default async function SecurityHostLanding() {
           <span className="mlf-pill" style={{ background: "rgba(0,180,219,.16)", color: "#7fe3f5" }}><i className="fas fa-bolt" aria-hidden="true" /> Ready for the next shift</span>
           <h2 style={{ marginTop: "16px" }}>Own the door, every night</h2>
           <p>Join {STAT_TRAINED} security hosts trained the smart way.</p>
-          <Link href={CTA_HREF} className="mlf-btn mlf-btn--primary">Start training for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+          <Link href={CTA_HREF} className="mlf-btn mlf-btn--primary">Start training <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
           <div className="mlf-micro" style={{ color: "#8aa2b5" }}>
             <span><i className="fas fa-lock" style={{ color: "#5DCAA5" }} aria-hidden="true" /> Secure checkout</span>
             <span><i className="fas fa-award" style={{ color: "#5DCAA5" }} aria-hidden="true" /> Certificate included</span>

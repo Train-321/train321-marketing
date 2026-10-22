@@ -18,11 +18,9 @@ export const metadata: Metadata = {
 
 // ── Campaign settings — edit these in one place ──────────────────────────
 const CTA_HREF = "/courses/human-trafficking"; // where every CTA goes
-const PRICE_INDIVIDUAL = "$20"; // PLACEHOLDER - confirm before launch
-const PRICE_TEAM = "$15"; // PLACEHOLDER - confirm before launch (per seat)
-// Impact figures. PLACEHOLDERS — replace with real, verifiable numbers before launch.
+// Course duration shown in the hero. PLACEHOLDER - replace with a real,
+// verifiable figure before launch.
 const STAT_DURATION = "About 1 hour"; // PLACEHOLDER - confirm before launch
-const STAT_CERTIFICATE = "Same day"; // PLACEHOLDER - confirm before launch
 
 const LEARN = [
   {
@@ -117,31 +115,8 @@ export default async function HumanTraffickingLanding() {
         </div>
       </section>
 
-      {/* ── Pricing (single-focus) ─────────────────────────────────────── */}
-      <section className="mle-section">
-        <div className="mle-col">
-          <h2 className="mle-h2">One course, one price</h2>
-          <div className="mle-price-card">
-            <p className="mle-price">{PRICE_INDIVIDUAL} <span>/ person</span></p>
-            <p className="mle-price-sub">Full awareness course and certificate, completed online.</p>
-            <ul className="mle-price-list">
-              <li><i className="fas fa-check" aria-hidden="true" /> Learn the signs and how to report</li>
-              <li><i className="fas fa-check" aria-hidden="true" /> {STAT_CERTIFICATE} certificate on completion</li>
-              <li><i className="fas fa-check" aria-hidden="true" /> Works on mobile and desktop</li>
-            </ul>
-            <Link href={CTA_HREF} className="mle-btn mle-btn--primary mle-btn--full">
-              Start the course
-            </Link>
-          </div>
-          <p className="mle-team-line">
-            Training a team? Enroll staff at {PRICE_TEAM} per seat and keep every certificate in one place.{" "}
-            <Link href={CTA_HREF} className="mle-inline-link">See the business option <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
-          </p>
-        </div>
-      </section>
-
       {/* ── FAQ ─────────────────────────────────────────────────────────── */}
-      <section className="mle-section mle-sunk">
+      <section className="mle-section">
         <div className="mle-col">
           <h2 className="mle-h2">Questions, answered</h2>
           <div className="mle-faq">

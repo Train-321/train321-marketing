@@ -18,9 +18,7 @@ export const metadata: Metadata = {
 
 // ── Campaign settings — edit these in one place ──────────────────────────
 const CTA_HREF = "/courses/sexual-harassment"; // where every CTA goes
-const PRICE_INDIVIDUAL = "$19"; // PLACEHOLDER - confirm before launch
-const PRICE_TEAM = "$12"; // PLACEHOLDER - confirm before launch (per seat, bulk)
-// Social-proof and scope figures. PLACEHOLDERS — replace with real numbers before launch.
+// Social-proof and scope figures. PLACEHOLDERS - replace with real numbers before launch.
 const STAT_TRAINED = "250,000+"; // PLACEHOLDER - confirm before launch
 const STAT_EMPLOYERS = "8,000+"; // PLACEHOLDER - confirm before launch
 const STAT_STATES = "All 50"; // PLACEHOLDER - confirm before launch
@@ -163,42 +161,6 @@ export default async function SexualHarassmentLanding() {
             </article>
 
           </div>
-        </div>
-      </section>
-
-      {/* ── Pricing (compact) ──────────────────────────────────────────── */}
-      <section className="mld-pricing">
-        <div className="mld-wrap">
-          <div className="mld-pricing-head">
-            <span className="mld-eyebrow"><i className="fas fa-tag" aria-hidden="true" /> Pricing</span>
-            <h2>Train one person or your whole organization</h2>
-          </div>
-          <div className="mld-price-grid">
-            <div className="mld-plan">
-              <h3>Individual</h3>
-              <p className="mld-plan-sub">For a single employee or supervisor</p>
-              <p className="mld-plan-price">{PRICE_INDIVIDUAL} <span>/ course</span></p>
-              <ul>
-                <li><i className="fas fa-check" aria-hidden="true" /> Full prevention course</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Employee or supervisor version</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Completion certificate</li>
-              </ul>
-              <Link href={CTA_HREF} className="mld-btn mld-btn--ghost mld-btn--block">Start training</Link>
-            </div>
-            <div className="mld-plan mld-plan--business">
-              <span className="mld-plan-tag">For employers</span>
-              <h3>Business / Team</h3>
-              <p className="mld-plan-sub">Bulk training for your staff</p>
-              <p className="mld-plan-price">{PRICE_TEAM} <span>/ seat</span></p>
-              <ul>
-                <li><i className="fas fa-check" aria-hidden="true" /> Everything in Individual</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Bulk employee enrollment</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Progress and completion tracking</li>
-              </ul>
-              <Link href={CTA_HREF} className="mld-btn mld-btn--primary mld-btn--block">Train your team</Link>
-            </div>
-          </div>
-          <p className="mld-price-fine">Prices shown are placeholders and subject to change before launch.</p>
         </div>
       </section>
 

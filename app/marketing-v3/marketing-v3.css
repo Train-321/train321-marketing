@@ -149,20 +149,6 @@
 .t321-mlc .mlc-stat .mlc-l { font-size: 13px; color: #9Fb6c8; margin-top: 2px; }
 .t321-mlc .mlc-stat + .mlc-stat { border-left: 1px solid rgba(255, 255, 255, .08); }
 
-/* ── Pricing ──────────────────────────────────────────────────────────── */
-.t321-mlc .mlc-price-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; max-width: 760px; margin: 0 auto; }
-.t321-mlc .mlc-plan { border: 1px solid var(--t321-mkt-line); border-radius: 20px; padding: 30px 28px; background: #fff; position: relative; }
-.t321-mlc .mlc-plan.is-pop { border: 2px solid var(--t321-mkt-accent); box-shadow: 0 26px 60px -30px rgba(11, 31, 51, .35); }
-.t321-mlc .mlc-plan .mlc-tag { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--t321-mkt-accent); color: #fff; font-size: 12px; font-weight: 600; padding: 5px 15px; border-radius: 999px; white-space: nowrap; }
-.t321-mlc .mlc-plan h3 { font-size: 20px; margin: 0 0 2px; }
-.t321-mlc .mlc-plan .mlc-sub { font-size: 13.5px; color: var(--t321-mkt-ink-muted); margin: 0 0 14px; }
-.t321-mlc .mlc-plan .mlc-price { font-family: var(--mlc-serif); font-size: 42px; font-weight: 700; margin: 0; line-height: 1; }
-.t321-mlc .mlc-plan .mlc-price span { font-family: inherit; font-size: 15px; color: var(--t321-mkt-ink-muted); font-weight: 500; }
-.t321-mlc .mlc-plan ul { list-style: none; margin: 20px 0 24px; padding: 0; display: flex; flex-direction: column; gap: 12px; }
-.t321-mlc .mlc-plan li { font-size: 14.5px; display: flex; gap: 10px; align-items: flex-start; }
-.t321-mlc .mlc-plan li i { color: var(--t321-mkt-positive); margin-top: 3px; font-size: 14px; }
-.t321-mlc .mlc-plan .mlc-btn { width: 100%; justify-content: center; }
-
 /* ── FAQ ──────────────────────────────────────────────────────────────── */
 .t321-mlc .mlc-faq { max-width: 760px; margin: 0 auto; }
 .t321-mlc .mlc-qa { border: 1px solid var(--t321-mkt-line); border-radius: 14px; padding: 18px 22px; margin-bottom: 12px; background: #fff; }
@@ -189,7 +175,6 @@
   .t321-mlc .mlc-learn-grid,
   .t321-mlc .mlc-cert-grid,
   .t321-mlc .mlc-tiles,
-  .t321-mlc .mlc-price-grid,
   .t321-mlc .mlc-stats-grid { grid-template-columns: 1fr; }
   .t321-mlc .mlc-hero-media .mlc-photo { aspect-ratio: 16 / 10; max-width: 460px; margin: 0 auto; }
   .t321-mlc .mlc-floatcard { left: 14px; }

@@ -18,8 +18,6 @@ export const metadata: Metadata = {
 
 // ── Campaign settings — edit these in one place ──────────────────────────
 const CTA_HREF = "/courses/food-handler"; // where every "Get certified" button goes
-const PRICE_INDIVIDUAL = "$10";
-const PRICE_TEAM = "$8";
 const PHONE = "561-325-7300";
 // Social-proof figures. PLACEHOLDERS — replace with real numbers before launch.
 const STAT_CERTIFIED = "50,000+";
@@ -58,7 +56,7 @@ export default async function FoodHandlerLanding() {
           <span className="ml-pill"><i className="fas fa-shield-halved" aria-hidden="true" /> ANSI-accredited food handler course</span>
           <h1>Food handler card in <em>about an hour</em></h1>
           <p className="ml-lede">100% online and accepted in all 50 states.</p>
-          <Link href={CTA_HREF} className="ml-btn ml-btn--primary">Get certified for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+          <Link href={CTA_HREF} className="ml-btn ml-btn--primary">Get certified <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
           <div className="ml-micro">
             <span><i className="fas fa-check" aria-hidden="true" /> No subscription</span>
             <span><i className="fas fa-check" aria-hidden="true" /> Instant certificate</span>
@@ -117,48 +115,8 @@ export default async function FoodHandlerLanding() {
         </div>
       </section>
 
-      {/* ── Pricing ────────────────────────────────────────────────────── */}
-      <section className="ml-section ml-sunk">
-        <div className="ml-container">
-          <div className="ml-head">
-            <span className="ml-pill"><i className="fas fa-tag" aria-hidden="true" /> Simple pricing</span>
-            <h2>One price. No surprises.</h2>
-            <p className="ml-lede">Certify yourself, or your whole team at a lower per-seat rate.</p>
-          </div>
-          <div className="ml-price-grid">
-            <div className="ml-plan">
-              <h3>Individual</h3>
-              <p className="ml-sub">For a single worker</p>
-              <p className="ml-price">{PRICE_INDIVIDUAL} <span>/ course</span></p>
-              <ul>
-                <li><i className="fas fa-check" aria-hidden="true" /> Full food handler course</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Final exam, free retakes</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Same-day certificate</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> English and Spanish</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Mobile and desktop</li>
-              </ul>
-              <Link href={CTA_HREF} className="ml-btn ml-btn--light">Get certified</Link>
-            </div>
-            <div className="ml-plan is-pop">
-              <span className="ml-tag">Best for businesses</span>
-              <h3>Team</h3>
-              <p className="ml-sub">For restaurants and food businesses</p>
-              <p className="ml-price">{PRICE_TEAM} <span>/ seat</span></p>
-              <ul>
-                <li><i className="fas fa-check" aria-hidden="true" /> Everything in Individual</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Manager dashboard</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Bulk staff enrollment</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Progress tracking</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Volume discounts</li>
-              </ul>
-              <Link href={CTA_HREF} className="ml-btn ml-btn--primary">Train your team</Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ── FAQ ────────────────────────────────────────────────────────── */}
-      <section className="ml-section">
+      <section className="ml-section ml-sunk">
         <div className="ml-narrow">
           <div className="ml-head">
             <span className="ml-pill"><i className="fas fa-circle-question" aria-hidden="true" /> Good to know</span>
@@ -181,7 +139,7 @@ export default async function FoodHandlerLanding() {
           <span className="ml-pill" style={{ background: "rgba(0,180,219,.16)", color: "#7fe3f5" }}><i className="fas fa-bolt" aria-hidden="true" /> Ready when you are</span>
           <h2 style={{ marginTop: "16px" }}>Get certified before your next shift</h2>
           <p>Join {STAT_CERTIFIED} workers certified the easy way.</p>
-          <Link href={CTA_HREF} className="ml-btn ml-btn--primary">Get certified for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+          <Link href={CTA_HREF} className="ml-btn ml-btn--primary">Get certified <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
           <div className="ml-micro" style={{ color: "#8aa2b5" }}>
             <span><i className="fas fa-lock" style={{ color: "#5DCAA5" }} aria-hidden="true" /> Secure checkout</span>
             <span><i className="fas fa-shield-halved" style={{ color: "#5DCAA5" }} aria-hidden="true" /> ANSI-accredited</span>

@@ -18,8 +18,6 @@ export const metadata: Metadata = {
 
 // ── Campaign settings — edit these in one place ──────────────────────────
 const CTA_HREF = "/courses/rbs"; // where every CTA button goes
-const PRICE_INDIVIDUAL = "$15"; // PLACEHOLDER - confirm before launch
-const PRICE_TEAM = "$12"; // PLACEHOLDER - confirm before launch
 const PHONE = "561-325-7300";
 // Social-proof figures. PLACEHOLDERS — replace with real numbers before launch.
 const STAT_CERTIFIED = "40,000+"; // PLACEHOLDER - confirm before launch
@@ -144,49 +142,8 @@ export default async function CaliforniaRbsLanding() {
         </div>
       </div>
 
-      {/* ── Pricing ────────────────────────────────────────────────────── */}
-      <section className="mlh-section mlh-sunk">
-        <div className="mlh-container">
-          <div className="mlh-head">
-            <span className="mlh-pill"><i className="fas fa-tag" aria-hidden="true" /> Simple pricing</span>
-            <h2>Certify yourself or your whole team</h2>
-          </div>
-          <div className="mlh-price-grid">
-            <div className="mlh-plan">
-              <h3>Individual</h3>
-              <p className="mlh-plan-sub">For a single server or manager</p>
-              {/* PLACEHOLDER - confirm before launch */}
-              <p className="mlh-price">{PRICE_INDIVIDUAL} <span>/ course</span></p>
-              <ul>
-                <li><i className="fas fa-check" aria-hidden="true" /> ABC-approved RBS training</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Exam preparation</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Online and self-paced</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Certificate for your records</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Mobile and desktop</li>
-              </ul>
-              <Link href={CTA_HREF} className="mlh-btn mlh-btn--light">Get certified</Link>
-            </div>
-            <div className="mlh-plan is-pop">
-              <span className="mlh-plan-tag">Best for businesses</span>
-              <h3>Team</h3>
-              <p className="mlh-plan-sub">For bars, restaurants, and venues</p>
-              {/* PLACEHOLDER - confirm before launch */}
-              <p className="mlh-price">{PRICE_TEAM} <span>/ seat</span></p>
-              <ul>
-                <li><i className="fas fa-check" aria-hidden="true" /> Everything in Individual</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Manager dashboard</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Bulk staff enrollment</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Progress tracking</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Volume discounts</li>
-              </ul>
-              <Link href={CTA_HREF} className="mlh-btn mlh-btn--primary">Train your team</Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ── FAQ: California specifics ──────────────────────────────────── */}
-      <section className="mlh-section">
+      <section className="mlh-section mlh-sunk">
         <div className="mlh-narrow">
           <div className="mlh-head">
             <span className="mlh-pill"><i className="fas fa-circle-question" aria-hidden="true" /> California specifics</span>
