@@ -173,6 +173,15 @@
 .t321-gs .gs-qa__a { margin: 0; padding: 0 22px 20px; font-size: 14.5px; color: var(--t321-mkt-ink-muted); line-height: 1.6; }
 .t321-gs .gs-inline-link { color: var(--t321-mkt-accent-ink); font-weight: 600; text-decoration: underline; }
 
+/* ── Testimonials section decor ───────────────────────────────────────── */
+.t321-gs .gs-tsec { position: relative; overflow: hidden; }
+.t321-gs .gs-tsec .gs-container { position: relative; z-index: 1; }
+.t321-gs .gs-tdeco { position: absolute; z-index: 0; pointer-events: none; opacity: .5; }
+.t321-gs .gs-tdeco--1 { left: 8%; top: 190px; font-size: 22px; color: var(--t321-mkt-accent); transform: rotate(-10deg); }
+.t321-gs .gs-tdeco--2 { left: 11%; bottom: 120px; font-size: 20px; color: var(--t321-mkt-accent-ink); transform: rotate(8deg); }
+.t321-gs .gs-tdeco--3 { right: 9%; top: 300px; font-size: 22px; color: var(--t321-mkt-accent); transform: rotate(10deg); }
+.t321-gs .gs-tdeco--4 { right: 12%; bottom: 150px; font-size: 20px; color: var(--t321-mkt-accent-ink); transform: rotate(-8deg); }
+
 /* ── Testimonials (small comment cards, full comment on hover) ────────── */
 .t321-gs .v9t-comments { max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 .t321-gs .v9t-comment { position: relative; width: 420px; max-width: 88%; background: #fff; border: 1px solid var(--t321-mkt-line); border-radius: 16px; padding: 16px 18px; box-shadow: 0 14px 36px -24px rgba(11, 31, 51, .3); transition: box-shadow .25s ease; }
@@ -231,6 +240,7 @@
   .t321-gs .gs-finder__chips { justify-content: center; }
   .t321-gs .gs-finder__go { justify-content: center; }
   .t321-gs .gs-hero__deco { display: none; }
+  .t321-gs .gs-tdeco { display: none; }
   .t321-gs .v9t-comment { width: 100%; max-width: 100%; }
   .t321-gs .v9t-comment__text { -webkit-line-clamp: unset; display: block; overflow: visible; }
   .t321-gs .v9t-comment__pop { display: none; }

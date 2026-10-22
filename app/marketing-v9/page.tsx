@@ -199,7 +199,11 @@ export default async function GetStartedLanding() {
 
       {/* ── Testimonials ───────────────────────────────────────────────── */}
       {quotes.length > 0 && (
-        <section className="gs-section gs-sunk">
+        <section className="gs-section gs-sunk gs-tsec">
+          <span className="gs-tdeco gs-tdeco--1" aria-hidden="true"><i className="fas fa-comment-dots" /></span>
+          <span className="gs-tdeco gs-tdeco--2" aria-hidden="true"><i className="fas fa-star" /></span>
+          <span className="gs-tdeco gs-tdeco--3" aria-hidden="true"><i className="fas fa-thumbs-up" /></span>
+          <span className="gs-tdeco gs-tdeco--4" aria-hidden="true"><i className="fas fa-heart" /></span>
           <div className="gs-container">
             <div className="gs-head">
               <span className="gs-pill"><i className="fas fa-quote-right" aria-hidden="true" /> What learners say</span>
