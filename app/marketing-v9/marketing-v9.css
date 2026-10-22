@@ -41,8 +41,8 @@
 .t321-gs .gs-topbar { position: sticky; top: 0; z-index: 30; background: #fff; border-bottom: 1px solid var(--t321-mkt-line); }
 .t321-gs .gs-topbar__inner { display: flex; align-items: center; justify-content: space-between; height: 66px; }
 .t321-gs .gs-topbar__brand { display: inline-flex; align-items: center; }
-.t321-gs .gs-topbar__brand img { height: 34px; width: auto; display: block; }
-.t321-gs .gs-topbar__cta { padding: 11px 20px; font-size: 14.5px; }
+.t321-gs .gs-topbar__brand img { height: 42px; width: auto; display: block; }
+.t321-gs .gs-topbar__cta { padding: 10px 18px; font-size: 14px; }
 
 /* ── Hero (centered course finder) ────────────────────────────────────── */
 .t321-gs .gs-hero { position: relative; overflow: hidden; padding: 76px 0 66px; background: var(--t321-mkt-paper-sunk); border-bottom: 1px solid var(--t321-mkt-line); text-align: center; }
