@@ -75,7 +75,6 @@ function Card({ course }: { course: V9Course }) {
         {blurb && <p className="v9c-card__blurb">{blurb}</p>}
         <div className="v9c-card__meta">
           <span><i className="fas fa-laptop" aria-hidden="true" /> Online</span>
-          <span><i className="fas fa-clock" aria-hidden="true" /> ~1 hr</span>
           <span><i className="fas fa-certificate" aria-hidden="true" /> Certificate</span>
         </div>
         <div className="v9c-card__foot">
