@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getMarketplaceCatalog, toBlurb, type MarketplaceCourse } from "@/lib/newFeatures";
+import { getMarketplaceCatalog, type MarketplaceCourse } from "@/lib/newFeatures";
 import { getTestimonials, getFaqGroups, getSiteSettings, type Testimonial, type FaqItem } from "@/lib/sanity";
-import AddToCartButton from "@/components/cart/AddToCartButton";
+import CoursesV9, { type V9Course } from "./CoursesV9";
 import "./marketing-v9.css";
 
 // "Get started" landing page: an advanced, LMS-style storefront. Courses come
@@ -54,52 +54,6 @@ function initials(name: string) {
   return (name || "").split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
 }
 
-function Price({ value }: { value: number }) {
-  if (value > 0) {
-    return (
-      <span className="gs-course__price"><span>From</span> <strong>${value}</strong> <span>/ seat</span></span>
-    );
-  }
-  return <span className="gs-course__price"><strong>Custom pricing</strong></span>;
-}
-
-function CourseCardAdd({ course }: { course: MarketplaceCourse }) {
-  const blurb = course.description ? toBlurb(course.description) : "";
-  return (
-    <div className="gs-course">
-      <div className="gs-course__media">
-        {course.image ? (
-          <img src={course.image} alt="" />
-        ) : (
-          <span className="gs-course__icon"><i className="fas fa-certificate" aria-hidden="true" /></span>
-        )}
-      </div>
-      <div className="gs-course__body">
-        {course.stateLabel && (
-          <span className="gs-course__badge"><i className="fas fa-map-marker-alt" aria-hidden="true" /> {course.stateLabel}</span>
-        )}
-        <span className="gs-course__title">{course.name}</span>
-        {blurb && <span className="gs-course__desc">{blurb}</span>}
-        <div className="gs-course__foot">
-          <Price value={course.price} />
-          <AddToCartButton
-            course={{
-              id: course.id,
-              name: course.name,
-              price: course.price,
-              image: course.image,
-              isSeatBased: course.isSeatBased,
-              stateLabel: course.stateLabel
-            }}
-            mode="add"
-            className="gs-btn gs-btn--primary gs-course__add"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default async function GetStartedLanding() {
   let courses: MarketplaceCourse[] = [];
   let categories: Array<{ id: number; name: string }> = [];
@@ -117,10 +71,13 @@ export default async function GetStartedLanding() {
   try { const s = await getSiteSettings(); stats = s.companyStats?.length ? s.companyStats : FALLBACK_STATS; } catch { stats = FALLBACK_STATS; }
 
   const catName = new Map(categories.map((c) => [c.id, c.name]));
-  const sections = categories
-    .map((c) => ({ id: c.id, label: c.name, items: dedupeByName(courses.filter((x) => x.categoryId === c.id)) }))
-    .filter((s) => s.items.length > 0);
-  const other = dedupeByName(courses.filter((c) => !c.categoryId || !catName.has(c.categoryId)));
+  const flat: V9Course[] = dedupeByName(courses).map((c) => ({
+    ...c,
+    catLabel: (c.categoryId != null && catName.get(c.categoryId)) || "More courses"
+  }));
+  const labels: string[] = [];
+  for (const c of categories) if (flat.some((f) => f.catLabel === c.name)) labels.push(c.name);
+  if (flat.some((f) => f.catLabel === "More courses")) labels.push("More courses");
 
   const quotes = (testimonials.filter((t) => t.featured).length ? testimonials.filter((t) => t.featured) : testimonials).slice(0, 3);
 
@@ -214,25 +171,9 @@ export default async function GetStartedLanding() {
             <p className="gs-lede">Add a course to your cart and check out in minutes. Every course is online and issues a certificate the moment you pass.</p>
           </div>
 
-          {sections.map((g) => (
-            <div key={g.id} className="gs-cat">
-              <h3 className="gs-cat__title">{g.label}</h3>
-              <div className="gs-courses">
-                {g.items.map((c) => <CourseCardAdd key={c.id} course={c} />)}
-              </div>
-            </div>
-          ))}
-
-          {other.length > 0 && (
-            <div className="gs-cat">
-              <h3 className="gs-cat__title">More courses</h3>
-              <div className="gs-courses">
-                {other.map((c) => <CourseCardAdd key={c.id} course={c} />)}
-              </div>
-            </div>
-          )}
-
-          {sections.length === 0 && other.length === 0 && (
+          {flat.length > 0 ? (
+            <CoursesV9 courses={flat} categories={labels} />
+          ) : (
             <p className="gs-lede" style={{ textAlign: "center" }}>
               Browse the <Link href={CATALOG_HREF} className="gs-inline-link">full catalog</Link> to see every course.
             </p>
