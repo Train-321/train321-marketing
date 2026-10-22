@@ -1,14 +1,17 @@
 "use client";
 
-// Modern course browser for /marketing-v9: category filter chips over a grid of
-// add-to-cart cards. Courses come pre-flattened from the page (marketplace
-// catalog), each tagged with its category label so filtering is pure client state.
+// Modern course browser for /marketing-v9: a search box + category filter
+// chips over a grid of add-to-cart cards, revealed a page at a time with a
+// "Load more" button. Courses come pre-flattened from the page (marketplace
+// catalog), each tagged with its category label so filtering is client state.
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toBlurb, type MarketplaceCourse } from "@/lib/newFeatures";
 import V9AddButton from "./cart/V9AddButton";
 
 export type V9Course = MarketplaceCourse & { catLabel: string };
+
+const PAGE_SIZE = 9;
 
 export default function CoursesV9({
   courses,
@@ -18,10 +21,50 @@ export default function CoursesV9({
   categories: string[];
 }) {
   const [active, setActive] = useState<string>("all");
-  const shown = active === "all" ? courses : courses.filter((c) => c.catLabel === active);
+  const [query, setQuery] = useState("");
+  const [visible, setVisible] = useState(PAGE_SIZE);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return courses.filter((c) => {
+      if (active !== "all" && c.catLabel !== active) return false;
+      if (!q) return true;
+      return (
+        c.name.toLowerCase().includes(q) ||
+        c.catLabel.toLowerCase().includes(q) ||
+        (c.stateLabel || "").toLowerCase().includes(q)
+      );
+    });
+  }, [courses, active, query]);
+
+  // Re-collapse to the first page whenever the filter or search changes, so a
+  // new result set doesn't open with a long list already expanded.
+  useEffect(() => {
+    setVisible(PAGE_SIZE);
+  }, [active, query]);
+
+  const shown = filtered.slice(0, visible);
+  const remaining = filtered.length - shown.length;
 
   return (
     <>
+      {/* Search */}
+      <div className="v9c-search">
+        <i className="fas fa-magnifying-glass" aria-hidden="true" />
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search courses…"
+          aria-label="Search courses"
+        />
+        {query && (
+          <button type="button" className="v9c-search__clear" aria-label="Clear search" onClick={() => setQuery("")}>
+            <i className="fas fa-xmark" aria-hidden="true" />
+          </button>
+        )}
+      </div>
+
       {categories.length > 1 && (
         <div className="v9c-filters" role="tablist" aria-label="Filter courses">
           <button
@@ -46,11 +89,28 @@ export default function CoursesV9({
         </div>
       )}
 
-      <div className="v9c-grid">
-        {shown.map((c) => (
-          <Card key={c.id} course={c} />
-        ))}
-      </div>
+      {shown.length > 0 ? (
+        <div className="v9c-grid">
+          {shown.map((c) => (
+            <Card key={c.id} course={c} />
+          ))}
+        </div>
+      ) : (
+        <p className="v9c-empty">
+          No courses match{query ? ` “${query.trim()}”` : " that filter"}.{" "}
+          <button type="button" className="gs-inline-link" onClick={() => { setQuery(""); setActive("all"); }}>
+            Clear
+          </button>
+        </p>
+      )}
+
+      {remaining > 0 && (
+        <div className="v9c-more">
+          <button type="button" className="gs-btn gs-btn--ghost" onClick={() => setVisible((v) => v + PAGE_SIZE)}>
+            Load more <span>({remaining} more)</span>
+          </button>
+        </div>
+      )}
     </>
   );
 }
