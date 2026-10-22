@@ -6,20 +6,20 @@ type Step = { title: string; body: string; icon: string; aside: string };
 
 const SELF: Step[] = [
   {
-    title: "Pick your state and course",
-    body: "Choose where you work and we only show what's accepted there. Food handler, alcohol server, manager, HR — from $10.",
+    title: "Choose your course",
+    body: "Pick the food safety, alcohol safety, or workplace training you need for work.",
     icon: "fa-map-marker-alt",
     aside: "2 min"
   },
   {
-    title: "Train on your phone",
-    body: "Short video lessons you can pause between tables. Most courses take about an hour, English or Spanish.",
+    title: "Train online",
+    body: "Complete your course from your phone or computer with simple, mobile-friendly lessons.",
     icon: "fa-mobile-alt",
     aside: "~1 hr"
   },
   {
-    title: "Download your certificate",
-    body: "Pass the final and your certificate is ready instantly — print it, save it, or send it straight to your manager.",
+    title: "Get your certificate",
+    body: "Pass the course and download your certificate when you are done.",
     icon: "fa-award",
     aside: "Instant"
   }
@@ -56,12 +56,12 @@ export default function HowItWorks({ audience }: { audience: "self" | "team" }) 
             <i className="fas fa-bolt" aria-hidden="true" /> How it works
           </p>
           <h2 id="v5-how-title" className="v5-h2">
-            Tap. Train. <em>Done.</em>
+            Required training made quick and <em>simple.</em>
           </h2>
           <p className="v5-lede">
             {audience === "team"
-              ? "No onboarding call, no setup fee. Most teams are fully certified the week they sign up."
-              : "No classroom, no waiting on anyone. Most people finish before their next shift."}
+              ? "Complete required food safety, alcohol safety, and workplace training online, with mobile-friendly courses your whole team can finish on any device."
+              : "Complete required food safety, alcohol safety, and workplace training online with mobile-friendly courses built for busy workers."}
           </p>
         </Reveal>
         <ol className="v5-how__grid">

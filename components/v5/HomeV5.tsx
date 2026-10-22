@@ -10,6 +10,7 @@ import { useCart } from "@/components/cart/CartContext";
 import { FinderV5Provider, type FinderMarketplace } from "./FinderContext";
 import HeroV5, { type Audience } from "./HeroV5";
 import TrustStrip from "./TrustStrip";
+import PillarsV5 from "./PillarsV5";
 import CourseExplorer from "./CourseExplorer";
 import PopularRail from "./PopularRail";
 import StatsBand from "./StatsBand";
@@ -75,6 +76,7 @@ export default function HomeV5({
       <div className="v5">
         <HeroV5 audience={audience} onAudience={chooseAudience} companyStats={companyStats} />
         <TrustStrip logos={trustLogos} />
+        <PillarsV5 head={home?.pillarsHead} pillars={home?.pillars} />
         <CourseExplorer />
         <PopularRail courses={courses} slugs={popularSlugs} />
         <StatsBand stats={companyStats} />
