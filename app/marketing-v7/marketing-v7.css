@@ -28,11 +28,11 @@
 }
 .t321-mlg .mlg-btn--primary {
   background: var(--t321-mkt-accent); color: #fff;
-  box-shadow: 0 10px 24px -8px rgba(0, 180, 219, .6);
+  box-shadow: 0 10px 24px -8px rgba(11, 31, 51, .3);
 }
 .t321-mlg .mlg-btn--primary:hover {
   background: var(--t321-mkt-accent-hover); transform: translateY(-1px);
-  box-shadow: 0 14px 30px -8px rgba(0, 180, 219, .7);
+  box-shadow: 0 14px 30px -8px rgba(11, 31, 51, .35);
 }
 .t321-mlg .mlg-btn--block { width: 100%; }
 
@@ -55,9 +55,7 @@
 /* ── Hero: copy + offer card (left), certificate (right) ──────────────── */
 .t321-mlg .mlg-hero {
   padding: 56px 0 48px;
-  background:
-    radial-gradient(1100px 480px at 85% -20%, #E8F8FC 0%, transparent 60%),
-    linear-gradient(180deg, var(--t321-mkt-paper-sunk) 0%, var(--t321-mkt-paper) 100%);
+  background: var(--t321-mkt-paper-sunk);
 }
 .t321-mlg .mlg-hero-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 52px; align-items: center; }
 .t321-mlg .mlg-hero-copy h1 { font-size: 46px; line-height: 1.06; margin: 18px 0 14px; }
@@ -136,14 +134,14 @@
 .t321-mlg .mlg-learn-icon {
   width: 38px; height: 38px; flex: 0 0 auto; border-radius: 11px;
   display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff;
-  background: linear-gradient(135deg, var(--t321-mkt-ink), var(--t321-mkt-accent));
+  background: var(--t321-mkt-accent);
 }
 
 /* ── Offer / pricing block ────────────────────────────────────────────── */
 .t321-mlg .mlg-deal {
   background: var(--t321-mkt-paper); border: 2px solid var(--t321-mkt-accent);
   border-radius: 22px; padding: 34px 32px; text-align: center; max-width: 480px; margin: 0 auto;
-  box-shadow: 0 30px 66px -32px rgba(0, 180, 219, .5);
+  box-shadow: 0 30px 66px -32px rgba(11, 31, 51, .35);
 }
 .t321-mlg .mlg-badge--lg { font-size: 13px; padding: 8px 16px; }
 .t321-mlg .mlg-deal-price { margin: 20px 0 6px; }
@@ -164,7 +162,7 @@
 .t321-mlg .mlg-qa p { margin: 0; font-size: 14.5px; color: var(--t321-mkt-ink-muted); line-height: 1.6; }
 
 /* ── Final CTA ────────────────────────────────────────────────────────── */
-.t321-mlg .mlg-final { text-align: center; color: #fff; padding: 64px 0; background: linear-gradient(135deg, var(--t321-mkt-ink) 0%, #15314d 100%); }
+.t321-mlg .mlg-final { text-align: center; color: #fff; padding: 64px 0; background: var(--t321-mkt-ink); }
 .t321-mlg .mlg-final .mlg-pill { margin-bottom: 16px; }
 .t321-mlg .mlg-final h2 { font-size: 36px; color: #fff; margin: 0 0 10px; }
 .t321-mlg .mlg-final p { color: #A8BFD0; font-size: 17px; max-width: 480px; margin: 0 auto 28px; }

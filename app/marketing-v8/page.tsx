@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getCourse } from "@/lib/sanity";
+import CourseCertificate from "@/components/CourseCertificate";
 import "./marketing-v8.css";
 
 // Standalone email-marketing landing page for the California RBS course
@@ -25,43 +27,29 @@ const STAT_RATING = "4.8/5"; // PLACEHOLDER - confirm before launch
 const STAT_REVIEWS = "1,900+"; // PLACEHOLDER - confirm before launch
 
 const STEPS = [
-  {
-    n: "1",
-    icon: "fas fa-id-card",
-    title: "Register with CA ABC",
-    body: "Create your account on the California ABC server portal to get your unique server ID."
-  },
-  {
-    n: "2",
-    icon: "fas fa-graduation-cap",
-    title: "Take the RBS training",
-    body: "Complete our ABC-approved online course at your own pace, on any device."
-  },
-  {
-    n: "3",
-    icon: "fas fa-award",
-    title: "Pass the ABC exam",
-    body: "Take the mandatory exam administered by the ABC and get certified within 60 days of hire."
-  }
+  { n: "1", icon: "fas fa-id-card", title: "Register with CA ABC", body: "Get your server ID from the ABC portal." },
+  { n: "2", icon: "fas fa-graduation-cap", title: "Take the training", body: "Finish our online course at your own pace." },
+  { n: "3", icon: "fas fa-award", title: "Pass the ABC exam", body: "Sit the mandatory exam and get certified." }
 ];
 
 const FEATURES = [
-  { icon: "fas fa-circle-check", title: "ABC-approved training", body: "Our course meets California ABC requirements for Responsible Beverage Service." },
-  { icon: "fas fa-clipboard-check", title: "Built for the ABC exam", body: "Lessons map to the exam so you walk in ready to pass on your first try." },
-  { icon: "fas fa-wine-bottle", title: "Responsible service skills", body: "Learn to check IDs, spot fake identification, and prevent over-service." },
-  { icon: "fas fa-laptop", title: "Online and self-paced", body: "Start, pause, and finish whenever it suits your schedule." },
-  { icon: "fas fa-file-arrow-down", title: "Certificate for your records", body: "Download proof of training to keep on file for your employer and the ABC." },
-  { icon: "fas fa-headset", title: "Support when you need it", body: "Questions about the California process? Our team is here to help." }
+  { icon: "fas fa-circle-check", title: "ABC-approved", body: "Meets California ABC requirements for RBS." },
+  { icon: "fas fa-clipboard-check", title: "Built for the exam", body: "Lessons map to the ABC exam so you pass." },
+  { icon: "fas fa-laptop", title: "Online, self-paced", body: "Start, pause, and finish on any device." }
 ];
 
 const FAQS = [
-  { icon: "fas fa-circle-check", q: "Is this course ABC approved?", a: "Yes. Our RBS training is approved by the California ABC to prepare servers and managers for the mandatory exam." },
-  { icon: "fas fa-id-card", q: "Do I need to register with the ABC first?", a: "Yes. California requires you to register on the ABC server portal and get a server ID before you take the exam. We walk you through it." },
-  { icon: "fas fa-clock", q: "How long does the training take?", a: "The online course is self-paced. Most servers finish the training in a couple of hours." },
-  { icon: "fas fa-award", q: "Who administers the exam?", a: "The exam is administered by the California ABC. Our course prepares you for it, then you take the ABC exam to get certified." }
+  { icon: "fas fa-circle-check", q: "Is this course ABC approved?", a: "Yes, it is approved by the California ABC." },
+  { icon: "fas fa-id-card", q: "Do I register with the ABC first?", a: "Yes, you need a server ID before the exam." },
+  { icon: "fas fa-clock", q: "How long does it take?", a: "Most servers finish in a couple of hours." }
 ];
 
-export default function CaliforniaRbsLanding() {
+export default async function CaliforniaRbsLanding() {
+  let course = null;
+  try {
+    course = await getCourse("rbs");
+  } catch {}
+
   return (
     <div className="t321-mlh">
 
@@ -75,8 +63,8 @@ export default function CaliforniaRbsLanding() {
         <div className="mlh-hero-panel">
           <div className="mlh-hero-inner">
             <span className="mlh-eyebrow"><i className="fas fa-martini-glass" aria-hidden="true" /> California RBS certification</span>
-            <h1>Get RBS certified for your <em>California bar or restaurant</em></h1>
-            <p className="mlh-subhead">ABC-approved Responsible Beverage Service training for alcohol servers and their managers. Online, self-paced, and built to help you pass the mandatory ABC exam.</p>
+            <h1>Get RBS certified, <em>100% online</em></h1>
+            <p className="mlh-subhead">ABC-approved training that prepares California servers to pass the mandatory exam.</p>
             <Link href={CTA_HREF} className="mlh-btn mlh-btn--primary">Start the RBS course <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
             <div className="mlh-micro">
               <span><i className="fas fa-check" aria-hidden="true" /> ABC-approved</span>
@@ -86,7 +74,7 @@ export default function CaliforniaRbsLanding() {
           </div>
         </div>
         <div className="mlh-hero-media">
-          <img src="/img/server.jpg" alt="Bartender serving a drink in a California restaurant" />
+          <img src={course?.image || "/img/server.jpg"} alt={course?.title || "California RBS course"} />
         </div>
       </section>
 
@@ -96,7 +84,6 @@ export default function CaliforniaRbsLanding() {
           <div className="mlh-head">
             <span className="mlh-pill"><i className="fas fa-list-ol" aria-hidden="true" /> The California process</span>
             <h2>RBS certification in 3 steps</h2>
-            <p className="mlh-lede">California requires each step in order. Here is exactly how it works.</p>
           </div>
           <ol className="mlh-stepper">
             {STEPS.map((s) => (
@@ -114,13 +101,12 @@ export default function CaliforniaRbsLanding() {
         </div>
       </section>
 
-      {/* ── Feature row: what's included / why us ──────────────────────── */}
+      {/* ── Feature row: why us ────────────────────────────────────────── */}
       <section className="mlh-section">
         <div className="mlh-container">
           <div className="mlh-head">
             <span className="mlh-pill"><i className="fas fa-star" aria-hidden="true" /> Why Train 321</span>
             <h2>Everything you need to get certified</h2>
-            <p className="mlh-lede">Built for California servers and the businesses that employ them.</p>
           </div>
           <div className="mlh-feature-grid">
             {FEATURES.map((f) => (
@@ -130,6 +116,20 @@ export default function CaliforniaRbsLanding() {
                 <p>{f.body}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Certificate preview ────────────────────────────────────────── */}
+      <section className="mlh-section mlh-sunk">
+        <div className="mlh-narrow">
+          <div className="mlh-head">
+            <span className="mlh-pill"><i className="fas fa-certificate" aria-hidden="true" /> Your certificate</span>
+            <h2>Proof of training to keep on file</h2>
+            <p className="mlh-lede">Download your certificate the moment you finish the course.</p>
+          </div>
+          <div className="mlh-cert">
+            <CourseCertificate courseTitle="California Responsible Beverage Service" showExpiration={false} />
           </div>
         </div>
       </section>
@@ -150,7 +150,6 @@ export default function CaliforniaRbsLanding() {
           <div className="mlh-head">
             <span className="mlh-pill"><i className="fas fa-tag" aria-hidden="true" /> Simple pricing</span>
             <h2>Certify yourself or your whole team</h2>
-            <p className="mlh-lede">One clear price, with a lower per-seat rate for businesses.</p>
           </div>
           <div className="mlh-price-grid">
             <div className="mlh-plan">

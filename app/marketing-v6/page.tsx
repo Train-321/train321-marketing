@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getCourse } from "@/lib/sanity";
+import CourseCertificate from "@/components/CourseCertificate";
 import "./marketing-v6.css";
 
 // Standalone email-marketing landing page for the Security Host course. A new,
@@ -25,31 +27,37 @@ const STAT_RATING = "4.8/5"; // PLACEHOLDER - confirm before launch
 const STAT_REVIEWS = "1,900+"; // PLACEHOLDER - confirm before launch
 const STAT_VENUES = "600+"; // PLACEHOLDER - confirm before launch
 
-// Scenario cards sit right below the hero headline.
+// Scenario cards sit right below the hero headline. Short labels only.
 const SCENARIOS = [
-  { icon: "fas fa-people-roof", title: "Crowd control", body: "Keep lines moving and manage capacity under pressure." },
-  { icon: "fas fa-id-card", title: "ID and entry", body: "Check IDs, spot fakes, and handle refusals with confidence." },
-  { icon: "fas fa-hand", title: "De-escalation", body: "Defuse conflict and calm heated guests before it escalates." },
-  { icon: "fas fa-triangle-exclamation", title: "Incident response", body: "Act fast when something goes wrong and document it right." }
+  { icon: "fas fa-people-roof", title: "Crowd control" },
+  { icon: "fas fa-id-card", title: "ID and entry" },
+  { icon: "fas fa-hand", title: "De-escalation" },
+  { icon: "fas fa-triangle-exclamation", title: "Incident response" }
 ];
 
 const COVERED = [
-  { icon: "fas fa-id-card-clip", title: "Entry and ID checks", body: "Verify IDs, catch fakes, and manage who gets in and who does not." },
-  { icon: "fas fa-people-group", title: "Crowd and line control", body: "Manage capacity, keep queues orderly, and prevent crushes." },
-  { icon: "fas fa-comments", title: "Conflict de-escalation", body: "Read the room and talk tense situations down before they turn physical." },
-  { icon: "fas fa-kit-medical", title: "Incident response", body: "Respond to fights, medical issues, and emergencies with a clear plan." },
-  { icon: "fas fa-scale-balanced", title: "Legal limits and liability", body: "Know your authority, use of force limits, and when to call police." },
-  { icon: "fas fa-award", title: "Certificate of completion", body: "Finish online and download a certificate you can show your venue." }
+  { icon: "fas fa-id-card-clip", title: "Entry and ID checks" },
+  { icon: "fas fa-people-group", title: "Crowd and line control" },
+  { icon: "fas fa-comments", title: "Conflict de-escalation" },
+  { icon: "fas fa-kit-medical", title: "Incident response" },
+  { icon: "fas fa-scale-balanced", title: "Legal limits" },
+  { icon: "fas fa-award", title: "Certificate of completion" }
 ];
 
 const FAQS = [
-  { icon: "fas fa-clock", q: "How long does it take?", a: "Most people finish in a few hours. Work at your own pace and resume anytime." },
-  { icon: "fas fa-building-shield", q: "Is it accepted by my venue or state?", a: "Requirements vary by state and venue. Check your local rules, then confirm with your employer." },
-  { icon: "fas fa-award", q: "Do I get a certificate?", a: "Yes. Pass the course and download your certificate right away to share with your venue." },
-  { icon: "fas fa-users", q: "Can I train my whole team?", a: "Yes. Enroll your door and security staff in bulk at a lower per-seat rate." }
+  { icon: "fas fa-clock", q: "How long does it take?", a: "A few hours, at your own pace." },
+  { icon: "fas fa-award", q: "Do I get a certificate?", a: "Yes, downloadable as soon as you pass." },
+  { icon: "fas fa-users", q: "Can I train my team?", a: "Yes, in bulk at a lower per-seat rate." }
 ];
 
-export default function SecurityHostLanding() {
+export default async function SecurityHostLanding() {
+  // Pull the course so the hero photo is the course's own image. Wrapped in
+  // try/catch so a Sanity hiccup never breaks this campaign page.
+  let course = null;
+  try {
+    course = await getCourse("security-host");
+  } catch {}
+
   return (
     <div className="t321-mlf">
 
@@ -63,8 +71,8 @@ export default function SecurityHostLanding() {
         <div className="mlf-container">
           <div className="mlf-hero-top">
             <span className="mlf-pill"><i className="fas fa-shield-halved" aria-hidden="true" /> Security host and door staff training</span>
-            <h1>Run the door with <em>confidence</em></h1>
-            <p className="mlf-lede">Online training for security hosts, door staff, and bouncers at bars, clubs, and venues. Manage entry, control crowds, and keep the night under control.</p>
+            <h1>Own the <em>door</em></h1>
+            <p className="mlf-lede">Online security host training for door staff at bars, clubs, and venues.</p>
             <div className="mlf-hero-cta">
               <Link href={CTA_HREF} className="mlf-btn mlf-btn--primary">Start training for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
               <div className="mlf-rating">
@@ -79,7 +87,6 @@ export default function SecurityHostLanding() {
               <div key={s.title} className="mlf-scenario">
                 <span className="mlf-scenario-ic"><i className={s.icon} aria-hidden="true" /></span>
                 <strong>{s.title}</strong>
-                <p>{s.body}</p>
               </div>
             ))}
           </div>
@@ -91,7 +98,7 @@ export default function SecurityHostLanding() {
         <div className="mlf-container mlf-band-inner">
           <div className="mlf-band-text">
             <h2>Get shift-ready, fast</h2>
-            <p>Finish online and walk into your next shift knowing exactly what to do.</p>
+            <p>Finish online, walk into your next shift ready.</p>
           </div>
           <Link href={CTA_HREF} className="mlf-btn mlf-btn--primary">Enroll now <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
         </div>
@@ -102,35 +109,32 @@ export default function SecurityHostLanding() {
         <div className="mlf-container">
           <div className="mlf-head">
             <span className="mlf-pill"><i className="fas fa-list-check" aria-hidden="true" /> What's covered</span>
-            <h2>Everything a door needs to run safe</h2>
-            <p className="mlf-lede">Built for the real situations security hosts face every night.</p>
+            <h2>Everything a door needs</h2>
           </div>
           <div className="mlf-feature-grid">
             {COVERED.map((c) => (
               <div key={c.title} className="mlf-feature">
                 <span className="mlf-feature-ic"><i className={c.icon} aria-hidden="true" /></span>
                 <strong>{c.title}</strong>
-                <p>{c.body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Value section: image + points ───────────────────────────────── */}
+      {/* ── Value section: course image + points ────────────────────────── */}
       <section className="mlf-section mlf-sunk">
         <div className="mlf-container mlf-value-grid">
           <div className="mlf-value-media">
-            <img src="/img/banner-image.png" alt="Security host working the door at a venue" />
+            <img src={course?.image || "/img/hero-restaurant.png"} alt={course?.title || "Security host training"} />
           </div>
           <div className="mlf-value-body">
             <span className="mlf-pill"><i className="fas fa-star" aria-hidden="true" /> Why Train 321</span>
-            <h2>Training that holds up under pressure</h2>
-            <p className="mlf-lede" style={{ fontSize: "16px" }}>Practical, no-fluff lessons you can finish on any device.</p>
+            <h2>Training that holds up</h2>
             <ul className="mlf-points">
-              <li><span className="mlf-pi"><i className="fas fa-bolt" aria-hidden="true" /></span><div><strong>Online and on your schedule</strong><p>Short lessons you can finish on a phone before your shift.</p></div></li>
-              <li><span className="mlf-pi"><i className="fas fa-shield-halved" aria-hidden="true" /></span><div><strong>Real door scenarios</strong><p>Entry, crowds, conflict, and incidents, taught the way they happen.</p></div></li>
-              <li><span className="mlf-pi"><i className="fas fa-award" aria-hidden="true" /></span><div><strong>Certificate to show your venue</strong><p>Download proof of completion as soon as you pass.</p></div></li>
+              <li><span className="mlf-pi"><i className="fas fa-bolt" aria-hidden="true" /></span><div><strong>On your schedule</strong></div></li>
+              <li><span className="mlf-pi"><i className="fas fa-shield-halved" aria-hidden="true" /></span><div><strong>Real door scenarios</strong></div></li>
+              <li><span className="mlf-pi"><i className="fas fa-award" aria-hidden="true" /></span><div><strong>Certificate to show your venue</strong></div></li>
             </ul>
             <Link href={CTA_HREF} className="mlf-btn mlf-btn--primary" style={{ marginTop: "26px" }}>Start training <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
           </div>
@@ -147,13 +151,27 @@ export default function SecurityHostLanding() {
         </div>
       </div>
 
-      {/* ── Pricing ─────────────────────────────────────────────────────── */}
+      {/* ── Certificate preview ─────────────────────────────────────────── */}
       <section className="mlf-section">
+        <div className="mlf-container mlf-cert-grid">
+          <div className="mlf-cert-copy">
+            <span className="mlf-pill"><i className="fas fa-award" aria-hidden="true" /> Certificate of completion</span>
+            <h2>Proof you can show your venue</h2>
+            <p className="mlf-lede">Pass the course and download your certificate right away.</p>
+            <Link href={CTA_HREF} className="mlf-btn mlf-btn--primary">Start training <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+          </div>
+          <div className="mlf-cert-preview">
+            <CourseCertificate courseTitle="Security Host Training" />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Pricing ─────────────────────────────────────────────────────── */}
+      <section className="mlf-section mlf-sunk">
         <div className="mlf-container">
           <div className="mlf-head">
             <span className="mlf-pill"><i className="fas fa-tag" aria-hidden="true" /> Simple pricing</span>
-            <h2>Train yourself, or your whole crew</h2>
-            <p className="mlf-lede">One flat price per person, with a lower rate for venues and teams.</p>
+            <h2>Train yourself, or your crew</h2>
           </div>
           <div className="mlf-price-grid">
             <div className="mlf-plan">
@@ -188,7 +206,7 @@ export default function SecurityHostLanding() {
       </section>
 
       {/* ── FAQ ─────────────────────────────────────────────────────────── */}
-      <section className="mlf-section mlf-sunk">
+      <section className="mlf-section">
         <div className="mlf-narrow">
           <div className="mlf-head">
             <span className="mlf-pill"><i className="fas fa-circle-question" aria-hidden="true" /> Good to know</span>

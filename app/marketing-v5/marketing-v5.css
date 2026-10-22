@@ -61,12 +61,12 @@
 .t321-mle .mle-btn--primary {
   background: var(--t321-mkt-accent);
   color: var(--t321-mkt-paper);
-  box-shadow: 0 10px 24px -10px rgba(0, 180, 219, .6);
+  box-shadow: 0 10px 24px -14px rgba(11, 31, 51, .45);
 }
 .t321-mle .mle-btn--primary:hover {
   background: var(--t321-mkt-accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 14px 30px -10px rgba(0, 180, 219, .7);
+  box-shadow: 0 14px 30px -14px rgba(11, 31, 51, .5);
 }
 .t321-mle .mle-btn--full { width: 100%; justify-content: center; }
 
@@ -87,9 +87,7 @@
 /* ── Hero (centered, minimal) ─────────────────────────────────────────── */
 .t321-mle .mle-hero {
   padding: 84px 0 44px;
-  background:
-    radial-gradient(900px 400px at 50% -20%, var(--t321-mkt-accent-wash) 0%, transparent 65%),
-    var(--t321-mkt-paper);
+  background: var(--t321-mkt-paper);
 }
 .t321-mle .mle-hero h1 {
   font-size: 52px;
@@ -201,6 +199,28 @@
   font-size: 15px;
   color: var(--t321-mkt-ink-muted);
   line-height: 1.6;
+}
+
+/* ── Certificate ──────────────────────────────────────────────────────── */
+.t321-mle .mle-cert-col {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 24px;
+  text-align: center;
+}
+.t321-mle .mle-cert-line {
+  font-size: 16px;
+  color: var(--t321-mkt-ink-muted);
+  line-height: 1.6;
+  margin: 10px auto 28px;
+  max-width: 520px;
+}
+.t321-mle .mle-cert-frame {
+  border: 1px solid var(--t321-mkt-line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--t321-mkt-paper);
+  box-shadow: 0 26px 60px -34px rgba(11, 31, 51, .35);
 }
 
 /* ── Who needs this ───────────────────────────────────────────────────── */

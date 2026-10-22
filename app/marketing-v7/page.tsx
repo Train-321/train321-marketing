@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getCourse } from "@/lib/sanity";
+import TabcCertificate from "@/components/TabcCertificate";
 import "./marketing-v7.css";
 
 // Standalone email-marketing landing page for the TABC Certification course
@@ -29,20 +31,23 @@ const STAT_RATING = "4.9/5";
 const STAT_REVIEWS = "3,100+";
 
 const LEARN = [
-  { icon: "fas fa-id-card", text: "Check IDs and spot fake or altered identification" },
-  { icon: "fas fa-user-slash", text: "Recognize and refuse service to intoxicated or underage customers" },
-  { icon: "fas fa-scale-balanced", text: "Understand Texas alcohol laws and your legal responsibilities" },
-  { icon: "fas fa-circle-exclamation", text: "Limit your liability and your employer's under state law" }
+  { icon: "fas fa-id-card", text: "Check IDs and spot fake identification" },
+  { icon: "fas fa-user-slash", text: "Refuse service to intoxicated or underage customers" },
+  { icon: "fas fa-scale-balanced", text: "Know Texas alcohol law and limit your liability" }
 ];
 
 const FAQS = [
-  { icon: "fas fa-circle-check", q: "Is this course TABC approved?", a: "Yes. It's an official TABC-approved seller-server program, accepted statewide for bartenders, servers, and retail clerks." },
-  { icon: "fas fa-calendar-check", q: "How long is my certification valid?", a: "Your TABC certificate stays valid for the full required period. We'll remind you before it's time to renew." },
-  { icon: "fas fa-bolt", q: "How fast do I get my certificate?", a: "Instantly. Pass the final and download your official certificate right away, no waiting and no mail." },
-  { icon: "fas fa-briefcase", q: "Will my employer accept it?", a: "Yes. Because it's TABC-approved, Texas employers accept it to satisfy their seller-server training requirement." }
+  { icon: "fas fa-circle-check", q: "Is this course TABC approved?", a: "Yes, it's an official TABC-approved seller-server program accepted statewide." },
+  { icon: "fas fa-bolt", q: "How fast do I get my certificate?", a: "Instantly. Pass the final and download your official certificate right away." },
+  { icon: "fas fa-briefcase", q: "Will my employer accept it?", a: "Yes. It's TABC-approved, so Texas employers accept it for seller-server training." }
 ];
 
-export default function TabcLanding() {
+export default async function TabcLanding() {
+  let course = null;
+  try {
+    course = await getCourse("tabc");
+  } catch {}
+
   return (
     <div className="t321-mlg">
 
@@ -57,8 +62,8 @@ export default function TabcLanding() {
 
           <div className="mlg-hero-copy">
             <span className="mlg-pill"><i className="fas fa-certificate" aria-hidden="true" /> Official TABC seller-server course</span>
-            <h1>Get TABC certified online in <em>about an hour</em></h1>
-            <p className="mlg-lede">The fast, official way for Texas bartenders, servers, and clerks to meet their alcohol seller-server requirement. Finish today and get your certificate instantly.</p>
+            <h1>Get TABC certified in <em>about an hour</em></h1>
+            <p className="mlg-lede">The fast, official way for Texas bartenders, servers, and clerks to certify online and get their certificate instantly.</p>
 
             <div className="mlg-offer">
               <div className="mlg-offer-head">
@@ -69,7 +74,7 @@ export default function TabcLanding() {
                 </div>
               </div>
               <ul className="mlg-offer-list">
-                <li><i className="fas fa-circle-check" aria-hidden="true" /> TABC-approved and accepted statewide</li>
+                <li><i className="fas fa-circle-check" aria-hidden="true" /> TABC-approved, accepted statewide</li>
                 <li><i className="fas fa-circle-check" aria-hidden="true" /> Official certificate the moment you pass</li>
                 <li><i className="fas fa-circle-check" aria-hidden="true" /> Satisfies your employer's requirement</li>
               </ul>
@@ -84,7 +89,7 @@ export default function TabcLanding() {
           <div className="mlg-hero-cert">
             <span className="mlg-cert-ribbon"><i className="fas fa-circle-check" aria-hidden="true" /> TABC approved</span>
             <div className="mlg-cert-frame">
-              <img src="/img/certificate/tabc-sample.png" alt="Sample TABC seller-server certification certificate" />
+              <TabcCertificate />
             </div>
             <div className="mlg-cert-caption">
               <img src="/img/certificate/stamp.png" alt="" className="mlg-cert-stamp" />
@@ -109,12 +114,11 @@ export default function TabcLanding() {
       <section className="mlg-section">
         <div className="mlg-container mlg-learn-grid">
           <div className="mlg-learn-media">
-            <img src="/img/server.jpg" alt="Server checking a customer's ID at the bar" />
+            <img src={course?.image || "/img/server.jpg"} alt={course?.title || "TABC certification course"} />
           </div>
           <div className="mlg-learn-body">
             <span className="mlg-pill"><i className="fas fa-graduation-cap" aria-hidden="true" /> What you'll learn</span>
             <h2>Everything Texas law requires, in one short course</h2>
-            <p className="mlg-lede mlg-lede--sm">Built for anyone who sells or serves alcohol in Texas.</p>
             <ul className="mlg-learn-list">
               {LEARN.map((l) => (
                 <li key={l.text}>
@@ -133,7 +137,7 @@ export default function TabcLanding() {
           <div className="mlg-head">
             <span className="mlg-pill"><i className="fas fa-tag" aria-hidden="true" /> One simple price</span>
             <h2>Certify yourself in minutes</h2>
-            <p className="mlg-lede">No subscription and no hidden fees. Just pass and download your certificate.</p>
+            <p className="mlg-lede">No subscription, no hidden fees. Just pass and download your certificate.</p>
           </div>
 
           <div className="mlg-deal">
@@ -146,7 +150,6 @@ export default function TabcLanding() {
               <li><i className="fas fa-circle-check" aria-hidden="true" /> Full TABC seller-server course</li>
               <li><i className="fas fa-circle-check" aria-hidden="true" /> Final exam with free retakes</li>
               <li><i className="fas fa-circle-check" aria-hidden="true" /> Instant official certificate</li>
-              <li><i className="fas fa-circle-check" aria-hidden="true" /> Valid for the full required period</li>
             </ul>
             <Link href={CTA_HREF} className="mlg-btn mlg-btn--primary mlg-btn--block">Get certified for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
             <p className="mlg-deal-team">

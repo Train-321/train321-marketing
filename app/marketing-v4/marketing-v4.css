@@ -47,7 +47,7 @@
 /* ── Hero (left-aligned, calm) ────────────────────────────────────────── */
 .t321-mld .mld-hero {
   padding: 64px 0 48px;
-  background: linear-gradient(180deg, var(--t321-mkt-paper-sunk) 0%, var(--t321-mkt-paper) 100%);
+  background: var(--t321-mkt-paper-sunk);
   border-bottom: 1px solid var(--t321-mkt-line);
 }
 .t321-mld .mld-hero h1 {
@@ -63,6 +63,11 @@
 }
 .t321-mld .mld-hero-points li { display: inline-flex; align-items: center; gap: 8px; }
 .t321-mld .mld-hero-points i { color: var(--t321-mkt-positive); }
+.t321-mld .mld-hero-media { margin: 34px 0 0; }
+.t321-mld .mld-hero-media img {
+  display: block; width: 100%; height: auto; border-radius: 14px;
+  border: 1px solid var(--t321-mkt-line); background: var(--t321-mkt-paper);
+}
 
 /* ── Trust strip ──────────────────────────────────────────────────────── */
 .t321-mld .mld-trust { background: var(--t321-mkt-paper); border-bottom: 1px solid var(--t321-mkt-line); padding: 26px 0; }

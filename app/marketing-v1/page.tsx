@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import CourseCertificate from "@/components/CourseCertificate";
+import { getCourse } from "@/lib/sanity";
 import "./marketing-v1.css";
 
 // Standalone email-marketing landing page for the Food Handler course. A new,
@@ -26,19 +27,23 @@ const STAT_RATING = "4.9/5";
 const STAT_REVIEWS = "2,300+";
 
 const BENEFITS = [
-  { icon: "fas fa-bolt", title: "Fast and 100% online", body: "Short lessons you finish in about an hour. English or Spanish, any device." },
-  { icon: "fas fa-certificate", title: "Same-day certificate", body: "Pass the exam and download your official certificate instantly. Free retakes." },
-  { icon: "fas fa-users", title: "Train your whole team", body: "Enroll staff in bulk, track progress, and store every certificate in one place." }
+  { icon: "fas fa-bolt", title: "Fast and 100% online", body: "Finish in about an hour, English or Spanish." },
+  { icon: "fas fa-certificate", title: "Same-day certificate", body: "Pass and download it instantly." },
+  { icon: "fas fa-users", title: "Train your whole team", body: "Enroll staff in bulk and track every certificate." }
 ];
 
 const FAQS = [
-  { icon: "fas fa-clock", q: "How long does it take?", a: "Most people finish in about an hour. Pause and resume anytime." },
-  { icon: "fas fa-map-location-dot", q: "Is it accepted in my state?", a: "It's ANSI-accredited and accepted in all 50 states." },
-  { icon: "fas fa-rotate-right", q: "What if I fail the exam?", a: "Retakes are free. Take the final as many times as you need." },
-  { icon: "fas fa-file-arrow-down", q: "When do I get my certificate?", a: "Right after you pass. Download, print, or email it." }
+  { icon: "fas fa-clock", q: "How long does it take?", a: "About an hour, pause and resume anytime." },
+  { icon: "fas fa-map-location-dot", q: "Is it accepted in my state?", a: "ANSI-accredited and accepted in all 50 states." },
+  { icon: "fas fa-rotate-right", q: "What if I fail the exam?", a: "Retakes are free, as many as you need." }
 ];
 
-export default function FoodHandlerLanding() {
+export default async function FoodHandlerLanding() {
+  let course = null;
+  try {
+    course = await getCourse("food-handler");
+  } catch {}
+
   return (
     <div className="t321-ml">
 
@@ -51,8 +56,8 @@ export default function FoodHandlerLanding() {
       <div className="ml-hero">
         <div className="ml-container">
           <span className="ml-pill"><i className="fas fa-shield-halved" aria-hidden="true" /> ANSI-accredited food handler course</span>
-          <h1>Get your food handler card in <em>about an hour</em></h1>
-          <p className="ml-lede">100% online. Pass the exam and download your official certificate the same day. Accepted in all 50 states.</p>
+          <h1>Food handler card in <em>about an hour</em></h1>
+          <p className="ml-lede">100% online and accepted in all 50 states.</p>
           <Link href={CTA_HREF} className="ml-btn ml-btn--primary">Get certified for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
           <div className="ml-micro">
             <span><i className="fas fa-check" aria-hidden="true" /> No subscription</span>
@@ -67,7 +72,7 @@ export default function FoodHandlerLanding() {
         <div className="ml-showcase">
           <span className="ml-ribbon"><i className="fas fa-circle-check" aria-hidden="true" /> ANSI-accredited</span>
           <div className="ml-photo">
-            <img src="/img/hero-restaurant.png" alt="Food service team at work" />
+            <img src={course?.image || "/img/hero-restaurant.png"} alt={course?.title || "Food handler course"} />
           </div>
           <div className="ml-floatcard">
             <div className="ml-thumb"><CourseCertificate courseTitle="Food Handler Certification" /></div>

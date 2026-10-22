@@ -26,11 +26,11 @@
 }
 .t321-mlf .mlf-btn--primary {
   background: var(--t321-mkt-accent); color: #fff;
-  box-shadow: 0 10px 24px -8px rgba(0, 180, 219, .6);
+  box-shadow: 0 10px 24px -8px rgba(11, 31, 51, .4);
 }
 .t321-mlf .mlf-btn--primary:hover {
   background: var(--t321-mkt-accent-hover); transform: translateY(-1px);
-  box-shadow: 0 14px 30px -8px rgba(0, 180, 219, .7);
+  box-shadow: 0 14px 30px -8px rgba(11, 31, 51, .5);
 }
 .t321-mlf .mlf-btn--light {
   background: #fff; color: var(--t321-mkt-accent-ink); border-color: var(--t321-mkt-line);
@@ -52,9 +52,7 @@
 /* ── Hero with scenario card grid ─────────────────────────────────────── */
 .t321-mlf .mlf-hero {
   position: relative; padding: 60px 0 56px; overflow: hidden;
-  background:
-    radial-gradient(1100px 460px at 80% -10%, #E8F8FC 0%, transparent 60%),
-    linear-gradient(180deg, var(--t321-mkt-paper-sunk) 0%, #ffffff 100%);
+  background: var(--t321-mkt-paper-sunk);
 }
 .t321-mlf .mlf-hero-top { max-width: 760px; }
 .t321-mlf .mlf-hero h1 { font-size: 54px; line-height: 1.04; margin: 20px 0 16px; }
@@ -76,10 +74,9 @@
 .t321-mlf .mlf-scenario-ic {
   width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center;
   justify-content: center; font-size: 19px; color: #fff; margin-bottom: 14px;
-  background: linear-gradient(135deg, var(--t321-mkt-ink), var(--t321-mkt-accent));
+  background: var(--t321-mkt-accent);
 }
-.t321-mlf .mlf-scenario strong { display: block; font-size: 16px; margin-bottom: 5px; }
-.t321-mlf .mlf-scenario p { margin: 0; font-size: 14px; color: var(--t321-mkt-ink-muted); line-height: 1.55; }
+.t321-mlf .mlf-scenario strong { display: block; font-size: 16px; }
 
 /* ── Dark CTA band ────────────────────────────────────────────────────── */
 .t321-mlf .mlf-band { background: var(--t321-mkt-ink); color: #fff; padding: 34px 0; }
@@ -105,8 +102,7 @@
   justify-content: center; font-size: 18px; color: var(--t321-mkt-accent-ink);
   background: var(--t321-mkt-accent-wash); margin-bottom: 14px;
 }
-.t321-mlf .mlf-feature strong { display: block; font-size: 16px; margin-bottom: 5px; }
-.t321-mlf .mlf-feature p { margin: 0; font-size: 14.5px; color: var(--t321-mkt-ink-muted); line-height: 1.55; }
+.t321-mlf .mlf-feature strong { display: block; font-size: 16px; }
 
 /* ── Value section (image + points) ───────────────────────────────────── */
 .t321-mlf .mlf-value-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: 48px; align-items: center; }
@@ -122,9 +118,9 @@
 .t321-mlf .mlf-points .mlf-pi {
   width: 38px; height: 38px; flex: 0 0 auto; border-radius: 11px;
   display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff;
-  background: linear-gradient(135deg, var(--t321-mkt-ink), var(--t321-mkt-accent));
+  background: var(--t321-mkt-accent);
 }
-.t321-mlf .mlf-points strong { display: block; font-size: 16px; margin-bottom: 2px; }
+.t321-mlf .mlf-points strong { display: block; font-size: 16px; }
 .t321-mlf .mlf-points p { margin: 0; font-size: 14.5px; color: var(--t321-mkt-ink-muted); line-height: 1.55; }
 
 /* ── Trust / stat strip ───────────────────────────────────────────────── */
@@ -137,7 +133,7 @@
 /* ── Pricing ──────────────────────────────────────────────────────────── */
 .t321-mlf .mlf-price-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; max-width: 760px; margin: 0 auto; }
 .t321-mlf .mlf-plan { border: 1px solid var(--t321-mkt-line); border-radius: 20px; padding: 30px 28px; background: #fff; position: relative; }
-.t321-mlf .mlf-plan.is-pop { border: 2px solid var(--t321-mkt-accent); box-shadow: 0 26px 60px -30px rgba(0, 180, 219, .5); }
+.t321-mlf .mlf-plan.is-pop { border: 2px solid var(--t321-mkt-accent); box-shadow: 0 26px 60px -30px rgba(11, 31, 51, .4); }
 .t321-mlf .mlf-plan .mlf-tag { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--t321-mkt-accent); color: #fff; font-size: 12px; font-weight: 600; padding: 5px 15px; border-radius: 999px; white-space: nowrap; }
 .t321-mlf .mlf-plan h3 { font-size: 20px; margin: 0 0 2px; }
 .t321-mlf .mlf-plan .mlf-sub { font-size: 13.5px; color: var(--t321-mkt-ink-muted); margin: 0 0 14px; }
@@ -148,6 +144,12 @@
 .t321-mlf .mlf-plan li i { color: var(--t321-mkt-positive); margin-top: 3px; font-size: 14px; }
 .t321-mlf .mlf-plan .mlf-btn { width: 100%; justify-content: center; }
 
+/* ── Certificate preview ──────────────────────────────────────────────── */
+.t321-mlf .mlf-cert-grid { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 48px; align-items: center; }
+.t321-mlf .mlf-cert-copy h2 { font-size: 32px; margin: 14px 0 10px; }
+.t321-mlf .mlf-cert-copy .mlf-lede { margin: 0 0 24px; }
+.t321-mlf .mlf-cert-preview { width: 100%; }
+
 /* ── FAQ ──────────────────────────────────────────────────────────────── */
 .t321-mlf .mlf-faq { max-width: 760px; margin: 0 auto; }
 .t321-mlf .mlf-qa { border: 1px solid var(--t321-mkt-line); border-radius: 14px; padding: 18px 22px; margin-bottom: 12px; background: #fff; }
@@ -156,7 +158,7 @@
 .t321-mlf .mlf-qa p { margin: 0; font-size: 14.5px; color: var(--t321-mkt-ink-muted); line-height: 1.6; }
 
 /* ── Final CTA ────────────────────────────────────────────────────────── */
-.t321-mlf .mlf-final { text-align: center; color: #fff; padding: 66px 0; background: linear-gradient(135deg, var(--t321-mkt-ink) 0%, #15314d 100%); }
+.t321-mlf .mlf-final { text-align: center; color: #fff; padding: 66px 0; background: var(--t321-mkt-ink); }
 .t321-mlf .mlf-final h2 { font-size: 36px; color: #fff; margin: 0 0 10px; }
 .t321-mlf .mlf-final p { color: #A8BFD0; font-size: 17px; max-width: 480px; margin: 0 auto 28px; }
 
@@ -175,6 +177,7 @@
   .t321-mlf .mlf-scenarios,
   .t321-mlf .mlf-feature-grid,
   .t321-mlf .mlf-value-grid,
+  .t321-mlf .mlf-cert-grid,
   .t321-mlf .mlf-price-grid,
   .t321-mlf .mlf-stats-grid { grid-template-columns: 1fr; }
   .t321-mlf .mlf-value-media { aspect-ratio: 16 / 10; max-width: 460px; margin: 0 auto; }

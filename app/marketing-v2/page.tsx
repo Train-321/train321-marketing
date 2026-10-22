@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import CourseCertificate from "@/components/CourseCertificate";
+import { getCourse } from "@/lib/sanity";
 import "./marketing-v2.css";
 
 // Standalone email-marketing landing page for the Food Manager course. A new,
@@ -30,37 +31,38 @@ const FEATURES = [
   {
     icon: "fas fa-award",
     kicker: "Nationally recognized",
-    title: "Earn the CFPM credential employers trust",
-    body: "The Certified Food Protection Manager certificate is ANSI-accredited and accepted by health departments nationwide. Carry a credential that holds weight in any jurisdiction.",
-    img: "/img/hero-restaurant.png",
-    alt: "Kitchen manager overseeing a busy commercial kitchen"
+    title: "Earn the CFPM credential",
+    body: "ANSI-accredited and accepted by health departments nationwide."
   },
   {
     icon: "fas fa-clipboard-check",
     kicker: "Inspection ready",
-    title: "Run a compliant kitchen with confidence",
-    body: "Master HACCP principles, temperature control, cross-contamination, and corrective action. Walk into every inspection knowing your kitchen meets the code.",
-    img: "/img/server.jpg",
-    alt: "Server and supervisor reviewing food safety on the floor"
+    title: "Run a compliant kitchen",
+    body: "Master HACCP, temperature control, and corrective action."
   },
   {
     icon: "fas fa-graduation-cap",
     kicker: "Full exam prep",
-    title: "Pass the CFPM exam the first time",
-    body: "Structured study modules, practice questions, and a final review built around the national exam. Study online at your own pace, on any device, around your shifts.",
-    img: "/img/individual-phone.png",
-    alt: "Manager studying the Food Manager course on a phone"
+    title: "Pass on the first try",
+    body: "Study modules and practice questions built around the national exam."
   }
 ];
 
 const FAQS = [
-  { icon: "fas fa-clock", q: "How long does the course take?", a: "Most managers complete the coursework and exam prep in a few sessions. Study at your own pace and pick up where you left off." },
-  { icon: "fas fa-file-signature", q: "Is the exam included?", a: "Yes. The course includes full preparation for the national Certified Food Protection Manager exam." },
-  { icon: "fas fa-building-shield", q: "Will my health department accept it?", a: "The CFPM credential is ANSI-accredited and recognized by health departments across the country. Confirm any local specifics with your jurisdiction." },
-  { icon: "fas fa-rotate-right", q: "What if I don't pass the first time?", a: "Retakes are available so you can sit the exam again until you earn your credential." }
+  { icon: "fas fa-clock", q: "How long does it take?", a: "Most managers finish in a few short sessions." },
+  { icon: "fas fa-file-signature", q: "Is the exam included?", a: "Yes, full CFPM exam prep is included." },
+  { icon: "fas fa-building-shield", q: "Will my health department accept it?", a: "Yes, the CFPM credential is recognized nationwide." }
 ];
 
-export default function FoodManagerLanding() {
+export default async function FoodManagerLanding() {
+  let course = null;
+  try {
+    course = await getCourse("food-manager");
+  } catch {}
+
+  const heroImg = course?.image || "/img/hero-restaurant.png";
+  const heroAlt = course?.title || "Food manager course";
+
   return (
     <div className="t321-mlb">
 
@@ -74,8 +76,8 @@ export default function FoodManagerLanding() {
         <div className="mlb-container mlb-hero-grid">
           <div className="mlb-hero-copy">
             <span className="mlb-pill"><i className="fas fa-shield-halved" aria-hidden="true" /> ANSI-accredited certification</span>
-            <h1>Lead your kitchen with the Food Manager credential</h1>
-            <p className="mlb-lede">Advanced food safety certification for kitchen managers and supervisors. Prepare for the Certified Food Protection Manager exam online, then run a compliant, inspection-ready operation.</p>
+            <h1>Become a Certified Food Protection Manager</h1>
+            <p className="mlb-lede">ANSI-accredited CFPM exam prep you complete online, at your own pace.</p>
             <div className="mlb-cta-row">
               <Link href={CTA_HREF} className="mlb-btn mlb-btn--primary">Start certification <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
               <Link href={CTA_HREF} className="mlb-btn mlb-btn--light">Train your team</Link>
@@ -89,7 +91,7 @@ export default function FoodManagerLanding() {
           <div className="mlb-hero-media">
             <span className="mlb-ribbon"><i className="fas fa-circle-check" aria-hidden="true" /> ANSI-accredited</span>
             <div className="mlb-hero-photo">
-              <img src="/img/hero-individual-v2.png" alt="Restaurant manager reviewing food safety standards" />
+              <img src={heroImg} alt={heroAlt} />
             </div>
             <div className="mlb-floatcard">
               <div className="mlb-thumb"><img src="/img/certificate/stamp.png" alt="" /></div>
@@ -108,13 +110,12 @@ export default function FoodManagerLanding() {
           <div className="mlb-head">
             <span className="mlb-pill"><i className="fas fa-star" aria-hidden="true" /> Why managers choose Train 321</span>
             <h2>Built for the people who run the kitchen</h2>
-            <p className="mlb-lede">For restaurant managers, chefs, and owners who own food safety for the whole team.</p>
           </div>
           <div className="mlb-zig">
             {FEATURES.map((f, i) => (
               <div key={f.title} className={`mlb-row${i % 2 === 1 ? " is-flip" : ""}`}>
                 <div className="mlb-row-media">
-                  <img src={f.img} alt={f.alt} />
+                  <img src={heroImg} alt={heroAlt} />
                 </div>
                 <div className="mlb-row-copy">
                   <span className="mlb-kicker"><i className={f.icon} aria-hidden="true" /> {f.kicker}</span>
@@ -144,7 +145,6 @@ export default function FoodManagerLanding() {
           <div className="mlb-head">
             <span className="mlb-pill"><i className="fas fa-tag" aria-hidden="true" /> Pricing</span>
             <h2>Certify one manager, or your whole bench</h2>
-            <p className="mlb-lede">Straightforward pricing with a lower per-manager rate for teams.</p>
           </div>
           <div className="mlb-price-grid">
             <div className="mlb-plan">
@@ -202,7 +202,7 @@ export default function FoodManagerLanding() {
           <div className="mlb-final-copy">
             <span className="mlb-pill mlb-pill--dark"><i className="fas fa-bolt" aria-hidden="true" /> Ready when you are</span>
             <h2>Put a certified manager on every shift</h2>
-            <p>Join {STAT_MANAGERS} managers who earned the CFPM credential with Train 321. Trusted by {STAT_REVIEWS} reviewers.</p>
+            <p>Join {STAT_MANAGERS} managers certified with Train 321.</p>
             <div className="mlb-cta-row">
               <Link href={CTA_HREF} className="mlb-btn mlb-btn--primary">Start certification for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
             </div>

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getCourse } from "@/lib/sanity";
+import CourseCertificate from "@/components/CourseCertificate";
 import "./marketing-v3.css";
 
 // Standalone email-marketing landing page for the Alcohol Safety (responsible
-// seller/server) course. A new, isolated route — nothing imports it and it
+// seller/server) course. A new, isolated route - nothing imports it and it
 // imports no existing page, so it can't affect the rest of the site. noindex
 // keeps it out of search (the page is for campaign traffic only).
 export const metadata: Metadata = {
@@ -14,40 +16,44 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true }
 };
 
-// ── Campaign settings — edit these in one place ──────────────────────────
+// Campaign settings - edit these in one place.
 const CTA_HREF = "/courses/alcohol"; // where every CTA button goes
 const PRICE_INDIVIDUAL = "$15"; // PLACEHOLDER - confirm before launch
 const PRICE_TEAM = "$11"; // PLACEHOLDER - confirm before launch
 const PHONE = "561-325-7300";
-// Social-proof figures. PLACEHOLDERS — replace with real numbers before launch.
+// Social-proof figures. PLACEHOLDERS - replace with real numbers before launch.
 const STAT_CERTIFIED = "75,000+"; // PLACEHOLDER - confirm before launch
 const STAT_RATING = "4.9/5"; // PLACEHOLDER - confirm before launch
 const STAT_REVIEWS = "3,100+"; // PLACEHOLDER - confirm before launch
 const STAT_MINUTES = "~60"; // PLACEHOLDER - confirm before launch
 
 const BENEFITS = [
-  { icon: "fas fa-id-card", title: "Check IDs with confidence", body: "Learn to verify real IDs and spot fakes before you pour a single drink." },
-  { icon: "fas fa-wine-glass", title: "Prevent over-service", body: "Recognize the signs of intoxication and know exactly when to stop serving." },
-  { icon: "fas fa-scale-balanced", title: "Reduce your liability", body: "Protect yourself and your venue from fines, lawsuits, and license trouble." }
+  { icon: "fas fa-id-card", title: "Check IDs with confidence", body: "Verify real IDs and spot fakes." },
+  { icon: "fas fa-wine-glass", title: "Prevent over-service", body: "Know exactly when to stop serving." },
+  { icon: "fas fa-scale-balanced", title: "Reduce your liability", body: "Protect yourself and your venue." }
 ];
 
 const LEARN = [
   "Verify and read IDs",
-  "Spot fake IDs fast",
   "Signs of intoxication",
-  "When to refuse service",
-  "Handle difficult guests",
-  "Your legal responsibilities"
+  "When to refuse service"
 ];
 
 const FAQS = [
-  { icon: "fas fa-clock", q: "How long does it take?", a: "Most people finish in about an hour. Pause and resume anytime, on any device." },
-  { icon: "fas fa-map-location-dot", q: "Is it accepted in my state?", a: "The course is state-approved where required. Check your state's requirement before you enroll." },
-  { icon: "fas fa-file-arrow-down", q: "When do I get my certificate?", a: "Right after you pass. Download, print, or email your certificate instantly." },
-  { icon: "fas fa-rotate-right", q: "What if I fail the exam?", a: "Retakes are free. Take the final as many times as you need to pass." }
+  { icon: "fas fa-clock", q: "How long does it take?", a: "About an hour, on any device." },
+  { icon: "fas fa-file-arrow-down", q: "When do I get my certificate?", a: "Instantly, right after you pass." },
+  { icon: "fas fa-rotate-right", q: "What if I fail the exam?", a: "Retakes are always free." }
 ];
 
-export default function AlcoholSafetyLanding() {
+export default async function AlcoholSafetyLanding() {
+  let course = null;
+  try {
+    course = await getCourse("alcohol");
+  } catch {}
+
+  const courseImg = course?.image || "/img/server.jpg";
+  const courseAlt = course?.title || "Alcohol safety course";
+
   return (
     <div className="t321-mlc">
 
@@ -56,13 +62,13 @@ export default function AlcoholSafetyLanding() {
           no other page is affected. The page renders its own minimal footer. */}
       <style>{`.t321-mkt-header,.t321-mkt-footer{display:none !important;}`}</style>
 
-      {/* ── Dark immersive hero ────────────────────────────────────────── */}
+      {/* Dark immersive hero (flat) */}
       <div className="mlc-hero">
         <div className="mlc-container mlc-hero-grid">
           <div className="mlc-hero-copy">
-            <span className="mlc-pill"><i className="fas fa-martini-glass-citrus" aria-hidden="true" /> Responsible alcohol server training</span>
+            <span className="mlc-pill"><i className="fas fa-martini-glass-citrus" aria-hidden="true" /> Alcohol server training</span>
             <h1>Serve smart. Stay <em>covered.</em></h1>
-            <p className="mlc-lede">Responsible seller and server certification for bartenders, servers, and retail clerks. Finish online in about an hour and get your certificate the same day.</p>
+            <p className="mlc-lede">Get your responsible seller-server certification online in about an hour.</p>
             <div className="mlc-hero-cta">
               <Link href={CTA_HREF} className="mlc-btn mlc-btn--primary">Get certified for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
               <span className="mlc-rating">
@@ -78,7 +84,7 @@ export default function AlcoholSafetyLanding() {
           </div>
           <div className="mlc-hero-media">
             <div className="mlc-photo">
-              <img src="/img/server.jpg" alt="Bartender checking a customer's ID at the bar" />
+              <img src={courseImg} alt={courseAlt} />
             </div>
             <div className="mlc-floatcard">
               <span className="mlc-fc-icon"><i className="fas fa-circle-check" aria-hidden="true" /></span>
@@ -91,13 +97,12 @@ export default function AlcoholSafetyLanding() {
         </div>
       </div>
 
-      {/* ── Benefit tiles (light) ──────────────────────────────────────── */}
+      {/* Benefit tiles (light) */}
       <section className="mlc-section">
         <div className="mlc-container">
           <div className="mlc-head">
             <span className="mlc-pill mlc-pill--light"><i className="fas fa-shield-halved" aria-hidden="true" /> Why it matters</span>
             <h2>One shift can cost your venue everything</h2>
-            <p className="mlc-lede">Train your judgment so a bad call never lands on you.</p>
           </div>
           <div className="mlc-tiles">
             {BENEFITS.map((b) => (
@@ -111,16 +116,15 @@ export default function AlcoholSafetyLanding() {
         </div>
       </section>
 
-      {/* ── What you'll learn (horizontal check list) ──────────────────── */}
+      {/* What you'll learn */}
       <section className="mlc-section mlc-sunk">
         <div className="mlc-container mlc-learn-grid">
           <div className="mlc-learn-media">
-            <img src="/img/hero-restaurant.png" alt="Servers working the floor of a busy restaurant" />
+            <img src={courseImg} alt={courseAlt} />
           </div>
           <div className="mlc-learn-body">
             <span className="mlc-pill mlc-pill--light"><i className="fas fa-list-check" aria-hidden="true" /> What you'll learn</span>
             <h2>Everything you need behind the bar</h2>
-            <p className="mlc-lede">Short, practical lessons built for real shifts.</p>
             <ul className="mlc-learn-list">
               {LEARN.map((item) => (
                 <li key={item}><i className="fas fa-circle-check" aria-hidden="true" /> {item}</li>
@@ -131,7 +135,22 @@ export default function AlcoholSafetyLanding() {
         </div>
       </section>
 
-      {/* ── Trust / stat strip ─────────────────────────────────────────── */}
+      {/* Certificate preview */}
+      <section className="mlc-section">
+        <div className="mlc-container mlc-cert-grid">
+          <div className="mlc-cert-body">
+            <span className="mlc-pill mlc-pill--light"><i className="fas fa-award" aria-hidden="true" /> Official certificate</span>
+            <h2>The certificate you earn</h2>
+            <p className="mlc-lede">Download, print, or email it the moment you pass.</p>
+            <Link href={CTA_HREF} className="mlc-btn mlc-btn--primary">Get certified for {PRICE_INDIVIDUAL} <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+          </div>
+          <div className="mlc-cert-visual">
+            <CourseCertificate courseTitle="Alcohol Seller-Server Certification" />
+          </div>
+        </div>
+      </section>
+
+      {/* Trust / stat strip */}
       <div className="mlc-stats">
         <div className="mlc-container mlc-stats-grid">
           <div className="mlc-stat"><div className="mlc-n">{STAT_CERTIFIED}</div><div className="mlc-l">Servers certified</div></div>
@@ -141,13 +160,12 @@ export default function AlcoholSafetyLanding() {
         </div>
       </div>
 
-      {/* ── Pricing (2-tier) ───────────────────────────────────────────── */}
+      {/* Pricing (2-tier) */}
       <section className="mlc-section">
         <div className="mlc-container">
           <div className="mlc-head">
             <span className="mlc-pill mlc-pill--light"><i className="fas fa-tag" aria-hidden="true" /> Simple pricing</span>
             <h2>One price. No surprises.</h2>
-            <p className="mlc-lede">Certify yourself, or train your whole venue at a lower per-seat rate.</p>
           </div>
           <div className="mlc-price-grid">
             <div className="mlc-plan">
@@ -159,7 +177,6 @@ export default function AlcoholSafetyLanding() {
                 <li><i className="fas fa-check" aria-hidden="true" /> Final exam, free retakes</li>
                 <li><i className="fas fa-check" aria-hidden="true" /> Same-day certificate</li>
                 <li><i className="fas fa-check" aria-hidden="true" /> Mobile and desktop</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Access anytime, anywhere</li>
               </ul>
               <Link href={CTA_HREF} className="mlc-btn mlc-btn--light">Get certified</Link>
             </div>
@@ -172,7 +189,6 @@ export default function AlcoholSafetyLanding() {
                 <li><i className="fas fa-check" aria-hidden="true" /> Everything in Individual</li>
                 <li><i className="fas fa-check" aria-hidden="true" /> Manager dashboard</li>
                 <li><i className="fas fa-check" aria-hidden="true" /> Bulk staff enrollment</li>
-                <li><i className="fas fa-check" aria-hidden="true" /> Progress tracking</li>
                 <li><i className="fas fa-check" aria-hidden="true" /> Volume discounts</li>
               </ul>
               <Link href={CTA_HREF} className="mlc-btn mlc-btn--primary">Train your team</Link>
@@ -181,7 +197,7 @@ export default function AlcoholSafetyLanding() {
         </div>
       </section>
 
-      {/* ── FAQ ────────────────────────────────────────────────────────── */}
+      {/* FAQ */}
       <section className="mlc-section mlc-sunk">
         <div className="mlc-narrow">
           <div className="mlc-head">
@@ -199,7 +215,7 @@ export default function AlcoholSafetyLanding() {
         </div>
       </section>
 
-      {/* ── Final CTA ──────────────────────────────────────────────────── */}
+      {/* Final CTA */}
       <div className="mlc-final">
         <div className="mlc-container">
           <span className="mlc-pill mlc-pill--dark"><i className="fas fa-bolt" aria-hidden="true" /> Ready when you are</span>
@@ -213,7 +229,7 @@ export default function AlcoholSafetyLanding() {
         </div>
       </div>
 
-      {/* ── Footer (minimal, no nav) ───────────────────────────────────── */}
+      {/* Footer (minimal, no nav) */}
       <footer className="mlc-footer">
         <div className="mlc-container">
           <div className="mlc-fbrand">Train 321</div>

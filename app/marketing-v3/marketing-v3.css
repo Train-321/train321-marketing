@@ -1,4 +1,4 @@
-/* Email-marketing landing page (/marketing-v3) — Alcohol Safety campaign.
+/* Email-marketing landing page (/marketing-v3) - Alcohol Safety campaign.
    Self-contained and scoped under .t321-mlc so nothing here leaks into the
    rest of the site. Built on the shared theme tokens from globals.css.
    Distinct layout: dark immersive hero, then light sections below. */
@@ -27,11 +27,11 @@
 }
 .t321-mlc .mlc-btn--primary {
   background: var(--t321-mkt-accent); color: #fff;
-  box-shadow: 0 10px 24px -8px rgba(0, 180, 219, .6);
+  box-shadow: 0 10px 24px -8px rgba(11, 31, 51, .35);
 }
 .t321-mlc .mlc-btn--primary:hover {
   background: var(--t321-mkt-accent-hover); transform: translateY(-1px);
-  box-shadow: 0 14px 30px -8px rgba(0, 180, 219, .7);
+  box-shadow: 0 14px 30px -8px rgba(11, 31, 51, .4);
 }
 .t321-mlc .mlc-btn--light {
   background: #fff; color: var(--t321-mkt-accent-ink); border-color: var(--t321-mkt-line);
@@ -65,9 +65,7 @@
 .t321-mlc .mlc-hero {
   position: relative; overflow: hidden; color: #fff;
   padding: 72px 0 76px;
-  background:
-    radial-gradient(900px 480px at 85% -10%, rgba(0, 180, 219, .28) 0%, transparent 60%),
-    linear-gradient(160deg, var(--t321-mkt-ink) 0%, #0f2A44 100%);
+  background: var(--t321-mkt-ink);
 }
 .t321-mlc .mlc-hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 54px; align-items: center; }
 .t321-mlc .mlc-hero h1 { font-size: 54px; line-height: 1.04; margin: 20px 0 16px; color: #fff; }
@@ -113,7 +111,7 @@
 .t321-mlc .mlc-tile-icon {
   width: 48px; height: 48px; border-radius: 13px; margin-bottom: 16px;
   display: flex; align-items: center; justify-content: center; font-size: 19px; color: #fff;
-  background: linear-gradient(135deg, var(--t321-mkt-ink), var(--t321-mkt-accent));
+  background: var(--t321-mkt-accent);
 }
 .t321-mlc .mlc-tile strong { display: block; font-size: 17px; margin-bottom: 6px; }
 .t321-mlc .mlc-tile p { margin: 0; font-size: 14.5px; color: var(--t321-mkt-ink-muted); line-height: 1.6; }
@@ -134,6 +132,16 @@
 .t321-mlc .mlc-learn-list li { display: flex; gap: 10px; align-items: center; font-size: 15px; font-weight: 500; }
 .t321-mlc .mlc-learn-list li i { color: var(--t321-mkt-positive); font-size: 16px; }
 
+/* ── Certificate preview ──────────────────────────────────────────────── */
+.t321-mlc .mlc-cert-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 48px; align-items: center; }
+.t321-mlc .mlc-cert-body .mlc-pill { margin-bottom: 16px; }
+.t321-mlc .mlc-cert-body h2 { font-size: 32px; margin: 0 0 10px; }
+.t321-mlc .mlc-cert-body .mlc-lede { margin: 0 0 24px; }
+.t321-mlc .mlc-cert-visual {
+  border: 1px solid var(--t321-mkt-line); border-radius: 18px; overflow: hidden;
+  background: #fff; box-shadow: 0 26px 56px -28px rgba(11, 31, 51, .4);
+}
+
 /* ── Trust / stat strip ───────────────────────────────────────────────── */
 .t321-mlc .mlc-stats { background: var(--t321-mkt-ink); color: #fff; padding: 28px 0; }
 .t321-mlc .mlc-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; text-align: center; }
@@ -144,7 +152,7 @@
 /* ── Pricing ──────────────────────────────────────────────────────────── */
 .t321-mlc .mlc-price-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; max-width: 760px; margin: 0 auto; }
 .t321-mlc .mlc-plan { border: 1px solid var(--t321-mkt-line); border-radius: 20px; padding: 30px 28px; background: #fff; position: relative; }
-.t321-mlc .mlc-plan.is-pop { border: 2px solid var(--t321-mkt-accent); box-shadow: 0 26px 60px -30px rgba(0, 180, 219, .5); }
+.t321-mlc .mlc-plan.is-pop { border: 2px solid var(--t321-mkt-accent); box-shadow: 0 26px 60px -30px rgba(11, 31, 51, .35); }
 .t321-mlc .mlc-plan .mlc-tag { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--t321-mkt-accent); color: #fff; font-size: 12px; font-weight: 600; padding: 5px 15px; border-radius: 999px; white-space: nowrap; }
 .t321-mlc .mlc-plan h3 { font-size: 20px; margin: 0 0 2px; }
 .t321-mlc .mlc-plan .mlc-sub { font-size: 13.5px; color: var(--t321-mkt-ink-muted); margin: 0 0 14px; }
@@ -163,7 +171,7 @@
 .t321-mlc .mlc-qa p { margin: 0; font-size: 14.5px; color: var(--t321-mkt-ink-muted); line-height: 1.6; }
 
 /* ── Final CTA ────────────────────────────────────────────────────────── */
-.t321-mlc .mlc-final { text-align: center; color: #fff; padding: 70px 0; background: linear-gradient(135deg, var(--t321-mkt-ink) 0%, #15314d 100%); }
+.t321-mlc .mlc-final { text-align: center; color: #fff; padding: 70px 0; background: var(--t321-mkt-ink); }
 .t321-mlc .mlc-final .mlc-pill { margin-bottom: 16px; }
 .t321-mlc .mlc-final h2 { font-size: 36px; color: #fff; margin: 0 0 10px; }
 .t321-mlc .mlc-final p { color: #A8BFD0; font-size: 17px; max-width: 480px; margin: 0 auto 28px; }
@@ -179,6 +187,7 @@
   .t321-mlc .mlc-hero h1 { font-size: 36px; }
   .t321-mlc .mlc-hero-grid,
   .t321-mlc .mlc-learn-grid,
+  .t321-mlc .mlc-cert-grid,
   .t321-mlc .mlc-tiles,
   .t321-mlc .mlc-price-grid,
   .t321-mlc .mlc-stats-grid { grid-template-columns: 1fr; }
