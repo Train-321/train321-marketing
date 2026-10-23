@@ -35,6 +35,8 @@ type Body = {
   billing_city?: string;
   billing_state?: string;
   billing_zip?: string;
+  /** Promo code name — the purchase endpoint re-validates it and recomputes the discount. */
+  promo_code?: string;
 };
 
 export async function POST(req: Request) {
@@ -156,6 +158,7 @@ export async function POST(req: Request) {
     billing_city: String(body.billing_city || ""),
     billing_state: String(body.billing_state || ""),
     billing_zip: String(body.billing_zip || ""),
+    ...(body.promo_code ? { promo_code: String(body.promo_code).trim() } : {}),
     // The purchase endpoint requires the buyer's id in the payload for
     // audience "myself" (the bearer alone doesn't satisfy its check).
     ...(userId > 0 ? { user_id: userId } : {})
