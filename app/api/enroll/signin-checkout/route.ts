@@ -26,9 +26,15 @@ const API_BASE = process.env.API_BASE || "https://api.train321.com";
 type Body = {
   email?: string;
   password?: string;
+  /** Email checkout-link token (?elt=…) — exchanged for a bearer server-side. */
+  link_token?: string;
   courses?: Array<{ id?: number | string; name?: string }>;
   payment_method_id?: string;
   payment_intent_id?: string;
+  billing_address?: string;
+  billing_city?: string;
+  billing_state?: string;
+  billing_zip?: string;
 };
 
 export async function POST(req: Request) {
@@ -51,15 +57,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, message: "Your cart is empty." }, { status: 400 });
   }
 
-  // 1. Establish who's buying. A password always wins (it also rescues an
-  //    expired session); otherwise reuse the site session's bearer token
-  //    (t321_token, set by /api/auth/login) so an already-signed-in visitor
-  //    never retypes their password. usedSession marks the cookie path so an
-  //    expired token can answer need_password instead of a dead end.
+  // 1. Establish who's buying, in priority order:
+  //      password  — always wins (also rescues an expired session/link)
+  //      link      — email checkout-link token, exchanged for a bearer
+  //      session   — the site's httpOnly t321_token cookie
+  //    usedFallback marks the non-password paths so an expired credential can
+  //    answer need_password instead of a dead end. The purchase endpoint
+  //    requires the buyer's user_id in the payload for audience "myself", so
+  //    each path also records it.
   const jar = await cookies();
+  const linkToken = String(body.link_token || "");
   let token: string | null = null;
   let billingName = email;
-  let usedSession = false;
+  let billingEmail = email;
+  let userId = 0;
+  let usedFallback = false;
 
   if (password) {
     if (!email) {
@@ -72,18 +84,48 @@ export async function POST(req: Request) {
       const auth = await login(email, password);
       token = auth.token;
       billingName = auth.fullName || email;
+      userId = auth.userId;
     } catch (err) {
       const message =
         err instanceof AuthError ? err.message : "We couldn't sign you in. Please try again.";
       const status = err instanceof AuthError && err.status === 502 ? 502 : 401;
       return NextResponse.json({ success: false, message }, { status });
     }
+  } else if (linkToken) {
+    usedFallback = true;
+    try {
+      const res = await fetch(`${API_BASE}/api/enroll-link/exchange`, {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({ token: linkToken }),
+        cache: "no-store"
+      });
+      const d = (await res.json().catch(() => null)) as {
+        success?: boolean;
+        token?: string;
+        full_name?: string;
+        user_id?: number;
+        email?: string;
+      } | null;
+      if (res.ok && d?.success && d.token) {
+        token = d.token;
+        billingName = d.full_name || billingName;
+        billingEmail = billingEmail || d.email || "";
+        userId = Number(d.user_id) || 0;
+      }
+    } catch {
+      /* fall through to need_password below */
+    }
   } else {
     token = jar.get(TOKEN_COOKIE)?.value || null;
-    usedSession = Boolean(token);
+    usedFallback = Boolean(token);
     try {
-      const profile = JSON.parse(jar.get(USER_COOKIE)?.value || "null") as { name?: string } | null;
+      const profile = JSON.parse(jar.get(USER_COOKIE)?.value || "null") as {
+        name?: string;
+        id?: number;
+      } | null;
       if (profile?.name) billingName = profile.name;
+      userId = Number(profile?.id) || 0;
     } catch {
       /* display cookie is cosmetic — ignore a bad one */
     }
@@ -91,7 +133,13 @@ export async function POST(req: Request) {
 
   if (!token) {
     return NextResponse.json(
-      { success: false, need_password: true, message: "Enter your password to sign in." },
+      {
+        success: false,
+        need_password: true,
+        message: linkToken
+          ? "This link has expired — enter your password to continue."
+          : "Enter your password to sign in."
+      },
       { status: 401 }
     );
   }
@@ -103,7 +151,14 @@ export async function POST(req: Request) {
     invoice_method: "one-time",
     courses,
     billing_name: billingName,
-    billing_email: email
+    billing_email: billingEmail,
+    billing_address: String(body.billing_address || ""),
+    billing_city: String(body.billing_city || ""),
+    billing_state: String(body.billing_state || ""),
+    billing_zip: String(body.billing_zip || ""),
+    // The purchase endpoint requires the buyer's id in the payload for
+    // audience "myself" (the bearer alone doesn't satisfy its check).
+    ...(userId > 0 ? { user_id: userId } : {})
   };
   if (body.payment_method_id) purchasePayload.payment_method_id = String(body.payment_method_id);
   if (body.payment_intent_id) purchasePayload.payment_intent_id = String(body.payment_intent_id);
@@ -135,10 +190,10 @@ export async function POST(req: Request) {
     );
   }
 
-  // A session token the backend no longer accepts → ask for the password
+  // A session/link token the backend no longer accepts → ask for the password
   // instead of surfacing a raw auth error. (Password logins can't hit this —
   // their token is seconds old.)
-  if (usedSession && res.status === 401) {
+  if (usedFallback && res.status === 401) {
     return NextResponse.json(
       { success: false, need_password: true, message: "Your session expired — enter your password to continue." },
       { status: 401 }

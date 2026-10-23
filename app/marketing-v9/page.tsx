@@ -118,7 +118,13 @@ export default async function GetStartedLanding({
           <div className="gs-container">
             <div className="gs-buyzone__box">
               <p className="gs-buyzone__label"><i className="fas fa-lock" aria-hidden="true" /> Secure checkout — create your account or sign in to start today</p>
-              <CourseCheckout courses={courses} audience={audience} prefillEmail={prefillEmail} publishableKey={publishableKey} />
+              <CourseCheckout
+                courses={courses}
+                audience={audience}
+                prefillEmail={prefillEmail}
+                publishableKey={publishableKey}
+                linkToken={typeof sp.elt === "string" ? sp.elt : ""}
+              />
               <div className="gs-buyzone__stats gs-stats__grid">
                 {stats.slice(0, 4).map((s, i) => (
                   <div key={i} className="gs-stat"><div className="gs-stat__n">{s.value}</div><div className="gs-stat__l">{s.label}</div></div>

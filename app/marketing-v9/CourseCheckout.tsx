@@ -53,6 +53,9 @@ type CheckoutProps = {
   audience?: CheckoutAudience;
   prefillEmail?: string;
   publishableKey?: string;
+  /** Email checkout-link token (?elt=…) — validated on load; while good, the
+      sign-in path needs no password and pays against the link. */
+  linkToken?: string;
 };
 
 export default function CourseCheckout(props: CheckoutProps) {
@@ -67,7 +70,8 @@ function CheckoutInner({
   courses,
   audience = "company",
   prefillEmail = "",
-  publishableKey = ""
+  publishableKey = "",
+  linkToken = ""
 }: CheckoutProps) {
   const isCompany = audience === "company";
   const stripe = useStripe();
@@ -85,6 +89,13 @@ function CheckoutInner({
   const [result, setResult] = useState<CheckoutResult | null>(null);
 
   const [signin, setSignin] = useState({ email: prefillEmail, password: "" });
+  // Billing address for the sign-in purchase path — the authenticated
+  // purchase endpoint requires it (same as the in-app Purchase form).
+  const [bill, setBill] = useState({ address: "", city: "", state: "", zip: "" });
+  const setBl = (k: keyof typeof bill) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setBill((p) => ({ ...p, [k]: e.target.value }));
+    setErrors((p) => ({ ...p, ["bl_" + k]: undefined }));
+  };
   // Name from the site session's display cookie (t321_user, set by
   // /api/auth/login). When present the buyer is already signed in on this
   // origin, so the password field stays hidden and the server route charges
@@ -101,6 +112,36 @@ function CheckoutInner({
       /* cosmetic cookie — a bad value just means "not signed in" */
     }
   }, []);
+  // Email checkout link (?elt=…): confirm it server-side, then borrow the
+  // signed-in UX — sessionUser hides the password field, linkActive makes the
+  // submit pay against the link token. An invalid/expired token changes
+  // nothing: the buyer just sees the normal password form.
+  const [linkActive, setLinkActive] = useState(false);
+  useEffect(() => {
+    if (!linkToken) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/enroll/link-validate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: linkToken })
+        });
+        const d = (await res.json().catch(() => null)) as
+          | { success?: boolean; full_name?: string; email?: string }
+          | null;
+        if (!cancelled && res.ok && d?.success) {
+          setSessionUser(String(d.full_name || d.email || "your account"));
+          setLinkActive(true);
+        }
+      } catch {
+        /* unreachable validator = no shortcut; the password form still works */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [linkToken]);
   const [form, setForm] = useState({
     company_name: "", first_name: "", last_name: "", email: prefillEmail, password: "", phone: "", state: ""
   });
@@ -173,6 +214,12 @@ function CheckoutInner({
     if (mode === "signin") {
       if (!EMAIL.test(signin.email.trim())) next.si_email = "Enter a valid email address.";
       if (!signin.password && !sessionUser) next.si_password = "Enter your password.";
+      if (dueToday > 0) {
+        if (!bill.address.trim()) next.bl_address = "Enter your billing address.";
+        if (!bill.city.trim()) next.bl_city = "Enter your city.";
+        if (!bill.state) next.bl_state = "Select your state.";
+        if (!/^\d{5}(-\d{4})?$/.test(bill.zip.trim())) next.bl_zip = "Enter a valid ZIP code.";
+      }
     } else {
       if (isCompany && !form.company_name.trim()) next.company_name = "Enter your company name.";
       if (!form.first_name.trim()) next.first_name = "Enter your first name.";
@@ -210,9 +257,14 @@ function CheckoutInner({
         // httpOnly session token; the password only travels when typed.
         const creds: Record<string, unknown> = {
           email: signin.email.trim(),
-          courses: courses.map((c) => ({ id: c.id, name: c.name }))
+          courses: courses.map((c) => ({ id: c.id, name: c.name })),
+          billing_address: bill.address.trim(),
+          billing_city: bill.city.trim(),
+          billing_state: bill.state,
+          billing_zip: bill.zip.trim()
         };
         if (signin.password) creds.password = signin.password;
+        else if (linkActive && linkToken) creds.link_token = linkToken;
 
         let paymentMethodId: string | null = null;
         if (dueToday > 0) {
@@ -259,9 +311,12 @@ function CheckoutInner({
         }
 
         if (!ok || !data?.success) {
-          // Session token expired (or was cleared server-side) — reveal the
-          // password field and let the buyer continue without losing the cart.
-          if (data?.need_password) setSessionUser(null);
+          // Session/link no longer valid — reveal the password field and let
+          // the buyer continue without losing the cart.
+          if (data?.need_password) {
+            setSessionUser(null);
+            setLinkActive(false);
+          }
           setSubmitError(
             (typeof data?.message === "string" && data.message) ||
               "We couldn't complete your enrollment. Your card has not been charged."
@@ -470,6 +525,34 @@ function CheckoutInner({
                   />
                   {errors.si_password && <em className="v9co__err">{errors.si_password}</em>}
                 </label>
+              )}
+              {dueToday > 0 && (
+                <>
+                  <div className="v9co__subhead"><i className="fas fa-location-dot" aria-hidden="true" /> Billing address</div>
+                  <label className={`v9co__field${errors.bl_address ? " has-error" : ""}`}>
+                    <span>Address <em aria-hidden="true">*</em></span>
+                    <input type="text" autoComplete="street-address" value={bill.address} onChange={setBl("address")} />
+                    {errors.bl_address && <em className="v9co__err">{errors.bl_address}</em>}
+                  </label>
+                  <label className={`v9co__field${errors.bl_city ? " has-error" : ""}`}>
+                    <span>City <em aria-hidden="true">*</em></span>
+                    <input type="text" autoComplete="address-level2" value={bill.city} onChange={setBl("city")} />
+                    {errors.bl_city && <em className="v9co__err">{errors.bl_city}</em>}
+                  </label>
+                  <label className={`v9co__field${errors.bl_state ? " has-error" : ""}`}>
+                    <span>State <em aria-hidden="true">*</em></span>
+                    <select value={bill.state} onChange={setBl("state")}>
+                      <option value="">Select your state…</option>
+                      {US_STATES.map((s) => <option key={s.code} value={s.name}>{s.name}</option>)}
+                    </select>
+                    {errors.bl_state && <em className="v9co__err">{errors.bl_state}</em>}
+                  </label>
+                  <label className={`v9co__field${errors.bl_zip ? " has-error" : ""}`}>
+                    <span>ZIP code <em aria-hidden="true">*</em></span>
+                    <input type="text" inputMode="numeric" autoComplete="postal-code" maxLength={10} value={bill.zip} onChange={setBl("zip")} />
+                    {errors.bl_zip && <em className="v9co__err">{errors.bl_zip}</em>}
+                  </label>
+                </>
               )}
             </div>
           ) : (
