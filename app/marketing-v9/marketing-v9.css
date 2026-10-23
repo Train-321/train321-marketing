@@ -650,3 +650,44 @@
   .t321-gs .gs-buyzone__label { font-size: 12px; padding: 2px 6px 14px; }
   .t321-gs .v9co__cadence { grid-template-columns: 1fr 1fr; }
 }
+
+/* ═══════════ v9 MODERN CHECKOUT REDESIGN — presentation only ═══════════ */
+/* Slim professional header */
+.t321-gs .gs-topbar2 { position: sticky; top: 0; z-index: 40; background: rgba(255, 255, 255, .86); backdrop-filter: saturate(1.4) blur(12px); border-bottom: 1px solid var(--t321-mkt-line); }
+.t321-gs .gs-topbar2__in { display: flex; align-items: center; justify-content: space-between; height: 62px; }
+.t321-gs .gs-topbar2__brand img { height: 28px; width: auto; display: block; }
+.t321-gs .gs-topbar2__right { display: flex; align-items: center; gap: 20px; font-size: 13.5px; }
+.t321-gs .gs-topbar2__ph { font-weight: 700; color: var(--t321-mkt-ink); text-decoration: none; }
+.t321-gs .gs-topbar2__lock { display: inline-flex; align-items: center; gap: 7px; color: var(--t321-mkt-ink-muted); font-weight: 500; }
+.t321-gs .gs-topbar2__lock i { color: var(--t321-mkt-accent-ink); }
+
+/* Compact, calm hero — no floating icons, so the checkout is the focus */
+.t321-gs .gs-hero__deco { display: none !important; }
+.t321-gs .gs-hero { background: radial-gradient(120% 80% at 85% -30%, var(--t321-mkt-accent-wash), transparent 55%), linear-gradient(180deg, #f2f7fb 0%, #ffffff 100%); }
+.t321-gs .gs-hero--buy { padding-top: 38px; padding-bottom: 76px; }
+.t321-gs .gs-hero--buy .gs-hero__center { max-width: 700px; }
+.t321-gs .gs-hero--buy h1 { font-size: clamp(26px, 4.2vw, 38px); letter-spacing: -.025em; margin-bottom: 10px; }
+.t321-gs .gs-hero--buy .gs-lede { font-size: 15px; max-width: 52ch; }
+.t321-gs .gs-hero--buy .gs-trust { margin-top: 16px; }
+.t321-gs .gs-hero__rating { background: #fff; border: 1px solid var(--t321-mkt-line); border-radius: 999px; padding: 6px 15px; box-shadow: 0 1px 2px rgba(13, 27, 43, .05); }
+
+/* Checkout floats as a clean white card on the light page (no dark box) */
+.t321-gs .gs-buyzone { background: transparent; padding-bottom: 50px; }
+.t321-gs .gs-buyzone__box { background: transparent; border: 0; box-shadow: none; padding: 0; margin-top: -50px; }
+.t321-gs .gs-buyzone__label { color: var(--t321-mkt-accent-ink); margin-bottom: 16px; }
+.t321-gs .gs-buyzone__label i { color: var(--t321-mkt-accent-ink) !important; }
+.t321-gs .v9co__onecard { box-shadow: 0 30px 72px -32px rgba(13, 27, 43, .4), 0 2px 8px rgba(13, 27, 43, .07); border-radius: 20px; }
+
+/* Supporting sections — modern, professional */
+.t321-gs .gs-section.gs-sunk { background: #f4f8fb; }
+.t321-gs .gs-step { background: #fff; border: 1px solid var(--t321-mkt-line); border-radius: 16px; box-shadow: 0 1px 3px rgba(13, 27, 43, .05); }
+.t321-gs .gs-step__num { background: var(--t321-mkt-ink); color: #fff; }
+.t321-gs .gs-footer { background: #0b1a2c; color: #c4d5e4; }
+.t321-gs .gs-footer .gs-fbrand { color: #fff; }
+.t321-gs .gs-footer a { color: #7fe0f3; }
+.t321-gs .gs-footer .gs-foot-fine { color: #7e94a8; }
+
+@media (max-width: 600px) {
+  .t321-gs .gs-topbar2__ph { display: none; }
+  .t321-gs .gs-buyzone__box { margin-top: -38px; padding: 0; }
+}

@@ -77,6 +77,19 @@ export default async function GetStartedLanding({
       {/* Landing page: hide the full site header/footer and use a minimal one. */}
       <style>{`.t321-mkt-header,.t321-mkt-footer{display:none !important;}`}</style>
 
+      {/* ── Slim professional header ───────────────────────────────────── */}
+      <header className="gs-topbar2">
+        <div className="gs-container gs-topbar2__in">
+          <Link href="/" className="gs-topbar2__brand" aria-label="Train 321 home">
+            <img src="/img/logos/train321_logo.png" alt="Train 321" />
+          </Link>
+          <div className="gs-topbar2__right">
+            <a href="tel:5613257300" className="gs-topbar2__ph">561-325-7300</a>
+            <span className="gs-topbar2__lock"><i className="fas fa-lock" aria-hidden="true" /> Secure checkout</span>
+          </div>
+        </div>
+      </header>
+
       {/* ── Hero (with the checkout built in when ?ids= is present) ─────── */}
       <section className={`gs-hero${hasCheckout ? " gs-hero--buy" : ""}`}>
         <span className="gs-hero__deco gs-hero__deco--1" aria-hidden="true"><i className="fas fa-id-badge" /></span>
@@ -113,7 +126,7 @@ export default async function GetStartedLanding({
 
       {/* ── Checkout on a dark band — the one card floats on dark (dark shows
           left/right), with the stat band below it. ──────────────────────── */}
-      {hasCheckout ? (
+      {hasCheckout && (
         <section className="gs-buyzone" id="checkout">
           <div className="gs-container">
             <div className="gs-buyzone__box">
@@ -125,23 +138,19 @@ export default async function GetStartedLanding({
                 publishableKey={publishableKey}
                 linkToken={typeof sp.elt === "string" ? sp.elt : ""}
               />
-              <div className="gs-buyzone__stats gs-stats__grid">
-                {stats.slice(0, 4).map((s, i) => (
-                  <div key={i} className="gs-stat"><div className="gs-stat__n">{s.value}</div><div className="gs-stat__l">{s.label}</div></div>
-                ))}
-              </div>
             </div>
           </div>
         </section>
-      ) : (
-        <div className="gs-stats">
-          <div className="gs-container gs-stats__grid">
-            {stats.slice(0, 4).map((s, i) => (
-              <div key={i} className="gs-stat"><div className="gs-stat__n">{s.value}</div><div className="gs-stat__l">{s.label}</div></div>
-            ))}
-          </div>
-        </div>
       )}
+
+      {/* ── Stats band ─────────────────────────────────────────────────── */}
+      <div className="gs-stats">
+        <div className="gs-container gs-stats__grid">
+          {stats.slice(0, 4).map((s, i) => (
+            <div key={i} className="gs-stat"><div className="gs-stat__n">{s.value}</div><div className="gs-stat__l">{s.label}</div></div>
+          ))}
+        </div>
+      </div>
 
       {/* ── How it works ───────────────────────────────────────────────── */}
       <section className="gs-section gs-sunk">
