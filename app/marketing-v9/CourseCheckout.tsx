@@ -167,8 +167,8 @@ function CheckoutInner({
         if (!EMAIL.test(billing.email.trim())) next.b_email = "Enter a valid email address.";
         if (!phoneIsValid(billing.phone)) next.b_phone = "Enter a 10-digit phone number.";
       }
-      if (dueToday > 0 && stripeConfigured && !cardComplete) next.card = "Enter your card details.";
     }
+    if (dueToday > 0 && stripeConfigured && !cardComplete) next.card = "Enter your card details.";
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -179,8 +179,19 @@ function CheckoutInner({
     if (!validate()) return;
 
     // The existing-account (sign-in) path has no backend endpoint to add a
-    // course to an account, so it stays UI-only.
+    // course to an account, so it validates the card and confirms without a
+    // server call (nothing is charged on this path).
     if (mode === "signin") {
+      if (dueToday > 0 && stripe && elements) {
+        const card = elements.getElement(CardElement);
+        if (card) {
+          const { error } = await stripe.createToken(card);
+          if (error) {
+            setErrors((p) => ({ ...p, card: error.message }));
+            return;
+          }
+        }
+      }
       setPlaced(true);
       return;
     }
@@ -493,12 +504,7 @@ function CheckoutInner({
 
         <section className="v9co__card">
           <h2 className="v9co__step"><span className="v9co__step-num">2</span> Payment</h2>
-          {mode === "signin" ? (
-            <div className="v9co__pay">
-              <span className="v9co__pay-label"><i className="fas fa-lock" aria-hidden="true" /> Existing account</span>
-              <p className="v9co__pay-note">We&rsquo;ll use the payment method on your account. (The sign-in path is UI-only in this build — switch to &ldquo;Create a new account&rdquo; to run a real test checkout.)</p>
-            </div>
-          ) : dueToday <= 0 ? (
+          {dueToday <= 0 ? (
             <p className="v9co__free"><i className="fas fa-circle-check" aria-hidden="true" /> No payment needed — your total is {money(dueToday)}.</p>
           ) : !stripeConfigured ? (
             <p className="v9co__paycfg" role="alert">Card payments aren&rsquo;t configured — set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.</p>
