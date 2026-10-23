@@ -390,6 +390,17 @@ function CheckoutInner({
     );
   }
 
+  // ── Initial load — the server is pricing the cart. A full-card loader
+  //    reads better than a half-rendered form with a tiny spinner.
+  if (loading && !quote) {
+    return (
+      <div className="v9co__embed-loading" role="status" aria-live="polite">
+        <span className="v9co__load-ring" aria-hidden="true" />
+        <p>Preparing your secure checkout…</p>
+      </div>
+    );
+  }
+
   return (
     <form className="v9co__onecard" onSubmit={submit} noValidate>
       <div className="v9co__grid">

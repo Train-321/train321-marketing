@@ -357,6 +357,12 @@
 .t321-gs .v9co__embed-done strong { color: #fff; }
 .t321-gs .v9co__embed-done .gs-btn { margin-top: 16px; }
 .t321-gs .v9co__done-link { color: #7fd8ef; text-decoration: underline; font-size: 13px; }
+/* Initial quote load — full-card loader shown while the server prices the
+   cart, instead of a half-rendered form. Sits on the dark embed card. */
+.t321-gs .v9co__embed-loading { min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: #a9c3d6; }
+.t321-gs .v9co__embed-loading p { margin: 0; font-size: 15px; letter-spacing: .01em; }
+.t321-gs .v9co__load-ring { width: 44px; height: 44px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, .18); border-top-color: #7fd8ef; animation: v9spin .8s linear infinite; }
+@keyframes v9spin { to { transform: rotate(360deg); } }
 /* Celebratory sparkle burst on the success check */
 .t321-gs .v9co__sparks { position: absolute; inset: 0; pointer-events: none; }
 .t321-gs .v9co__spark { position: absolute; top: 50%; left: 50%; width: 9px; height: 9px; border-radius: 50%; background: radial-gradient(circle, #ffe08a 0%, #ff9d4d 72%); opacity: 0; animation: v9spark 950ms ease-out forwards; }
