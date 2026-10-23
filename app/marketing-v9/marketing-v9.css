@@ -364,7 +364,7 @@
    stays the normal light colour above and below it. */
 .t321-gs .gs-buyzone { background: transparent; padding: 0 0 56px; }
 .t321-gs .gs-buyzone__box { max-width: 1160px; margin: -74px auto 0; position: relative; z-index: 2; background: var(--t321-mkt-ink); border-radius: 30px; padding: 26px 40px 40px; box-shadow: 0 50px 100px -48px rgba(11, 31, 51, .55); }
-.t321-gs .gs-buyzone__label { text-align: center; color: #9ec9e8; font-size: 13px; font-weight: 600; padding: 4px 0 18px; margin: 0; }
+.t321-gs .gs-buyzone__label { text-align: center; color: #fff; font-size: 13px; font-weight: 600; padding: 4px 0 18px; margin: 0; }
 .t321-gs .gs-buyzone__label i { margin-right: 7px; color: #4cc3e0; }
 .t321-gs .gs-buyzone__stats { margin-top: 40px; }
 
