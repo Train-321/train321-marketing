@@ -24,25 +24,12 @@ function phoneIsValid(v: string): boolean {
 type Tab = "signin" | "new";
 type Errors = Record<string, string | undefined>;
 
-const brandedShell = (inner: React.ReactNode, back: React.ReactNode) => (
-  <div className="t321-gs">
-    <style>{`.t321-mkt-header,.t321-mkt-footer{display:none !important;}`}</style>
-    <header className="gs-topbar">
-      <div className="gs-container gs-topbar__inner">
-        <Link href="/marketing-v9" className="gs-topbar__brand" aria-label="Train 321 home">
-          <img src="/img/logos/train321_logo.png" alt="Train 321" />
-        </Link>
-        {back}
-      </div>
-    </header>
-    {inner}
-  </div>
-);
-
-// Direct checkout pre-filled with one OR several courses (comma-separated ids
-// in the URL). Two account paths: sign in (existing account) or create a new
-// company admin account. UI-first — "Place order" neither signs in, charges,
-// nor creates anything. Pricing is the real server-authoritative quote (read-only).
+// Embeddable checkout section — pre-filled with one OR several courses. Rendered
+// as a section INSIDE the /marketing-v9 landing page (the parent provides the
+// page shell, header and container). Two account paths: sign in (existing
+// account) or create a new company admin account. UI-first — "Place order"
+// neither signs in, charges, nor creates anything. Pricing is the real
+// server-authoritative quote (read-only).
 export default function CourseCheckout({ courses }: { courses: CartCourse[] }) {
   const [tab, setTab] = useState<Tab>("new");
   const [placed, setPlaced] = useState(false);
@@ -149,63 +136,30 @@ export default function CourseCheckout({ courses }: { courses: CartCourse[] }) {
   const buyerName = tab === "signin" ? "" : form.first_name;
   const courseWord = courses.length === 1 ? "your course" : `your ${courses.length} courses`;
 
-  const backLink = (
-    <Link href="/marketing-v9" className="gs-btn gs-btn--ghost gs-topbar__cta">
-      <i className="fas fa-arrow-left" aria-hidden="true" /> Back
-    </Link>
-  );
-
-  // ── No valid courses in the URL ───────────────────────────────────────
+  // ── No valid courses (parent normally hides the section instead) ──────
   if (isEmpty) {
-    return brandedShell(
-      <section className="v9co v9co--empty">
-        <div className="v9co__empty-card">
-          <span className="v9co__empty-ic"><i className="fas fa-cart-shopping" aria-hidden="true" /></span>
-          <h1>Nothing to check out</h1>
-          <p>We couldn&rsquo;t find those courses. Browse the catalog and pick the training you need.</p>
-          <Link href="/catalog" className="gs-btn gs-btn--primary">Browse courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
-        </div>
-      </section>,
-      backLink
+    return (
+      <div className="v9co__embed-empty">
+        <span className="v9co__empty-ic"><i className="fas fa-cart-shopping" aria-hidden="true" /></span>
+        <p>We couldn&rsquo;t find those courses. <Link href="/catalog" className="gs-inline-link">Browse the catalog</Link> and pick the training you need.</p>
+      </div>
     );
   }
 
   // ── Order placed ──────────────────────────────────────────────────────
   if (placed) {
-    return brandedShell(
-      <section className="v9co v9co--done">
-        <div className="v9co__done-card">
-          <span className="v9co__done-ic"><i className="fas fa-circle-check" aria-hidden="true" /></span>
-          <h1>Order placed</h1>
-          <p>Thanks{buyerName ? `, ${buyerName}` : ""}! A confirmation and access to {courseWord} will be sent to <strong>{buyerEmail}</strong>.</p>
-          <p className="v9co__done-note">Payment is being set up — nothing has been charged yet.</p>
-          <Link href="/marketing-v9" className="gs-btn gs-btn--primary">Browse more courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
-        </div>
-      </section>,
-      backLink
+    return (
+      <div className="v9co__embed-done">
+        <span className="v9co__done-ic"><i className="fas fa-circle-check" aria-hidden="true" /></span>
+        <h3>Order placed</h3>
+        <p>Thanks{buyerName ? `, ${buyerName}` : ""}! A confirmation and access to {courseWord} will be sent to <strong>{buyerEmail}</strong>.</p>
+        <p className="v9co__done-note">Payment is being set up — nothing has been charged yet.</p>
+        <Link href="/catalog" className="gs-btn gs-btn--primary">Browse more courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+      </div>
     );
   }
 
-  return brandedShell(
-    <>
-      {/* Compact hero — headline up top, the buy form right below it so a
-          visitor can purchase within seconds without scrolling an intro. */}
-      <section className="v9co-hero">
-        <div className="gs-container">
-          <div className="v9co-hero__rating">
-            <span className="gs-stars" aria-hidden="true">★★★★★</span>
-            <span><strong>4.9/5</strong> from 50,000+ learners</span>
-          </div>
-          <h1>Find your required training and <em>get certified today.</em></h1>
-          <ul className="gs-trust v9co-hero__trust">
-            <li><i className="fas fa-shield-halved" aria-hidden="true" /> ANSI-accredited</li>
-            <li><i className="fas fa-flag-usa" aria-hidden="true" /> Accepted in 50 states</li>
-            <li><i className="fas fa-bolt" aria-hidden="true" /> Instant certificate</li>
-          </ul>
-        </div>
-      </section>
-      <section className="v9co v9co--withhero">
-      <div className="gs-container">
+  return (
         <form className="v9co__grid" onSubmit={submit} noValidate>
           <div className="v9co__main">
             {/* Account path tabs */}
@@ -398,9 +352,5 @@ export default function CourseCheckout({ courses }: { courses: CartCourse[] }) {
             </ul>
           </aside>
         </form>
-      </div>
-    </section>
-    </>,
-    backLink
   );
 }
