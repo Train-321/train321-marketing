@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getMarketplaceCatalog, toBlurb, type MarketplaceCourse } from "@/lib/newFeatures";
+import { getMarketplaceCatalog, toBlurb } from "@/lib/newFeatures";
+import { getCartCourse } from "@/lib/enroll";
 import "../../marketing-v9.css";
 
 // Dynamic per-course landing page for the v9 flow — one template that works for
@@ -11,26 +12,48 @@ import "../../marketing-v9.css";
 
 export const dynamicParams = true;
 
-async function findCourse(id: number): Promise<{ course: MarketplaceCourse; catLabel: string } | null> {
+type LandingCourse = {
+  name: string;
+  price: number;
+  image: string | null;
+  stateLabel: string | null;
+  description: string;
+  catLabel: string;
+};
+
+// Resolve a course for the landing page. Prefer the storefront catalog (it
+// carries the marketplace description + category), but fall back to a direct
+// course lookup so a buyable course that isn't in the storefront listing still
+// gets a landing page rather than a 404.
+async function resolveLanding(id: number): Promise<LandingCourse | null> {
+  if (!Number.isInteger(id) || id <= 0) return null;
   try {
     const { courses, categories } = await getMarketplaceCatalog();
-    const course = courses.find((c) => c.id === id);
-    if (!course) return null;
-    const catLabel =
-      (course.categoryId != null && categories.find((k) => k.id === course.categoryId)?.name) || "Compliance training";
-    return { course, catLabel };
+    const c = courses.find((x) => x.id === id);
+    if (c) {
+      const catLabel =
+        (c.categoryId != null && categories.find((k) => k.id === c.categoryId)?.name) || "Compliance training";
+      return { name: c.name, price: c.price, image: c.image, stateLabel: c.stateLabel, description: c.description || "", catLabel };
+    }
   } catch {
-    return null;
+    /* fall through to the direct lookup */
   }
+  try {
+    const c = await getCartCourse(id);
+    if (c) return { name: c.name, price: c.price, image: c.image, stateLabel: c.stateLabel, description: "", catLabel: "Compliance training" };
+  } catch {
+    /* not found */
+  }
+  return null;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const found = await findCourse(Number(id));
-  if (!found) return { title: "Course | Train 321", robots: { index: false, follow: false } };
+  const course = await resolveLanding(Number(id));
+  if (!course) return { title: "Course | Train 321", robots: { index: false, follow: false } };
   return {
-    title: `${found.course.name} — get certified today | Train 321`,
-    description: `Enroll in ${found.course.name}. Online, about an hour, official certificate the same day.`,
+    title: `${course.name} — get certified today | Train 321`,
+    description: `Enroll in ${course.name}. Online, about an hour, official certificate the same day.`,
     robots: { index: false, follow: true }
   };
 }
@@ -50,13 +73,11 @@ const STEPS = [
 export default async function CourseLanding({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const numId = Number(id);
-  if (!Number.isInteger(numId) || numId <= 0) notFound();
-
-  const found = await findCourse(numId);
-  if (!found) notFound();
-  const { course, catLabel } = found;
+  const course = await resolveLanding(numId);
+  if (!course) notFound();
+  const { catLabel } = course;
   const blurb = course.description ? toBlurb(course.description, 220) : "";
-  const checkoutHref = `/marketing-v9/course/${course.id}/checkout`;
+  const checkoutHref = `/marketing-v9/course/${numId}/checkout`;
 
   return (
     <div className="t321-gs">
