@@ -355,11 +355,36 @@
 .t321-gs .v9co__embed-done p { color: var(--t321-mkt-ink-muted); line-height: 1.6; margin: 0 0 8px; }
 .t321-gs .v9co__embed-done .v9co__done-note { font-size: 13px; }
 .t321-gs .v9co__embed-done .gs-btn { margin-top: 16px; }
-/* Checkout built into the hero (the buy form sits inside the hero section) */
-.t321-gs .gs-hero--buy { padding-bottom: 48px; }
-.t321-gs .gs-hero__buy { position: relative; z-index: 1; margin-top: 22px; text-align: left; }
-.t321-gs .gs-hero__buy-label { text-align: center; font-size: 13px; font-weight: 600; color: var(--t321-mkt-accent-ink); margin: 0 0 16px; }
-.t321-gs .gs-hero__buy-label i { margin-right: 6px; }
+/* ── Checkout on the landing: dark band + one premium card ───────────── */
+.t321-gs .gs-hero--buy { padding-top: 52px; padding-bottom: 84px; }
+.t321-gs .gs-hero--buy .gs-lede { margin-bottom: 0; }
+.t321-gs .gs-hero--buy .gs-trust { margin-top: 20px; }
+
+.t321-gs .gs-buyzone { background: var(--t321-mkt-ink); padding: 0 0 56px; }
+.t321-gs .gs-buyzone__label { text-align: center; color: #9ec9e8; font-size: 13px; font-weight: 600; padding: 24px 0 0; margin: 0; }
+.t321-gs .gs-buyzone__label i { margin-right: 7px; color: #4cc3e0; }
+.t321-gs .gs-overlap { position: relative; z-index: 2; margin-top: -56px; }
+.t321-gs .gs-buyzone__stats { margin-top: 44px; }
+
+/* One premium card — form panel + tinted order-summary panel */
+.t321-gs .v9co__onecard { max-width: 1000px; margin: 14px auto 0; background: #fff; border-radius: 22px; overflow: hidden; box-shadow: 0 44px 90px -42px rgba(0, 0, 0, .7), 0 2px 6px rgba(11, 31, 51, .14); }
+.t321-gs .v9co__onecard .v9co__grid { display: grid; grid-template-columns: 1.3fr .9fr; gap: 0; max-width: none; margin: 0; align-items: stretch; }
+.t321-gs .v9co__onecard .v9co__main { padding: 30px 34px; }
+.t321-gs .v9co__onecard .v9co__summary { position: static; top: auto; background: var(--t321-mkt-paper-sunk); border: 0; border-left: 1px solid var(--t321-mkt-line); border-radius: 0; padding: 30px; }
+.t321-gs .v9co__onecard .v9co__card { background: transparent; border: 0; border-radius: 0; padding: 0; }
+.t321-gs .v9co__onecard .v9co__card + .v9co__card { margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--t321-mkt-line); }
+
+/* Account radio — existing account vs new account */
+.t321-gs .v9co__modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 22px; }
+.t321-gs .v9co__mode { display: flex; align-items: center; gap: 11px; padding: 13px 14px; border: 1.5px solid var(--t321-mkt-line); border-radius: 12px; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
+.t321-gs .v9co__mode:hover { border-color: var(--t321-mkt-line-strong); }
+.t321-gs .v9co__mode.is-on { border-color: var(--t321-mkt-accent); background: var(--t321-mkt-accent-wash); }
+.t321-gs .v9co__mode input { position: absolute; opacity: 0; width: 0; height: 0; }
+.t321-gs .v9co__mode-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--t321-mkt-line-strong); flex: 0 0 auto; position: relative; }
+.t321-gs .v9co__mode.is-on .v9co__mode-dot { border-color: var(--t321-mkt-accent); }
+.t321-gs .v9co__mode.is-on .v9co__mode-dot::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--t321-mkt-accent); }
+.t321-gs .v9co__mode-text { font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; line-height: 1.2; }
+.t321-gs .v9co__mode-text i { color: var(--t321-mkt-accent-ink); }
 .t321-gs .v9co__grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 28px; max-width: 1000px; margin: 0 auto; align-items: start; }
 .t321-gs .v9co__main { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 .t321-gs .v9co__card, .t321-gs .v9co__summary { background: #fff; border: 1px solid var(--t321-mkt-line); border-radius: 18px; padding: 22px 24px; }
@@ -490,6 +515,9 @@
   .t321-gs .v9co__grid { grid-template-columns: 1fr; }
   .t321-gs .v9co__summary { order: -1; position: static; top: auto; }
   .t321-gs .v9co__row, .t321-gs .v9co__aud { grid-template-columns: 1fr; }
+  .t321-gs .v9co__onecard .v9co__grid { grid-template-columns: 1fr; }
+  .t321-gs .v9co__onecard .v9co__summary { border-left: 0; border-top: 1px solid var(--t321-mkt-line); }
+  .t321-gs .v9co__modes { grid-template-columns: 1fr; }
   .t321-gs .gs-clp-hero__grid { grid-template-columns: 1fr; gap: 28px; }
   .t321-gs .gs-clp-hero__media { order: -1; aspect-ratio: 16 / 9; }
   .t321-gs .gs-clp-hero__copy h1 { font-size: 30px; }

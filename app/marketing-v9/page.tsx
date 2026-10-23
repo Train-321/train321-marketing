@@ -52,6 +52,12 @@ export default async function GetStartedLanding({
   const courses = resolved.filter((c): c is CartCourse => c !== null);
   const hasCheckout = courses.length > 0;
 
+  // Account type + email come from the campaign URL:
+  // ?audience=individual|company_admin&email=...
+  const audRaw = (Array.isArray(sp.audience) ? sp.audience[0] : sp.audience) || (Array.isArray(sp.type) ? sp.type[0] : sp.type) || "";
+  const audience: "individual" | "company" = /^ind/i.test(audRaw) ? "individual" : "company";
+  const prefillEmail = (Array.isArray(sp.email) ? sp.email[0] : sp.email) || "";
+
   let testimonials: Testimonial[] = [];
   let stats: Stat[] = [];
   try { testimonials = await getTestimonials(); } catch { /* skip social proof */ }
@@ -79,8 +85,10 @@ export default async function GetStartedLanding({
             <span className="gs-stars" aria-hidden="true">★★★★★</span>
             <span><strong>4.9/5</strong> from 50,000+ learners</span>
           </div>
-          <h1>Find your required training and <em>get certified today.</em></h1>
-          <p className="gs-lede">Food, alcohol, and workplace courses you finish on your phone in about an hour. Certificate the same day, accepted in all 50 states.</p>
+          <h1>{hasCheckout ? <>You&rsquo;re one step from <em>getting certified.</em></> : <>Find your required training and <em>get certified today.</em></>}</h1>
+          <p className="gs-lede">{hasCheckout
+            ? "Create your account or sign in below to finish enrolling — instant access, certificate the same day, accepted in all 50 states."
+            : "Food, alcohol, and workplace courses you finish on your phone in about an hour. Certificate the same day, accepted in all 50 states."}</p>
           {!hasCheckout && (
             <div className="gs-cta-row" style={{ marginTop: "26px" }}>
               <Link href={CATALOG_HREF} className="gs-btn gs-btn--primary gs-btn--lg">
@@ -94,24 +102,33 @@ export default async function GetStartedLanding({
             <li><i className="fas fa-bolt" aria-hidden="true" /> Instant certificate</li>
           </ul>
         </div>
-
-        {/* Checkout built right into the hero when ?ids= is present. */}
-        {hasCheckout && (
-          <div className="gs-container gs-hero__buy" id="checkout">
-            <p className="gs-hero__buy-label"><i className="fas fa-lock" aria-hidden="true" /> Secure checkout — create your account or sign in to start today</p>
-            <CourseCheckout courses={courses} />
-          </div>
-        )}
       </section>
 
-      {/* ── Stat band ──────────────────────────────────────────────────── */}
-      <div className="gs-stats">
-        <div className="gs-container gs-stats__grid">
-          {stats.slice(0, 4).map((s, i) => (
-            <div key={i} className="gs-stat"><div className="gs-stat__n">{s.value}</div><div className="gs-stat__l">{s.label}</div></div>
-          ))}
+      {/* ── Checkout on a dark band — the one card floats on dark (dark shows
+          left/right), with the stat band below it. ──────────────────────── */}
+      {hasCheckout ? (
+        <section className="gs-buyzone">
+          <div className="gs-container">
+            <p className="gs-buyzone__label"><i className="fas fa-lock" aria-hidden="true" /> Secure checkout — create your account or sign in to start today</p>
+            <div className="gs-overlap" id="checkout">
+              <CourseCheckout courses={courses} audience={audience} prefillEmail={prefillEmail} />
+            </div>
+            <div className="gs-buyzone__stats gs-stats__grid">
+              {stats.slice(0, 4).map((s, i) => (
+                <div key={i} className="gs-stat"><div className="gs-stat__n">{s.value}</div><div className="gs-stat__l">{s.label}</div></div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : (
+        <div className="gs-stats">
+          <div className="gs-container gs-stats__grid">
+            {stats.slice(0, 4).map((s, i) => (
+              <div key={i} className="gs-stat"><div className="gs-stat__n">{s.value}</div><div className="gs-stat__l">{s.label}</div></div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── How it works ───────────────────────────────────────────────── */}
       <section className="gs-section gs-sunk">
