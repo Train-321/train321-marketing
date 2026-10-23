@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Elements, CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { US_STATES } from "@/lib/states";
+import CustomSelect from "@/components/CustomSelect";
 import type { CartCourse, EnrollQuote, CheckoutResult } from "@/lib/enroll";
 
 const money = (n: number) =>
@@ -539,14 +540,24 @@ function CheckoutInner({
                     <input type="text" autoComplete="address-level2" value={bill.city} onChange={setBl("city")} />
                     {errors.bl_city && <em className="v9co__err">{errors.bl_city}</em>}
                   </label>
-                  <label className={`v9co__field${errors.bl_state ? " has-error" : ""}`}>
+                  {/* div, not label: CustomSelect opens on its own button, and a
+                      wrapping label would re-toggle it on every click. */}
+                  <div className={`v9co__field${errors.bl_state ? " has-error" : ""}`}>
                     <span>State <em aria-hidden="true">*</em></span>
-                    <select value={bill.state} onChange={setBl("state")}>
-                      <option value="">Select your state…</option>
-                      {US_STATES.map((s) => <option key={s.code} value={s.name}>{s.name}</option>)}
-                    </select>
+                    <CustomSelect
+                      value={bill.state}
+                      options={US_STATES.map((s) => s.name)}
+                      placeholder="Select your state…"
+                      onChange={(v) => {
+                        setBill((p) => ({ ...p, state: v }));
+                        setErrors((p) => ({ ...p, bl_state: undefined }));
+                      }}
+                      ariaLabel="Billing state"
+                      searchable
+                      searchPlaceholder="Search states…"
+                    />
                     {errors.bl_state && <em className="v9co__err">{errors.bl_state}</em>}
-                  </label>
+                  </div>
                   <label className={`v9co__field${errors.bl_zip ? " has-error" : ""}`}>
                     <span>ZIP code <em aria-hidden="true">*</em></span>
                     <input type="text" inputMode="numeric" autoComplete="postal-code" maxLength={10} value={bill.zip} onChange={setBl("zip")} />

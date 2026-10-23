@@ -451,6 +451,27 @@
 .t321-gs .v9co__field small { font-weight: 400; color: var(--t321-mkt-ink-muted); }
 .t321-gs .v9co__field input, .t321-gs .v9co__field select { width: 100%; height: 44px; border: 1px solid var(--t321-mkt-line); border-radius: 10px; padding: 0 14px; font-size: 14px; font-family: inherit; color: var(--t321-mkt-ink); background: #fff; }
 .t321-gs .v9co__field input:focus, .t321-gs .v9co__field select:focus { outline: 2px solid var(--t321-mkt-accent); outline-offset: 1px; border-color: var(--t321-mkt-accent); }
+/* Chrome paints autofilled inputs pale blue, which made them look like a
+   different control than the (white) selects. Pin the autofill background to
+   the design's white so every field matches. */
+.t321-gs .v9co__field input:-webkit-autofill,
+.t321-gs .v9co__field input:-webkit-autofill:hover,
+.t321-gs .v9co__field input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #fff inset;
+  box-shadow: 0 0 0 1000px #fff inset;
+  -webkit-text-fill-color: var(--t321-mkt-ink);
+  caret-color: var(--t321-mkt-ink);
+}
+/* Selects drop the native chrome and draw the same quiet chevron everywhere,
+   so they read as the same control as the text inputs. */
+.t321-gs .v9co__field select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%235a6672' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+}
 .t321-gs .v9co__field.has-error input { border-color: #C9542B; }
 .t321-gs .v9co__field small { display: block; margin-top: 5px; font-size: 12px; }
 .t321-gs .v9co__stepper { display: inline-flex; align-items: center; width: 100%; height: 44px; border: 1px solid var(--t321-mkt-line); border-radius: 10px; overflow: hidden; background: #fff; }
