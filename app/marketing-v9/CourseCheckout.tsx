@@ -120,7 +120,6 @@ export default function CourseCheckout({
     const next: Errors = {};
     if (mode === "signin") {
       if (!EMAIL.test(signin.email.trim())) next.si_email = "Enter a valid email address.";
-      if (!signin.password) next.si_password = "Enter your password.";
     } else {
       if (isCompany && !form.company_name.trim()) next.company_name = "Enter your company name.";
       if (!form.first_name.trim()) next.first_name = "Enter your first name.";
@@ -206,19 +205,21 @@ export default function CourseCheckout({
           {mode === "signin" ? (
             <div className="v9co__panel">
               <p className="v9co__panel-note">Sign in and we&rsquo;ll add {courseWord} to your existing Train 321 account.</p>
-              {prefillEmail ? (
-                <p className="v9co__signin-as">Signing in as <strong>{signin.email}</strong></p>
-              ) : (
-                <label className={`v9co__field${errors.si_email ? " has-error" : ""}`}>
-                  <span>Email <em aria-hidden="true">*</em></span>
-                  <input type="email" autoComplete="email" value={signin.email} onChange={(e) => { setSignin((s) => ({ ...s, email: e.target.value })); setErrors((p) => ({ ...p, si_email: undefined })); }} />
-                  {errors.si_email && <em className="v9co__err">{errors.si_email}</em>}
-                </label>
-              )}
-              <label className={`v9co__field${errors.si_password ? " has-error" : ""}`}>
-                <span>Password <em aria-hidden="true">*</em></span>
-                <input type="password" autoComplete="current-password" value={signin.password} onChange={(e) => { setSignin((s) => ({ ...s, password: e.target.value })); setErrors((p) => ({ ...p, si_password: undefined })); }} />
-                {errors.si_password && <em className="v9co__err">{errors.si_password}</em>}
+              <label className={`v9co__field${errors.si_email ? " has-error" : ""}`}>
+                <span>Email <em aria-hidden="true">*</em></span>
+                <input
+                  type="email"
+                  autoComplete="email"
+                  value={signin.email}
+                  readOnly={Boolean(prefillEmail)}
+                  className={prefillEmail ? "v9co__input--readonly" : undefined}
+                  onChange={(e) => {
+                    if (prefillEmail) return;
+                    setSignin((s) => ({ ...s, email: e.target.value }));
+                    setErrors((p) => ({ ...p, si_email: undefined }));
+                  }}
+                />
+                {errors.si_email && <em className="v9co__err">{errors.si_email}</em>}
               </label>
             </div>
           ) : (

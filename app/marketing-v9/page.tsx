@@ -55,7 +55,8 @@ export default async function GetStartedLanding({
   // Account type + email come from the campaign URL:
   // ?audience=individual|company_admin&email=...
   const audRaw = (Array.isArray(sp.audience) ? sp.audience[0] : sp.audience) || (Array.isArray(sp.type) ? sp.type[0] : sp.type) || "";
-  const audience: "individual" | "company" = /^ind/i.test(audRaw) ? "individual" : "company";
+  // Default to individual unless the query explicitly says company/company_admin.
+  const audience: "individual" | "company" = /^comp/i.test(audRaw) ? "company" : "individual";
   const prefillEmail = (Array.isArray(sp.email) ? sp.email[0] : sp.email) || "";
 
   let testimonials: Testimonial[] = [];

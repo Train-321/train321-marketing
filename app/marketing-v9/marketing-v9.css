@@ -397,6 +397,8 @@
 .t321-gs .v9co__cadence + .v9co__subhead { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--t321-mkt-line); }
 .t321-gs .v9co__signin-as { margin: 0 0 4px; font-size: 14px; color: var(--t321-mkt-ink); }
 .t321-gs .v9co__signin-as strong { font-weight: 700; }
+.t321-gs .v9co__input--readonly { background: var(--t321-mkt-paper-sunk); color: var(--t321-mkt-ink-muted); cursor: default; }
+.t321-gs .v9co__input--readonly:focus { outline: none; border-color: var(--t321-mkt-line); }
 .t321-gs .v9co__grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 28px; max-width: 1000px; margin: 0 auto; align-items: start; }
 .t321-gs .v9co__main { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 .t321-gs .v9co__card, .t321-gs .v9co__summary { background: #fff; border: 1px solid var(--t321-mkt-line); border-radius: 18px; padding: 22px 24px; }
