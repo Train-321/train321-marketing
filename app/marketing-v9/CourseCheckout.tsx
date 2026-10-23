@@ -85,6 +85,22 @@ function CheckoutInner({
   const [result, setResult] = useState<CheckoutResult | null>(null);
 
   const [signin, setSignin] = useState({ email: prefillEmail, password: "" });
+  // Name from the site session's display cookie (t321_user, set by
+  // /api/auth/login). When present the buyer is already signed in on this
+  // origin, so the password field stays hidden and the server route charges
+  // against the httpOnly session token instead. Cleared again if the server
+  // answers need_password (expired session) — the field then appears.
+  const [sessionUser, setSessionUser] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      const m = document.cookie.match(/(?:^|;\s*)t321_user=([^;]+)/);
+      if (!m) return;
+      const u = JSON.parse(decodeURIComponent(m[1])) as { name?: string } | null;
+      if (u?.name) setSessionUser(String(u.name));
+    } catch {
+      /* cosmetic cookie — a bad value just means "not signed in" */
+    }
+  }, []);
   const [form, setForm] = useState({
     company_name: "", first_name: "", last_name: "", email: prefillEmail, password: "", phone: "", state: ""
   });
@@ -156,7 +172,7 @@ function CheckoutInner({
     const next: Errors = {};
     if (mode === "signin") {
       if (!EMAIL.test(signin.email.trim())) next.si_email = "Enter a valid email address.";
-      if (!signin.password) next.si_password = "Enter your password.";
+      if (!signin.password && !sessionUser) next.si_password = "Enter your password.";
     } else {
       if (isCompany && !form.company_name.trim()) next.company_name = "Enter your company name.";
       if (!form.first_name.trim()) next.first_name = "Enter your first name.";
@@ -190,11 +206,13 @@ function CheckoutInner({
     if (mode === "signin") {
       setSubmitting(true);
       try {
-        const creds = {
+        // No password + a site session → the server route charges against the
+        // httpOnly session token; the password only travels when typed.
+        const creds: Record<string, unknown> = {
           email: signin.email.trim(),
-          password: signin.password,
           courses: courses.map((c) => ({ id: c.id, name: c.name }))
         };
+        if (signin.password) creds.password = signin.password;
 
         let paymentMethodId: string | null = null;
         if (dueToday > 0) {
@@ -208,7 +226,7 @@ function CheckoutInner({
           const { paymentMethod, error } = await stripe.createPaymentMethod({
             type: "card",
             card,
-            billing_details: { email: creds.email }
+            billing_details: { email: signin.email.trim() }
           });
           if (error || !paymentMethod) {
             setErrors((p) => ({ ...p, card: error?.message || "We couldn't verify that card." }));
@@ -241,6 +259,9 @@ function CheckoutInner({
         }
 
         if (!ok || !data?.success) {
+          // Session token expired (or was cleared server-side) — reveal the
+          // password field and let the buyer continue without losing the cart.
+          if (data?.need_password) setSessionUser(null);
           setSubmitError(
             (typeof data?.message === "string" && data.message) ||
               "We couldn't complete your enrollment. Your card has not been charged."
@@ -419,19 +440,26 @@ function CheckoutInner({
                 />
                 {errors.si_email && <em className="v9co__err">{errors.si_email}</em>}
               </label>
-              <label className={`v9co__field${errors.si_password ? " has-error" : ""}`}>
-                <span>Password <em aria-hidden="true">*</em></span>
-                <input
-                  type="password"
-                  autoComplete="current-password"
-                  value={signin.password}
-                  onChange={(e) => {
-                    setSignin((s) => ({ ...s, password: e.target.value }));
-                    setErrors((p) => ({ ...p, si_password: undefined }));
-                  }}
-                />
-                {errors.si_password && <em className="v9co__err">{errors.si_password}</em>}
-              </label>
+              {sessionUser ? (
+                <p className="v9co__panel-note">
+                  <i className="fas fa-circle-check" aria-hidden="true" /> Signed in as{" "}
+                  <strong>{sessionUser}</strong> — no password needed.
+                </p>
+              ) : (
+                <label className={`v9co__field${errors.si_password ? " has-error" : ""}`}>
+                  <span>Password <em aria-hidden="true">*</em></span>
+                  <input
+                    type="password"
+                    autoComplete="current-password"
+                    value={signin.password}
+                    onChange={(e) => {
+                      setSignin((s) => ({ ...s, password: e.target.value }));
+                      setErrors((p) => ({ ...p, si_password: undefined }));
+                    }}
+                  />
+                  {errors.si_password && <em className="v9co__err">{errors.si_password}</em>}
+                </label>
+              )}
             </div>
           ) : (
             <div className="v9co__panel">

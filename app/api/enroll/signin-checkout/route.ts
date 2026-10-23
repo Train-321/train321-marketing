@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { login, AuthError } from "@/lib/auth";
+import { cookies } from "next/headers";
+import { login, AuthError, TOKEN_COOKIE, USER_COOKIE } from "@/lib/auth";
 
 /**
  * Existing-account checkout for the marketing-v9 embed.
@@ -46,25 +47,53 @@ export async function POST(req: Request) {
         .filter((c) => Number.isFinite(c.id) && c.id > 0)
     : [];
 
-  if (!email || !password) {
-    return NextResponse.json(
-      { success: false, message: "Enter your email and password to sign in." },
-      { status: 400 }
-    );
-  }
   if (courses.length === 0) {
     return NextResponse.json({ success: false, message: "Your cart is empty." }, { status: 400 });
   }
 
-  // 1. Sign the buyer in. A wrong password surfaces the backend's own wording.
-  let auth;
-  try {
-    auth = await login(email, password);
-  } catch (err) {
-    const message =
-      err instanceof AuthError ? err.message : "We couldn't sign you in. Please try again.";
-    const status = err instanceof AuthError && err.status === 502 ? 502 : 401;
-    return NextResponse.json({ success: false, message }, { status });
+  // 1. Establish who's buying. A password always wins (it also rescues an
+  //    expired session); otherwise reuse the site session's bearer token
+  //    (t321_token, set by /api/auth/login) so an already-signed-in visitor
+  //    never retypes their password. usedSession marks the cookie path so an
+  //    expired token can answer need_password instead of a dead end.
+  const jar = await cookies();
+  let token: string | null = null;
+  let billingName = email;
+  let usedSession = false;
+
+  if (password) {
+    if (!email) {
+      return NextResponse.json(
+        { success: false, message: "Enter your email and password to sign in." },
+        { status: 400 }
+      );
+    }
+    try {
+      const auth = await login(email, password);
+      token = auth.token;
+      billingName = auth.fullName || email;
+    } catch (err) {
+      const message =
+        err instanceof AuthError ? err.message : "We couldn't sign you in. Please try again.";
+      const status = err instanceof AuthError && err.status === 502 ? 502 : 401;
+      return NextResponse.json({ success: false, message }, { status });
+    }
+  } else {
+    token = jar.get(TOKEN_COOKIE)?.value || null;
+    usedSession = Boolean(token);
+    try {
+      const profile = JSON.parse(jar.get(USER_COOKIE)?.value || "null") as { name?: string } | null;
+      if (profile?.name) billingName = profile.name;
+    } catch {
+      /* display cookie is cosmetic — ignore a bad one */
+    }
+  }
+
+  if (!token) {
+    return NextResponse.json(
+      { success: false, need_password: true, message: "Enter your password to sign in." },
+      { status: 401 }
+    );
   }
 
   // 2. Run the same authenticated purchase the LMS app uses. Amounts are
@@ -73,7 +102,7 @@ export async function POST(req: Request) {
     audience: "myself",
     invoice_method: "one-time",
     courses,
-    billing_name: auth.fullName || email,
+    billing_name: billingName,
     billing_email: email
   };
   if (body.payment_method_id) purchasePayload.payment_method_id = String(body.payment_method_id);
@@ -86,7 +115,7 @@ export async function POST(req: Request) {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        Authorization: `Bearer ${auth.token}`
+        Authorization: `Bearer ${token}`
       },
       body: JSON.stringify(purchasePayload),
       cache: "no-store"
@@ -103,6 +132,16 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { success: false, message: "Unexpected response from the enrollment service." },
       { status: 502 }
+    );
+  }
+
+  // A session token the backend no longer accepts → ask for the password
+  // instead of surfacing a raw auth error. (Password logins can't hit this —
+  // their token is seconds old.)
+  if (usedSession && res.status === 401) {
+    return NextResponse.json(
+      { success: false, need_password: true, message: "Your session expired — enter your password to continue." },
+      { status: 401 }
     );
   }
 
