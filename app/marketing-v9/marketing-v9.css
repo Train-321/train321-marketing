@@ -349,12 +349,25 @@
 /* Checkout embedded as a section on the landing page */
 .t321-gs .v9co__embed-empty { max-width: 560px; margin: 0 auto; text-align: center; color: var(--t321-mkt-ink-muted); display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .t321-gs .v9co__embed-empty .v9co__empty-ic { font-size: 40px; color: var(--t321-mkt-line-strong); }
-.t321-gs .v9co__embed-done { max-width: 560px; margin: 0 auto; text-align: center; }
-.t321-gs .v9co__embed-done .v9co__done-ic { font-size: 46px; color: var(--t321-mkt-positive); }
-.t321-gs .v9co__embed-done h3 { font-family: var(--gs-serif); font-size: 24px; margin: 14px 0 10px; }
-.t321-gs .v9co__embed-done p { color: var(--t321-mkt-ink-muted); line-height: 1.6; margin: 0 0 8px; }
-.t321-gs .v9co__embed-done .v9co__done-note { font-size: 13px; }
+.t321-gs .v9co__embed-done { max-width: 560px; margin: 0 auto; padding: 10px 0 4px; text-align: center; color: #c9dbe8; }
+.t321-gs .v9co__embed-done .v9co__done-ic { position: relative; display: inline-flex; font-size: 48px; color: #35c07a; }
+.t321-gs .v9co__embed-done .v9co__done-ic > i { animation: v9pop .5s cubic-bezier(.2, 1.4, .4, 1); }
+.t321-gs .v9co__embed-done h3 { font-family: var(--gs-serif); font-size: 25px; margin: 16px 0 10px; color: #fff; }
+.t321-gs .v9co__embed-done p { color: #a9c3d6; line-height: 1.6; margin: 0 0 8px; }
+.t321-gs .v9co__embed-done strong { color: #fff; }
 .t321-gs .v9co__embed-done .gs-btn { margin-top: 16px; }
+.t321-gs .v9co__done-link { color: #7fd8ef; text-decoration: underline; font-size: 13px; }
+/* Celebratory sparkle burst on the success check */
+.t321-gs .v9co__sparks { position: absolute; inset: 0; pointer-events: none; }
+.t321-gs .v9co__spark { position: absolute; top: 50%; left: 50%; width: 9px; height: 9px; border-radius: 50%; background: radial-gradient(circle, #ffe08a 0%, #ff9d4d 72%); opacity: 0; animation: v9spark 950ms ease-out forwards; }
+.t321-gs .v9co__spark:nth-child(even) { width: 7px; height: 7px; background: radial-gradient(circle, #8fe3ff 0%, #35a7d6 72%); animation-duration: 1120ms; }
+@keyframes v9spark {
+  0% { transform: translate(-50%, -50%) rotate(var(--a)) translateX(8px) scale(.3); opacity: 0; }
+  22% { opacity: 1; }
+  100% { transform: translate(-50%, -50%) rotate(var(--a)) translateX(78px) scale(1); opacity: 0; }
+}
+@keyframes v9pop { 0% { transform: scale(.4); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .t321-gs .v9co__spark { display: none; } .t321-gs .v9co__embed-done .v9co__done-ic > i { animation: none; } }
 /* ── Checkout on the landing: dark rounded box + one premium card ────── */
 .t321-gs .gs-hero--buy { padding-top: 78px; padding-bottom: 104px; }
 .t321-gs .gs-hero--buy .gs-lede { margin-bottom: 0; }

@@ -73,6 +73,8 @@ function CheckoutInner({
   const stripe = useStripe();
   const elements = useElements();
   const stripeConfigured = Boolean(publishableKey);
+  const appLogin =
+    (process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com").replace(/\/+$/, "") + "/#/login";
 
   const [mode, setMode] = useState<Mode>("signin");
   const [placed, setPlaced] = useState(false);
@@ -278,22 +280,30 @@ function CheckoutInner({
   if (placed) {
     return (
       <div className="v9co__embed-done">
-        <span className="v9co__done-ic"><i className="fas fa-circle-check" aria-hidden="true" /></span>
+        <span className="v9co__done-ic">
+          <i className="fas fa-circle-check" aria-hidden="true" />
+          <span className="v9co__sparks" aria-hidden="true">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <span key={i} className="v9co__spark" style={{ "--a": `${i * 30}deg` } as React.CSSProperties} />
+            ))}
+          </span>
+        </span>
         {result ? (
           <>
-            <h3>You&rsquo;re all set{result.employee?.first_name ? `, ${result.employee.first_name}` : ""}.</h3>
-            <p>We created your account for <strong>{result.employee.email}</strong>{result.amount > 0 ? <> and charged <strong>{money(result.amount)}</strong> (test)</> : null}. Sign in to start your training.</p>
+            <h3>You&rsquo;re all set{result.employee?.first_name ? `, ${result.employee.first_name}` : ""}! 🎉</h3>
+            <p>We created your account for <strong>{result.employee.email}</strong>{result.amount > 0 ? <> and charged <strong>{money(result.amount)}</strong> (test)</> : null}. Log in to start your training.</p>
             <div className="v9co__done-actions">
-              <a href={result.loginUrl} className="gs-btn gs-btn--primary">Sign in to start <i className="fas fa-arrow-right" aria-hidden="true" /></a>
-              {result.receiptUrl && <a href={result.receiptUrl} target="_blank" rel="noopener noreferrer" className="gs-inline-link">View Stripe receipt</a>}
+              <a href={result.loginUrl} className="gs-btn gs-btn--primary">Log in to start <i className="fas fa-arrow-right" aria-hidden="true" /></a>
+              {result.receiptUrl && <a href={result.receiptUrl} target="_blank" rel="noopener noreferrer" className="v9co__done-link">View Stripe receipt</a>}
             </div>
           </>
         ) : (
           <>
-            <h3>Order placed</h3>
+            <h3>Order placed! 🎉</h3>
             <p>Thanks{buyerName ? `, ${buyerName}` : ""}! A confirmation and access to {courseWord} will be sent to <strong>{buyerEmail}</strong>.</p>
-            <p className="v9co__done-note">The sign-in path is UI-only in this build — nothing was charged.</p>
-            <Link href="/catalog" className="gs-btn gs-btn--primary">Browse more courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+            <div className="v9co__done-actions">
+              <a href={appLogin} className="gs-btn gs-btn--primary">Log in <i className="fas fa-arrow-right" aria-hidden="true" /></a>
+            </div>
           </>
         )}
       </div>
