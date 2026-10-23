@@ -187,9 +187,25 @@ export default function CourseCheckout({ courses }: { courses: CartCourse[] }) {
   }
 
   return brandedShell(
-    <section className="v9co">
+    <>
+      {/* Compact hero — headline up top, the buy form right below it so a
+          visitor can purchase within seconds without scrolling an intro. */}
+      <section className="v9co-hero">
+        <div className="gs-container">
+          <div className="v9co-hero__rating">
+            <span className="gs-stars" aria-hidden="true">★★★★★</span>
+            <span><strong>4.9/5</strong> from 50,000+ learners</span>
+          </div>
+          <h1>Find your required training and <em>get certified today.</em></h1>
+          <ul className="gs-trust v9co-hero__trust">
+            <li><i className="fas fa-shield-halved" aria-hidden="true" /> ANSI-accredited</li>
+            <li><i className="fas fa-flag-usa" aria-hidden="true" /> Accepted in 50 states</li>
+            <li><i className="fas fa-bolt" aria-hidden="true" /> Instant certificate</li>
+          </ul>
+        </div>
+      </section>
+      <section className="v9co v9co--withhero">
       <div className="gs-container">
-        <h1 className="v9co__title">Checkout</h1>
         <form className="v9co__grid" onSubmit={submit} noValidate>
           <div className="v9co__main">
             {/* Account path tabs */}
@@ -383,7 +399,8 @@ export default function CourseCheckout({ courses }: { courses: CartCourse[] }) {
           </aside>
         </form>
       </div>
-    </section>,
+    </section>
+    </>,
     backLink
   );
 }

@@ -337,7 +337,15 @@
 
 /* ── Checkout page (v9) ───────────────────────────────────────────────── */
 .t321-gs .v9co { padding: 40px 0 72px; }
+.t321-gs .v9co--withhero { padding-top: 12px; }
 .t321-gs .v9co__title { font-family: var(--gs-serif); font-size: 32px; text-align: center; margin: 0 0 28px; }
+/* Compact hero above the checkout (buy within seconds) */
+.t321-gs .v9co-hero { text-align: center; padding: 40px 0 4px; }
+.t321-gs .v9co-hero__rating { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 14px; color: var(--t321-mkt-ink-muted); }
+.t321-gs .v9co-hero__rating strong { color: var(--t321-mkt-ink); font-weight: 700; }
+.t321-gs .v9co-hero h1 { font-family: var(--gs-serif); font-size: 40px; line-height: 1.06; letter-spacing: -0.02em; margin: 0 auto 12px; max-width: 740px; }
+.t321-gs .v9co-hero h1 em { color: var(--t321-mkt-accent); font-style: normal; }
+.t321-gs .v9co-hero__trust { justify-content: center; margin: 12px 0 0; }
 .t321-gs .v9co__grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 28px; max-width: 1000px; margin: 0 auto; align-items: start; }
 .t321-gs .v9co__main { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 .t321-gs .v9co__card, .t321-gs .v9co__summary { background: #fff; border: 1px solid var(--t321-mkt-line); border-radius: 18px; padding: 22px 24px; }
@@ -471,6 +479,7 @@
   .t321-gs .gs-clp-hero__grid { grid-template-columns: 1fr; gap: 28px; }
   .t321-gs .gs-clp-hero__media { order: -1; aspect-ratio: 16 / 9; }
   .t321-gs .gs-clp-hero__copy h1 { font-size: 30px; }
+  .t321-gs .v9co-hero h1 { font-size: 27px; }
   .t321-gs .v9t-comment { width: 100%; max-width: 100%; }
   .t321-gs .v9t-comment__text { -webkit-line-clamp: unset; display: block; overflow: visible; }
   .t321-gs .v9t-comment__pop { display: none; }
