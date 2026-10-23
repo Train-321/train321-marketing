@@ -355,6 +355,11 @@
 .t321-gs .v9co__embed-done p { color: var(--t321-mkt-ink-muted); line-height: 1.6; margin: 0 0 8px; }
 .t321-gs .v9co__embed-done .v9co__done-note { font-size: 13px; }
 .t321-gs .v9co__embed-done .gs-btn { margin-top: 16px; }
+/* Checkout built into the hero (the buy form sits inside the hero section) */
+.t321-gs .gs-hero--buy { padding-bottom: 48px; }
+.t321-gs .gs-hero__buy { position: relative; z-index: 1; margin-top: 22px; text-align: left; }
+.t321-gs .gs-hero__buy-label { text-align: center; font-size: 13px; font-weight: 600; color: var(--t321-mkt-accent-ink); margin: 0 0 16px; }
+.t321-gs .gs-hero__buy-label i { margin-right: 6px; }
 .t321-gs .v9co__grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 28px; max-width: 1000px; margin: 0 auto; align-items: start; }
 .t321-gs .v9co__main { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 .t321-gs .v9co__card, .t321-gs .v9co__summary { background: #fff; border: 1px solid var(--t321-mkt-line); border-radius: 18px; padding: 22px 24px; }

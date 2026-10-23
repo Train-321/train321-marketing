@@ -64,8 +64,8 @@ export default async function GetStartedLanding({
       {/* Landing page: hide the full site header/footer and use a minimal one. */}
       <style>{`.t321-mkt-header,.t321-mkt-footer{display:none !important;}`}</style>
 
-      {/* ── Hero ────────────────────────────────────────────────────────── */}
-      <section className="gs-hero">
+      {/* ── Hero (with the checkout built in when ?ids= is present) ─────── */}
+      <section className={`gs-hero${hasCheckout ? " gs-hero--buy" : ""}`}>
         <span className="gs-hero__deco gs-hero__deco--1" aria-hidden="true"><i className="fas fa-id-badge" /></span>
         <span className="gs-hero__deco gs-hero__deco--2" aria-hidden="true"><i className="fas fa-certificate" /></span>
         <span className="gs-hero__deco gs-hero__deco--3" aria-hidden="true"><i className="fas fa-graduation-cap" /></span>
@@ -81,32 +81,28 @@ export default async function GetStartedLanding({
           </div>
           <h1>Find your required training and <em>get certified today.</em></h1>
           <p className="gs-lede">Food, alcohol, and workplace courses you finish on your phone in about an hour. Certificate the same day, accepted in all 50 states.</p>
-          <div className="gs-cta-row" style={{ marginTop: "26px" }}>
-            <Link href={hasCheckout ? "#checkout" : CATALOG_HREF} className="gs-btn gs-btn--primary gs-btn--lg">
-              {hasCheckout ? "Complete your order" : "Browse all courses"} <i className="fas fa-arrow-right" aria-hidden="true" />
-            </Link>
-          </div>
+          {!hasCheckout && (
+            <div className="gs-cta-row" style={{ marginTop: "26px" }}>
+              <Link href={CATALOG_HREF} className="gs-btn gs-btn--primary gs-btn--lg">
+                Browse all courses <i className="fas fa-arrow-right" aria-hidden="true" />
+              </Link>
+            </div>
+          )}
           <ul className="gs-trust">
             <li><i className="fas fa-shield-halved" aria-hidden="true" /> ANSI-accredited</li>
             <li><i className="fas fa-flag-usa" aria-hidden="true" /> Accepted in 50 states</li>
             <li><i className="fas fa-bolt" aria-hidden="true" /> Instant certificate</li>
           </ul>
         </div>
-      </section>
 
-      {/* ── Checkout (pre-filled from ?ids=) ────────────────────────────── */}
-      {hasCheckout && (
-        <section className="gs-section gs-sunk" id="checkout">
-          <div className="gs-container">
-            <div className="gs-head">
-              <span className="gs-pill"><i className="fas fa-lock" aria-hidden="true" /> Secure checkout</span>
-              <h2>Complete your enrollment</h2>
-              <p className="gs-lede">Create your account or sign in — you&rsquo;ll get instant access the moment you&rsquo;re done.</p>
-            </div>
+        {/* Checkout built right into the hero when ?ids= is present. */}
+        {hasCheckout && (
+          <div className="gs-container gs-hero__buy" id="checkout">
+            <p className="gs-hero__buy-label"><i className="fas fa-lock" aria-hidden="true" /> Secure checkout — create your account or sign in to start today</p>
             <CourseCheckout courses={courses} />
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
       {/* ── Stat band ──────────────────────────────────────────────────── */}
       <div className="gs-stats">
