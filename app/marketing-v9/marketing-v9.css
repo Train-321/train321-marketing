@@ -574,4 +574,13 @@
 @media (max-width: 600px) {
   .t321-gs .gs-courses,
   .t321-gs .v9c-grid { grid-template-columns: 1fr; }
+  /* Tighter phone gutter + roomier card/box interiors */
+  .t321-gs .gs-container { padding: 0 16px; }
+  .t321-gs .gs-hero--buy { padding-top: 44px; padding-bottom: 72px; }
+  .t321-gs .gs-hero h1 { font-size: 30px; }
+  .t321-gs .v9co__onecard .v9co__main,
+  .t321-gs .v9co__onecard .v9co__summary { padding: 22px 18px; }
+  .t321-gs .gs-buyzone__box { padding: 14px 10px 24px; }
+  .t321-gs .gs-buyzone__label { font-size: 12px; padding: 2px 6px 14px; }
+  .t321-gs .v9co__cadence { grid-template-columns: 1fr 1fr; }
 }
