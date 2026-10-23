@@ -21,6 +21,11 @@ export const metadata: Metadata = {
 
 const CATALOG_HREF = "/catalog";
 
+// Stripe publishable key for the card field. Default to the staging TEST key so
+// v9 never accidentally uses a live key; override with NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.
+const STAGING_TEST_PK =
+  "pk_test_51TXerrHCrvN27dgKikzbOVKiEgVrnoGpmaDOaRQ19Rggz4Vwobdezb8CughlPawXWT662nPSCAsWQPOGWdJc3I3Z00Ylg5794l";
+
 type Stat = { value: string; label: string };
 const FALLBACK_STATS: Stat[] = [
   { value: "50,000+", label: "Workers certified" },
@@ -58,6 +63,7 @@ export default async function GetStartedLanding({
   // Default to individual unless the query explicitly says company/company_admin.
   const audience: "individual" | "company" = /^comp/i.test(audRaw) ? "company" : "individual";
   const prefillEmail = (Array.isArray(sp.email) ? sp.email[0] : sp.email) || "";
+  const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || STAGING_TEST_PK;
 
   let testimonials: Testimonial[] = [];
   let stats: Stat[] = [];
@@ -112,7 +118,7 @@ export default async function GetStartedLanding({
           <div className="gs-container">
             <div className="gs-buyzone__box">
               <p className="gs-buyzone__label"><i className="fas fa-lock" aria-hidden="true" /> Secure checkout — create your account or sign in to start today</p>
-              <CourseCheckout courses={courses} audience={audience} prefillEmail={prefillEmail} />
+              <CourseCheckout courses={courses} audience={audience} prefillEmail={prefillEmail} publishableKey={publishableKey} />
               <div className="gs-buyzone__stats gs-stats__grid">
                 {stats.slice(0, 4).map((s, i) => (
                   <div key={i} className="gs-stat"><div className="gs-stat__n">{s.value}</div><div className="gs-stat__l">{s.label}</div></div>

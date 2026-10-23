@@ -2,12 +2,27 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { Elements, CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import { US_STATES } from "@/lib/states";
-import type { CartCourse, EnrollQuote } from "@/lib/enroll";
+import type { CartCourse, EnrollQuote, CheckoutResult } from "@/lib/enroll";
 
 const money = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const EMAIL = /^\S+@\S+\.\S+$/;
+
+// loadStripe must run once per key, outside render — recreating the promise on
+// every render would reload Stripe.js each time.
+let stripePromise: ReturnType<typeof loadStripe> | null = null;
+let stripeKeyLoaded = "";
+function getStripe(pk: string) {
+  if (!pk) return null;
+  if (!stripePromise || stripeKeyLoaded !== pk) {
+    stripePromise = loadStripe(pk);
+    stripeKeyLoaded = pk;
+  }
+  return stripePromise;
+}
 
 function formatUsPhone(raw: string): string {
   const d = raw.replace(/\D/g, "").replace(/^1(?=\d{10})/, "").slice(0, 10);
@@ -33,20 +48,39 @@ type Errors = Record<string, string | undefined>;
 // company admin + team fields. `prefillEmail` seeds the email from the query.
 // UI-first — "Place order" neither signs in, charges, nor creates anything.
 // Pricing is the real server-authoritative quote (read-only).
-export default function CourseCheckout({
-  courses,
-  audience = "company",
-  prefillEmail = ""
-}: {
+type CheckoutProps = {
   courses: CartCourse[];
   audience?: CheckoutAudience;
   prefillEmail?: string;
-}) {
+  publishableKey?: string;
+};
+
+export default function CourseCheckout(props: CheckoutProps) {
+  return (
+    <Elements stripe={getStripe(props.publishableKey || "")}>
+      <CheckoutInner {...props} />
+    </Elements>
+  );
+}
+
+function CheckoutInner({
+  courses,
+  audience = "company",
+  prefillEmail = "",
+  publishableKey = ""
+}: CheckoutProps) {
   const isCompany = audience === "company";
+  const stripe = useStripe();
+  const elements = useElements();
+  const stripeConfigured = Boolean(publishableKey);
 
   const [mode, setMode] = useState<Mode>("signin");
   const [placed, setPlaced] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
+  const [cardComplete, setCardComplete] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [result, setResult] = useState<CheckoutResult | null>(null);
 
   const [signin, setSignin] = useState({ email: prefillEmail, password: "" });
   const [form, setForm] = useState({
@@ -133,15 +167,86 @@ export default function CourseCheckout({
         if (!EMAIL.test(billing.email.trim())) next.b_email = "Enter a valid email address.";
         if (!phoneIsValid(billing.phone)) next.b_phone = "Enter a 10-digit phone number.";
       }
+      if (dueToday > 0 && stripeConfigured && !cardComplete) next.card = "Enter your card details.";
     }
     setErrors(next);
     return Object.keys(next).length === 0;
   }
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
     if (!validate()) return;
-    setPlaced(true); // UI-first: nothing is signed in, charged, or created.
+
+    // The existing-account (sign-in) path has no backend endpoint to add a
+    // course to an account, so it stays UI-only.
+    if (mode === "signin") {
+      setPlaced(true);
+      return;
+    }
+
+    // New account → real checkout: create the account + take payment through the
+    // backend (NEW_FEATURES_API_BASE). The card is tokenised in the browser; only
+    // the opaque token id reaches our server.
+    setSubmitting(true);
+    try {
+      let tokenId: string | null = null;
+      if (dueToday > 0) {
+        if (!stripe || !elements) {
+          setSubmitError("Payment isn't ready yet. Please wait a moment and try again.");
+          setSubmitting(false);
+          return;
+        }
+        const card = elements.getElement(CardElement);
+        if (!card) throw new Error("Card field is unavailable. Please reload the page.");
+        const { token, error } = await stripe.createToken(card, {
+          name: `${form.first_name} ${form.last_name}`.trim()
+        });
+        if (error || !token) {
+          setErrors((p) => ({ ...p, card: error?.message || "We couldn't verify that card." }));
+          setSubmitting(false);
+          return;
+        }
+        tokenId = token.id;
+      }
+
+      const res = await fetch("/api/enroll/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lines,
+          promoCode: "",
+          stripeTokenId: tokenId,
+          cardholderName: `${form.first_name} ${form.last_name}`.trim(),
+          audience: isCompany ? "company" : "individual",
+          employees,
+          locations,
+          cadence,
+          companyName: form.company_name.trim(),
+          billing: isCompany && billingDifferent ? billing : null,
+          details: {
+            email: form.email.trim(),
+            password: form.password,
+            first_name: form.first_name.trim(),
+            last_name: form.last_name.trim(),
+            phone: form.phone.trim(),
+            state: form.state
+          }
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSubmitError(data?.message || "We couldn't complete your enrollment.");
+        setSubmitting(false);
+        return;
+      }
+      setResult(data as CheckoutResult);
+      setPlaced(true);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const buyerEmail = mode === "signin" ? signin.email : form.email;
@@ -163,10 +268,23 @@ export default function CourseCheckout({
     return (
       <div className="v9co__embed-done">
         <span className="v9co__done-ic"><i className="fas fa-circle-check" aria-hidden="true" /></span>
-        <h3>Order placed</h3>
-        <p>Thanks{buyerName ? `, ${buyerName}` : ""}! A confirmation and access to {courseWord} will be sent to <strong>{buyerEmail}</strong>.</p>
-        <p className="v9co__done-note">Payment is being set up — nothing has been charged yet.</p>
-        <Link href="/catalog" className="gs-btn gs-btn--primary">Browse more courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+        {result ? (
+          <>
+            <h3>You&rsquo;re all set{result.employee?.first_name ? `, ${result.employee.first_name}` : ""}.</h3>
+            <p>We created your account for <strong>{result.employee.email}</strong>{result.amount > 0 ? <> and charged <strong>{money(result.amount)}</strong> (test)</> : null}. Sign in to start your training.</p>
+            <div className="v9co__done-actions">
+              <a href={result.loginUrl} className="gs-btn gs-btn--primary">Sign in to start <i className="fas fa-arrow-right" aria-hidden="true" /></a>
+              {result.receiptUrl && <a href={result.receiptUrl} target="_blank" rel="noopener noreferrer" className="gs-inline-link">View Stripe receipt</a>}
+            </div>
+          </>
+        ) : (
+          <>
+            <h3>Order placed</h3>
+            <p>Thanks{buyerName ? `, ${buyerName}` : ""}! A confirmation and access to {courseWord} will be sent to <strong>{buyerEmail}</strong>.</p>
+            <p className="v9co__done-note">The sign-in path is UI-only in this build — nothing was charged.</p>
+            <Link href="/catalog" className="gs-btn gs-btn--primary">Browse more courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+          </>
+        )}
       </div>
     );
   }
@@ -375,10 +493,39 @@ export default function CourseCheckout({
 
         <section className="v9co__card">
           <h2 className="v9co__step"><span className="v9co__step-num">2</span> Payment</h2>
-          <div className="v9co__pay">
-            <span className="v9co__pay-label"><i className="fas fa-lock" aria-hidden="true" /> Payment</span>
-            <p className="v9co__pay-note">Secure card payment is being set up. For now, placing the order reserves {courseWord} — nothing is charged.</p>
-          </div>
+          {mode === "signin" ? (
+            <div className="v9co__pay">
+              <span className="v9co__pay-label"><i className="fas fa-lock" aria-hidden="true" /> Existing account</span>
+              <p className="v9co__pay-note">We&rsquo;ll use the payment method on your account. (The sign-in path is UI-only in this build — switch to &ldquo;Create a new account&rdquo; to run a real test checkout.)</p>
+            </div>
+          ) : dueToday <= 0 ? (
+            <p className="v9co__free"><i className="fas fa-circle-check" aria-hidden="true" /> No payment needed — your total is {money(dueToday)}.</p>
+          ) : !stripeConfigured ? (
+            <p className="v9co__paycfg" role="alert">Card payments aren&rsquo;t configured — set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.</p>
+          ) : (
+            <>
+              <label className={`v9co__field${errors.card ? " has-error" : ""}`}>
+                <span>Card details <em aria-hidden="true">*</em></span>
+                <div className="v9co__cardel">
+                  <CardElement
+                    options={{
+                      hidePostalCode: false,
+                      style: {
+                        base: { fontSize: "15px", color: "#0B1F33", fontFamily: "inherit", "::placeholder": { color: "#8A97A6" } },
+                        invalid: { color: "#9D1F2A" }
+                      }
+                    }}
+                    onChange={(ev) => {
+                      setCardComplete(ev.complete);
+                      setErrors((p) => ({ ...p, card: ev.error?.message }));
+                    }}
+                  />
+                </div>
+                {errors.card && <em className="v9co__err">{errors.card}</em>}
+              </label>
+              <p className="v9co__secure"><i className="fas fa-lock" aria-hidden="true" /> Card details go straight to Stripe — they never touch our servers. Test mode.</p>
+            </>
+          )}
         </section>
       </div>
 
@@ -424,9 +571,16 @@ export default function CourseCheckout({
           </div>
         )}
 
-        <button type="submit" className="gs-btn gs-btn--primary v9co__place" disabled={loading || !quote}>
-          {mode === "signin" ? "Sign in & place order" : "Create account & place order"}{dueToday > 0 ? ` · ${money(dueToday)}` : ""} <i className="fas fa-arrow-right" aria-hidden="true" />
+        <button type="submit" className="gs-btn gs-btn--primary v9co__place" disabled={submitting || loading || !quote}>
+          {submitting ? (
+            <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> Processing…</>
+          ) : (
+            <>{mode === "signin" ? "Sign in & place order" : "Create account & place order"}{dueToday > 0 ? ` · ${money(dueToday)}` : ""} <i className="fas fa-arrow-right" aria-hidden="true" /></>
+          )}
         </button>
+        {submitError && (
+          <p className="v9co__submit-error" role="alert"><i className="fas fa-circle-exclamation" aria-hidden="true" /> {submitError}</p>
+        )}
 
         <ul className="v9co__assure">
           <li><i className="fas fa-shield-halved" aria-hidden="true" /> Secure 256-bit SSL encrypted</li>
