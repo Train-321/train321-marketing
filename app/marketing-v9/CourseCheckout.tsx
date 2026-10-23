@@ -726,7 +726,7 @@ function CheckoutInner({
           ) : (
             <>
               <label className={`v9co__field${errors.card ? " has-error" : ""}`}>
-                <span>Card details <em aria-hidden="true">*</em></span>
+                <span>Card information <em aria-hidden="true">*</em></span>
                 <div className="v9co__cardel">
                   <CardElement
                     options={{
@@ -808,6 +808,7 @@ function CheckoutInner({
           <li><i className="fas fa-bolt" aria-hidden="true" /> Instant access after purchase</li>
           <li><i className="fas fa-headset" aria-hidden="true" /> Support at support@train321.com</li>
         </ul>
+        <p className="v9co__powered">Powered by <strong>Stripe</strong></p>
       </aside>
       </div>
     </form>

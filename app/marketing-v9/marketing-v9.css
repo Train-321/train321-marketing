@@ -523,6 +523,48 @@
 .t321-gs .v9co__ongoing span { font-size: 11.5px; color: var(--t321-mkt-ink-muted); line-height: 1.5; }
 .t321-gs .v9co__place { width: 100%; justify-content: center; }
 .t321-gs .v9co__place:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ── Stripe-style skin — visual only, scoped to the one card; the form's
+   markup, state, pricing and Stripe tokenisation are all unchanged. ──────── */
+.t321-gs .v9co__onecard {
+  --sx: #635bff; --sx-ink: #4b45c6; --sx-wash: #f3f2ff;
+  --sx-line: #d9dce1; --sx-line2: #e8e8ec; --sx-label: #30313d;
+  --sx-rad: 7px; --sx-focus: 0 0 0 1px var(--sx), 0 1px 2px rgba(50,50,93,.12);
+}
+/* labels, required marks, section accents */
+.t321-gs .v9co__onecard .v9co__field > span:first-child { font-size: 13px; font-weight: 500; color: var(--sx-label); }
+.t321-gs .v9co__onecard .v9co__field > span:first-child i,
+.t321-gs .v9co__onecard .v9co__field em[aria-hidden],
+.t321-gs .v9co__onecard .v9co__pay-label i,
+.t321-gs .v9co__onecard .v9co__secure i { color: var(--sx); }
+.t321-gs .v9co__onecard .v9co__subhead i,
+.t321-gs .v9co__onecard .v9co__mode-text > i { color: var(--sx-ink); }
+.t321-gs .v9co__onecard .v9co__step-num { background: var(--sx-wash); color: var(--sx-ink); }
+/* text inputs + selects */
+.t321-gs .v9co__onecard .v9co__field input,
+.t321-gs .v9co__onecard .v9co__field select { height: 42px; border: 1px solid var(--sx-line); border-radius: var(--sx-rad); font-size: 15px; box-shadow: 0 1px 1px rgba(0,0,0,.02); transition: box-shadow .1s ease, border-color .1s ease; }
+.t321-gs .v9co__onecard .v9co__field input:focus,
+.t321-gs .v9co__onecard .v9co__field select:focus { outline: none; border-color: var(--sx); box-shadow: var(--sx-focus); }
+.t321-gs .v9co__onecard .v9co__stepper { height: 42px; border: 1px solid var(--sx-line); border-radius: var(--sx-rad); box-shadow: 0 1px 1px rgba(0,0,0,.02); }
+.t321-gs .v9co__onecard .v9co__stepper input { border-color: var(--sx-line2); }
+/* grouped card field */
+.t321-gs .v9co__onecard .v9co__cardel { border: 1px solid var(--sx-line); border-radius: var(--sx-rad); padding: 12px; box-shadow: 0 1px 1px rgba(0,0,0,.02); transition: box-shadow .1s ease, border-color .1s ease; }
+.t321-gs .v9co__onecard .v9co__cardel:focus-within { border-color: var(--sx); box-shadow: var(--sx-focus); }
+/* account radio */
+.t321-gs .v9co__onecard .v9co__mode { border: 1px solid var(--sx-line); border-radius: 8px; }
+.t321-gs .v9co__onecard .v9co__mode:hover { border-color: var(--sx); }
+.t321-gs .v9co__onecard .v9co__mode.is-on { border-color: var(--sx); background: var(--sx-wash); box-shadow: var(--sx-focus); }
+.t321-gs .v9co__onecard .v9co__mode.is-on .v9co__mode-dot { border-color: var(--sx); }
+.t321-gs .v9co__onecard .v9co__mode.is-on .v9co__mode-dot::after { background: var(--sx); }
+/* cadence toggle */
+.t321-gs .v9co__onecard .v9co__cadence button { border-radius: var(--sx-rad); }
+.t321-gs .v9co__onecard .v9co__cadence button.is-active { border-color: var(--sx); background: var(--sx-wash); color: var(--sx-ink); }
+/* pay button → Stripe indigo */
+.t321-gs .v9co__onecard .v9co__place.gs-btn--primary { background: var(--sx); border-radius: 8px; box-shadow: 0 1px 2px rgba(50,50,93,.2); }
+.t321-gs .v9co__onecard .v9co__place.gs-btn--primary:hover { background: var(--sx-ink); }
+/* Powered by Stripe footer */
+.t321-gs .v9co__powered { text-align: center; font-size: 11.5px; color: var(--t321-mkt-ink-muted); border-top: 1px solid var(--t321-mkt-line); padding-top: 12px; margin: 14px 0 0; }
+.t321-gs .v9co__powered strong { color: var(--sx-ink); font-weight: 700; }
 .t321-gs .v9co__assure { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .t321-gs .v9co__assure li { display: flex; align-items: center; gap: 9px; font-size: 12px; color: var(--t321-mkt-ink-muted); }
 .t321-gs .v9co__assure i { color: var(--t321-mkt-positive); width: 16px; text-align: center; }
