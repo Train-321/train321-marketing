@@ -44,7 +44,7 @@ export default function CourseCheckout({
 }) {
   const isCompany = audience === "company";
 
-  const [mode, setMode] = useState<Mode>("new");
+  const [mode, setMode] = useState<Mode>("signin");
   const [placed, setPlaced] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
 
@@ -182,23 +182,39 @@ export default function CourseCheckout({
             <label className={`v9co__mode${mode === "signin" ? " is-on" : ""}`}>
               <input type="radio" name="v9co-mode" checked={mode === "signin"} onChange={() => setMode("signin")} />
               <span className="v9co__mode-dot" aria-hidden="true" />
-              <span className="v9co__mode-text"><i className="fas fa-right-to-bracket" aria-hidden="true" /> I have an account</span>
+              <span className="v9co__mode-text">
+                <i className="fas fa-right-to-bracket" aria-hidden="true" />
+                <span className="v9co__mode-lines">
+                  <strong>{prefillEmail || "I have an account"}</strong>
+                  <small>Sign in to your account</small>
+                </span>
+              </span>
             </label>
             <label className={`v9co__mode${mode === "new" ? " is-on" : ""}`}>
               <input type="radio" name="v9co-mode" checked={mode === "new"} onChange={() => setMode("new")} />
               <span className="v9co__mode-dot" aria-hidden="true" />
-              <span className="v9co__mode-text"><i className={isCompany ? "fas fa-building" : "fas fa-user-plus"} aria-hidden="true" /> {isCompany ? "Create a company account" : "Create an account"}</span>
+              <span className="v9co__mode-text">
+                <i className={isCompany ? "fas fa-building" : "fas fa-user-plus"} aria-hidden="true" />
+                <span className="v9co__mode-lines">
+                  <strong>{isCompany ? "Create a company account" : "Create a new account"}</strong>
+                  <small>{isCompany ? "Admin + team" : "New to Train 321"}</small>
+                </span>
+              </span>
             </label>
           </div>
 
           {mode === "signin" ? (
             <div className="v9co__panel">
               <p className="v9co__panel-note">Sign in and we&rsquo;ll add {courseWord} to your existing Train 321 account.</p>
-              <label className={`v9co__field${errors.si_email ? " has-error" : ""}`}>
-                <span>Email <em aria-hidden="true">*</em></span>
-                <input type="email" autoComplete="email" value={signin.email} onChange={(e) => { setSignin((s) => ({ ...s, email: e.target.value })); setErrors((p) => ({ ...p, si_email: undefined })); }} />
-                {errors.si_email && <em className="v9co__err">{errors.si_email}</em>}
-              </label>
+              {prefillEmail ? (
+                <p className="v9co__signin-as">Signing in as <strong>{signin.email}</strong></p>
+              ) : (
+                <label className={`v9co__field${errors.si_email ? " has-error" : ""}`}>
+                  <span>Email <em aria-hidden="true">*</em></span>
+                  <input type="email" autoComplete="email" value={signin.email} onChange={(e) => { setSignin((s) => ({ ...s, email: e.target.value })); setErrors((p) => ({ ...p, si_email: undefined })); }} />
+                  {errors.si_email && <em className="v9co__err">{errors.si_email}</em>}
+                </label>
+              )}
               <label className={`v9co__field${errors.si_password ? " has-error" : ""}`}>
                 <span>Password <em aria-hidden="true">*</em></span>
                 <input type="password" autoComplete="current-password" value={signin.password} onChange={(e) => { setSignin((s) => ({ ...s, password: e.target.value })); setErrors((p) => ({ ...p, si_password: undefined })); }} />
@@ -207,56 +223,15 @@ export default function CourseCheckout({
             </div>
           ) : (
             <div className="v9co__panel">
-              <p className="v9co__panel-note">{isCompany ? "Set up a company admin account and train your whole team." : "Create your account and get instant access the moment you finish."}</p>
-
-              {isCompany && (
-                <label className={`v9co__field${errors.company_name ? " has-error" : ""}`}>
-                  <span>Company name <em aria-hidden="true">*</em></span>
-                  <input type="text" autoComplete="organization" value={form.company_name} onChange={setF("company_name")} />
-                  {errors.company_name && <em className="v9co__err">{errors.company_name}</em>}
-                </label>
-              )}
-
-              <div className="v9co__row">
-                <label className={`v9co__field${errors.first_name ? " has-error" : ""}`}>
-                  <span>First name <em aria-hidden="true">*</em></span>
-                  <input type="text" autoComplete="given-name" value={form.first_name} onChange={setF("first_name")} />
-                  {errors.first_name && <em className="v9co__err">{errors.first_name}</em>}
-                </label>
-                <label className={`v9co__field${errors.last_name ? " has-error" : ""}`}>
-                  <span>Last name <em aria-hidden="true">*</em></span>
-                  <input type="text" autoComplete="family-name" value={form.last_name} onChange={setF("last_name")} />
-                  {errors.last_name && <em className="v9co__err">{errors.last_name}</em>}
-                </label>
-              </div>
-              <label className={`v9co__field${errors.email ? " has-error" : ""}`}>
-                <span>{isCompany ? "Admin email" : "Email"} <em aria-hidden="true">*</em></span>
-                <input type="email" autoComplete="email" value={form.email} onChange={setF("email")} />
-                {errors.email ? <em className="v9co__err">{errors.email}</em> : <small>{isCompany ? "Becomes the company admin sign-in." : "You'll sign in with this."}</small>}
-              </label>
-              <label className={`v9co__field${errors.password ? " has-error" : ""}`}>
-                <span>Password <em aria-hidden="true">*</em></span>
-                <input type="password" autoComplete="new-password" maxLength={8} value={form.password} onChange={setF("password")} />
-                {errors.password ? <em className="v9co__err">{errors.password}</em> : <small>Exactly 8 characters.</small>}
-              </label>
-              <div className="v9co__row">
-                <label className={`v9co__field${errors.phone ? " has-error" : ""}`}>
-                  <span>Phone <small>(optional)</small></span>
-                  <input type="tel" autoComplete="tel" placeholder="(555) 123-4567" maxLength={14} value={form.phone} onChange={(e) => { setForm((f) => ({ ...f, phone: formatUsPhone(e.target.value) })); setErrors((p) => ({ ...p, phone: undefined })); }} />
-                  {errors.phone && <em className="v9co__err">{errors.phone}</em>}
-                </label>
-                <label className="v9co__field">
-                  <span>State <small>(optional)</small></span>
-                  <select value={form.state} onChange={setF("state")}>
-                    <option value="">Select…</option>
-                    {US_STATES.map((s) => <option key={s.code} value={s.name}>{s.name}</option>)}
-                  </select>
-                </label>
-              </div>
-
-              {/* Team fields — company audience only */}
-              {isCompany && (
+              {isCompany ? (
                 <>
+                  <p className="v9co__panel-note">Set up a company admin account and train your whole team.</p>
+                  <div className="v9co__subhead"><i className="fas fa-building" aria-hidden="true" /> Company</div>
+                  <label className={`v9co__field${errors.company_name ? " has-error" : ""}`}>
+                    <span>Company name <em aria-hidden="true">*</em></span>
+                    <input type="text" autoComplete="organization" value={form.company_name} onChange={setF("company_name")} />
+                    {errors.company_name && <em className="v9co__err">{errors.company_name}</em>}
+                  </label>
                   <div className="v9co__row">
                     <label className="v9co__field">
                       <span><i className="fas fa-user-group" aria-hidden="true" /> Employees <em aria-hidden="true">*</em></span>
@@ -265,6 +240,7 @@ export default function CourseCheckout({
                         <input type="number" min={1} max={9999} value={employees} aria-label="Number of employees" onChange={(e) => setEmployees(Math.max(1, Math.min(9999, Number(e.target.value) || 1)))} />
                         <button type="button" onClick={() => setEmployees((n) => Math.min(9999, n + 1))} aria-label="Increase employees">+</button>
                       </span>
+                      <small>Seat counts in your order follow this number.</small>
                     </label>
                     <label className="v9co__field">
                       <span><i className="fas fa-map-marker-alt" aria-hidden="true" /> Locations <em aria-hidden="true">*</em></span>
@@ -273,11 +249,50 @@ export default function CourseCheckout({
                         <input type="number" min={1} max={9999} value={locations} aria-label="Number of locations" onChange={(e) => setLocations(Math.max(1, Math.min(9999, Number(e.target.value) || 1)))} />
                         <button type="button" onClick={() => setLocations((n) => Math.min(9999, n + 1))} aria-label="Increase locations">+</button>
                       </span>
+                      <small>Where your team works.</small>
                     </label>
                   </div>
                   <div className="v9co__cadence" role="radiogroup" aria-label="Billing cadence">
                     <button type="button" role="radio" aria-checked={cadence === "yearly"} className={cadence === "yearly" ? "is-active" : ""} onClick={() => setCadence("yearly")}>Yearly <em>Save 10%</em></button>
                     <button type="button" role="radio" aria-checked={cadence === "monthly"} className={cadence === "monthly" ? "is-active" : ""} onClick={() => setCadence("monthly")}>Monthly</button>
+                  </div>
+
+                  <div className="v9co__subhead"><i className="fas fa-user-shield" aria-hidden="true" /> Admin account</div>
+                  <div className="v9co__row">
+                    <label className={`v9co__field${errors.first_name ? " has-error" : ""}`}>
+                      <span>First name <em aria-hidden="true">*</em></span>
+                      <input type="text" autoComplete="given-name" value={form.first_name} onChange={setF("first_name")} />
+                      {errors.first_name && <em className="v9co__err">{errors.first_name}</em>}
+                    </label>
+                    <label className={`v9co__field${errors.last_name ? " has-error" : ""}`}>
+                      <span>Last name <em aria-hidden="true">*</em></span>
+                      <input type="text" autoComplete="family-name" value={form.last_name} onChange={setF("last_name")} />
+                      {errors.last_name && <em className="v9co__err">{errors.last_name}</em>}
+                    </label>
+                  </div>
+                  <label className={`v9co__field${errors.email ? " has-error" : ""}`}>
+                    <span>Admin email <em aria-hidden="true">*</em></span>
+                    <input type="email" autoComplete="email" value={form.email} onChange={setF("email")} />
+                    {errors.email ? <em className="v9co__err">{errors.email}</em> : <small>Becomes the company admin sign-in.</small>}
+                  </label>
+                  <label className={`v9co__field${errors.password ? " has-error" : ""}`}>
+                    <span>Password <em aria-hidden="true">*</em></span>
+                    <input type="password" autoComplete="new-password" maxLength={8} value={form.password} onChange={setF("password")} />
+                    {errors.password ? <em className="v9co__err">{errors.password}</em> : <small>Exactly 8 characters.</small>}
+                  </label>
+                  <div className="v9co__row">
+                    <label className={`v9co__field${errors.phone ? " has-error" : ""}`}>
+                      <span>Phone <small>(optional)</small></span>
+                      <input type="tel" autoComplete="tel" placeholder="(555) 123-4567" maxLength={14} value={form.phone} onChange={(e) => { setForm((f) => ({ ...f, phone: formatUsPhone(e.target.value) })); setErrors((p) => ({ ...p, phone: undefined })); }} />
+                      {errors.phone && <em className="v9co__err">{errors.phone}</em>}
+                    </label>
+                    <label className="v9co__field">
+                      <span>State <small>(optional)</small></span>
+                      <select value={form.state} onChange={setF("state")}>
+                        <option value="">Select…</option>
+                        {US_STATES.map((s) => <option key={s.code} value={s.name}>{s.name}</option>)}
+                      </select>
+                    </label>
                   </div>
 
                   <label className="v9co__billing-toggle">
@@ -310,6 +325,47 @@ export default function CourseCheckout({
                       </label>
                     </div>
                   )}
+                </>
+              ) : (
+                <>
+                  <p className="v9co__panel-note">Create your account and get instant access the moment you finish.</p>
+                  <div className="v9co__subhead"><i className="fas fa-user" aria-hidden="true" /> Your details</div>
+                  <div className="v9co__row">
+                    <label className={`v9co__field${errors.first_name ? " has-error" : ""}`}>
+                      <span>First name <em aria-hidden="true">*</em></span>
+                      <input type="text" autoComplete="given-name" value={form.first_name} onChange={setF("first_name")} />
+                      {errors.first_name && <em className="v9co__err">{errors.first_name}</em>}
+                    </label>
+                    <label className={`v9co__field${errors.last_name ? " has-error" : ""}`}>
+                      <span>Last name <em aria-hidden="true">*</em></span>
+                      <input type="text" autoComplete="family-name" value={form.last_name} onChange={setF("last_name")} />
+                      {errors.last_name && <em className="v9co__err">{errors.last_name}</em>}
+                    </label>
+                  </div>
+                  <label className={`v9co__field${errors.email ? " has-error" : ""}`}>
+                    <span>Email <em aria-hidden="true">*</em></span>
+                    <input type="email" autoComplete="email" value={form.email} onChange={setF("email")} />
+                    {errors.email ? <em className="v9co__err">{errors.email}</em> : <small>You&rsquo;ll sign in with this.</small>}
+                  </label>
+                  <label className={`v9co__field${errors.password ? " has-error" : ""}`}>
+                    <span>Password <em aria-hidden="true">*</em></span>
+                    <input type="password" autoComplete="new-password" maxLength={8} value={form.password} onChange={setF("password")} />
+                    {errors.password ? <em className="v9co__err">{errors.password}</em> : <small>Exactly 8 characters.</small>}
+                  </label>
+                  <div className="v9co__row">
+                    <label className={`v9co__field${errors.phone ? " has-error" : ""}`}>
+                      <span>Phone <small>(optional)</small></span>
+                      <input type="tel" autoComplete="tel" placeholder="(555) 123-4567" maxLength={14} value={form.phone} onChange={(e) => { setForm((f) => ({ ...f, phone: formatUsPhone(e.target.value) })); setErrors((p) => ({ ...p, phone: undefined })); }} />
+                      {errors.phone && <em className="v9co__err">{errors.phone}</em>}
+                    </label>
+                    <label className="v9co__field">
+                      <span>State <small>(optional)</small></span>
+                      <select value={form.state} onChange={setF("state")}>
+                        <option value="">Select…</option>
+                        {US_STATES.map((s) => <option key={s.code} value={s.name}>{s.name}</option>)}
+                      </select>
+                    </label>
+                  </div>
                 </>
               )}
             </div>

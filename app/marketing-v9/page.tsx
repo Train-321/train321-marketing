@@ -107,16 +107,16 @@ export default async function GetStartedLanding({
       {/* ── Checkout on a dark band — the one card floats on dark (dark shows
           left/right), with the stat band below it. ──────────────────────── */}
       {hasCheckout ? (
-        <section className="gs-buyzone">
+        <section className="gs-buyzone" id="checkout">
           <div className="gs-container">
-            <p className="gs-buyzone__label"><i className="fas fa-lock" aria-hidden="true" /> Secure checkout — create your account or sign in to start today</p>
-            <div className="gs-overlap" id="checkout">
+            <div className="gs-buyzone__box">
+              <p className="gs-buyzone__label"><i className="fas fa-lock" aria-hidden="true" /> Secure checkout — create your account or sign in to start today</p>
               <CourseCheckout courses={courses} audience={audience} prefillEmail={prefillEmail} />
-            </div>
-            <div className="gs-buyzone__stats gs-stats__grid">
-              {stats.slice(0, 4).map((s, i) => (
-                <div key={i} className="gs-stat"><div className="gs-stat__n">{s.value}</div><div className="gs-stat__l">{s.label}</div></div>
-              ))}
+              <div className="gs-buyzone__stats gs-stats__grid">
+                {stats.slice(0, 4).map((s, i) => (
+                  <div key={i} className="gs-stat"><div className="gs-stat__n">{s.value}</div><div className="gs-stat__l">{s.label}</div></div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
