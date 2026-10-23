@@ -156,6 +156,7 @@ function CheckoutInner({
     const next: Errors = {};
     if (mode === "signin") {
       if (!EMAIL.test(signin.email.trim())) next.si_email = "Enter a valid email address.";
+      if (!signin.password) next.si_password = "Enter your password.";
     } else {
       if (isCompany && !form.company_name.trim()) next.company_name = "Enter your company name.";
       if (!form.first_name.trim()) next.first_name = "Enter your first name.";
@@ -180,21 +181,79 @@ function CheckoutInner({
     setSubmitError(null);
     if (!validate()) return;
 
-    // The existing-account (sign-in) path has no backend endpoint to add a
-    // course to an account, so it validates the card and confirms without a
-    // server call (nothing is charged on this path).
+    // Existing account → sign in with the entered credentials, then run the
+    // same authenticated purchase the LMS app uses (via /api/enroll/
+    // signin-checkout): server-side pricing, PaymentIntent charge, course
+    // assignment, purchase history + ledger, receipt email. 3DS cards
+    // round-trip: backend answers requires_action + client_secret, the
+    // browser completes the challenge, then we re-POST with the intent id.
     if (mode === "signin") {
-      if (dueToday > 0 && stripe && elements) {
-        const card = elements.getElement(CardElement);
-        if (card) {
-          const { error } = await stripe.createToken(card);
-          if (error) {
-            setErrors((p) => ({ ...p, card: error.message }));
+      setSubmitting(true);
+      try {
+        const creds = {
+          email: signin.email.trim(),
+          password: signin.password,
+          courses: courses.map((c) => ({ id: c.id, name: c.name }))
+        };
+
+        let paymentMethodId: string | null = null;
+        if (dueToday > 0) {
+          if (!stripe || !elements) {
+            setSubmitError("Payment isn't ready yet. Please wait a moment and try again.");
+            setSubmitting(false);
             return;
           }
+          const card = elements.getElement(CardElement);
+          if (!card) throw new Error("Card field is unavailable. Please reload the page.");
+          const { paymentMethod, error } = await stripe.createPaymentMethod({
+            type: "card",
+            card,
+            billing_details: { email: creds.email }
+          });
+          if (error || !paymentMethod) {
+            setErrors((p) => ({ ...p, card: error?.message || "We couldn't verify that card." }));
+            setSubmitting(false);
+            return;
+          }
+          paymentMethodId = paymentMethod.id;
         }
+
+        const post = async (extra: Record<string, unknown>) => {
+          const res = await fetch("/api/enroll/signin-checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...creds, ...extra })
+          });
+          return { ok: res.ok, data: (await res.json().catch(() => null)) as Record<string, unknown> | null };
+        };
+
+        let { ok, data } = await post(paymentMethodId ? { payment_method_id: paymentMethodId } : {});
+
+        // 3DS challenge — finish it in the browser, then confirm server-side.
+        if (data?.requires_action && typeof data.client_secret === "string" && stripe) {
+          const { error: actionError } = await stripe.confirmCardPayment(data.client_secret);
+          if (actionError) {
+            setErrors((p) => ({ ...p, card: actionError.message || "Card authentication failed." }));
+            setSubmitting(false);
+            return;
+          }
+          ({ ok, data } = await post({ payment_intent_id: String(data.intent_id || "") }));
+        }
+
+        if (!ok || !data?.success) {
+          setSubmitError(
+            (typeof data?.message === "string" && data.message) ||
+              "We couldn't complete your enrollment. Your card has not been charged."
+          );
+          setSubmitting(false);
+          return;
+        }
+        setPlaced(true);
+      } catch (err) {
+        setSubmitError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      } finally {
+        setSubmitting(false);
       }
-      setPlaced(true);
       return;
     }
 
@@ -359,6 +418,19 @@ function CheckoutInner({
                   }}
                 />
                 {errors.si_email && <em className="v9co__err">{errors.si_email}</em>}
+              </label>
+              <label className={`v9co__field${errors.si_password ? " has-error" : ""}`}>
+                <span>Password <em aria-hidden="true">*</em></span>
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  value={signin.password}
+                  onChange={(e) => {
+                    setSignin((s) => ({ ...s, password: e.target.value }));
+                    setErrors((p) => ({ ...p, si_password: undefined }));
+                  }}
+                />
+                {errors.si_password && <em className="v9co__err">{errors.si_password}</em>}
               </label>
             </div>
           ) : (
