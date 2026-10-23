@@ -1,22 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getMarketplaceCatalog, type MarketplaceCourse } from "@/lib/newFeatures";
 import { getTestimonials, getFaqGroups, getSiteSettings, type Testimonial, type FaqItem } from "@/lib/sanity";
-import CoursesV9, { type V9Course } from "./CoursesV9";
 import TestimonialsV9 from "./TestimonialsV9";
-import { V9CartProvider } from "./cart/V9CartContext";
-import V9CartBtn from "./cart/V9CartBtn";
-import V9Drawer from "./cart/V9Drawer";
 import "./marketing-v9.css";
 
-// "Get started" landing page: an advanced, LMS-style storefront. Courses come
-// from the marketplace catalog (same source as /catalog) so they carry prices
-// and buyable ids — the cards add straight to the cart. A minimal landing
-// header (logo + one CTA), noindex for now.
+// v9 intro page. No on-page storefront grid or cart — each course has its own
+// landing page (/marketing-v9/course/[id]) that email/ad campaigns link to,
+// and "Get started" there goes straight to a direct checkout. This page is a
+// simple brand intro that points visitors to the full catalog. noindex.
 export const metadata: Metadata = {
   title: "Get started — food, alcohol & workplace training | Train 321",
   description:
-    "Browse ANSI-accredited food, alcohol and workplace compliance courses and add them to your cart. Finish online in about an hour, certificate the same day.",
+    "ANSI-accredited food, alcohol and workplace compliance courses. Finish online in about an hour, certificate the same day.",
   alternates: { canonical: "/marketing-v9" },
   robots: { index: false, follow: true }
 };
@@ -34,7 +29,7 @@ const FALLBACK_STATS: Stat[] = [
 const BENEFITS = [
   { icon: "fas fa-shield-halved", title: "ANSI-accredited training", body: "Nationally recognized courses accepted by regulators in all 50 states." },
   { icon: "fas fa-certificate", title: "Same-day certificate", body: "Pass the exam and download your official certificate instantly." },
-  { icon: "fas fa-users", title: "Train your whole team", body: "Enroll staff in bulk and track every certificate in one dashboard." }
+  { icon: "fas fa-users", title: "Train your whole team", body: "Set up a company account and certify your whole staff in one place." }
 ];
 
 const STEPS = [
@@ -43,48 +38,19 @@ const STEPS = [
   { n: 3, title: "Get your certificate", body: "Pass the course and download your certificate the moment you are done." }
 ];
 
-// Collapse state variants of the same course into one representative card,
-// preferring a nationwide version when one exists.
-function dedupeByName(list: MarketplaceCourse[]): MarketplaceCourse[] {
-  const seen = new Map<string, MarketplaceCourse>();
-  for (const c of list) {
-    const existing = seen.get(c.name);
-    if (!existing || (existing.stateLabel && !c.stateLabel)) seen.set(c.name, c);
-  }
-  return [...seen.values()];
-}
-
 export default async function GetStartedLanding() {
-  let courses: MarketplaceCourse[] = [];
-  let categories: Array<{ id: number; name: string }> = [];
   let testimonials: Testimonial[] = [];
   let faqs: FaqItem[] = [];
   let stats: Stat[] = [];
 
-  try {
-    const catalog = await getMarketplaceCatalog();
-    courses = catalog.courses;
-    categories = catalog.categories.map((c) => ({ id: c.id, name: c.name }));
-  } catch { /* storefront unreachable: the grid just won't render */ }
   try { testimonials = await getTestimonials(); } catch { /* skip social proof */ }
   try { const g = await getFaqGroups(); faqs = (g[0]?.items || []).slice(0, 6); } catch { /* skip faq */ }
   try { const s = await getSiteSettings(); stats = s.companyStats?.length ? s.companyStats : FALLBACK_STATS; } catch { stats = FALLBACK_STATS; }
 
-  const catName = new Map(categories.map((c) => [c.id, c.name]));
-  const flat: V9Course[] = dedupeByName(courses).map((c) => ({
-    ...c,
-    catLabel: (c.categoryId != null && catName.get(c.categoryId)) || "More courses"
-  }));
-  const labels: string[] = [];
-  for (const c of categories) if (flat.some((f) => f.catLabel === c.name)) labels.push(c.name);
-  if (flat.some((f) => f.catLabel === "More courses")) labels.push("More courses");
-
   const quotes = (testimonials.filter((t) => t.featured).length ? testimonials.filter((t) => t.featured) : testimonials).slice(0, 6);
 
   return (
-    <V9CartProvider>
     <div className="t321-gs">
-
       {/* Landing page: hide the full site header/footer and use a minimal one. */}
       <style>{`.t321-mkt-header,.t321-mkt-footer{display:none !important;}`}</style>
 
@@ -94,17 +60,12 @@ export default async function GetStartedLanding() {
           <Link href="/" className="gs-topbar__brand" aria-label="Train 321 home">
             <img src="/img/logos/train321_logo.png" alt="Train 321" />
           </Link>
-          <div className="gs-topbar__actions">
-            <V9CartBtn />
-            <Link href={CATALOG_HREF} className="gs-btn gs-btn--primary gs-topbar__cta">Browse all courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
-          </div>
+          <Link href={CATALOG_HREF} className="gs-btn gs-btn--primary gs-topbar__cta">Browse all courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
         </div>
       </header>
 
-      {/* ── Hero (centered course finder) ──────────────────────────────── */}
+      {/* ── Hero ────────────────────────────────────────────────────────── */}
       <section className="gs-hero">
-        {/* Decorative accents only — aria-hidden and non-interactive so they
-            never block the finder, buttons, or any clicks. */}
         <span className="gs-hero__deco gs-hero__deco--1" aria-hidden="true"><i className="fas fa-id-badge" /></span>
         <span className="gs-hero__deco gs-hero__deco--2" aria-hidden="true"><i className="fas fa-certificate" /></span>
         <span className="gs-hero__deco gs-hero__deco--3" aria-hidden="true"><i className="fas fa-graduation-cap" /></span>
@@ -120,14 +81,8 @@ export default async function GetStartedLanding() {
           </div>
           <h1>Find your required training and <em>get certified today.</em></h1>
           <p className="gs-lede">Food, alcohol, and workplace courses you finish on your phone in about an hour. Certificate the same day, accepted in all 50 states.</p>
-          <div className="gs-finder">
-            <span className="gs-finder__label"><i className="fas fa-magnifying-glass" aria-hidden="true" /> I need</span>
-            <div className="gs-finder__chips">
-              <a href="#courses" className="gs-finder__chip">Food safety</a>
-              <a href="#courses" className="gs-finder__chip">Alcohol &amp; service</a>
-              <a href="#courses" className="gs-finder__chip">Workplace</a>
-            </div>
-            <a href="#courses" className="gs-btn gs-btn--primary gs-finder__go">Browse courses <i className="fas fa-arrow-right" aria-hidden="true" /></a>
+          <div className="gs-cta-row" style={{ marginTop: "26px" }}>
+            <Link href={CATALOG_HREF} className="gs-btn gs-btn--primary gs-btn--lg">Browse all courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
           </div>
           <ul className="gs-trust">
             <li><i className="fas fa-shield-halved" aria-hidden="true" /> ANSI-accredited</li>
@@ -166,27 +121,8 @@ export default async function GetStartedLanding() {
         </div>
       </section>
 
-      {/* ── Courses by category (dynamic, add to cart) ─────────────────── */}
-      <section className="gs-section gs-sunk" id="courses">
-        <div className="gs-container">
-          <div className="gs-head">
-            <span className="gs-pill"><i className="fas fa-graduation-cap" aria-hidden="true" /> Our courses</span>
-            <h2>Pick your training</h2>
-            <p className="gs-lede">Add a course to your cart and check out in minutes. Every course is online and issues a certificate the moment you pass.</p>
-          </div>
-
-          {flat.length > 0 ? (
-            <CoursesV9 courses={flat} categories={labels} />
-          ) : (
-            <p className="gs-lede" style={{ textAlign: "center" }}>
-              Browse the <Link href={CATALOG_HREF} className="gs-inline-link">full catalog</Link> to see every course.
-            </p>
-          )}
-        </div>
-      </section>
-
       {/* ── How it works ───────────────────────────────────────────────── */}
-      <section className="gs-section">
+      <section className="gs-section gs-sunk">
         <div className="gs-container">
           <div className="gs-head">
             <span className="gs-pill"><i className="fas fa-wand-magic-sparkles" aria-hidden="true" /> How it works</span>
@@ -206,7 +142,7 @@ export default async function GetStartedLanding() {
 
       {/* ── Testimonials ───────────────────────────────────────────────── */}
       {quotes.length > 0 && (
-        <section className="gs-section gs-sunk gs-tsec">
+        <section className="gs-section gs-tsec">
           <span className="gs-tdeco gs-tdeco--1" aria-hidden="true"><i className="fas fa-comment-dots" /></span>
           <span className="gs-tdeco gs-tdeco--2" aria-hidden="true"><i className="fas fa-star" /></span>
           <span className="gs-tdeco gs-tdeco--3" aria-hidden="true"><i className="fas fa-thumbs-up" /></span>
@@ -223,7 +159,7 @@ export default async function GetStartedLanding() {
 
       {/* ── FAQ ────────────────────────────────────────────────────────── */}
       {faqs.length > 0 && (
-        <section className="gs-section">
+        <section className="gs-section gs-sunk">
           <div className="gs-container gs-faq">
             <div className="gs-head">
               <span className="gs-pill"><i className="fas fa-circle-question" aria-hidden="true" /> Good to know</span>
@@ -247,9 +183,9 @@ export default async function GetStartedLanding() {
         <div className="gs-container">
           <span className="gs-pill"><i className="fas fa-bolt" aria-hidden="true" /> Ready when you are</span>
           <h2 style={{ marginTop: "14px" }}>Get certified before your next shift</h2>
-          <p>Pick your course and finish online today.</p>
+          <p>Browse the catalog, pick your course and finish online today.</p>
           <div className="gs-cta-row">
-            <a href="#courses" className="gs-btn gs-btn--primary">Browse courses <i className="fas fa-arrow-right" aria-hidden="true" /></a>
+            <Link href={CATALOG_HREF} className="gs-btn gs-btn--primary gs-btn--lg">Browse all courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
           </div>
         </div>
       </section>
@@ -262,9 +198,6 @@ export default async function GetStartedLanding() {
           <p className="gs-foot-fine">© 2026 Train 321. All rights reserved.</p>
         </div>
       </footer>
-
-      <V9Drawer />
     </div>
-    </V9CartProvider>
   );
 }
