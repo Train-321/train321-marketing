@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTestimonials, getFaqGroups, getSiteSettings, type Testimonial, type FaqItem } from "@/lib/sanity";
+import { getCartCourse, type CartCourse } from "@/lib/enroll";
 import TestimonialsV9 from "./TestimonialsV9";
+import CourseCheckout from "./CourseCheckout";
 import "./marketing-v9.css";
 
 // v9 intro page. No on-page storefront grid or cart — each course has its own
@@ -38,7 +40,28 @@ const STEPS = [
   { n: 3, title: "Get your certificate", body: "Pass the course and download your certificate the moment you are done." }
 ];
 
-export default async function GetStartedLanding() {
+export default async function GetStartedLanding({
+  searchParams
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  // Checkout lives on THIS page: /marketing-v9?ids=856,692 renders the checkout
+  // pre-filled with those courses (no separate checkout route). With no ids it
+  // is the brand intro below.
+  const sp = await searchParams;
+  const idsParam = sp.ids ?? sp.course ?? sp.id;
+  if (idsParam) {
+    const raw = Array.isArray(idsParam) ? idsParam.join(",") : idsParam;
+    const ids = [
+      ...new Set(
+        raw.split(",").map((s) => Number(s.trim())).filter((n) => Number.isInteger(n) && n > 0)
+      )
+    ];
+    const resolved = await Promise.all(ids.map((n) => getCartCourse(n)));
+    const courses = resolved.filter((c): c is CartCourse => c !== null);
+    return <CourseCheckout courses={courses} />;
+  }
+
   let testimonials: Testimonial[] = [];
   let faqs: FaqItem[] = [];
   let stats: Stat[] = [];

@@ -77,7 +77,7 @@ export default async function CourseLanding({ params }: { params: Promise<{ id: 
   if (!course) notFound();
   const { catLabel } = course;
   const blurb = course.description ? toBlurb(course.description, 220) : "";
-  const checkoutHref = `/marketing-v9/course/${numId}/checkout`;
+  const checkoutHref = `/marketing-v9?ids=${numId}`;
 
   return (
     <div className="t321-gs">
