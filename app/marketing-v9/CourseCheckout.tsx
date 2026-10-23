@@ -581,7 +581,7 @@ function CheckoutInner({
           {submitting ? (
             <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> Processing…</>
           ) : (
-            <>{mode === "signin" ? "Sign in & place order" : "Create account & place order"}{dueToday > 0 ? ` · ${money(dueToday)}` : ""} <i className="fas fa-arrow-right" aria-hidden="true" /></>
+            <>{dueToday > 0 ? `Pay ${money(dueToday)}` : "Place order"} <i className="fas fa-arrow-right" aria-hidden="true" /></>
           )}
         </button>
         {submitError && (
