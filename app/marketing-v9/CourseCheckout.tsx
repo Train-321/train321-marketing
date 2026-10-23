@@ -430,7 +430,7 @@ function CheckoutInner({
             <p>We created your account for <strong>{result.employee.email}</strong>{result.amount > 0 ? <> and charged <strong>{money(result.amount)}</strong> (test)</> : null}. Log in to start your training.</p>
             <div className="v9co__done-actions">
               <a href={result.loginUrl} className="gs-btn gs-btn--primary">Log in to start <i className="fas fa-arrow-right" aria-hidden="true" /></a>
-              {result.receiptUrl && <a href={result.receiptUrl} target="_blank" rel="noopener noreferrer" className="v9co__done-link">View Stripe receipt</a>}
+              {result.receiptUrl && <a href={result.receiptUrl} target="_blank" rel="noopener noreferrer" className="v9co__done-link">View receipt</a>}
             </div>
           </>
         ) : (
@@ -726,7 +726,7 @@ function CheckoutInner({
           ) : (
             <>
               <label className={`v9co__field${errors.card ? " has-error" : ""}`}>
-                <span>Card information <em aria-hidden="true">*</em></span>
+                <span>Card details <em aria-hidden="true">*</em></span>
                 <div className="v9co__cardel">
                   <CardElement
                     options={{
@@ -744,7 +744,7 @@ function CheckoutInner({
                 </div>
                 {errors.card && <em className="v9co__err">{errors.card}</em>}
               </label>
-              <p className="v9co__secure"><i className="fas fa-lock" aria-hidden="true" /> Card details go straight to Stripe — they never touch our servers. Test mode.</p>
+              <p className="v9co__secure"><i className="fas fa-lock" aria-hidden="true" /> Your card is encrypted and never touches our servers. Test mode.</p>
             </>
           )}
         </section>
@@ -808,7 +808,6 @@ function CheckoutInner({
           <li><i className="fas fa-bolt" aria-hidden="true" /> Instant access after purchase</li>
           <li><i className="fas fa-headset" aria-hidden="true" /> Support at support@train321.com</li>
         </ul>
-        <p className="v9co__powered">Powered by <strong>Stripe</strong></p>
       </aside>
       </div>
     </form>
