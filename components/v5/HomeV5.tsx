@@ -20,7 +20,11 @@ import HowItWorks from "./HowItWorks";
 import TestimonialsV5 from "./TestimonialsV5";
 import FaqV5 from "./FaqV5";
 import FinalCta from "./FinalCta";
+import { useHalloween } from "./halloween/event";
+import HalloweenBar from "./halloween/HalloweenBar";
+import HalloweenDecor from "./halloween/HalloweenDecor";
 import "./v5.css";
+import "./halloween/halloween.css";
 
 type CompanyStat = { value: string; label: string };
 
@@ -70,22 +74,39 @@ export default function HomeV5({
   const featured = testimonials.filter((t) => t.featured);
   const quotes = featured.length ? featured : testimonials;
   const faqItems = (faqs[0]?.items || []).slice(0, 6);
+  // The same Studio copy the canonical home page reads (Home Page → "For
+  // myself" / "For my team"), so edits there land on both pages.
+  const studio = audience === "team" ? home?.audienceTeam : home?.audienceSelf;
+  // ?event=halloween: the event bar on top and a themed hero. Nothing else
+  // on the page changes, and it switches itself off once the offer ends.
+  const halloween = useHalloween();
 
   return (
     <FinderV5Provider marketplace={marketplace}>
-      <div className="v5">
-        <HeroV5 audience={audience} onAudience={chooseAudience} companyStats={companyStats} />
-        <TrustStrip logos={trustLogos} />
+      {halloween && <HalloweenBar />}
+      <div className={`v5${halloween ? " v5--halloween" : ""}`}>
+        <HeroV5
+          audience={audience}
+          onAudience={chooseAudience}
+          home={home}
+          decor={halloween ? <HalloweenDecor /> : null}
+        />
+        <TrustStrip logos={trustLogos} label={studio?.trustLabel} />
         <PillarsV5 head={home?.pillarsHead} pillars={home?.pillars} />
         <CourseExplorer />
-        <PopularRail courses={courses} slugs={popularSlugs} />
+        <PopularRail courses={courses} slugs={popularSlugs} head={home?.popularHead} />
         <StatsBand stats={companyStats} />
         <RolesMarquee />
         <TeamsSplit onAudience={chooseAudience} />
-        <HowItWorks audience={audience} />
-        <TestimonialsV5 items={quotes} companyStats={companyStats} />
-        <FaqV5 items={faqItems} />
-        <FinalCta phone={phone} email={email} />
+        <HowItWorks audience={audience} head={home?.howHead} studio={studio} />
+        <TestimonialsV5 items={quotes} companyStats={companyStats} head={home?.opinionsHead} />
+        <FaqV5 items={faqItems} head={home?.faqTeaserHead} ctaLabel={home?.faqTeaserCtaLabel} />
+        <FinalCta
+          phone={phone}
+          email={email}
+          heading={(audience === "team" && home?.bottomCta?.heading) || studio?.bottomTitle}
+          lede={(audience === "team" && home?.bottomCta?.lede) || studio?.bottomLede}
+        />
       </div>
     </FinderV5Provider>
   );

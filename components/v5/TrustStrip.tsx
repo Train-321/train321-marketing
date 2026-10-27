@@ -6,7 +6,7 @@
 
 import type { TrustLogo } from "@/lib/sanity";
 
-export default function TrustStrip({ logos }: { logos: TrustLogo[] }) {
+export default function TrustStrip({ logos, label }: { logos: TrustLogo[]; label?: string }) {
   const items = logos.filter((l) => l.imageUrl);
   if (!items.length) return null;
   const loop = [...items, ...items];
@@ -14,7 +14,7 @@ export default function TrustStrip({ logos }: { logos: TrustLogo[] }) {
     <section className="v5-trust" aria-label="Trusted by">
       <div className="v5-container v5-trust__row">
         <p className="v5-trust__label">
-          Trusted by teams at restaurant groups, hotels and state associations
+          {label || "Trusted by teams at restaurant groups, hotels and state associations"}
         </p>
         <div className="v5-marquee v5-marquee--logos">
           <div className="v5-marquee__track">

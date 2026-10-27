@@ -1,57 +1,69 @@
 [
   {
     "key": "restaurant",
-    "id": "1719573019827-d06944a0c2be",
-    "url": "https://images.unsplash.com/photo-1719573019827-d06944a0c2be",
-    "photographer": "Roshan Chakkeeri",
-    "photoPageUrl": "https://unsplash.com/photos/a-man-in-a-tuxedo-carrying-a-tray-of-food-H9q_XcRpHNo",
-    "description": "Waiter in a tuxedo carrying a tray of plates through a busy outdoor dining room; face visible, candid",
-    "orientation": "portrait"
+    "id": "29129767",
+    "url": "https://images.pexels.com/photos/29129767/pexels-photo-29129767.jpeg",
+    "photographer": "Kenzhar Sharap",
+    "photoPageUrl": "https://www.pexels.com/photo/professional-waitress-serving-in-upscale-restaurant-29129767/",
+    "description": "Server carrying a tray of plates through a warmly lit restaurant",
+    "orientation": "portrait",
+    "source": "Pexels",
+    "license": "Pexels License (free commercial use, no attribution required)"
   },
   {
     "key": "bar",
-    "id": "1647776112336-72f4c30fafc1",
-    "url": "https://images.unsplash.com/photo-1647776112336-72f4c30fafc1",
-    "photographer": "Olena Bohovyk",
-    "photoPageUrl": "https://unsplash.com/photos/a-man-is-making-a-drink-at-a-bar-HN2ukPUF_og",
-    "description": "Bartender pouring a cocktail from a shaker into a glass behind a warm wooden bar; face visible, subject centered",
-    "orientation": "landscape"
+    "id": "4485407",
+    "url": "https://images.pexels.com/photos/4485407/pexels-photo-4485407.jpeg",
+    "photographer": "Antoni Shkraba",
+    "photoPageUrl": "https://www.pexels.com/photo/barman-in-black-vest-making-cocktail-4485407/",
+    "description": "Bartender in a black vest making a cocktail behind a dimly lit bar",
+    "orientation": "landscape",
+    "source": "Pexels",
+    "license": "Pexels License (free commercial use, no attribution required)"
   },
   {
     "key": "hotel",
-    "id": "1580842402762-6f5868c17412",
-    "url": "https://images.unsplash.com/photo-1580842402762-6f5868c17412",
-    "photographer": "Ashwini Chaudhary(Monty)",
-    "photoPageUrl": "https://unsplash.com/photos/man-in-blue-dress-shirt-and-blue-denim-jeans-holding-green-plastic-bag--4KzDiyZjgw",
-    "description": "Hotel housekeeper pushing a housekeeping cart down a carpeted hotel corridor; candid, face visible",
-    "orientation": "portrait"
+    "id": "29649747",
+    "url": "https://images.pexels.com/photos/29649747/pexels-photo-29649747.jpeg",
+    "photographer": "Clément Proust",
+    "photoPageUrl": "https://www.pexels.com/photo/charming-hotel-receptionist-at-wooden-desk-29649747/",
+    "description": "Hotel receptionist at a warmly lit wooden front desk",
+    "orientation": "portrait",
+    "source": "Pexels",
+    "license": "Pexels License (free commercial use, no attribution required)"
   },
   {
     "key": "cafe",
-    "id": "1507914372368-b2b085b925a1",
-    "url": "https://images.unsplash.com/photo-1507914372368-b2b085b925a1",
-    "photographer": "Brooke Cagle",
-    "photoPageUrl": "https://unsplash.com/photos/woman-holding-portafilter-in-coffee-shop-8jp-6SjVibM",
-    "description": "Smiling barista in a mustard beanie holding a portafilter at the espresso machine in a coffee shop; shallow depth of field",
-    "orientation": "landscape"
+    "id": "20609544",
+    "url": "https://images.pexels.com/photos/20609544/pexels-photo-20609544.jpeg",
+    "photographer": "Fatima Said",
+    "photoPageUrl": "https://www.pexels.com/photo/waiter-in-apron-and-shirt-at-cafe-20609544/",
+    "description": "Barista in an apron working behind the counter of a bright café",
+    "orientation": "landscape",
+    "source": "Pexels",
+    "license": "Pexels License (free commercial use, no attribution required)"
   },
   {
     "key": "grocery",
-    "id": "1774978612876-967903f8ab82",
-    "url": "https://images.unsplash.com/photo-1774978612876-967903f8ab82",
-    "photographer": "Adhitya Sibikumar",
-    "photoPageUrl": "https://unsplash.com/photos/a-man-in-a-hairnet-stocks-produce-in-a-supermarket-ltQ0PaMoU3A",
-    "description": "Grocery worker in a hairnet and gloves stocking produce from a crate in a supermarket aisle; candid",
-    "orientation": "portrait"
+    "id": "8476592",
+    "url": "https://images.pexels.com/photos/8476592/pexels-photo-8476592.jpeg",
+    "photographer": "Kampus Production",
+    "photoPageUrl": "https://www.pexels.com/photo/man-in-an-apron-taking-out-groceries-from-a-shopping-bag-8476592/",
+    "description": "Grocery store employee in an apron bagging fresh produce",
+    "orientation": "portrait",
+    "source": "Pexels",
+    "license": "Pexels License (free commercial use, no attribution required)"
   },
   {
     "key": "catering",
-    "id": "1779683609997-b541b697d0c2",
-    "url": "https://images.unsplash.com/photo-1779683609997-b541b697d0c2",
-    "photographer": "Lens Fables",
-    "photoPageUrl": "https://unsplash.com/photos/smiling-man-serves-a-dark-drink-on-a-tray-LPUVEb4k0ok",
-    "description": "Smiling event server in a black uniform carrying a drink on a tray at a banquet/event; subject centered",
-    "orientation": "portrait"
+    "id": "36581576",
+    "url": "https://images.pexels.com/photos/36581576/pexels-photo-36581576.jpeg",
+    "photographer": "Luis Morales Torres",
+    "photoPageUrl": "https://www.pexels.com/photo/smiling-waiter-serving-colorful-cocktails-at-event-36581576/",
+    "description": "Smiling event server presenting a tray of cocktails",
+    "orientation": "portrait",
+    "source": "Pexels",
+    "license": "Pexels License (free commercial use, no attribution required)"
   },
   {
     "key": "kitchen",

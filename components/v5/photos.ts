@@ -1,15 +1,15 @@
-// Photography for the /v5 homepage. Every entry is a real workplace photo;
-// Unsplash hot-links (already allowed in next.config remotePatterns) with
-// imgix crop params so the hero accordion, role tiles and industry cards all
-// get face-safe crops at the size they render. Swap any entry for owned
-// photography by pointing `src` at /img/… — nothing else needs to change.
+// Photography for the /v5 homepage. Every entry is a real workplace photo,
+// hot-linked from Pexels (the six hero industries) or Unsplash (the rest),
+// with each CDN's resize params so the hero, role tiles and industry cards
+// all get crops at the size they render. Swap any entry for owned photography
+// by pointing `src` at /img/… — nothing else needs to change.
 //
-// Licence: Unsplash (free for commercial use, no attribution required). The
-// photographer is kept per entry anyway as the audit trail; the source list
-// with page links lives in reports/v5-photos.json.
+// Licence: Pexels and Unsplash are both free for commercial use with no
+// attribution required. The photographer is kept per entry anyway as the
+// audit trail; the source list with page links lives in reports/v5-photos.json.
 
 export type Photo = {
-  /** Base URL, no query string. Unsplash hot-link or a /public path. */
+  /** Base URL, no query string. Pexels or Unsplash hot-link, or a /public path. */
   src: string;
   alt: string;
   /** object-position for the cover crop — keeps faces in frame. */
@@ -18,11 +18,19 @@ export type Photo = {
 };
 
 /**
- * Size an Unsplash photo on the way out. Local /img assets pass through
- * untouched. `fit=crop&crop=faces` lets Unsplash pick the crop around the
- * people in the frame when the aspect ratio changes.
+ * Size a CDN photo on the way out. Local /img assets pass through untouched.
+ * On Unsplash, `fit=crop&crop=faces` picks the crop around the people in the
+ * frame when the aspect ratio changes; Pexels crops from the centre.
  */
 export function photoUrl(p: Photo, width: number, height?: number): string {
+  if (p.src.startsWith("https://images.pexels.com/")) {
+    const q = new URLSearchParams({ auto: "compress", cs: "tinysrgb", w: String(width) });
+    if (height) {
+      q.set("h", String(height));
+      q.set("fit", "crop");
+    }
+    return `${p.src}?${q.toString()}`;
+  }
   if (!p.src.startsWith("https://images.unsplash.com/")) return p.src;
   const q = new URLSearchParams({
     auto: "format",
@@ -36,43 +44,44 @@ export function photoUrl(p: Photo, width: number, height?: number): string {
 }
 
 const U = "https://images.unsplash.com/photo-";
+const pexels = (id: number) => `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg`;
 
 export const PHOTOS = {
   restaurant: {
-    src: `${U}1719573019827-d06944a0c2be`,
-    alt: "Waiter carrying a tray of plates through a busy dining room",
-    pos: "50% 30%",
-    credit: "Roshan Chakkeeri"
+    src: pexels(29129767),
+    alt: "Server carrying a tray of plates through a warmly lit restaurant",
+    pos: "50% 35%",
+    credit: "Kenzhar Sharap"
   },
   bar: {
-    src: `${U}1647776112336-72f4c30fafc1`,
-    alt: "Bartender pouring a cocktail from a shaker behind a warm wooden bar",
-    pos: "50% 35%",
-    credit: "Olena Bohovyk"
+    src: pexels(4485407),
+    alt: "Bartender in a black vest making a cocktail behind a dimly lit bar",
+    pos: "50% 30%",
+    credit: "Antoni Shkraba"
   },
   hotel: {
-    src: `${U}1580842402762-6f5868c17412`,
-    alt: "Hotel housekeeper pushing a cart down a hotel corridor",
-    pos: "50% 30%",
-    credit: "Ashwini Chaudhary"
+    src: pexels(29649747),
+    alt: "Hotel receptionist at a warmly lit wooden front desk",
+    pos: "50% 35%",
+    credit: "Clément Proust"
   },
   cafe: {
-    src: `${U}1507914372368-b2b085b925a1`,
-    alt: "Smiling barista holding a portafilter at the espresso machine",
+    src: pexels(20609544),
+    alt: "Barista in an apron working behind the counter of a bright café",
     pos: "50% 35%",
-    credit: "Brooke Cagle"
+    credit: "Fatima Said"
   },
   grocery: {
-    src: `${U}1774978612876-967903f8ab82`,
-    alt: "Grocery worker in a hairnet and gloves stocking produce",
-    pos: "50% 30%",
-    credit: "Adhitya Sibikumar"
+    src: pexels(8476592),
+    alt: "Grocery store employee in an apron bagging fresh produce",
+    pos: "50% 35%",
+    credit: "Kampus Production"
   },
   catering: {
-    src: `${U}1779683609997-b541b697d0c2`,
-    alt: "Smiling event server carrying a drink on a tray at a banquet",
+    src: pexels(36581576),
+    alt: "Smiling event server presenting a tray of cocktails",
     pos: "50% 30%",
-    credit: "Lens Fables"
+    credit: "Luis Morales Torres"
   },
   kitchen: {
     src: `${U}1581349485608-9469926a8e5e`,

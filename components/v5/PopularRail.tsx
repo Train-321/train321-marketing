@@ -6,9 +6,10 @@
 
 import Link from "next/link";
 import { useRef, type CSSProperties } from "react";
-import type { Course } from "@/lib/sanity";
+import type { Course, SectionHead } from "@/lib/sanity";
 import { sizedImage } from "@/lib/images";
 import { Reveal } from "./motion";
+import AccentLast from "./AccentLast";
 
 const CATEGORY_LABEL: Record<string, string> = {
   food: "Food safety",
@@ -16,7 +17,15 @@ const CATEGORY_LABEL: Record<string, string> = {
   hr: "HR compliance"
 };
 
-export default function PopularRail({ courses, slugs }: { courses: Course[]; slugs: string[] }) {
+export default function PopularRail({
+  courses,
+  slugs,
+  head
+}: {
+  courses: Course[];
+  slugs: string[];
+  head?: SectionHead;
+}) {
   const railRef = useRef<HTMLDivElement | null>(null);
   const picked = slugs
     .map((s) => courses.find((c) => c.slug === s))
@@ -39,11 +48,18 @@ export default function PopularRail({ courses, slugs }: { courses: Course[]; slu
         <Reveal className="v5-head v5-head--row">
           <div>
             <p className="v5-eyebrow">
-              <i className="fas fa-fire" aria-hidden="true" /> Most enrolled
+              <i className={head?.icon || "fas fa-fire"} aria-hidden="true" /> {head?.eyebrow || "Most enrolled"}
             </p>
             <h2 id="v5-popular-title" className="v5-h2">
-              The courses employers ask for <em>most.</em>
+              {head?.heading ? (
+                <AccentLast text={head.heading} />
+              ) : (
+                <>
+                  The courses employers ask for <em>most.</em>
+                </>
+              )}
             </h2>
+            {head?.lede && <p className="v5-lede">{head.lede}</p>}
           </div>
           <div className="v5-rail__nav">
             <button type="button" className="v5-rail__btn" aria-label="Scroll back" onClick={() => scrollBy(-1)}>
@@ -77,7 +93,6 @@ export default function PopularRail({ courses, slugs }: { courses: Course[]; slu
                 </span>
                 <span className="v5-pop__top">
                   <span className="v5-pop__chip">{chip}</span>
-                  {i === 0 && <span className="v5-pop__chip v5-pop__chip--hot">#1 this month</span>}
                 </span>
                 <span className="v5-pop__body">
                   <span className="v5-pop__title">{c.title}</span>

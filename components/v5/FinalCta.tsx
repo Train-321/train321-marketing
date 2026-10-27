@@ -4,20 +4,42 @@ import CustomSelect from "@/components/CustomSelect";
 import { STATE_CODES_BY_NAME, STATE_NAMES, US_STATES } from "@/lib/states";
 import { useFinderV5 } from "./FinderContext";
 import { Reveal } from "./motion";
+import AccentLast from "./AccentLast";
 
-export default function FinalCta({ phone, email }: { phone: string; email: string }) {
+export default function FinalCta({
+  phone,
+  email,
+  heading,
+  lede
+}: {
+  phone: string;
+  email: string;
+  heading?: string;
+  lede?: string;
+}) {
   const { stateCode, setStateCode, focusExplorer, detectLocation, detecting } = useFinderV5();
   return (
     <section className="v5-section v5-final" aria-labelledby="v5-final-title">
-      <div className="v5-final__glow" aria-hidden="true" />
+      {/* The glow is clipped by its own layer, not the section, so the state
+          menu can spill past the section's edge over the footer. */}
+      <div className="v5-final__bg" aria-hidden="true">
+        <div className="v5-final__glow" />
+      </div>
       <div className="v5-container">
         <Reveal className="v5-final__inner">
           <p className="v5-eyebrow v5-eyebrow--light">
             <i className="fas fa-stopwatch" aria-hidden="true" /> Need it today?
           </p>
           <h2 id="v5-final-title" className="v5-h2">
-            Start now. Be certified <em>before your shift ends.</em>
+            {heading ? (
+              <AccentLast text={heading} />
+            ) : (
+              <>
+                Start now. Be certified <em>before your shift ends.</em>
+              </>
+            )}
           </h2>
+          {lede && <p className="v5-lede">{lede}</p>}
           <form
             className="v5-finderbar v5-finderbar--dark v5-finderbar--simple"
             role="search"
