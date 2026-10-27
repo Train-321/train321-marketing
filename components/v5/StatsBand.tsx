@@ -10,12 +10,12 @@ type Stat = { value: string; label: string };
 const FALLBACK: Stat[] = [
   { value: "50,000+", label: "Certificates issued" },
   { value: "5,000+", label: "Locations trained" },
-  { value: "50", label: "States accepted" },
+  { value: "6 yrs", label: "Serving hospitality" },
   { value: "4.8/5", label: "Average learner rating" }
 ];
 
 const PROOF = [
-  { icon: "fa-certificate", title: "ANSI / ANAB accredited", body: "The accreditation health departments look for on a food handler card." },
+  { icon: "fa-certificate", title: "Accredited & approved", body: "Accredited, state-approved, or built to a state's requirements. Each course page shows which." },
   { icon: "fa-landmark", title: "State-approved providers", body: "TABC, California RBS, Florida RVT, Illinois BASSET and more — the official versions." },
   { icon: "fa-language", title: "English and Spanish", body: "Most courses in both, with the same certificate at the end." },
   { icon: "fa-headset", title: "Real people on the phone", body: "561-325-7300. Since 2020, that's how we've answered." }

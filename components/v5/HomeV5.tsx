@@ -70,22 +70,30 @@ export default function HomeV5({
   const featured = testimonials.filter((t) => t.featured);
   const quotes = featured.length ? featured : testimonials;
   const faqItems = (faqs[0]?.items || []).slice(0, 6);
+  // The same Studio copy the canonical home page reads (Home Page → "For
+  // myself" / "For my team"), so edits there land on both pages.
+  const studio = audience === "team" ? home?.audienceTeam : home?.audienceSelf;
 
   return (
     <FinderV5Provider marketplace={marketplace}>
       <div className="v5">
-        <HeroV5 audience={audience} onAudience={chooseAudience} companyStats={companyStats} />
-        <TrustStrip logos={trustLogos} />
+        <HeroV5 audience={audience} onAudience={chooseAudience} home={home} />
+        <TrustStrip logos={trustLogos} label={studio?.trustLabel} />
         <PillarsV5 head={home?.pillarsHead} pillars={home?.pillars} />
         <CourseExplorer />
-        <PopularRail courses={courses} slugs={popularSlugs} />
+        <PopularRail courses={courses} slugs={popularSlugs} head={home?.popularHead} />
         <StatsBand stats={companyStats} />
         <RolesMarquee />
         <TeamsSplit onAudience={chooseAudience} />
-        <HowItWorks audience={audience} />
-        <TestimonialsV5 items={quotes} companyStats={companyStats} />
-        <FaqV5 items={faqItems} />
-        <FinalCta phone={phone} email={email} />
+        <HowItWorks audience={audience} head={home?.howHead} studio={studio} />
+        <TestimonialsV5 items={quotes} companyStats={companyStats} head={home?.opinionsHead} />
+        <FaqV5 items={faqItems} head={home?.faqTeaserHead} ctaLabel={home?.faqTeaserCtaLabel} />
+        <FinalCta
+          phone={phone}
+          email={email}
+          heading={(audience === "team" && home?.bottomCta?.heading) || studio?.bottomTitle}
+          lede={(audience === "team" && home?.bottomCta?.lede) || studio?.bottomLede}
+        />
       </div>
     </FinderV5Provider>
   );

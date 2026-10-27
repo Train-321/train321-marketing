@@ -14,20 +14,24 @@ import {
 // dashboard, and the usual proof. The canonical homepage (app/page.tsx) and
 // the /v2 and /v3 previews are untouched.
 
-export const metadata: Metadata = {
-  title: "Food Handler, Alcohol & Compliance Training — Certified Today",
-  description:
-    "ANSI-accredited food handler, food manager, alcohol server and HR compliance courses. Pick your state, finish on your phone in about an hour, certificate the same day.",
-  alternates: { canonical: "/v5" },
-  // Internal preview of a home-page design — duplicate content against "/".
-  robots: { index: false, follow: true },
-  openGraph: {
-    title: "Get certified before your next shift — Train 321",
+// Title and description are the home page's own, from Studio (Site Settings →
+// "Search & social sharing"), so this preview reads like the page it may replace.
+export async function generateMetadata(): Promise<Metadata> {
+  const { defaultSeo: seo } = await getSiteSettings();
+  return {
+    // Absolute: the Studio title already carries the brand, and the layout's
+    // "%s | Train 321" template would add it a second time on this child route.
+    title: {
+      absolute: seo?.metaTitle || "Online Food Handler, Alcohol & Compliance Training for Restaurants | Train 321"
+    },
     description:
-      "Pick your state and see only the courses accepted there. Food, alcohol and HR compliance training from $10, certificate the moment you pass.",
-    type: "website"
-  }
-};
+      seo?.metaDescription ||
+      "Food handler, food manager, alcohol server and workplace compliance courses. Pick your state, finish on your phone, and download your certificate when you pass.",
+    alternates: { canonical: "/v5" },
+    // Internal preview of a home-page design — duplicate content against "/".
+    robots: { index: false, follow: true }
+  };
+}
 
 export default async function Page() {
   const [courses, testimonials, faqs, settings, home, catalog] = await Promise.all([

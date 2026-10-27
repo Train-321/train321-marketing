@@ -1,24 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import type { FaqItem } from "@/lib/sanity";
+import type { FaqItem, SectionHead } from "@/lib/sanity";
 import { Reveal } from "./motion";
+import AccentLast from "./AccentLast";
 
-export default function FaqV5({ items }: { items: FaqItem[] }) {
+export default function FaqV5({
+  items,
+  head,
+  ctaLabel
+}: {
+  items: FaqItem[];
+  head?: SectionHead;
+  ctaLabel?: string;
+}) {
   if (!items.length) return null;
   return (
     <section className="v5-section v5-faq" aria-labelledby="v5-faq-title">
       <div className="v5-container v5-faq__grid">
         <Reveal className="v5-faq__intro">
           <p className="v5-eyebrow">
-            <i className="fas fa-question-circle" aria-hidden="true" /> Good to know
+            <i className={head?.icon || "fas fa-question-circle"} aria-hidden="true" /> {head?.eyebrow || "Good to know"}
           </p>
           <h2 id="v5-faq-title" className="v5-h2">
-            Questions we get <em>before the first course.</em>
+            {head?.heading ? (
+              <AccentLast text={head.heading} />
+            ) : (
+              <>
+                Questions we get <em>before the first course.</em>
+              </>
+            )}
           </h2>
-          <p className="v5-lede">Still unsure? Call 561-325-7300 — a person answers.</p>
+          <p className="v5-lede">{head?.lede || "Still unsure? Call 561-325-7300 — a person answers."}</p>
           <Link href="/faq" className="v5-btn v5-btn--ghost">
-            All FAQs <i className="fas fa-arrow-right" aria-hidden="true" />
+            {ctaLabel || "All FAQs"} <i className="fas fa-arrow-right" aria-hidden="true" />
           </Link>
         </Reveal>
         <div className="v5-faq__list">

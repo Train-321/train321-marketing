@@ -1,6 +1,8 @@
 "use client";
 
+import type { AudienceCopyDoc, SectionHead } from "@/lib/sanity";
 import { Reveal } from "./motion";
+import AccentLast from "./AccentLast";
 
 type Step = { title: string; body: string; icon: string; aside: string };
 
@@ -27,46 +29,70 @@ const SELF: Step[] = [
 
 const TEAM: Step[] = [
   {
-    title: "Add your team",
-    body: "Upload a list or share a link. Every location on one account, one invoice, seats you can reassign.",
+    title: "Choose your training",
+    body: "Select the courses your team needs for food safety, alcohol safety, or workplace compliance.",
+    icon: "fa-tasks",
+    aside: "2 min"
+  },
+  {
+    title: "Create your account",
+    body: "Sign up, add your team, and assign courses from one simple platform.",
     icon: "fa-users",
     aside: "5 min"
   },
   {
-    title: "They train, you track",
-    body: "Staff finish on their phones. Your dashboard shows who's certified, who's in progress, and who needs a nudge.",
+    title: "Track completions",
+    body: "Monitor progress, view certificates, and keep training records organized in one dashboard.",
     icon: "fa-chart-line",
     aside: "Same day"
-  },
-  {
-    title: "Stay inspection-ready",
-    body: "Certificates file themselves. We remind you before anything expires, so the binder is never out of date.",
-    icon: "fa-shield-alt",
-    aside: "Always"
   }
 ];
 
-export default function HowItWorks({ audience }: { audience: "self" | "team" }) {
-  const steps = audience === "team" ? TEAM : SELF;
+const LEDE = {
+  self: "Complete required food safety, alcohol safety, and workplace training online with mobile-friendly courses built for busy workers.",
+  team: "Assign courses in minutes. Employees complete training on their phones, and you can track progress without chasing paperwork."
+};
+
+export default function HowItWorks({
+  audience,
+  head,
+  studio
+}: {
+  audience: "self" | "team";
+  head?: SectionHead;
+  studio?: AudienceCopyDoc;
+}) {
+  // Titles and bodies come from Studio when set; the icon and time chip stay
+  // with each step's position, so editors only ever write words.
+  const base = audience === "team" ? TEAM : SELF;
+  const steps = studio?.steps?.length
+    ? studio.steps.map((s, i) => ({
+        ...(base[i] || base[base.length - 1]),
+        title: s.title || "",
+        body: s.body || ""
+      }))
+    : base;
   return (
     <section className="v5-section v5-how" aria-labelledby="v5-how-title">
       <div className="v5-container">
         <Reveal className="v5-head v5-head--center">
           <p className="v5-eyebrow">
-            <i className="fas fa-bolt" aria-hidden="true" /> How it works
+            <i className={head?.icon || "fas fa-bolt"} aria-hidden="true" /> {head?.eyebrow || "How it works"}
           </p>
           <h2 id="v5-how-title" className="v5-h2">
-            Required training made quick and <em>simple.</em>
+            {studio?.stepsTitle ? (
+              <AccentLast text={studio.stepsTitle} />
+            ) : (
+              <>
+                Required training made quick and <em>simple.</em>
+              </>
+            )}
           </h2>
-          <p className="v5-lede">
-            {audience === "team"
-              ? "Complete required food safety, alcohol safety, and workplace training online, with mobile-friendly courses your whole team can finish on any device."
-              : "Complete required food safety, alcohol safety, and workplace training online with mobile-friendly courses built for busy workers."}
-          </p>
+          <p className="v5-lede">{studio?.stepsLede || LEDE[audience]}</p>
         </Reveal>
         <ol className="v5-how__grid">
           {steps.map((s, i) => (
-            <Reveal as="li" key={s.title} index={i} className="v5-how__step">
+            <Reveal as="li" key={i} index={i} className="v5-how__step">
               <span className="v5-how__num" aria-hidden="true">
                 0{i + 1}
               </span>

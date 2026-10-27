@@ -1,24 +1,22 @@
 "use client";
 
 // Hero: the finder IS the hero. Audience toggle, headline, a search-bar style
-// "Where do you work? / What do you need?" row that drives the explorer, a
-// proof row, and the industry accordion on the right.
+// "Where do you work? / What do you need?" row that drives the explorer, the
+// Studio trust badges, and the industry accordion on the right.
 
-import { useCart } from "@/components/cart/CartContext";
+import type { HomePage } from "@/lib/sanity";
 import FinderBar from "./FinderBar";
 import IndustrySpotlight from "./IndustrySpotlight";
 import { useFinderV5 } from "./FinderContext";
 
 export type Audience = "self" | "team";
 
-type Stat = { value: string; label: string };
-
 const COPY: Record<
   Audience,
   { eyebrow: string; h1Pre: string; h1Em: string; lede: string; cta: string }
 > = {
   self: {
-    eyebrow: "ANSI-accredited · Accepted in all 50 states · Certificate the same day",
+    eyebrow: "Accredited courses · Accepted in most states · Certificate the same day",
     h1Pre: "The certificate your job needs,",
     h1Em: "before your next shift.",
     lede:
@@ -30,31 +28,45 @@ const COPY: Record<
     h1Pre: "Train the whole team",
     h1Em: "before the dinner rush.",
     lede:
-      "Assign ANSI-accredited courses in minutes, watch certificates roll in the same day, and keep every location inspection-ready from one dashboard.",
+      "Assign accredited courses in minutes, watch certificates roll in the same day, and keep every location inspection-ready from one dashboard.",
     cta: "Search courses"
   }
 };
 
-function findStat(stats: Stat[], re: RegExp): Stat | undefined {
-  return stats.find((s) => re.test(s.label) || re.test(s.value));
-}
+// Only shown while Studio's Home Page → hero trust pills is empty.
+const TRUST_PILLS = [
+  { icon: "fas fa-shield-alt", label: "Trusted since 2020" },
+  { icon: "fas fa-flag-usa", label: "Accepted in most states" },
+  { icon: "fas fa-bolt", label: "Instant certificate" }
+];
 
 export default function HeroV5({
   audience,
   onAudience,
-  companyStats
+  home
 }: {
   audience: Audience;
   onAudience: (a: Audience) => void;
-  companyStats: Stat[];
+  home: HomePage | null;
 }) {
-  const copy = COPY[audience];
+  // Studio copy wins, in the canonical home page's order: the per-audience
+  // block, then the legacy single-hero fields, then the defaults above. A
+  // Studio headline without its own accent words stands alone, as it does there.
+  const fallback = COPY[audience];
+  const studio = audience === "team" ? home?.audienceTeam : home?.audienceSelf;
+  const studioH1 = studio?.h1Pre || home?.heroHeadline;
+  const copy = {
+    ...fallback,
+    eyebrow: studio?.eyebrow || home?.heroEyebrow || fallback.eyebrow,
+    h1Pre: studioH1?.trim() || fallback.h1Pre,
+    h1Em: studio?.h1Em?.trim() || (studioH1 ? "" : fallback.h1Em),
+    lede: studio?.lede || home?.heroSubcopy || fallback.lede
+  };
   const { stateName, setStateCode, stateSource, detectError } = useFinderV5();
-  const { buyer } = useCart();
-
-  const rating = findStat(companyStats, /rating/i);
-  const certs = findStat(companyStats, /certificate/i);
-  const locations = findStat(companyStats, /location/i);
+  // The same badges the canonical home page shows under its hero.
+  const pills = home?.heroTrustPills?.filter((p) => p.label).length
+    ? home.heroTrustPills.filter((p) => p.label)
+    : TRUST_PILLS;
 
   return (
     <section className="v5-hero" aria-labelledby="v5-hero-title">
@@ -100,10 +112,15 @@ export default function HeroV5({
           <h1 className="v5-h1" id="v5-hero-title" key={`h1-${audience}`}>
             <span className="v5-h1__line">
               <span>{copy.h1Pre}</span>
-            </span>{" "}
-            <span className="v5-h1__line">
-              <em>{copy.h1Em}</em>
             </span>
+            {copy.h1Em && (
+              <>
+                {" "}
+                <span className="v5-h1__line">
+                  <em>{copy.h1Em}</em>
+                </span>
+              </>
+            )}
           </h1>
           <p className="v5-hero__lede" key={`lede-${audience}`}>
             {copy.lede}
@@ -135,25 +152,12 @@ export default function HeroV5({
           )}
 
           <ul className="v5-hero__proof" aria-label="Why Train 321">
-            <li>
-              <span className="v5-stars" aria-hidden="true">
-                <i className="fas fa-star" />
-                <i className="fas fa-star" />
-                <i className="fas fa-star" />
-                <i className="fas fa-star" />
-                <i className="fas fa-star-half-alt" />
-              </span>
-              <strong>{rating?.value || "4.8/5"}</strong>
-              <span>rating</span>
-            </li>
-            <li>
-              <strong>{certs?.value || "50,000+"}</strong>
-              <span>certified</span>
-            </li>
-            <li>
-              <strong>{locations?.value || "5,000+"}</strong>
-              <span>{buyer.audience === "company" ? "locations on team plans" : "locations"}</span>
-            </li>
+            {pills.map((p, i) => (
+              <li key={i}>
+                <i className={`${p.icon || "fas fa-check"} v5-hero__proof-icon`} aria-hidden="true" />
+                <strong>{p.label}</strong>
+              </li>
+            ))}
           </ul>
         </div>
 
