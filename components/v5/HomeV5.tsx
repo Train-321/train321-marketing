@@ -38,6 +38,9 @@ export type HomeV5Props = {
   marketplace: FinderMarketplace;
   phone: string;
   email: string;
+  /** Force the Halloween event on even without ?event=halloween in the URL —
+      used by the homepage takeover that renders this page at "/". */
+  forceEvent?: boolean;
 };
 
 const POPULAR_SLUGS = ["food-handler", "alcohol", "food-manager", "sexual-harassment", "tabc", "rbs"];
@@ -51,7 +54,8 @@ export default function HomeV5({
   home,
   marketplace,
   phone,
-  email
+  email,
+  forceEvent = false
 }: HomeV5Props) {
   const { buyer, setAudience: setCartAudience } = useCart();
   const [audience, setAudienceState] = useState<Audience>("self");
@@ -79,7 +83,7 @@ export default function HomeV5({
   const studio = audience === "team" ? home?.audienceTeam : home?.audienceSelf;
   // ?event=halloween: the event bar on top and a themed hero. Nothing else
   // on the page changes, and it switches itself off once the offer ends.
-  const halloween = useHalloween();
+  const halloween = useHalloween(forceEvent);
 
   return (
     <FinderV5Provider marketplace={marketplace}>

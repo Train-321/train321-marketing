@@ -17,12 +17,17 @@ export const HALLOWEEN = {
   endsAt: "2026-11-01T03:59:59Z"
 };
 
-/** True after mount when the URL asks for the event and it's still running. */
-export function useHalloween(): boolean {
+/**
+ * True after mount when the event is live. It turns on when the URL asks for it
+ * (?event=halloween) OR when `forced` is passed (the homepage takeover renders
+ * the event at "/" with no query param). The end date still applies either way,
+ * so it switches itself off once the offer ends.
+ */
+export function useHalloween(forced = false): boolean {
   const [on, setOn] = useState(false);
   useEffect(() => {
-    const asked = new URLSearchParams(window.location.search).get("event") === HALLOWEEN.key;
+    const asked = forced || new URLSearchParams(window.location.search).get("event") === HALLOWEEN.key;
     setOn(asked && Date.now() < Date.parse(HALLOWEEN.endsAt));
-  }, []);
+  }, [forced]);
   return on;
 }
