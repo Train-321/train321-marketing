@@ -4,6 +4,7 @@
 // "Where do you work? / What do you need?" row that drives the explorer, the
 // Studio trust badges, and the industry accordion on the right.
 
+import type { ReactNode } from "react";
 import type { HomePage } from "@/lib/sanity";
 import FinderBar from "./FinderBar";
 import IndustrySpotlight from "./IndustrySpotlight";
@@ -43,11 +44,14 @@ const TRUST_PILLS = [
 export default function HeroV5({
   audience,
   onAudience,
-  home
+  home,
+  decor
 }: {
   audience: Audience;
   onAudience: (a: Audience) => void;
   home: HomePage | null;
+  /** Seasonal art layered over the backdrop (e.g. the Halloween event). */
+  decor?: ReactNode;
 }) {
   // Studio copy wins, in the canonical home page's order: the per-audience
   // block, then the legacy single-hero fields, then the defaults above. A
@@ -75,6 +79,7 @@ export default function HeroV5({
         <span className="v5-hero__blob v5-hero__blob--b" />
         <span className="v5-hero__grid" />
       </div>
+      {decor}
 
       <div className="v5-container v5-hero__grid-layout">
         <div className="v5-hero__copy">

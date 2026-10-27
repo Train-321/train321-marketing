@@ -1,0 +1,533 @@
+/* Halloween event for /v5 (?event=halloween). Everything here is scoped to
+   the event bar or to .v5--halloween .v5-hero, so the page and its other
+   sections are untouched when the event is off. The bar renders outside .v5
+   (above the site header), so its colours are literal, not --v5 tokens. */
+
+/* --------------------------------------------------------------------------
+   Event bar
+   -------------------------------------------------------------------------- */
+
+.v5-hw-bar {
+  position: relative;
+  overflow: hidden;
+  color: #fbeee0;
+  /* Night sky: two warm and violet glows, a scatter of faint stars. */
+  background:
+    radial-gradient(1px 1px at 8% 30%, rgba(255, 255, 255, 0.7), transparent 60%),
+    radial-gradient(1px 1px at 23% 72%, rgba(255, 255, 255, 0.45), transparent 60%),
+    radial-gradient(1.5px 1.5px at 41% 22%, rgba(255, 255, 255, 0.55), transparent 60%),
+    radial-gradient(1px 1px at 58% 78%, rgba(255, 255, 255, 0.4), transparent 60%),
+    radial-gradient(1.5px 1.5px at 73% 28%, rgba(255, 255, 255, 0.5), transparent 60%),
+    radial-gradient(1px 1px at 91% 66%, rgba(255, 255, 255, 0.45), transparent 60%),
+    radial-gradient(360px 90px at 14% 50%, rgba(244, 122, 31, 0.32), transparent 70%),
+    radial-gradient(460px 110px at 86% 50%, rgba(124, 58, 237, 0.3), transparent 70%),
+    linear-gradient(90deg, #170b21 0%, #26112f 50%, #170b21 100%);
+  border-bottom: 1px solid rgba(255, 181, 77, 0.22);
+  font-size: 0.86rem;
+  animation: v5-hw-drop 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes v5-hw-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+.v5-hw-bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.25rem;
+  max-width: 1240px;
+  min-height: 58px;
+  margin: 0 auto;
+  padding: 0.5rem 3.5rem;
+}
+
+/* Offer */
+.v5-hw-bar__offer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  white-space: nowrap;
+}
+.v5-hw-bar__pumpkin {
+  width: 30px;
+  height: 28px;
+  flex: none;
+  filter: drop-shadow(0 0 10px rgba(255, 160, 40, 0.6));
+  animation: v5-hw-bob 1.6s ease-in-out infinite alternate;
+}
+.v5-hw-bar__title {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.14rem;
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  background: linear-gradient(92deg, #ffd08a, #ff9a3c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.v5-hw-bar__deal {
+  padding-left: 0.75rem;
+  border-left: 1px solid rgba(251, 238, 224, 0.2);
+  color: rgba(251, 238, 224, 0.82);
+}
+.v5-hw-bar__deal strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Countdown tiles */
+.v5-hw-bar__clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+}
+.v5-hw-bar__ends {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(251, 238, 224, 0.55);
+}
+.v5-hw-bar__tiles {
+  display: inline-flex;
+  gap: 0.3rem;
+}
+.v5-hw-bar__tile {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 36px;
+  padding: 0.2rem 0.3rem 0.18rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.06);
+  line-height: 1;
+}
+.v5-hw-bar__tile b {
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #ffc27a;
+}
+.v5-hw-bar__tile small {
+  margin-top: 0.18rem;
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(251, 238, 224, 0.5);
+}
+
+/* Coupon ticket */
+.v5-hw-ticket {
+  display: inline-flex;
+  align-items: stretch;
+  flex: none;
+  border: 1px solid rgba(255, 181, 77, 0.45);
+  border-radius: 999px;
+  background: rgba(255, 181, 77, 0.07);
+  box-shadow: 0 0 0 0 rgba(255, 160, 40, 0);
+  transition: box-shadow 0.3s, border-color 0.3s;
+}
+.v5-hw-ticket:hover {
+  box-shadow: 0 0 22px -4px rgba(255, 160, 40, 0.45);
+}
+.v5-hw-ticket__code {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.85rem 0 1rem;
+  /* The perforation between code and action. */
+  border-right: 1.5px dashed rgba(255, 181, 77, 0.5);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #ffd08a;
+}
+.v5-hw-ticket__code small {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(251, 238, 224, 0.5);
+}
+.v5-hw-ticket__action {
+  margin: 3px;
+  padding: 0.42rem 1rem;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffbf5e, #f47a1f);
+  color: #2a1206;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 6px 16px -8px rgba(244, 122, 31, 0.95);
+  transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+}
+.v5-hw-ticket__action:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 10px 22px -8px rgba(244, 122, 31, 1);
+}
+.v5-hw-ticket__action:focus-visible,
+.v5-hw-bar__close:focus-visible {
+  outline: 2px solid #ffc27a;
+  outline-offset: 2px;
+}
+.v5-hw-ticket.is-applied {
+  border-color: rgba(134, 239, 172, 0.5);
+  background: rgba(134, 239, 172, 0.06);
+}
+.v5-hw-ticket__action--done {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(134, 239, 172, 0.16);
+  color: #a7f3c0;
+  box-shadow: none;
+  cursor: default;
+}
+.v5-hw-ticket__action--done:hover {
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+
+.v5-hw-bar__close {
+  position: absolute;
+  top: 50%;
+  right: 0.85rem;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(251, 238, 224, 0.55);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: color 0.2s, background 0.2s;
+}
+.v5-hw-bar__close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Laptops: drop the "Ends in" label before anything wraps. */
+@media (max-width: 1099.98px) {
+  .v5-hw-bar__inner {
+    gap: 1.4rem;
+  }
+  .v5-hw-bar__ends {
+    display: none;
+  }
+}
+
+/* Phones and small tablets: two tidy rows — offer and countdown, then the
+   ticket centred under them. */
+@media (max-width: 859.98px) {
+  .v5-hw-bar__inner {
+    flex-wrap: wrap;
+    gap: 0.55rem 0.9rem;
+    padding: 0.6rem 2.6rem 0.7rem;
+  }
+  .v5-hw-bar__offer {
+    gap: 0.5rem;
+  }
+  .v5-hw-bar__pumpkin {
+    width: 24px;
+    height: 22px;
+  }
+  .v5-hw-bar__title {
+    font-size: 1rem;
+  }
+  .v5-hw-bar__deal {
+    padding-left: 0.5rem;
+  }
+  .v5-hw-bar__tile {
+    min-width: 30px;
+    padding: 0.16rem 0.22rem;
+  }
+  .v5-hw-bar__tile b {
+    font-size: 0.82rem;
+  }
+  .v5-hw-ticket {
+    flex-basis: auto;
+  }
+  .v5-hw-bar__close {
+    top: 0.6rem;
+    transform: none;
+  }
+}
+/* Phones: row one is the offer, row two the countdown beside the ticket.
+   The extra words and the "Code" label go, so both rows fit at 360px. */
+@media (max-width: 479.98px) {
+  /* Side padding stays small: the close button only shares row one, whose
+     short centred offer never reaches it. */
+  .v5-hw-bar__inner {
+    gap: 0.5rem 0.45rem;
+    padding: 0.55rem 0.6rem 0.65rem;
+  }
+  .v5-hw-bar__offer {
+    flex-basis: 100%;
+    justify-content: center;
+  }
+  .v5-hw-bar__deal-rest,
+  .v5-hw-ticket__code small {
+    display: none;
+  }
+  .v5-hw-bar__close {
+    top: 0.4rem;
+    right: 0.4rem;
+  }
+  .v5-hw-bar__tiles {
+    gap: 0.2rem;
+  }
+  .v5-hw-bar__tile {
+    min-width: 27px;
+    padding: 0.14rem 0.15rem;
+  }
+  .v5-hw-bar__tile b {
+    font-size: 0.78rem;
+  }
+  .v5-hw-bar__tile small {
+    font-size: 0.5rem;
+  }
+  .v5-hw-ticket__code {
+    padding: 0 0.55rem 0 0.75rem;
+    font-size: 0.8rem;
+  }
+  .v5-hw-ticket__action {
+    padding: 0.36rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Hero theme
+   -------------------------------------------------------------------------- */
+
+.v5--halloween .v5-hero {
+  background: linear-gradient(180deg, #fff8f0 0%, #fffaf5 55%, #ffffff 100%);
+}
+.v5--halloween .v5-hero__blob--a {
+  background: radial-gradient(closest-side, rgba(244, 122, 31, 0.26), transparent);
+}
+.v5--halloween .v5-hero__blob--b {
+  background: radial-gradient(closest-side, rgba(124, 58, 237, 0.16), transparent);
+}
+.v5--halloween .v5-hero .v5-h1 em {
+  background: linear-gradient(92deg, #f47a1f 0%, #c2410c 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.v5--halloween .v5-hero .v5-dot {
+  background: #f47a1f;
+  box-shadow: 0 0 0 0 rgba(244, 122, 31, 0.55);
+  animation-name: v5-hw-ping;
+}
+@keyframes v5-hw-ping {
+  70% {
+    box-shadow: 0 0 0 10px rgba(244, 122, 31, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(244, 122, 31, 0);
+  }
+}
+.v5--halloween .v5-hero .v5-finderbar__go {
+  background: linear-gradient(135deg, #ffb54d, #f47a1f);
+  color: #2a1206;
+  box-shadow: 0 12px 28px -12px rgba(244, 122, 31, 0.8);
+}
+.v5--halloween .v5-hero .v5-finderbar__go:hover {
+  box-shadow: 0 16px 34px -12px rgba(244, 122, 31, 0.95);
+}
+.v5--halloween .v5-hero__proof-icon {
+  color: #f47a1f;
+}
+
+/* --------------------------------------------------------------------------
+   Hero decoration
+   -------------------------------------------------------------------------- */
+
+/* Its own clipping layer — never the hero's, so finder menus stay unclipped.
+   z-index 1 keeps it under the finder menus (50) and the copy's controls. */
+.v5-hw-decor {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.v5-hw-hang {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: 50% 0;
+  animation: v5-hw-swing var(--hw-dur) ease-in-out var(--hw-delay) infinite alternate;
+}
+.v5-hw-hang__string {
+  width: 1.5px;
+  height: var(--hw-len);
+  background: linear-gradient(180deg, rgba(42, 18, 54, 0.15), rgba(42, 18, 54, 0.55));
+}
+.v5-hw-hang__pumpkin {
+  width: var(--hw-size);
+  height: auto;
+  margin-top: -3px;
+  filter: drop-shadow(0 10px 14px rgba(156, 52, 9, 0.28)) drop-shadow(0 0 18px rgba(255, 160, 40, 0.35));
+}
+.v5-hw-face {
+  animation: v5-hw-flicker 3.4s steps(1, end) infinite;
+}
+@keyframes v5-hw-swing {
+  from {
+    transform: rotate(-4deg);
+  }
+  to {
+    transform: rotate(4deg);
+  }
+}
+@keyframes v5-hw-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  42% {
+    opacity: 0.82;
+  }
+  44% {
+    opacity: 1;
+  }
+  71% {
+    opacity: 0.9;
+  }
+}
+
+.v5-hw-bat {
+  position: absolute;
+  left: 0;
+  width: var(--hw-size);
+  color: #231030;
+  opacity: 0.88;
+  animation: v5-hw-fly var(--hw-dur) linear var(--hw-delay) infinite;
+}
+.v5-hw-bat--far {
+  color: #4a2a5c;
+  opacity: 0.45;
+  filter: blur(0.4px);
+}
+.v5-hw-bat svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  fill: currentColor;
+  /* A gentle bob on top of the flight path, in time with the wingbeat. */
+  animation: v5-hw-bob 0.6s ease-in-out infinite alternate;
+}
+/* Each wing pivots on its shoulder (its inner edge). The left wing is
+   mirrored by its group, so the same rotation reads as a mirrored beat. */
+.v5-hw-bat__wing {
+  transform-box: fill-box;
+  transform-origin: 0% 55%;
+  animation: v5-hw-flap 0.3s ease-in-out infinite alternate;
+}
+@keyframes v5-hw-flap {
+  from {
+    transform: rotate(-26deg);
+  }
+  to {
+    transform: rotate(16deg) scaleY(0.85);
+  }
+}
+@keyframes v5-hw-bob {
+  from {
+    transform: translateY(-2px);
+  }
+  to {
+    transform: translateY(2px);
+  }
+}
+/* A slow glide across the sky: soft rises and dips, banking into each. */
+@keyframes v5-hw-fly {
+  0% {
+    transform: translate(-12vw, 0) rotate(4deg);
+  }
+  20% {
+    transform: translate(14vw, -16px) rotate(-5deg);
+  }
+  40% {
+    transform: translate(38vw, 6px) rotate(6deg);
+  }
+  60% {
+    transform: translate(62vw, -12px) rotate(-4deg);
+  }
+  80% {
+    transform: translate(86vw, 8px) rotate(5deg);
+  }
+  100% {
+    transform: translate(112vw, -4px) rotate(-2deg);
+  }
+}
+
+.v5-hw-web {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 170px;
+  height: 170px;
+  color: rgba(42, 18, 54, 0.14);
+}
+
+/* Phones: the copy fills the width, so one small pumpkin hangs at the right
+   edge on a short string, clear of the toggle and headline, and one bat keeps
+   to the strip above them. !important beats the per-item inline values. */
+@media (max-width: 767.98px) {
+  .v5-hw-hang--extra,
+  .v5-hw-web,
+  .v5-hw-bat--extra {
+    display: none;
+  }
+  .v5-hw-hang {
+    left: 84% !important;
+    --hw-len: 22px !important;
+    --hw-size: 42px !important;
+  }
+  .v5-hw-bat {
+    top: 6px !important;
+    --hw-size: 34px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v5-hw-bar,
+  .v5-hw-bar__pumpkin,
+  .v5-hw-hang,
+  .v5-hw-bat,
+  .v5-hw-bat svg,
+  .v5-hw-bat__wing,
+  .v5-hw-face {
+    animation: none;
+  }
+  /* Bats parked in the sky rather than flying across it. */
+  .v5-hw-bat {
+    transform: translateX(62vw);
+  }
+  .v5-hw-bat--extra {
+    transform: translateX(78vw);
+  }
+}
