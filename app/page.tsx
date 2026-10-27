@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import HomePage from "@/components/HomePage";
 import JsonLd from "@/components/JsonLd";
 import { WEBSITE_LD } from "@/lib/seo";
@@ -26,7 +27,19 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// ── TEMPORARY: Halloween promo takeover ──────────────────────────────────
+// While the promo is live, send the homepage to the /v5 event page (which
+// switches on the Halloween bar + decor + 20% off from ?event=halloween).
+// This auto-reverts to the normal homepage after the offer ends, so it needs
+// no cleanup — but to turn it off sooner, delete this block. The end date
+// mirrors HALLOWEEN.endsAt in components/v5/halloween/event.ts.
+const HALLOWEEN_HOME_ENDS = Date.parse("2026-11-01T03:59:59Z");
+
 export default async function Page() {
+  if (Date.now() < HALLOWEEN_HOME_ENDS) {
+    redirect("/v5?event=halloween");
+  }
+
   const [courses, testimonials, faqs, settings, home, catalog] = await Promise.all([
     getCourses(),
     getTestimonials(),
