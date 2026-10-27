@@ -682,6 +682,8 @@
   align-items: center;
   gap: 0.4rem;
   font-size: 0.76rem;
+  /* Pinned (0.95rem tall) so a flipped-up menu can clear it exactly. */
+  line-height: 1.25;
   font-weight: 600;
   white-space: nowrap;
   color: var(--v5-muted-2);
@@ -751,6 +753,13 @@
   left: calc(-0.9rem - 0.5rem);
   right: auto;
   width: max(calc(100% + 1.9rem), 260px);
+}
+/* Flipped up (pickers left on "auto" with no room below): clear the label
+   (.95rem) + field gap (.05rem) + field padding (.4rem) + bar padding (.5rem)
+   + border and gap, so the menu sits just above the bar like it sits below. */
+.v5-finderbar .t321-mkt-select__menu.is-up {
+  top: auto;
+  bottom: calc(100% + 1.9rem + 9px);
 }
 
 .v5-finderbar--dark {
@@ -2670,10 +2679,17 @@
 
 .v5-final {
   position: relative;
-  overflow: hidden;
+  /* Above the footer that follows, so an open state menu paints over it. */
+  z-index: 2;
   text-align: center;
   color: #fff;
   background: var(--v5-navy-deep);
+}
+.v5-final__bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 .v5-final__glow {
   position: absolute;
@@ -2860,6 +2876,11 @@
     top: calc(100% + 0.75rem + 0.5rem + 9px);
     left: calc(-0.9rem - 0.5rem);
     width: calc(100% + 2.8rem);
+  }
+  .v5-finderbar .t321-mkt-select__menu.is-up {
+    top: auto;
+    /* label + gap (1rem) + phone field padding (.75rem) + bar padding (.5rem) */
+    bottom: calc(100% + 2.25rem + 9px);
   }
   .v5-spot__stage {
     height: 340px;

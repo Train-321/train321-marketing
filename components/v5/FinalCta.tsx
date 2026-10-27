@@ -20,7 +20,11 @@ export default function FinalCta({
   const { stateCode, setStateCode, focusExplorer, detectLocation, detecting } = useFinderV5();
   return (
     <section className="v5-section v5-final" aria-labelledby="v5-final-title">
-      <div className="v5-final__glow" aria-hidden="true" />
+      {/* The glow is clipped by its own layer, not the section, so the state
+          menu can spill past the section's edge over the footer. */}
+      <div className="v5-final__bg" aria-hidden="true">
+        <div className="v5-final__glow" />
+      </div>
       <div className="v5-container">
         <Reveal className="v5-final__inner">
           <p className="v5-eyebrow v5-eyebrow--light">
