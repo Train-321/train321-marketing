@@ -8,7 +8,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useCart } from "@/components/cart/CartContext";
-import { HALLOWEEN } from "./event";
+import { HALLOWEEN, useEventPromo } from "./event";
 import { Pumpkin } from "./HalloweenDecor";
 
 const DISMISS_KEY = "t321.v5.halloween.dismissed";
@@ -30,8 +30,15 @@ export default function HalloweenBar() {
   const [host, setHost] = useState<HTMLElement | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const [now, setNow] = useState(() => Date.now());
-  const ends = Date.parse(HALLOWEEN.endsAt);
-  const applied = promoCode.toUpperCase() === HALLOWEEN.code.toUpperCase();
+  // The offer as the LMS promo admin defines it. While loading (or if the LMS
+  // can't be reached) the hard-coded defaults render exactly as before; a code
+  // the LMS says is dead hides the bar (see the early return below).
+  const live = useEventPromo(HALLOWEEN.code);
+  const code = live?.code ?? HALLOWEEN.code;
+  const offer = live?.offer ?? HALLOWEEN.offer;
+  const rest = live?.rest ?? " every course";
+  const ends = live?.endsAt ?? Date.parse(HALLOWEEN.endsAt);
+  const applied = promoCode.toUpperCase() === code.toUpperCase();
 
   // Mount point: first child of the page wrapper, so the bar sits above the
   // sticky header and scrolls away while the header stays pinned.
@@ -55,7 +62,9 @@ export default function HalloweenBar() {
     return () => window.clearInterval(id);
   }, []);
 
-  if (!host || dismissed || now >= ends) return null;
+  // live === null: the LMS says the code is inactive/expired — don't advertise
+  // a code the cart would reject.
+  if (!host || dismissed || live === null || now >= ends) return null;
   const t = remaining(ends - now);
 
   const dismiss = () => {
@@ -81,8 +90,8 @@ export default function HalloweenBar() {
           <Pumpkin className="v5-hw-bar__pumpkin" />
           <span className="v5-hw-bar__title">Halloween Sale</span>
           <span className="v5-hw-bar__deal">
-            <strong>{HALLOWEEN.offer}</strong>
-            <span className="v5-hw-bar__deal-rest"> every course</span>
+            <strong>{offer}</strong>
+            <span className="v5-hw-bar__deal-rest">{rest}</span>
           </span>
         </p>
 
@@ -105,7 +114,7 @@ export default function HalloweenBar() {
         <div className={`v5-hw-ticket${applied ? " is-applied" : ""}`}>
           <span className="v5-hw-ticket__code">
             <small>Code</small>
-            {HALLOWEEN.code}
+            {code}
           </span>
           {applied ? (
             <span className="v5-hw-ticket__action v5-hw-ticket__action--done" role="status">
@@ -115,8 +124,8 @@ export default function HalloweenBar() {
             <button
               type="button"
               className="v5-hw-ticket__action"
-              onClick={() => applyPromo(HALLOWEEN.code)}
-              aria-label={`Apply code ${HALLOWEEN.code} to your cart`}
+              onClick={() => applyPromo(code)}
+              aria-label={`Apply code ${code} to your cart`}
             >
               Apply code
             </button>

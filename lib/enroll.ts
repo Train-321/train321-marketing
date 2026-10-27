@@ -189,6 +189,56 @@ async function post<T>(path: string, body: unknown): Promise<T> {
   return parsed as T;
 }
 
+/** A live promo code as the LMS promo-code admin defines it. */
+export type PromoInfo = {
+  code: string;
+  description: string;
+  discountType: "percentage" | "fixed";
+  discount: number;
+  /** YYYY-MM-DD, or null when the code never expires. */
+  validUntil: string | null;
+};
+
+/**
+ * Look a promo code up in the LMS (POST /list/purchase-promo-code-validate-new,
+ * the same check checkout runs). Resolves to null when the code is unknown,
+ * inactive, used up or expired — so a banner can hide a dead offer instead of
+ * advertising a code the cart will reject. Throws only when the LMS itself is
+ * unreachable, so callers can tell "no such code" from "couldn't ask".
+ */
+export async function getPromo(code: string): Promise<PromoInfo | null> {
+  const name = code.trim();
+  if (!name) return null;
+  type Raw = {
+    success?: boolean;
+    promo?: {
+      name?: string;
+      description?: string;
+      discount_type?: string;
+      discount?: number | string;
+      valid_until?: string | null;
+    };
+  };
+  let raw: Raw;
+  try {
+    raw = await post<Raw>("/api/list/purchase-promo-code-validate-new", { code: name });
+  } catch (err) {
+    // The LMS answers an invalid code with a non-2xx + message; that's "no
+    // such code", not an outage. Only an unreachable service re-throws.
+    if (err instanceof EnrollApiError && err.status !== 503) return null;
+    throw err;
+  }
+  const p = raw.promo;
+  if (!raw.success || !p?.name) return null;
+  return {
+    code: String(p.name),
+    description: String(p.description || ""),
+    discountType: String(p.discount_type || "").toLowerCase() === "fixed" ? "fixed" : "percentage",
+    discount: Number(p.discount) || 0,
+    validUntil: p.valid_until ? String(p.valid_until).slice(0, 10) : null
+  };
+}
+
 /**
  * Look one course up by marketplace id.
  *
