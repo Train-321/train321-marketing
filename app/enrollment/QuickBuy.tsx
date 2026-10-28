@@ -78,6 +78,9 @@ export type QuickBuyProps = {
   linkToken?: string;
   /** Highlights under the certificate; Studio-managed per course, else the built-in four. */
   benefits?: EnrollBenefit[];
+  /** Studio headline / blurb in place of the lead course's name and overview (no-course default). */
+  headline?: string;
+  lede?: string;
   publishableKey: string;
   rating: string;
 };
@@ -90,7 +93,7 @@ export default function QuickBuy(props: QuickBuyProps) {
   );
 }
 
-function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillName = "", prefillPromo = "", linkToken = "", benefits = DEFAULT_BENEFITS, rating }: QuickBuyProps) {
+function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillName = "", prefillPromo = "", linkToken = "", benefits = DEFAULT_BENEFITS, headline = "", lede = "", rating }: QuickBuyProps) {
   const stripe = useStripe();
   const elements = useElements();
   const appBase = (process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com").replace(/\/+$/, "");
@@ -558,10 +561,13 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
         <p className="v10-hello">
           {firstName ? `Hi ${firstName}, your course is ready` : "Your course is ready"}
         </p>
-        <h1 className="v10-title">{lead.name}</h1>
-        {/* The admin's Marketplace "Overview" when one is written; otherwise
-            the generic promise. lead.name is already the marketplace name. */}
-        {overview ? (
+        <h1 className="v10-title">{headline || lead.name}</h1>
+        {/* Studio copy when given (no-course default), else the admin's
+            Marketplace "Overview" when one is written, else the generic
+            promise. lead.name is already the marketplace name. */}
+        {lede ? (
+          <p className="v10-lede">{lede}</p>
+        ) : overview ? (
           <div className="v10-lede v10-overview" dangerouslySetInnerHTML={{ __html: overview }} />
         ) : (
           <p className="v10-lede">

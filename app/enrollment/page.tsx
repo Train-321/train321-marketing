@@ -81,6 +81,17 @@ export default async function EmailCheckoutLanding({
     getSiteSettings().catch(() => null),
     getEnrollmentPage().catch(() => null)
   ]);
+
+  // No course in the URL at all: Studio can name the course(s) to offer
+  // (Enrollment Page → "Courses to offer"); they go through the real checkout
+  // under the Studio headline / description.
+  const isDefault = ids.length === 0 && !group;
+  if (isDefault && enrollmentPage?.defaultCourseIds.length) {
+    const found = (await Promise.all(enrollmentPage.defaultCourseIds.map((n) => getCartCourse(n)))).filter(
+      (c): c is CartCourse => c !== null
+    );
+    courses.push(...found);
+  }
   const logos: TrustLogo[] = settings?.trustLogos || [];
   const supportEmail = settings?.supportEmail || "support@train321.com";
   // Highlights under the certificate: a per-course set from Studio when one is
@@ -205,6 +216,8 @@ export default async function EmailCheckoutLanding({
                 prefillPromo={one(sp.promo)}
                 linkToken={one(sp.elt)}
                 benefits={benefits}
+                headline={isDefault ? enrollmentPage?.emptyTitle : ""}
+                lede={isDefault ? enrollmentPage?.emptyLede : ""}
                 publishableKey={publishableKey}
                 rating={RATING}
               />

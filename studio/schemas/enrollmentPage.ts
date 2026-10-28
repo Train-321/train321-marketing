@@ -43,6 +43,16 @@ export default defineType({
       description: 'Paragraph under the title. Blank → the built-in "find your course in our catalog" copy.'
     }),
     defineField({
+      name: 'defaultCourseIds',
+      title: 'Courses to offer',
+      type: 'array',
+      of: [defineArrayMember({ type: 'number', validation: (R) => R.integer().positive() })],
+      group: 'empty',
+      description:
+        'LMS course ids (the number from the admin Courses list) to put in the checkout when the link has no course. ' +
+        'With at least one, the page shows the real checkout for these; empty → only the button below.'
+    }),
+    defineField({
       name: 'emptyCtaLabel',
       title: 'Button label',
       type: 'string',
