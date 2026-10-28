@@ -40,6 +40,11 @@
   font: inherit; font-size: 17px; font-weight: 600;
   transition: background .15s ease, transform .1s ease, box-shadow .15s ease;
 }
+/* Group links (?group=…) — the "which state?" step before the checkout. */
+.t321-v10 .v10-kicker { margin: 0 0 6px; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--t321-mkt-accent, #1db8d8); }
+.t321-v10 .v10-states { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 22px; }
+.t321-v10 .v10-btn--state { width: auto; min-height: 44px; padding: 0 18px; font-size: 15px; background: #fff; color: #0b1f33; border: 1px solid #d9dee3; }
+.t321-v10 .v10-btn--state:hover { border-color: var(--t321-mkt-accent, #1db8d8); color: var(--t321-mkt-accent, #1db8d8); }
 .t321-v10 .v10-btn--pay {
   width: 100%; color: #fff !important;
   background: linear-gradient(180deg, #0B8DB8 0%, var(--v10-pay) 100%);

@@ -46,7 +46,11 @@ const DEMO_LINK = "demo";
  *   new      — no account yet: name + password
  *   unknown  — no email in the URL: ask for it first
  */
-type Identity = "checking" | "link" | "existing" | "new" | "unknown";
+// session — the buyer is already signed in on this site (t321_user display
+// cookie present); the server route charges against the httpOnly session
+// token, so no password is asked. Falls back to "existing" if the server
+// answers need_password (session expired).
+type Identity = "checking" | "link" | "session" | "existing" | "new" | "unknown";
 type Errors = Record<string, string | undefined>;
 type PayWith = { kind: "card" } | { kind: "wallet"; token: Token; payerName?: string };
 type Outcome = { ok: true } | { ok: false; message: string };
@@ -145,6 +149,21 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
         }
       }
       if (cancelled) return;
+      // Already signed in on the site? The display cookie carries the name;
+      // the httpOnly token stays server-side and authorises the purchase.
+      try {
+        const m = document.cookie.match(/(?:^|;\s*)t321_user=([^;]+)/);
+        if (m) {
+          const u = JSON.parse(decodeURIComponent(m[1])) as { name?: string } | null;
+          if (u?.name) {
+            setAccountName(String(u.name));
+            setIdentity("session");
+            return;
+          }
+        }
+      } catch {
+        /* a bad cosmetic cookie just means "not signed in" */
+      }
       if (prefillEmail) await lookUp(prefillEmail);
       else setIdentity("unknown");
     })();
@@ -153,7 +172,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
     };
   }, [linkToken, prefillEmail, prefillName, lookUp]);
 
-  const signedInPath = identity === "link" || identity === "existing";
+  const signedInPath = identity === "link" || identity === "session" || identity === "existing";
 
   // ── Form ──────────────────────────────────────────────────────────────
   const [fullName, setFullName] = useState(prefillName);
@@ -508,7 +527,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
     }, 450);
   };
 
-  const knownName = identity === "link" ? accountName : "";
+  const knownName = identity === "link" || identity === "session" ? accountName : "";
   const certName = knownName || fullName.trim() || "Your Name";
   const firstName = (knownName || fullName).trim().split(/\s+/)[0] || "";
   const isLoading = identity === "checking";
@@ -630,7 +649,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
             <div className="v10-who">
               {isLoading ? (
                 <p className="v10-checking"><span className="v10-spin v10-spin--dark" aria-hidden="true" /> Finding your account…</p>
-              ) : identity === "link" ? (
+              ) : identity === "link" || identity === "session" ? (
                 <div className="v10-member">
                   <span className="v10-avatar" aria-hidden="true">{(accountName || email).charAt(0).toUpperCase()}</span>
                   <span className="v10-member__text">

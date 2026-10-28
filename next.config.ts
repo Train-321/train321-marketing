@@ -34,6 +34,10 @@ const nextConfig: NextConfig = {
   // Permanent redirects preserve any inbound SEO juice and avoid 404s on old bookmarks.
   async redirects() {
     return [
+      // The email-first checkout moved from its design-iteration slug to a
+      // functional URL. Query strings (ids, email, elt…) carry over, so links
+      // already sent keep working.
+      { source: "/marketing-v10", destination: "/enrollment", permanent: true },
       // Legacy course slugs → /courses/<slug>
       ...[
         "food-handler",

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getSiteSettings, getTestimonials, type Testimonial, type TrustLogo } from "@/lib/sanity";
 import { getCartCourse, type CartCourse } from "@/lib/enroll";
 import { suggestAddOns } from "./addOns";
+import { resolveGroup } from "./groupResolve";
 import QuickBuy from "./QuickBuy";
 import "./marketing-v10.css";
 
@@ -51,7 +52,26 @@ export default async function EmailCheckoutLanding({
   const sp = await searchParams;
   const raw = [sp.ids, sp.course, sp.id].flat().filter(Boolean).join(",");
   const ids = [...new Set(raw.split(",").map((s) => Number(s.trim())).filter((n) => Number.isInteger(n) && n > 0))];
-  const courses = (await Promise.all(ids.map((n) => getCartCourse(n)))).filter((c): c is CartCourse => c !== null);
+  const idCourses = (await Promise.all(ids.map((n) => getCartCourse(n)))).filter((c): c is CartCourse => c !== null);
+
+  // ?group=<id> (+ &state=XX): a course GROUP instead of / alongside course ids.
+  // Its matching version(s) join the cart; with no state chosen yet (and a
+  // state-aware group) the page asks first — see the picker below.
+  const group = one(sp.group) ? await resolveGroup(one(sp.group), one(sp.state)) : null;
+  const seen = new Set(idCourses.map((c) => c.id));
+  const courses = [...idCourses, ...(group?.members || []).filter((c) => !seen.has(c.id))];
+  const needsState = Boolean(group && group.stateAware && !group.state && courses.length === 0);
+
+  // Links for the state picker keep every other campaign param (email, elt…).
+  const stateHref = (code: string) => {
+    const q = new URLSearchParams();
+    for (const [k, v] of Object.entries(sp)) {
+      const val = Array.isArray(v) ? v[0] : v;
+      if (val && k !== "state") q.set(k, val);
+    }
+    q.set("state", code);
+    return `?${q.toString()}`;
+  };
 
   const [suggestions, testimonials, logos] = await Promise.all([
     courses.length ? suggestAddOns(courses) : Promise.resolve([] as CartCourse[]),
@@ -78,7 +98,36 @@ export default async function EmailCheckoutLanding({
         </div>
       </header>
 
-      {courses.length === 0 ? (
+      {group && group.state && courses.length === 0 && group.redirectHref ? (
+        /* The chosen state is served by a partner site — send them there. */
+        <section className="v10-hero">
+          <div className="v10-wrap v10-empty">
+            <p className="v10-kicker">{group.name}</p>
+            <h1 className="v10-title">Your state&rsquo;s version is on our partner site</h1>
+            <p className="v10-lede">The approved {group.name} for your state is provided through a partner. Continue there to enroll &mdash; it only takes a minute.</p>
+            <a href={group.redirectHref} className="v10-btn v10-btn--pay">Continue to enroll <i className="fas fa-arrow-right" aria-hidden="true" /></a>
+          </div>
+        </section>
+      ) : needsState && group ? (
+        /* Group link, state not chosen yet: ask, then reload with &state=XX so
+           the matching version(s) land in the cart. Plain links — no client
+           state — so the rest of the page stays exactly as it is. */
+        <section className="v10-hero">
+          <div className="v10-wrap v10-empty">
+            <p className="v10-kicker">{group.name}</p>
+            <h1 className="v10-title">Which state do you work in?</h1>
+            <p className="v10-lede">{group.blurb || "The approved version depends on your state — pick yours and we'll load the right course."}</p>
+            <div className="v10-states" role="list">
+              {group.stateOptions.map((s) => (
+                <Link key={s.code} href={stateHref(s.code)} className="v10-btn v10-btn--state" role="listitem">{s.name}</Link>
+              ))}
+              {group.hasNationwide && (
+                <Link href={stateHref("ALL")} className="v10-btn v10-btn--state" role="listitem">Any other state</Link>
+              )}
+            </div>
+          </div>
+        </section>
+      ) : courses.length === 0 ? (
         <section className="v10-hero">
           <div className="v10-wrap v10-empty">
             <h1 className="v10-title">This link is missing its course</h1>
