@@ -3,7 +3,8 @@ import Link from "next/link";
 import { getSiteSettings, getTestimonials, getEnrollmentPage, type Testimonial, type TrustLogo } from "@/lib/sanity";
 import { getCartCourse, type CartCourse } from "@/lib/enroll";
 import { resolveGroup } from "./groupResolve";
-import QuickBuy from "./QuickBuy";
+import CourseCertificate from "@/components/CourseCertificate";
+import QuickBuy, { DEFAULT_BENEFITS } from "./QuickBuy";
 import "./marketing-v10.css";
 
 // v10: the email-to-checkout landing page. One link in a campaign email —
@@ -138,18 +139,58 @@ export default async function EmailCheckoutLanding({
           </div>
         </section>
       ) : courses.length === 0 ? (
+        /* No course in the URL: the same hero layout as a course link — kicker,
+           headline, blurb, certificate preview, highlights and the side card —
+           with the title / description / button from Studio (Enrollment Page →
+           "No course in link"). The strings below are the fallbacks. */
         <section className="v10-hero">
-          <div className="v10-wrap v10-empty">
-            {/* No course in the URL: the title + description come from Studio
-                (Enrollment Page → "No course in link"); these are the fallbacks. */}
-            <h1 className="v10-title">{enrollmentPage?.emptyTitle || "This link is missing its course"}</h1>
-            <p className="v10-lede">
-              {enrollmentPage?.emptyLede ||
-                `It may have been cut off by your email app. Find your course in our catalog, or email ${supportEmail} and we'll get you enrolled.`}
-            </p>
-            <Link href={enrollmentPage?.emptyCtaHref || "/catalog"} className="v10-btn v10-btn--pay">
-              {enrollmentPage?.emptyCtaLabel || "Browse courses"} <i className="fas fa-arrow-right" aria-hidden="true" />
-            </Link>
+          <div className="v10-wrap">
+            <div className="v10-hero__grid">
+              <div className="v10-head">
+                <p className="v10-hello">Your course is ready</p>
+                <h1 className="v10-title">{enrollmentPage?.emptyTitle || "Your Train 321 course"}</h1>
+                <p className="v10-lede">
+                  {enrollmentPage?.emptyLede || "Finish online in about an hour and download your certificate the same day."}
+                </p>
+                <div className="v10-rating">
+                  <span className="v10-stars" aria-hidden="true">★★★★★</span>
+                  <span><strong>{RATING}</strong> from 50,000+ learners</span>
+                </div>
+              </div>
+
+              <div className="v10-more">
+                <figure className="v10-cert">
+                  <CourseCertificate
+                    courseTitle={enrollmentPage?.emptyTitle || "Your Train 321 course"}
+                    learnerName="Your Name"
+                    showExpiration={false}
+                  />
+                </figure>
+                <ul className="v10-benefits">
+                  {(benefits ?? DEFAULT_BENEFITS).map((b, i) => (
+                    <li key={`${b.title}-${i}`}>
+                      <i className={b.icon || "fas fa-check"} aria-hidden="true" />
+                      <span><strong>{b.title}</strong> {b.sub}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="v10-card v10-card--default" id="v10-checkout">
+                <div className="v10-card__head">
+                  <h2>Complete your enrollment</h2>
+                  <span><i className="fas fa-lock" aria-hidden="true" /> Secure</span>
+                </div>
+                <p className="v10-lede">Pick your course and you&rsquo;ll be enrolled in under a minute.</p>
+                <Link href={enrollmentPage?.emptyCtaHref || "/catalog"} className="v10-btn v10-btn--pay">
+                  {enrollmentPage?.emptyCtaLabel || "Browse courses"} <i className="fas fa-arrow-right" aria-hidden="true" />
+                </Link>
+                <ul className="v10-assure">
+                  <li><i className="fas fa-lock" aria-hidden="true" /> Encrypted checkout by Stripe</li>
+                  <li><i className="fas fa-bolt" aria-hidden="true" /> Instant access</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </section>
       ) : (

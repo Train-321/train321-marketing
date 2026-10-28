@@ -108,6 +108,9 @@
 }
 @media (min-width: 480px) { .t321-v10 .v10-card { padding: 28px; } }
 .t321-v10 .v10-card form { display: grid; gap: 18px; }
+/* No-course default: the card holds a blurb + the Studio button instead of a form. */
+.t321-v10 .v10-card--default { display: grid; gap: 18px; align-content: start; }
+.t321-v10 .v10-card--default .v10-lede { font-size: 16px; }
 .t321-v10 .v10-card__head { display: flex; align-items: center; justify-content: space-between; }
 .t321-v10 .v10-card__head h2 { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
 .t321-v10 .v10-card__head span { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--t321-mkt-positive); background: var(--t321-mkt-positive-wash); padding: 5px 10px; border-radius: 999px; }

@@ -20,7 +20,7 @@ const money = (n: number) => n.toLocaleString("en-US", { style: "currency", curr
 export type EnrollBenefit = { icon: string; title: string; sub: string };
 
 /** Built-in highlights — what renders when Studio has nothing for this course. */
-const DEFAULT_BENEFITS: EnrollBenefit[] = [
+export const DEFAULT_BENEFITS: EnrollBenefit[] = [
   { icon: "fas fa-shield-halved", title: "ANSI-accredited", sub: "nationally recognized training" },
   { icon: "fas fa-mobile-screen", title: "Any device", sub: "phone, tablet or computer" },
   { icon: "fas fa-language", title: "English or Spanish", sub: "take it in your language" },
