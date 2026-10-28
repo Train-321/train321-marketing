@@ -41,6 +41,12 @@ export type CartCourse = {
    */
   isSeatBased: boolean;
   stateLabel: string | null;
+  /**
+   * The admin's Marketplace "Overview" (rich text from the LMS course editor),
+   * as HTML. Optional — only the storefront pages that show a course blurb
+   * read it; the cart and checkout ignore it.
+   */
+  description?: string;
 };
 
 export type BuyerAudience = "individual" | "company";
@@ -268,6 +274,8 @@ export async function getCartCourse(id: number): Promise<CartCourse | null> {
         image?: string | null;
         is_seat_based?: number;
         state_label?: string | null;
+        /** The admin's Marketplace "Overview" rich text (tbl_course.overview). */
+        marketplace_description?: string | null;
       };
     };
     const c = data?.course;
@@ -281,7 +289,8 @@ export async function getCartCourse(id: number): Promise<CartCourse | null> {
       price: Number(c.price ?? 0),
       image: secureImageUrl(c.image),
       isSeatBased: Number(c.is_seat_based ?? 0) === 1,
-      stateLabel: c.state_label || null
+      stateLabel: c.state_label || null,
+      description: typeof c.marketplace_description === "string" ? c.marketplace_description : ""
     };
   } catch {
     return null;

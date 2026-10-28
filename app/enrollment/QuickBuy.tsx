@@ -10,6 +10,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { loadStripe, type PaymentRequest, type Token } from "@stripe/stripe-js";
 import { US_STATES } from "@/lib/states";
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import CourseCertificate from "@/components/CourseCertificate";
 import type { CartCourse, EnrollQuote, CheckoutResult } from "@/lib/enroll";
 
@@ -533,6 +534,9 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
   const isLoading = identity === "checking";
   const openSuggestions = suggestions.filter((s) => !added.includes(s.id));
   const where = lead.stateLabel && /^[A-Z]{2}$/i.test(lead.stateLabel) ? stateName(lead.stateLabel) : "";
+  // Admin-authored Marketplace Overview (rich text), scrubbed of anything
+  // executable. Empty when the admin hasn't written one.
+  const overview = lead.description ? sanitizeHtml(lead.description).trim() : "";
 
   return (
     <div className="v10-hero__grid">
@@ -542,9 +546,15 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
           {firstName ? `Hi ${firstName}, your course is ready` : "Your course is ready"}
         </p>
         <h1 className="v10-title">{lead.name}</h1>
-        <p className="v10-lede">
-          Finish online in about an hour and download your certificate the same day{where ? ` — built for ${where} requirements` : ""}.
-        </p>
+        {/* The admin's Marketplace "Overview" when one is written; otherwise
+            the generic promise. lead.name is already the marketplace name. */}
+        {overview ? (
+          <div className="v10-lede v10-overview" dangerouslySetInnerHTML={{ __html: overview }} />
+        ) : (
+          <p className="v10-lede">
+            Finish online in about an hour and download your certificate the same day{where ? ` — built for ${where} requirements` : ""}.
+          </p>
+        )}
         <div className="v10-rating">
           <span className="v10-stars" aria-hidden="true">★★★★★</span>
           <span><strong>{rating}</strong> from 50,000+ learners</span>

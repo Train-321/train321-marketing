@@ -79,6 +79,12 @@
 .t321-v10 .v10-hello { font-size: 15px; font-weight: 600; color: var(--t321-mkt-accent-ink); margin-bottom: 10px; }
 .t321-v10 .v10-title { font-family: var(--v10-serif); font-weight: 600; font-size: clamp(28px, 6.2vw, 48px); line-height: 1.08; letter-spacing: -0.02em; }
 .t321-v10 .v10-lede { margin-top: 14px; font-size: 18px; line-height: 1.55; color: var(--v10-muted); max-width: 560px; }
+/* Admin-authored Overview (rich text) in the lede slot: keep its paragraphs
+   tidy and its links on-brand. */
+.t321-v10 .v10-overview p { margin: 0 0 10px; }
+.t321-v10 .v10-overview p:last-child { margin-bottom: 0; }
+.t321-v10 .v10-overview ul, .t321-v10 .v10-overview ol { margin: 0 0 10px; padding-left: 22px; }
+.t321-v10 .v10-overview a { color: var(--t321-mkt-accent, #1db8d8); }
 .t321-v10 .v10-rating { display: flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 14px; color: var(--v10-muted); }
 .t321-v10 .v10-rating strong { color: var(--v10-ink); }
 @media (max-width: 991px) {
