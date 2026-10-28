@@ -1,4 +1,5 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
+import { CourseIdNumberInput } from '../components/CoursePickerInput'
 
 // The email-first checkout page (/enrollment). Today it manages the
 // "highlights" shown under the certificate preview — the four icon + title +
@@ -46,10 +47,17 @@ export default defineType({
       name: 'defaultCourseIds',
       title: 'Courses to offer',
       type: 'array',
-      of: [defineArrayMember({ type: 'number', validation: (R) => R.integer().positive() })],
+      of: [
+        defineArrayMember({
+          type: 'number',
+          title: 'Course',
+          components: { input: CourseIdNumberInput },
+          validation: (R) => R.integer().positive()
+        })
+      ],
       group: 'empty',
       description:
-        'LMS course ids (the number from the admin Courses list) to put in the checkout when the link has no course. ' +
+        'Pick the course(s) to put in the checkout when the link has no course. ' +
         'With at least one, the page shows the real checkout for these; empty → only the button below.'
     }),
     defineField({

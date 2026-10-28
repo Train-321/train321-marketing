@@ -1,17 +1,13 @@
 import {useCallback, useEffect, useMemo, useState} from 'react'
-import {set, unset, type StringInputProps} from 'sanity'
+import {set, unset, type NumberInputProps, type StringInputProps} from 'sanity'
 import {Autocomplete, Box, Button, Card, Flex, Spinner, Stack, Text} from '@sanity/ui'
 
 const API_URL = 'https://new-features-api.train321.com/course/public-list'
 
 type Course = {id: number; name: string}
 
-// Custom input for the course "enrollId" field. Fetches the live storefront
-// course list from the Train321 API and lets the editor search + pick one,
-// storing the course id (as a string) into the field. Falls back to manual
-// entry if the API is unreachable.
-export default function CoursePickerInput(props: StringInputProps) {
-  const {value, onChange, elementProps} = props
+/** The live storefront course list, fetched once per input. */
+function useStorefrontCourses() {
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -38,6 +34,21 @@ export default function CoursePickerInput(props: StringInputProps) {
     }
   }, [])
 
+  return {courses, loading, error}
+}
+
+type PickerProps = {
+  /** The stored course id, as a string ('' / undefined when empty). */
+  value: string | undefined
+  onPick: (next: string | undefined) => void
+  elementProps: StringInputProps['elementProps'] | NumberInputProps['elementProps']
+}
+
+// Searchable dropdown of the live storefront courses. Falls back to manual
+// entry if the API is unreachable, so editors are never blocked.
+function CoursePicker({value, onPick, elementProps}: PickerProps) {
+  const {courses, loading, error} = useStorefrontCourses()
+
   const options = useMemo(
     () => courses.map((c) => ({value: String(c.id), name: c.name})),
     [courses],
@@ -46,13 +57,6 @@ export default function CoursePickerInput(props: StringInputProps) {
   const selected = useMemo(
     () => courses.find((c) => String(c.id) === value),
     [courses, value],
-  )
-
-  const handleChange = useCallback(
-    (next: string | undefined) => {
-      onChange(next ? set(next) : unset())
-    },
-    [onChange],
   )
 
   if (loading) {
@@ -74,10 +78,11 @@ export default function CoursePickerInput(props: StringInputProps) {
           <Text size={1}>Couldn’t load the course list ({error}). Enter the course ID manually.</Text>
         </Card>
         <input
-          {...elementProps}
+          id={elementProps.id}
+          ref={elementProps.ref as never}
           type="text"
           value={value || ''}
-          onChange={(e) => handleChange(e.currentTarget.value || undefined)}
+          onChange={(e) => onPick(e.currentTarget.value || undefined)}
           style={{padding: '0.6rem', width: '100%', borderRadius: 4, border: '1px solid #ccc'}}
           placeholder="Course ID"
         />
@@ -108,7 +113,7 @@ export default function CoursePickerInput(props: StringInputProps) {
           </Card>
         )}
         renderValue={(_value, option) => option?.name || _value}
-        onChange={(next) => handleChange(next || undefined)}
+        onChange={(next) => onPick(next || undefined)}
       />
       {selected ? (
         <Card padding={3} radius={2} tone="positive" border>
@@ -122,7 +127,7 @@ export default function CoursePickerInput(props: StringInputProps) {
               fontSize={1}
               padding={2}
               text="Clear"
-              onClick={() => handleChange(undefined)}
+              onClick={() => onPick(undefined)}
             />
           </Flex>
         </Card>
@@ -135,5 +140,39 @@ export default function CoursePickerInput(props: StringInputProps) {
         </Card>
       ) : null}
     </Stack>
+  )
+}
+
+// Custom input for the course "enrollId" field (a string): pick a storefront
+// course, store its id as a string.
+export default function CoursePickerInput(props: StringInputProps) {
+  const {value, onChange, elementProps} = props
+  const handlePick = useCallback(
+    (next: string | undefined) => {
+      onChange(next ? set(next) : unset())
+    },
+    [onChange],
+  )
+  return <CoursePicker value={value} onPick={handlePick} elementProps={elementProps} />
+}
+
+// The same picker for a NUMBER field — e.g. each row of the Enrollment Page's
+// "Courses to offer" — storing the id as a number. Anything that isn't a
+// positive whole number clears the field.
+export function CourseIdNumberInput(props: NumberInputProps) {
+  const {value, onChange, elementProps} = props
+  const handlePick = useCallback(
+    (next: string | undefined) => {
+      const n = Number(next)
+      onChange(next && Number.isInteger(n) && n > 0 ? set(n) : unset())
+    },
+    [onChange],
+  )
+  return (
+    <CoursePicker
+      value={value === undefined || value === null ? undefined : String(value)}
+      onPick={handlePick}
+      elementProps={elementProps}
+    />
   )
 }
