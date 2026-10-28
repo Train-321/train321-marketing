@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getSiteSettings, getTestimonials, getEnrollmentPage, type Testimonial, type TrustLogo } from "@/lib/sanity";
 import { getCartCourse, type CartCourse } from "@/lib/enroll";
-import { suggestAddOns } from "./addOns";
 import { resolveGroup } from "./groupResolve";
 import QuickBuy from "./QuickBuy";
 import "./marketing-v10.css";
@@ -74,7 +73,9 @@ export default async function EmailCheckoutLanding({
   };
 
   const [suggestions, testimonials, settings, enrollmentPage] = await Promise.all([
-    courses.length ? suggestAddOns(courses) : Promise.resolve([] as CartCourse[]),
+    // Add-on upsell ("Often added with this course") is intentionally off —
+    // the page sells exactly what the link carries.
+    Promise.resolve([] as CartCourse[]),
     getTestimonials().catch(() => [] as Testimonial[]),
     getSiteSettings().catch(() => null),
     getEnrollmentPage().catch(() => null)
@@ -102,7 +103,6 @@ export default async function EmailCheckoutLanding({
         <div className="v10-wrap v10-top__inner">
           <Link href="/" aria-label="Train 321 home"><img src="/img/logos/train321_logo.png" alt="Train 321" className="v10-top__logo" /></Link>
           <div className="v10-top__right">
-            <span className="v10-top__rating">Questions? Email a real person</span>
             <a href={`mailto:${supportEmail}`} className="v10-top__phone"><i className="fas fa-envelope" aria-hidden="true" /> <span>{supportEmail}</span></a>
           </div>
         </div>
@@ -140,9 +140,16 @@ export default async function EmailCheckoutLanding({
       ) : courses.length === 0 ? (
         <section className="v10-hero">
           <div className="v10-wrap v10-empty">
-            <h1 className="v10-title">This link is missing its course</h1>
-            <p className="v10-lede">It may have been cut off by your email app. Find your course in our catalog, or call us at 561-325-7300 and we&rsquo;ll get you enrolled.</p>
-            <Link href="/catalog" className="v10-btn v10-btn--pay">Browse courses <i className="fas fa-arrow-right" aria-hidden="true" /></Link>
+            {/* No course in the URL: the title + description come from Studio
+                (Enrollment Page → "No course in link"); these are the fallbacks. */}
+            <h1 className="v10-title">{enrollmentPage?.emptyTitle || "This link is missing its course"}</h1>
+            <p className="v10-lede">
+              {enrollmentPage?.emptyLede ||
+                `It may have been cut off by your email app. Find your course in our catalog, or email ${supportEmail} and we'll get you enrolled.`}
+            </p>
+            <Link href={enrollmentPage?.emptyCtaHref || "/catalog"} className="v10-btn v10-btn--pay">
+              {enrollmentPage?.emptyCtaLabel || "Browse courses"} <i className="fas fa-arrow-right" aria-hidden="true" />
+            </Link>
           </div>
         </section>
       ) : (

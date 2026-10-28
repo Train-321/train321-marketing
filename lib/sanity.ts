@@ -928,6 +928,11 @@ export async function getTeam(): Promise<TeamMember[]> {
 export type EnrollmentHighlight = { icon: string; title: string; sub: string };
 
 export type EnrollmentPage = {
+  /** Copy for /enrollment opened with no course in the URL. Blank → built-in text. */
+  emptyTitle: string;
+  emptyLede: string;
+  emptyCtaLabel: string;
+  emptyCtaHref: string;
   /** Site-wide highlights; empty → the page's built-in four. */
   defaultHighlights: EnrollmentHighlight[];
   /** Per-LMS-course overrides, keyed by the numeric course id. */
@@ -941,10 +946,15 @@ export type EnrollmentPage = {
 export async function getEnrollmentPage(): Promise<EnrollmentPage | null> {
   const r = (await (await getClient()).fetch(
     `*[_id == "enrollmentPage"][0] {
+      emptyTitle, emptyLede, emptyCtaLabel, emptyCtaHref,
       defaultHighlights[]{ icon, title, sub },
       courseHighlights[]{ courseId, highlights[]{ icon, title, sub } }
     }`
   )) as {
+    emptyTitle?: string | null;
+    emptyLede?: string | null;
+    emptyCtaLabel?: string | null;
+    emptyCtaHref?: string | null;
     defaultHighlights?: Array<Partial<EnrollmentHighlight>> | null;
     courseHighlights?: Array<{ courseId?: number; highlights?: Array<Partial<EnrollmentHighlight>> | null }> | null;
   } | null;
@@ -956,6 +966,10 @@ export async function getEnrollmentPage(): Promise<EnrollmentPage | null> {
       .map((h) => ({ icon: h.icon || "", title: h.title || "", sub: h.sub || "" }));
 
   return {
+    emptyTitle: (r.emptyTitle || "").trim(),
+    emptyLede: (r.emptyLede || "").trim(),
+    emptyCtaLabel: (r.emptyCtaLabel || "").trim(),
+    emptyCtaHref: (r.emptyCtaHref || "").trim(),
     defaultHighlights: clean(r.defaultHighlights),
     courseHighlights: (r.courseHighlights || [])
       .filter((c) => Number.isInteger(c?.courseId) && (c.courseId as number) > 0)

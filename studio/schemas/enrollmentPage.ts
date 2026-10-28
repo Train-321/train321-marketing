@@ -21,10 +21,46 @@ export default defineType({
   name: 'enrollmentPage',
   title: 'Enrollment Page',
   type: 'document',
+  groups: [
+    { name: 'empty', title: 'No course in link', default: true },
+    { name: 'highlights', title: 'Highlights' }
+  ],
   fields: [
+    // What /enrollment shows when the URL carries no course (ids / group).
+    defineField({
+      name: 'emptyTitle',
+      title: 'Title',
+      type: 'string',
+      group: 'empty',
+      description: 'Headline when the page is opened without a course. Blank → "This link is missing its course".'
+    }),
+    defineField({
+      name: 'emptyLede',
+      title: 'Description',
+      type: 'text',
+      rows: 3,
+      group: 'empty',
+      description: 'Paragraph under the title. Blank → the built-in "find your course in our catalog" copy.'
+    }),
+    defineField({
+      name: 'emptyCtaLabel',
+      title: 'Button label',
+      type: 'string',
+      group: 'empty',
+      description: 'Blank → "Browse courses".'
+    }),
+    defineField({
+      name: 'emptyCtaHref',
+      title: 'Button link',
+      type: 'string',
+      group: 'empty',
+      description: 'Path or URL the button opens. Blank → /catalog.'
+    }),
+
     defineField({
       name: 'defaultHighlights',
       title: 'Default highlights',
+      group: 'highlights',
       type: 'array',
       of: [highlight],
       description:
@@ -35,6 +71,7 @@ export default defineType({
     defineField({
       name: 'courseHighlights',
       title: 'Per-course highlights',
+      group: 'highlights',
       type: 'array',
       description: 'Override the highlights for a specific LMS course id (the number from the admin Courses list).',
       of: [
