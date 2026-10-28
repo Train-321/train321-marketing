@@ -2,7 +2,11 @@ import {useCallback, useEffect, useMemo, useState} from 'react'
 import {set, unset, type NumberInputProps, type StringInputProps} from 'sanity'
 import {Autocomplete, Box, Button, Card, Flex, Spinner, Stack, Text} from '@sanity/ui'
 
-const API_URL = 'https://new-features-api.train321.com/course/public-list'
+// The LMS API the course list is read from. Production by default; a local
+// Studio points SANITY_STUDIO_LMS_API_URL (studio/.env) at a local backend so
+// the dropdown shows the courses that exist there.
+const API_BASE = (process.env.SANITY_STUDIO_LMS_API_URL || 'https://new-features-api.train321.com').replace(/\/+$/, '')
+const API_URL = `${API_BASE}/course/public-list`
 
 type Course = {id: number; name: string}
 
@@ -168,9 +172,10 @@ export function CourseIdNumberInput(props: NumberInputProps) {
     },
     [onChange],
   )
+  // A freshly added number item starts at 0 — show it as "nothing picked yet".
   return (
     <CoursePicker
-      value={value === undefined || value === null ? undefined : String(value)}
+      value={value === undefined || value === null || value === 0 ? undefined : String(value)}
       onPick={handlePick}
       elementProps={elementProps}
     />
