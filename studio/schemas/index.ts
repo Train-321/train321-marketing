@@ -10,6 +10,7 @@ import faqPage from './faqPage'
 import catalogPage from './catalogPage'
 import testimonialsPage from './testimonialsPage'
 import detailPagesCopy from './detailPagesCopy'
+import enrollmentPage from './enrollmentPage'
 
 import course from './course'
 import blogPost from './blogPost'
@@ -62,6 +63,7 @@ export const schemaTypes = [
   catalogPage,
   testimonialsPage,
   detailPagesCopy,
+  enrollmentPage,
 
   // Content documents
   course,

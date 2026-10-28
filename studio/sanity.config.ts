@@ -72,6 +72,7 @@ export default defineConfig({
             single('catalogPage', 'catalogPage', 'Catalog Page'),
             single('testimonialsPage', 'testimonialsPage', 'Testimonials Page'),
             single('detailPagesCopy', 'detailPagesCopy', 'Detail Pages (chrome)'),
+            single('enrollmentPage', 'enrollmentPage', 'Enrollment Page'),
             S.divider(),
             blog,
             S.divider(),

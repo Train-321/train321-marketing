@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getSiteSettings, getTestimonials, type Testimonial, type TrustLogo } from "@/lib/sanity";
+import { getSiteSettings, getTestimonials, getEnrollmentPage, type Testimonial, type TrustLogo } from "@/lib/sanity";
 import { getCartCourse, type CartCourse } from "@/lib/enroll";
 import { suggestAddOns } from "./addOns";
 import { resolveGroup } from "./groupResolve";
@@ -73,11 +73,21 @@ export default async function EmailCheckoutLanding({
     return `?${q.toString()}`;
   };
 
-  const [suggestions, testimonials, logos] = await Promise.all([
+  const [suggestions, testimonials, settings, enrollmentPage] = await Promise.all([
     courses.length ? suggestAddOns(courses) : Promise.resolve([] as CartCourse[]),
     getTestimonials().catch(() => [] as Testimonial[]),
-    getSiteSettings().then((s) => s.trustLogos || []).catch(() => [] as TrustLogo[])
+    getSiteSettings().catch(() => null),
+    getEnrollmentPage().catch(() => null)
   ]);
+  const logos: TrustLogo[] = settings?.trustLogos || [];
+  const supportEmail = settings?.supportEmail || "support@train321.com";
+  // Highlights under the certificate: a per-course set from Studio when one is
+  // defined for the lead course id, else the Studio defaults, else QuickBuy's
+  // built-in four.
+  const leadId = courses[0]?.id;
+  const benefits =
+    enrollmentPage?.courseHighlights.find((c) => c.courseId === leadId)?.highlights ??
+    (enrollmentPage?.defaultHighlights.length ? enrollmentPage.defaultHighlights : undefined);
   const featured = testimonials.filter((t) => t.featured);
   const quotes = (featured.length ? featured : testimonials).slice(0, 3);
   const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || STAGING_TEST_PK;
@@ -92,8 +102,8 @@ export default async function EmailCheckoutLanding({
         <div className="v10-wrap v10-top__inner">
           <Link href="/" aria-label="Train 321 home"><img src="/img/logos/train321_logo.png" alt="Train 321" className="v10-top__logo" /></Link>
           <div className="v10-top__right">
-            <span className="v10-top__rating">Questions? Talk to a real person</span>
-            <a href="tel:5613257300" className="v10-top__phone"><i className="fas fa-phone" aria-hidden="true" /> <span>561-325-7300</span></a>
+            <span className="v10-top__rating">Questions? Email a real person</span>
+            <a href={`mailto:${supportEmail}`} className="v10-top__phone"><i className="fas fa-envelope" aria-hidden="true" /> <span>{supportEmail}</span></a>
           </div>
         </div>
       </header>
@@ -146,6 +156,7 @@ export default async function EmailCheckoutLanding({
                 prefillName={one(sp.name)}
                 prefillPromo={one(sp.promo)}
                 linkToken={one(sp.elt)}
+                benefits={benefits}
                 publishableKey={publishableKey}
                 rating={RATING}
               />

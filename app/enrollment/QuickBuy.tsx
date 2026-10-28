@@ -15,6 +15,17 @@ import CourseCertificate from "@/components/CourseCertificate";
 import type { CartCourse, EnrollQuote, CheckoutResult } from "@/lib/enroll";
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+
+/** One highlight under the certificate: Font Awesome icon class, bold title, quiet sub-line. */
+export type EnrollBenefit = { icon: string; title: string; sub: string };
+
+/** Built-in highlights — what renders when Studio has nothing for this course. */
+const DEFAULT_BENEFITS: EnrollBenefit[] = [
+  { icon: "fas fa-shield-halved", title: "ANSI-accredited", sub: "nationally recognized training" },
+  { icon: "fas fa-mobile-screen", title: "Any device", sub: "phone, tablet or computer" },
+  { icon: "fas fa-language", title: "English or Spanish", sub: "take it in your language" },
+  { icon: "fas fa-rotate", title: "Save your progress", sub: "stop and come back anytime" }
+];
 const EMAIL = /^\S+@\S+\.\S+$/;
 
 // loadStripe must run once per key, outside render.
@@ -65,6 +76,8 @@ export type QuickBuyProps = {
   /** Promo code from the campaign link (?promo=), applied on load. */
   prefillPromo?: string;
   linkToken?: string;
+  /** Highlights under the certificate; Studio-managed per course, else the built-in four. */
+  benefits?: EnrollBenefit[];
   publishableKey: string;
   rating: string;
 };
@@ -77,7 +90,7 @@ export default function QuickBuy(props: QuickBuyProps) {
   );
 }
 
-function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillName = "", prefillPromo = "", linkToken = "", rating }: QuickBuyProps) {
+function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillName = "", prefillPromo = "", linkToken = "", benefits = DEFAULT_BENEFITS, rating }: QuickBuyProps) {
   const stripe = useStripe();
   const elements = useElements();
   const appBase = (process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com").replace(/\/+$/, "");
@@ -565,12 +578,16 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
         <figure className="v10-cert">
           <CourseCertificate courseTitle={lead.name} learnerName={certName} showExpiration={false} />
         </figure>
-        <ul className="v10-benefits">
-          <li><i className="fas fa-shield-halved" aria-hidden="true" /><span><strong>ANSI-accredited</strong> nationally recognized training</span></li>
-          <li><i className="fas fa-mobile-screen" aria-hidden="true" /><span><strong>Any device</strong> phone, tablet or computer</span></li>
-          <li><i className="fas fa-language" aria-hidden="true" /><span><strong>English or Spanish</strong> take it in your language</span></li>
-          <li><i className="fas fa-rotate" aria-hidden="true" /><span><strong>Save your progress</strong> stop and come back anytime</span></li>
-        </ul>
+        {benefits.length > 0 && (
+          <ul className="v10-benefits">
+            {benefits.map((b, i) => (
+              <li key={`${b.title}-${i}`}>
+                <i className={b.icon || "fas fa-check"} aria-hidden="true" />
+                <span><strong>{b.title}</strong> {b.sub}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* ── Checkout ─────────────────────────────────────────────────── */}

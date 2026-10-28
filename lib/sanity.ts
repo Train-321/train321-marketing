@@ -924,6 +924,46 @@ export async function getTeam(): Promise<TeamMember[]> {
   );
 }
 
+/** One highlight row on /enrollment: Font Awesome icon class, bold title, sub-line. */
+export type EnrollmentHighlight = { icon: string; title: string; sub: string };
+
+export type EnrollmentPage = {
+  /** Site-wide highlights; empty → the page's built-in four. */
+  defaultHighlights: EnrollmentHighlight[];
+  /** Per-LMS-course overrides, keyed by the numeric course id. */
+  courseHighlights: Array<{ courseId: number; highlights: EnrollmentHighlight[] }>;
+};
+
+/**
+ * Studio-managed copy for the email-first checkout (/enrollment). Null when
+ * the singleton hasn't been created yet, so the page keeps its built-ins.
+ */
+export async function getEnrollmentPage(): Promise<EnrollmentPage | null> {
+  const r = (await (await getClient()).fetch(
+    `*[_id == "enrollmentPage"][0] {
+      defaultHighlights[]{ icon, title, sub },
+      courseHighlights[]{ courseId, highlights[]{ icon, title, sub } }
+    }`
+  )) as {
+    defaultHighlights?: Array<Partial<EnrollmentHighlight>> | null;
+    courseHighlights?: Array<{ courseId?: number; highlights?: Array<Partial<EnrollmentHighlight>> | null }> | null;
+  } | null;
+  if (!r) return null;
+
+  const clean = (rows?: Array<Partial<EnrollmentHighlight>> | null): EnrollmentHighlight[] =>
+    (rows || [])
+      .filter((h) => h && (h.title || h.sub))
+      .map((h) => ({ icon: h.icon || "", title: h.title || "", sub: h.sub || "" }));
+
+  return {
+    defaultHighlights: clean(r.defaultHighlights),
+    courseHighlights: (r.courseHighlights || [])
+      .filter((c) => Number.isInteger(c?.courseId) && (c.courseId as number) > 0)
+      .map((c) => ({ courseId: Number(c.courseId), highlights: clean(c.highlights) }))
+      .filter((c) => c.highlights.length > 0)
+  };
+}
+
 const SETTINGS_DEFAULT: SiteSettings = {
   siteName: "Train 321",
   tagline: "Online Food Safety Training",
