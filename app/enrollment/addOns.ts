@@ -44,9 +44,20 @@ function cartState(cart: CartCourse[]): string | null {
   return null;
 }
 
-export async function suggestAddOns(cart: CartCourse[], popularIds: number[] = []): Promise<CartCourse[]> {
+/** A usable 2-letter state code from the URL's &state=, else null ("ALL" counts as none). */
+export function stateFromParam(raw: string | null | undefined): string | null {
+  const code = (raw || "").trim().toUpperCase();
+  return /^[A-Z]{2}$/.test(code) && STATE_NAMES[code] ? code : null;
+}
+
+export async function suggestAddOns(
+  cart: CartCourse[],
+  popularIds: number[] = [],
+  /** &state= from the link, which wins over the cart's own tags. */
+  stateParam: string | null = null
+): Promise<CartCourse[]> {
   if (cart.length === 0) return [];
-  const stateCode = cartState(cart);
+  const stateCode = stateFromParam(stateParam) ?? cartState(cart);
 
   let courses: MarketplaceCourse[];
   try {

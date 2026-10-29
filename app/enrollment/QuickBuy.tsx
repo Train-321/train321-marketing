@@ -83,6 +83,8 @@ export type QuickBuyProps = {
   linkToken?: string;
   /** Highlights under the certificate; Studio-managed per course, else the built-in four. */
   benefits?: EnrollBenefit[];
+  /** &state= from the link: names the state in the add-on box title even when the lead course isn't state-tagged. */
+  stateCode?: string | null;
   /** Studio headline / blurb in place of the lead course's name and overview (no-course default). */
   headline?: string;
   lede?: string;
@@ -98,7 +100,7 @@ export default function QuickBuy(props: QuickBuyProps) {
   );
 }
 
-function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillName = "", prefillPromo = "", linkToken = "", benefits = DEFAULT_BENEFITS, headline = "", lede = "", rating }: QuickBuyProps) {
+function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillName = "", prefillPromo = "", linkToken = "", benefits = DEFAULT_BENEFITS, stateCode = null, headline = "", lede = "", rating }: QuickBuyProps) {
   const stripe = useStripe();
   const elements = useElements();
   const appBase = (process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com").replace(/\/+$/, "");
@@ -554,7 +556,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
   const firstName = (knownName || fullName).trim().split(/\s+/)[0] || "";
   const isLoading = identity === "checking";
   const openSuggestions = suggestions.filter((s) => !added.includes(s.id));
-  const where = singleStateName(lead.stateLabel);
+  const where = stateCode ? stateName(stateCode) : singleStateName(lead.stateLabel);
   // Admin-authored Marketplace Overview (rich text), scrubbed of anything
   // executable. Empty when the admin hasn't written one.
   const overview = lead.description ? sanitizeHtml(lead.description).trim() : "";

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getSiteSettings, getTestimonials, getEnrollmentPage, type Testimonial, type TrustLogo } from "@/lib/sanity";
 import { getCartCourse, type CartCourse } from "@/lib/enroll";
 import { resolveGroup } from "./groupResolve";
-import { suggestAddOns } from "./addOns";
+import { suggestAddOns, stateFromParam } from "./addOns";
 import CourseCertificate from "@/components/CourseCertificate";
 import QuickBuy, { DEFAULT_BENEFITS } from "./QuickBuy";
 import "./marketing-v10.css";
@@ -91,10 +91,12 @@ export default async function EmailCheckoutLanding({
     courses.push(...found);
   }
 
-  // "Add to your order" box: other courses for the cart's state, or — with no
-  // state — Studio's popular picks (see addOns.ts). Never blocks the page.
+  // "Add to your order" box: other courses for the link's state (&state=, or
+  // the cart's own state tags), or — with no state — Studio's popular picks
+  // (see addOns.ts). Never blocks the page.
+  const linkState = stateFromParam(one(sp.state));
   const suggestions = courses.length
-    ? await suggestAddOns(courses, enrollmentPage?.popularCourseIds ?? []).catch(() => [] as CartCourse[])
+    ? await suggestAddOns(courses, enrollmentPage?.popularCourseIds ?? [], linkState).catch(() => [] as CartCourse[])
     : [];
   const logos: TrustLogo[] = settings?.trustLogos || [];
   const supportEmail = settings?.supportEmail || "support@train321.com";
@@ -220,6 +222,7 @@ export default async function EmailCheckoutLanding({
                 prefillPromo={one(sp.promo)}
                 linkToken={one(sp.elt)}
                 benefits={benefits}
+                stateCode={linkState}
                 headline={isDefault ? enrollmentPage?.emptyTitle : ""}
                 lede={isDefault ? enrollmentPage?.emptyLede : ""}
                 publishableKey={publishableKey}
