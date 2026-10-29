@@ -85,6 +85,8 @@ export type QuickBuyProps = {
   benefits?: EnrollBenefit[];
   /** &state= from the link: names the state in the add-on box title even when the lead course isn't state-tagged. */
   stateCode?: string | null;
+  /** Whether `suggestions` are the state's own courses (titled by state) or the popular list. */
+  suggestionsByState?: boolean;
   /** Studio headline / blurb in place of the lead course's name and overview (no-course default). */
   headline?: string;
   lede?: string;
@@ -100,7 +102,7 @@ export default function QuickBuy(props: QuickBuyProps) {
   );
 }
 
-function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillName = "", prefillPromo = "", linkToken = "", benefits = DEFAULT_BENEFITS, stateCode = null, headline = "", lede = "", rating }: QuickBuyProps) {
+function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillName = "", prefillPromo = "", linkToken = "", benefits = DEFAULT_BENEFITS, stateCode = null, suggestionsByState = false, headline = "", lede = "", rating }: QuickBuyProps) {
   const stripe = useStripe();
   const elements = useElements();
   const appBase = (process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com").replace(/\/+$/, "");
@@ -830,7 +832,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
               <div className="v10-addons">
                 <p className="v10-addons__title">
                   <i className="fas fa-star" aria-hidden="true" />
-                  {where ? `Often added by ${where} workers` : "Popular with other learners"}
+                  {suggestionsByState && where ? `Often added by ${where} workers` : "Popular with other learners"}
                 </p>
                 {(showAllAddOns ? openSuggestions : openSuggestions.slice(0, 1)).map((s) => (
                   <button key={s.id} type="button" className="v10-addon" onClick={() => toggleAddOn(s.id)}>

@@ -95,9 +95,10 @@ export default async function EmailCheckoutLanding({
   // the cart's own state tags), or — with no state — Studio's popular picks
   // (see addOns.ts). Never blocks the page.
   const linkState = stateFromParam(one(sp.state));
-  const suggestions = courses.length
-    ? await suggestAddOns(courses, enrollmentPage?.popularCourseIds ?? [], linkState).catch(() => [] as CartCourse[])
-    : [];
+  const addOns = courses.length
+    ? await suggestAddOns(courses, enrollmentPage?.popularCourseIds ?? [], linkState).catch(() => ({ picks: [] as CartCourse[], byState: false }))
+    : { picks: [] as CartCourse[], byState: false };
+  const suggestions = addOns.picks;
   const logos: TrustLogo[] = settings?.trustLogos || [];
   const supportEmail = settings?.supportEmail || "support@train321.com";
   // Highlights under the certificate: a per-course set from Studio when one is
@@ -223,6 +224,7 @@ export default async function EmailCheckoutLanding({
                 linkToken={one(sp.elt)}
                 benefits={benefits}
                 stateCode={linkState}
+                suggestionsByState={addOns.byState}
                 headline={isDefault ? enrollmentPage?.emptyTitle : ""}
                 lede={isDefault ? enrollmentPage?.emptyLede : ""}
                 publishableKey={publishableKey}

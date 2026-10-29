@@ -50,25 +50,29 @@ export function stateFromParam(raw: string | null | undefined): string | null {
   return /^[A-Z]{2}$/.test(code) && STATE_NAMES[code] ? code : null;
 }
 
+export type AddOnSuggestions = {
+  picks: CartCourse[];
+  /** True when the picks are courses written for the cart's state; false when they're the popular list. */
+  byState: boolean;
+};
+
 export async function suggestAddOns(
   cart: CartCourse[],
   popularIds: number[] = [],
   /** &state= from the link, which wins over the cart's own tags. */
   stateParam: string | null = null
-): Promise<CartCourse[]> {
-  if (cart.length === 0) return [];
+): Promise<AddOnSuggestions> {
+  const none: AddOnSuggestions = { picks: [], byState: false };
+  if (cart.length === 0) return none;
   const stateCode = stateFromParam(stateParam) ?? cartState(cart);
 
   let courses: MarketplaceCourse[];
   try {
-    // With a state: filtered to what's sold there, that state's own versions
-    // first. Without: the whole catalog, so Studio's popular picks resolve
-    // whatever state they're written for.
-    ({ courses } = await getMarketplaceCatalog(
-      stateCode ? { stateCode, perPage: 500 } : { anyState: true, keepVariants: true, perPage: 500 }
-    ));
+    // The whole catalog, every state: the state branch needs the courses
+    // tagged for its state, the popular branch whatever the client picked.
+    ({ courses } = await getMarketplaceCatalog({ anyState: true, keepVariants: true, perPage: 500 }));
   } catch {
-    return [];
+    return none;
   }
 
   const inCart = new Set(cart.map((c) => c.id));
@@ -88,29 +92,23 @@ export async function suggestAddOns(
     if (c.lmsGroupId) groups.add(c.lmsGroupId);
   };
 
+  // Courses WRITTEN for this state (tagged with it in the LMS). Untagged
+  // "sold everywhere" courses don't count — a state with none of its own
+  // falls through to the popular list below.
   if (stateCode) {
-    // An untagged course whose title leads with another state's code
-    // ("CA Sexual Harassment…") is not a pick for this state, whatever the
-    // LMS tags say.
-    const namedForOtherState = (c: MarketplaceCourse) => {
-      const m = /^([A-Z]{2})\b/.exec(c.name.trim());
-      return Boolean(m && STATE_NAMES[m[1]] && m[1] !== stateCode);
-    };
-    const fits = (c: MarketplaceCourse) => !namedForOtherState(c);
-    // This state's own versions first, then nationwide compliance courses,
-    // then whatever else is sold there.
-    for (const c of courses) if (c.availability.kind === "in" && fits(c)) take(c);
-    for (const c of courses) if (isCompliance(c) && fits(c)) take(c);
-    for (const c of courses) if (fits(c)) take(c);
-  } else {
-    // Studio's picks in the order the client listed them…
-    for (const id of popularIds) {
-      const c = courses.find((x) => x.id === id);
-      if (c) take(c);
-    }
-    // …then nationwide compliance courses until the box is full.
-    for (const c of courses) if (c.availability.kind === "all" && isCompliance(c)) take(c);
+    const forState = courses.filter((c) => c.availability.kind === "in" && c.availability.codes.includes(stateCode));
+    for (const c of forState) if (isCompliance(c)) take(c);
+    for (const c of forState) take(c);
+    if (picks.length > 0) return { picks: picks.map(toCart), byState: true };
   }
 
-  return picks.map(toCart);
+  // Studio's picks in the order the client listed them…
+  for (const id of popularIds) {
+    const c = courses.find((x) => x.id === id);
+    if (c) take(c);
+  }
+  // …then nationwide compliance courses until the box is full.
+  for (const c of courses) if (c.availability.kind === "all" && isCompliance(c)) take(c);
+
+  return { picks: picks.map(toCart), byState: false };
 }
