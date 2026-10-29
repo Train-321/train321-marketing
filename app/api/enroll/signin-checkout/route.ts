@@ -151,6 +151,10 @@ export async function POST(req: Request) {
   const purchasePayload: Record<string, unknown> = {
     audience: "myself",
     invoice_method: "one-time",
+    // Tells the purchase endpoint this is a learner paying for themselves
+    // from the email-link page, so a course their company also provides
+    // isn't refused (the LMS app's own checkout keeps that rule).
+    source: "enrollment",
     courses,
     billing_name: billingName,
     billing_email: billingEmail,
