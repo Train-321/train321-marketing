@@ -88,10 +88,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: 0.8
     })),
-    ...ok(posts).map((p) => ({
+    // A post set to "Hide from search engines" is noindex, so listing it
+    // here would send Google mixed signals.
+    ...ok(posts).filter((p) => !p.seo?.noIndex).map((p) => ({
       url: `${SITE}/blog/${p.slug}`,
       // The last edit when there is one, else the publish date.
-      ...when(p.updatedAt || p.publishedAt),
+      ...when(p.revisedAt || p.updatedAt || p.publishedAt),
       changeFrequency: "yearly" as const,
       priority: 0.5
     })),

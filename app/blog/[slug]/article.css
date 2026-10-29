@@ -45,7 +45,7 @@
   font-size: 0.82rem;
   font-weight: 600;
 }
-.t321-mkt-article__avatar--lg { width: 56px; height: 56px; font-size: 1rem; }
+.t321-mkt-article__avatar--lg { width: 56px; height: 56px; font-size: 1rem; flex-shrink: 0; }
 .t321-mkt-article__author strong {
   display: block;
   font-size: 0.92rem;
@@ -72,6 +72,7 @@
   font-size: 0.8rem;
   color: var(--t321-mkt-ink-muted);
 }
+.t321-mkt-article__dates span span { display: inline; }
 
 .t321-mkt-article__body {
   display: grid;
@@ -326,4 +327,43 @@
   .t321-mkt-article__share span { margin-bottom: 0; margin-right: 0.25rem; }
   .t321-mkt-article__related { grid-template-columns: 1fr; }
   .t321-mkt-article__cta { grid-template-columns: 1fr; }
+}
+
+/* ── Related course box (after the prose) ──────────────── */
+.t321-mkt-article__course {
+  margin: 2.5rem 0 0;
+  padding: 1.5rem 1.75rem;
+  border: 1px solid var(--t321-mkt-line, #e3e7ec);
+  border-left: 4px solid var(--t321-mkt-accent);
+  border-radius: 14px;
+  background: var(--t321-mkt-paper-sunk);
+}
+.t321-mkt-article__course .t321-mkt-eyebrow { margin-bottom: 0.4rem; }
+.t321-mkt-article__course h2 { margin: 0 0 0.4rem; font-size: 1.35rem; }
+.t321-mkt-article__course p { margin: 0 0 1rem; }
+.t321-mkt-article__course-list { display: grid; gap: 1.5rem; }
+.t321-mkt-article__course.is-multi .t321-mkt-article__course-list {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+.t321-mkt-article__course-item { display: flex; flex-direction: column; align-items: flex-start; }
+.t321-mkt-article__course-item p { flex: 1; }
+/* The box sits inside .t321-mkt-prose, whose underlined link colour would
+   otherwise paint over the button. */
+.t321-mkt-article__course .t321-mkt-btn,
+.t321-mkt-article__course .t321-mkt-btn:hover { color: #ffffff; text-decoration: none; }
+.t321-mkt-article__course.is-multi h2 { font-size: 1.1rem; }
+.t321-mkt-article__course-aud {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--t321-mkt-ink-muted);
+  margin-bottom: 0.2rem;
+}
+
+/* ── Author bio in the sign-off ────────────────────────── */
+.t321-mkt-article__sign:has(.t321-mkt-article__bio) { align-items: flex-start; }
+.t321-mkt-article__bio {
+  margin: 0.6rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--t321-mkt-ink-muted);
 }

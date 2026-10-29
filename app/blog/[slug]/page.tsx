@@ -35,24 +35,73 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const post = await getBlogPost(slug);
   if (!post) return { title: "Article" };
+  // The post's SEO tab wins; the headline and subhead are the fallback.
+  const seoTitle = post.seo?.metaTitle?.trim() || post.title;
+  const description = post.seo?.metaDescription?.trim() || post.excerpt || "";
   return {
     // Headlines run 50–70 chars; a long one goes out without " — Train 321"
     // rather than losing its last words to the brand.
-    title: fitTitle(post.title),
-    description: post.excerpt || "",
+    title: fitTitle(seoTitle),
+    description,
     alternates: { canonical: `/blog/${slug}` },
+    ...(post.seo?.noIndex ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       type: "article",
-      title: post.title,
-      description: post.excerpt || "",
+      title: seoTitle,
+      description,
       publishedTime: post.publishedAt,
+      ...(post.revisedAt ? { modifiedTime: post.revisedAt } : {}),
       authors: post.author?.name ? [post.author.name] : undefined,
-      // The cover image when the post has one. Declaring openGraph here
-      // replaces the layout's file-convention image, so coverless posts must
-      // name the branded card explicitly or they'd ship with no og:image.
-      images: [{ url: post.coverImage || `${SITE_URL}/opengraph-image` }]
+      // The share image, else the cover. Declaring openGraph here replaces
+      // the layout's file-convention image, so coverless posts must name the
+      // branded card explicitly or they'd ship with no og:image.
+      images: [{ url: post.seo?.ogImage || post.coverImage || `${SITE_URL}/opengraph-image` }]
     }
   };
+}
+
+type CourseLink = { slug: string; label: string; audience: string; blurb: string };
+
+const COURSES: Record<string, CourseLink> = {
+  "food-handler": { slug: "food-handler", label: "Food Handler Card", audience: "For food workers", blurb: "The food safety basics every food service worker needs, from hygiene and safe temperatures to allergens. Your certificate is ready as soon as you pass." },
+  "food-manager": { slug: "food-manager", label: "Food Manager Certification", audience: "For managers", blurb: "Videos, study material and a 300-question practice test, then a proctored, ANAB-accredited exam valid for five years." },
+  rbs: { slug: "rbs", label: "California RBS Training", audience: "California servers", blurb: "Required Responsible Beverage Service training from an approved provider. We report your completion to ABC within 24 hours." },
+  tabc: { slug: "tabc", label: "TABC Seller-Server", audience: "Texas servers", blurb: "The Texas seller-server certification course, online." },
+  alcohol: { slug: "alcohol", label: "Alcohol Safety", audience: "Other states", blurb: "Spot fake IDs, recognize intoxication and refuse a sale the right way." },
+  "california-sexual-harassment": { slug: "california-sexual-harassment", label: "California Sexual Harassment Training", audience: "California employers", blurb: "One-hour employee and two-hour supervisor courses for California's harassment prevention requirement." },
+  "human-trafficking": { slug: "human-trafficking", label: "Human Trafficking Awareness", audience: "Hospitality teams", blurb: "Hospitality-focused training on recognizing and reporting human trafficking." }
+};
+
+/**
+ * The courses an article should hand readers to, picked from its title and
+ * category; first match wins. Articles were shipping with zero links to a
+ * course page, so the pages earning the traffic passed none of it on.
+ * General food safety posts get both food courses, labelled by audience, so
+ * employees and managers each land on the course meant for them.
+ */
+const COURSE_RULES: Array<{ test: RegExp; slugs: string[] }> = [
+  { test: /\brbs\b|responsible beverage/i, slugs: ["rbs"] },
+  { test: /tabc|seller.server/i, slugs: ["tabc"] },
+  { test: /intoxica|alcohol/i, slugs: ["rbs", "tabc", "alcohol"] },
+  { test: /food manager|manager certification|manager exam/i, slugs: ["food-manager"] },
+  { test: /harassment|sb ?1343/i, slugs: ["california-sexual-harassment"] },
+  { test: /traffick/i, slugs: ["human-trafficking"] },
+  { test: /food|contamin|kitchen|allergen|temperature|hygiene|defense|fda/i, slugs: ["food-handler", "food-manager"] }
+];
+
+function coursesFor(post: { title: string; category?: string }): CourseLink[] {
+  const hay = `${post.title} ${post.category || ""}`;
+  return COURSE_RULES.find((r) => r.test.test(hay))?.slugs.map((s) => COURSES[s]) || [];
+}
+
+/**
+ * "Keep reading" picks: posts in the same category first, then the newest of
+ * the rest. Newest-only sent a food safety reader to the CEO note.
+ */
+function relatedPosts<T extends { slug: string; category?: string }>(post: T, all: T[], n = 3): T[] {
+  const others = all.filter((p) => p.slug !== post.slug);
+  const same = others.filter((p) => post.category && p.category === post.category);
+  return [...same, ...others.filter((p) => !same.includes(p))].slice(0, n);
 }
 
 export default async function BlogArticlePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -64,7 +113,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
   ]);
   if (!post) notFound();
 
-  const related = allPosts.filter((p) => p.slug !== post.slug).slice(0, 3);
+  const related = relatedPosts(post, allPosts);
 
   const crumbJournal = copy?.blogCrumbJournal || "Journal";
   const shareLabel = copy?.blogShareLabel || "Share";
@@ -76,6 +125,12 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
   const relatedReadLabel = copy?.blogRelatedReadLabel || "Read article";
 
   const authorName = post.author?.name || orgSuffix;
+  const courseLinks = coursesFor(post);
+  // Only an editor-set "Last updated" shows; _updatedAt moves on every typo
+  // fix and bulk edit, which would stamp old posts as freshly revised.
+  const revised = post.revisedAt && post.revisedAt.slice(0, 10) > (post.publishedAt || "").slice(0, 10)
+    ? post.revisedAt
+    : null;
 
   const cta = copy?.blogBottomCta;
   const ctaHeading = cta?.heading || "Ready to see the platform?";
@@ -94,15 +149,27 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
     description: post.excerpt || "",
     url: `${SITE_URL}/blog/${post.slug}`,
     datePublished: post.publishedAt,
-    ...(post.updatedAt ? { dateModified: post.updatedAt } : {}),
+    ...(revised || post.updatedAt ? { dateModified: revised || post.updatedAt } : {}),
     ...(post.coverImage ? { image: post.coverImage } : {}),
-    author: {
-      "@type": "Person",
-      name: authorName,
-      ...(post.author?.role ? { jobTitle: post.author.role } : {})
-    },
+    // A post with no named author is the company's, not a person called
+    // "Train 321".
+    author: post.author?.name
+      ? {
+          "@type": "Person",
+          name: post.author.name,
+          ...(post.author.role ? { jobTitle: post.author.role } : {}),
+          ...(post.author.bio ? { description: post.author.bio } : {}),
+          worksFor: { "@id": `${SITE_URL}/#organization` }
+        }
+      : { "@id": `${SITE_URL}/#organization` },
     publisher: { "@id": `${SITE_URL}/#organization` },
-    mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`
+    mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`,
+    ...(post.category ? { articleSection: post.category } : {}),
+    ...(courseLinks.length
+      ? {
+          about: courseLinks.map((c) => ({ "@type": "Course", name: c.label, url: `${SITE_URL}/courses/${c.slug}` }))
+        }
+      : {})
   };
 
   // Same trail as the crumbs rendered below; the category is a label there,
@@ -138,8 +205,21 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
             </div>
             <div className="t321-mkt-article__dot" aria-hidden="true" />
             <div className="t321-mkt-article__dates">
-              <strong>{formatDate(post.publishedAt)}</strong>
-              <span>{post.readMinutes} {readingMinSuffix}</span>
+              <strong>
+                <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+              </strong>
+              <span>
+                {[
+                  revised && (
+                    <span key="u">
+                      Updated <time dateTime={revised}>{formatDate(revised)}</time>
+                    </span>
+                  ),
+                  post.readMinutes && <span key="r">{post.readMinutes} {readingMinSuffix}</span>
+                ]
+                  .filter(Boolean)
+                  .flatMap((el, i) => (i ? [" · ", el] : [el]))}
+              </span>
             </div>
           </div>
         </div>
@@ -166,6 +246,27 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
           <article className="t321-mkt-article__prose t321-mkt-prose">
             <BlogPortableText value={post.body} />
 
+            {courseLinks.length > 0 && (
+              <aside
+                className={`t321-mkt-article__course${courseLinks.length > 1 ? " is-multi" : ""}`}
+                aria-label={courseLinks.length > 1 ? "Related courses" : "Related course"}
+              >
+                <span className="t321-mkt-eyebrow">{courseLinks.length > 1 ? "Related courses" : "Related course"}</span>
+                <div className="t321-mkt-article__course-list">
+                  {courseLinks.map((c) => (
+                    <div key={c.slug} className="t321-mkt-article__course-item">
+                      {courseLinks.length > 1 && <span className="t321-mkt-article__course-aud">{c.audience}</span>}
+                      <h2>{c.label}</h2>
+                      <p>{c.blurb}</p>
+                      <Link href={`/courses/${c.slug}`} className="t321-mkt-btn t321-mkt-btn--accent">
+                        See the course
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </aside>
+            )}
+
             <div className="t321-mkt-article__sign">
               <div className="t321-mkt-article__avatar t321-mkt-article__avatar--lg" aria-hidden="true">
                 {initials(authorName)}
@@ -173,6 +274,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
               <div>
                 <strong>{authorName}</strong>
                 <span>{[post.author?.role, orgSuffix].filter(Boolean).join(" · ")}</span>
+                {post.author?.bio && <p className="t321-mkt-article__bio">{post.author.bio}</p>}
               </div>
             </div>
           </article>
