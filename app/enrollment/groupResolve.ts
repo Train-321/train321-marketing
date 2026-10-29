@@ -66,10 +66,14 @@ export async function resolveGroup(groupId: string, stateParam: string): Promise
   let redirectHref: string | null = null;
   // A state's own version outranks the everywhere one (stable sort, so the
   // LMS order holds within each bucket) — for both the cart and a redirect.
-  const pick = (code: string | null) =>
-    variants
-      .filter((v) => availableIn(v.availability, code))
-      .sort((a, b) => Number(b.availability.kind === "in") - Number(a.availability.kind === "in"));
+  // The version(s) for a state: the ones written for that state when it has
+  // any, else the nationwide / everywhere-except ones. A state's own version
+  // and the nationwide one are alternatives, never both.
+  const pick = (code: string | null) => {
+    const sold = variants.filter((v) => availableIn(v.availability, code));
+    const own = sold.filter((v) => v.availability.kind === "in");
+    return own.length ? own : sold;
+  };
   if (!stateAware) {
     members = variants.flatMap((v) => (v.course ? [v.course] : []));
   } else if (state) {
