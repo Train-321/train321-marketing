@@ -1,21 +1,22 @@
 import { getMarketplaceCatalog, type MarketplaceCourse } from "@/lib/newFeatures";
 import type { CartCourse } from "@/lib/enroll";
+import { parseStateTag } from "@/lib/states";
 
-// Courses to offer next to the one in the email — the "add to your order"
-// list on /marketing-v10. Picks, in order:
-//   1. the other compliance courses for the same state (food handler, alcohol,
-//      harassment prevention) the buyer doesn't already have in the cart;
-//   2. one role skill that pairs with the lead course's category.
-// Variants of something already in the cart (same LMS course group), manager
-// tiers and other-language versions are skipped so each pick is a distinct,
-// obvious "yes" for the same person.
+// Courses offered next to the one in the email — the "add to your order"
+// box on /enrollment.
+//
+//   • Cart has a state (e.g. the Florida food handler): the other courses
+//     sold in that state that aren't in the cart yet — that state's own
+//     versions first, then the nationwide ones.
+//   • Cart has no state: "popular" courses — the list the client picks in
+//     Studio (Enrollment Page → Popular courses); if that's empty, the
+//     nationwide compliance courses (food handler, alcohol, harassment).
+//
+// Variants of something already in the cart (same LMS course group) and
+// other-language versions are skipped so each pick is a distinct "yes".
 
 const ALCOHOL = 2;
 const FOOD_HANDLER = 3;
-const SKILL_FOR: Record<number, RegExp> = {
-  [ALCOHOL]: /^bartending 101$/i,
-  [FOOD_HANDLER]: /^food allergens$/i
-};
 const MAX = 3;
 
 const isCompliance = (c: MarketplaceCourse) =>
@@ -30,49 +31,66 @@ const toCart = (c: MarketplaceCourse): CartCourse => ({
   stateLabel: c.stateLabel
 });
 
-export async function suggestAddOns(cart: CartCourse[]): Promise<CartCourse[]> {
-  const lead = cart[0];
-  if (!lead) return [];
-  const code = (lead.stateLabel || "").trim().toUpperCase();
-  const stateCode = /^[A-Z]{2}$/.test(code) ? code : null;
+/**
+ * The state the cart is for: the first course whose LMS state tag names
+ * exactly one state ("FL" or "Florida"), else null. Multi-state and
+ * nationwide tags don't pin the cart to a state.
+ */
+function cartState(cart: CartCourse[]): string | null {
+  for (const c of cart) {
+    const parsed = parseStateTag(c.stateLabel);
+    if (parsed.states !== "all" && parsed.states.length === 1) return parsed.states[0];
+  }
+  return null;
+}
+
+export async function suggestAddOns(cart: CartCourse[], popularIds: number[] = []): Promise<CartCourse[]> {
+  if (cart.length === 0) return [];
+  const stateCode = cartState(cart);
 
   let courses: MarketplaceCourse[];
   try {
-    // State-filtered and already sorted with that state's own versions first.
-    ({ courses } = await getMarketplaceCatalog({ stateCode: stateCode ?? undefined, perPage: 500 }));
+    // With a state: filtered to what's sold there, that state's own versions
+    // first. Without: the whole catalog, so Studio's popular picks resolve
+    // whatever state they're written for.
+    ({ courses } = await getMarketplaceCatalog(
+      stateCode ? { stateCode, perPage: 500 } : { anyState: true, keepVariants: true, perPage: 500 }
+    ));
   } catch {
     return [];
   }
 
   const inCart = new Set(cart.map((c) => c.id));
-  const leadEntry = courses.find((c) => c.id === lead.id);
-  const leadCategory = leadEntry?.categoryId ?? null;
   const groups = new Set(courses.filter((c) => inCart.has(c.id) && c.lmsGroupId).map((c) => c.lmsGroupId!));
-  const spanish = /spanish/i.test(lead.name);
+  const spanish = cart.some((c) => /spanish/i.test(c.name));
 
   const eligible = (c: MarketplaceCourse) =>
     !inCart.has(c.id) &&
     c.price > 0 &&
     !(c.lmsGroupId && groups.has(c.lmsGroupId)) &&
-    !(leadCategory !== null && c.categoryId === leadCategory) &&
-    /spanish/i.test(c.name) === spanish &&
-    !/manager/i.test(c.name) &&
-    // With no state to match, only offer courses that aren't state-specific.
-    (stateCode !== null || !c.stateLabel);
+    /spanish/i.test(c.name) === spanish;
 
   const picks: MarketplaceCourse[] = [];
   const take = (c: MarketplaceCourse) => {
+    if (picks.length >= MAX || picks.some((p) => p.id === c.id) || !eligible(c)) return;
     picks.push(c);
     if (c.lmsGroupId) groups.add(c.lmsGroupId);
   };
 
-  for (const c of courses) {
-    if (picks.length >= MAX - 1) break;
-    if (isCompliance(c) && eligible(c)) take(c);
+  if (stateCode) {
+    // Already sorted state-specific first; compliance courses lead, the rest
+    // fill in behind them.
+    for (const c of courses) if (isCompliance(c)) take(c);
+    for (const c of courses) take(c);
+  } else {
+    // Studio's picks in the order the client listed them…
+    for (const id of popularIds) {
+      const c = courses.find((x) => x.id === id);
+      if (c) take(c);
+    }
+    // …then nationwide compliance courses until the box is full.
+    for (const c of courses) if (c.availability.kind === "all" && isCompliance(c)) take(c);
   }
-  const skill = leadCategory !== null ? SKILL_FOR[leadCategory] : undefined;
-  const skillPick = skill && courses.find((c) => skill.test(c.name.trim()) && eligible(c));
-  if (skillPick) take(skillPick);
 
-  return picks.slice(0, MAX).map(toCart);
+  return picks.map(toCart);
 }

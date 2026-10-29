@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getSiteSettings, getTestimonials, getEnrollmentPage, type Testimonial, type TrustLogo } from "@/lib/sanity";
 import { getCartCourse, type CartCourse } from "@/lib/enroll";
 import { resolveGroup } from "./groupResolve";
+import { suggestAddOns } from "./addOns";
 import CourseCertificate from "@/components/CourseCertificate";
 import QuickBuy, { DEFAULT_BENEFITS } from "./QuickBuy";
 import "./marketing-v10.css";
@@ -73,10 +74,7 @@ export default async function EmailCheckoutLanding({
     return `?${q.toString()}`;
   };
 
-  const [suggestions, testimonials, settings, enrollmentPage] = await Promise.all([
-    // Add-on upsell ("Often added with this course") is intentionally off —
-    // the page sells exactly what the link carries.
-    Promise.resolve([] as CartCourse[]),
+  const [testimonials, settings, enrollmentPage] = await Promise.all([
     getTestimonials().catch(() => [] as Testimonial[]),
     getSiteSettings().catch(() => null),
     getEnrollmentPage().catch(() => null)
@@ -92,6 +90,12 @@ export default async function EmailCheckoutLanding({
     );
     courses.push(...found);
   }
+
+  // "Add to your order" box: other courses for the cart's state, or — with no
+  // state — Studio's popular picks (see addOns.ts). Never blocks the page.
+  const suggestions = courses.length
+    ? await suggestAddOns(courses, enrollmentPage?.popularCourseIds ?? []).catch(() => [] as CartCourse[])
+    : [];
   const logos: TrustLogo[] = settings?.trustLogos || [];
   const supportEmail = settings?.supportEmail || "support@train321.com";
   // Highlights under the certificate: a per-course set from Studio when one is

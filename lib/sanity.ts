@@ -935,6 +935,8 @@ export type EnrollmentPage = {
   emptyCtaHref: string;
   /** LMS course ids put in the cart when the URL carries no course. Empty → no checkout, just the button. */
   defaultCourseIds: number[];
+  /** "Add to your order" picks when the cart has no state. Empty → nationwide compliance courses. */
+  popularCourseIds: number[];
   /** Site-wide highlights; empty → the page's built-in four. */
   defaultHighlights: EnrollmentHighlight[];
   /** Per-LMS-course overrides, keyed by the numeric course id. */
@@ -948,7 +950,7 @@ export type EnrollmentPage = {
 export async function getEnrollmentPage(): Promise<EnrollmentPage | null> {
   const r = (await (await getClient()).fetch(
     `*[_id == "enrollmentPage"][0] {
-      emptyTitle, emptyLede, emptyCtaLabel, emptyCtaHref, defaultCourseIds,
+      emptyTitle, emptyLede, emptyCtaLabel, emptyCtaHref, defaultCourseIds, popularCourseIds,
       defaultHighlights[]{ icon, title, sub },
       courseHighlights[]{ courseId, highlights[]{ icon, title, sub } }
     }`
@@ -958,11 +960,14 @@ export async function getEnrollmentPage(): Promise<EnrollmentPage | null> {
     emptyCtaLabel?: string | null;
     emptyCtaHref?: string | null;
     defaultCourseIds?: Array<number | null> | null;
+    popularCourseIds?: Array<number | null> | null;
     defaultHighlights?: Array<Partial<EnrollmentHighlight>> | null;
     courseHighlights?: Array<{ courseId?: number; highlights?: Array<Partial<EnrollmentHighlight>> | null }> | null;
   } | null;
   if (!r) return null;
 
+  const cleanIds = (ids?: Array<number | null> | null): number[] =>
+    [...new Set((ids || []).map(Number).filter((n) => Number.isInteger(n) && n > 0))];
   const clean = (rows?: Array<Partial<EnrollmentHighlight>> | null): EnrollmentHighlight[] =>
     (rows || [])
       .filter((h) => h && (h.title || h.sub))
@@ -973,7 +978,8 @@ export async function getEnrollmentPage(): Promise<EnrollmentPage | null> {
     emptyLede: (r.emptyLede || "").trim(),
     emptyCtaLabel: (r.emptyCtaLabel || "").trim(),
     emptyCtaHref: (r.emptyCtaHref || "").trim(),
-    defaultCourseIds: [...new Set((r.defaultCourseIds || []).map(Number).filter((n) => Number.isInteger(n) && n > 0))],
+    defaultCourseIds: cleanIds(r.defaultCourseIds),
+    popularCourseIds: cleanIds(r.popularCourseIds),
     defaultHighlights: clean(r.defaultHighlights),
     courseHighlights: (r.courseHighlights || [])
       .filter((c) => Number.isInteger(c?.courseId) && (c.courseId as number) > 0)

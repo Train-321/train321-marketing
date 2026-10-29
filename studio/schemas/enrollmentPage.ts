@@ -24,6 +24,7 @@ export default defineType({
   type: 'document',
   groups: [
     { name: 'empty', title: 'No course in link', default: true },
+    { name: 'addons', title: 'Add to your order' },
     { name: 'highlights', title: 'Highlights' }
   ],
   fields: [
@@ -59,6 +60,25 @@ export default defineType({
       description:
         'Pick the course(s) to put in the checkout when the link has no course. ' +
         'With at least one, the page shows the real checkout for these; empty → only the button below.'
+    }),
+    defineField({
+      name: 'popularCourseIds',
+      title: 'Popular courses',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'number',
+          title: 'Course',
+          components: { input: CourseIdNumberInput },
+          validation: (R) => R.integer().positive()
+        })
+      ],
+      group: 'addons',
+      description:
+        'Shown in the "add to your order" box when the course in the link has no state. ' +
+        'With a state, the box offers that state\'s other courses automatically. Up to 3 are shown; ' +
+        'empty → the nationwide food handler / alcohol / harassment courses.',
+      validation: (R) => R.max(6)
     }),
     defineField({
       name: 'emptyCtaLabel',

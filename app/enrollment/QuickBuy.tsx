@@ -9,7 +9,7 @@ import {
   useStripe
 } from "@stripe/react-stripe-js";
 import { loadStripe, type PaymentRequest, type Token } from "@stripe/stripe-js";
-import { US_STATES } from "@/lib/states";
+import { US_STATES, parseStateTag } from "@/lib/states";
 import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import CourseCertificate from "@/components/CourseCertificate";
 import type { CartCourse, EnrollQuote, CheckoutResult } from "@/lib/enroll";
@@ -44,6 +44,11 @@ function getStripe(pk: string) {
 const stateName = (v: string | null | undefined) => {
   const s = (v || "").trim();
   return US_STATES.find((x) => x.code.toLowerCase() === s.toLowerCase())?.name || s;
+};
+/** Full state name when an LMS state tag names exactly one state ("FL" / "Florida"), else "". */
+const singleStateName = (v: string | null | undefined) => {
+  const parsed = parseStateTag(v);
+  return parsed.states !== "all" && parsed.states.length === 1 ? stateName(parsed.states[0]) : "";
 };
 
 // `?elt=demo` previews the signed-in-link state while the backend's
@@ -549,7 +554,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
   const firstName = (knownName || fullName).trim().split(/\s+/)[0] || "";
   const isLoading = identity === "checking";
   const openSuggestions = suggestions.filter((s) => !added.includes(s.id));
-  const where = lead.stateLabel && /^[A-Z]{2}$/i.test(lead.stateLabel) ? stateName(lead.stateLabel) : "";
+  const where = singleStateName(lead.stateLabel);
   // Admin-authored Marketplace Overview (rich text), scrubbed of anything
   // executable. Empty when the admin hasn't written one.
   const overview = lead.description ? sanitizeHtml(lead.description).trim() : "";
@@ -823,7 +828,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
               <div className="v10-addons">
                 <p className="v10-addons__title">
                   <i className="fas fa-star" aria-hidden="true" />
-                  {where ? `Often added by ${where} workers` : "Often added with this course"}
+                  {where ? `Often added by ${where} workers` : "Popular with other learners"}
                 </p>
                 {(showAllAddOns ? openSuggestions : openSuggestions.slice(0, 1)).map((s) => (
                   <button key={s.id} type="button" className="v10-addon" onClick={() => toggleAddOn(s.id)}>
