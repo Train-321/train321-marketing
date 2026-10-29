@@ -1,6 +1,6 @@
 import { getMarketplaceCatalog, type MarketplaceCourse } from "@/lib/newFeatures";
 import type { CartCourse } from "@/lib/enroll";
-import { parseStateTag } from "@/lib/states";
+import { parseStateTag, STATE_NAMES } from "@/lib/states";
 
 // Courses offered next to the one in the email — the "add to your order"
 // box on /enrollment.
@@ -78,10 +78,19 @@ export async function suggestAddOns(cart: CartCourse[], popularIds: number[] = [
   };
 
   if (stateCode) {
-    // Already sorted state-specific first; compliance courses lead, the rest
-    // fill in behind them.
-    for (const c of courses) if (isCompliance(c)) take(c);
-    for (const c of courses) take(c);
+    // An untagged course whose title leads with another state's code
+    // ("CA Sexual Harassment…") is not a pick for this state, whatever the
+    // LMS tags say.
+    const namedForOtherState = (c: MarketplaceCourse) => {
+      const m = /^([A-Z]{2})\b/.exec(c.name.trim());
+      return Boolean(m && STATE_NAMES[m[1]] && m[1] !== stateCode);
+    };
+    const fits = (c: MarketplaceCourse) => !namedForOtherState(c);
+    // This state's own versions first, then nationwide compliance courses,
+    // then whatever else is sold there.
+    for (const c of courses) if (c.availability.kind === "in" && fits(c)) take(c);
+    for (const c of courses) if (isCompliance(c) && fits(c)) take(c);
+    for (const c of courses) if (fits(c)) take(c);
   } else {
     // Studio's picks in the order the client listed them…
     for (const id of popularIds) {
