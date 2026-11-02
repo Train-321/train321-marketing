@@ -122,12 +122,17 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
   /** Add from the add-ons box — a removed linked course comes back, else an add-on is added. */
   const addLine = (id: number) =>
     isLinked(id) ? setRemoved((r) => r.filter((x) => x !== id)) : toggleAddOn(id);
+  // Newest add-on on top, then the courses the link came with.
   const cart = useMemo(
-    () => [...courses.filter((c) => !removed.includes(c.id)), ...suggestions.filter((s) => added.includes(s.id))],
+    () => [
+      ...[...added].reverse().map((id) => suggestions.find((s) => s.id === id)).filter((s): s is CartCourse => Boolean(s)),
+      ...courses.filter((c) => !removed.includes(c.id))
+    ],
     [courses, suggestions, added, removed]
   );
-  // The course the page is "about" — the first one still in the cart.
-  const lead = cart[0] ?? courses[0];
+  // The course the page is "about" — the first linked course still in the
+  // cart (add-ons on top must not retitle the page), else whatever is left.
+  const lead = cart.find((c) => isLinked(c.id)) ?? cart[0] ?? courses[0];
 
   // ── Identity ──────────────────────────────────────────────────────────
   const [identity, setIdentity] = useState<Identity>(prefillEmail || linkToken ? "checking" : "unknown");
