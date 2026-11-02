@@ -27,14 +27,14 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// ── Homepage = the v5 design, Halloween theme on ─────────────────────────
+// ── Homepage = the v5 design; Halloween theme follows the promo code ─────
 // The homepage — still at "/" — renders the v5 page (no redirect, the URL
-// stays "/") with the Halloween theme forced on and NO date gate: it stays
-// until HOME_V5 is flipped to false, which returns the classic homepage
-// (its render below is untouched). The offer bar inside the theme follows
-// the live HALLOWEEN promo code in the LMS (discount, wording, expiry): a
-// code that is expired or inactive hides the bar while the decor stays.
-// The /v5 route itself is unaffected either way.
+// stays "/"). `forceEvent` lets the Halloween theme + offer bar appear here
+// WITHOUT ?event=halloween, but only while the HALLOWEEN promo code in the
+// LMS is active and not expired (see useHalloween). Deactivate or expire the
+// code in Promo Codes and the homepage is plain v5 again — no deploy needed.
+// Flip HOME_V5 to false to return to the classic homepage (its render below
+// is untouched). The /v5 route itself is unaffected either way.
 const HOME_V5 = true;
 
 export default async function Page() {

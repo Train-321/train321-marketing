@@ -109,20 +109,21 @@ export function useEventPromo(code: string): LivePromo | null | undefined {
 /**
  * True after mount when the event is live.
  *   - ?event=halloween in the URL turns it on until HALLOWEEN.endsAt.
- *   - `forced` (the homepage rendering the event at "/") turns it on with NO
- *     end date: the theme stays until the homepage stops forcing it. The offer
- *     bar still follows the live LMS promo code — see HalloweenBar — so an
- *     expired code is never advertised even while the decor is up.
+ *   - `forced` (the homepage rendering the event at "/") follows the LIVE
+ *     promo code in the LMS: the theme is on only while the HALLOWEEN code is
+ *     active and its "valid until" has not passed. Deactivating or expiring
+ *     the code in Promo Codes switches the homepage back to plain v5 — no
+ *     deploy needed. While the promo is still loading the theme stays off,
+ *     so a plain page never flashes into the theme.
  */
 export function useHalloween(forced = false): boolean {
-  const [on, setOn] = useState(false);
+  const [asked, setAsked] = useState(false);
+  const live = useEventPromo(HALLOWEEN.code);
   useEffect(() => {
-    if (forced) {
-      setOn(true);
-      return;
-    }
-    const asked = new URLSearchParams(window.location.search).get("event") === HALLOWEEN.key;
-    setOn(asked && Date.now() < Date.parse(HALLOWEEN.endsAt));
-  }, [forced]);
-  return on;
+    setAsked(new URLSearchParams(window.location.search).get("event") === HALLOWEEN.key);
+  }, []);
+  if (forced) {
+    return Boolean(live) && Date.now() < (live as LivePromo).endsAt;
+  }
+  return asked && Date.now() < Date.parse(HALLOWEEN.endsAt);
 }
