@@ -107,17 +107,27 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
   const elements = useElements();
   const appBase = (process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com").replace(/\/+$/, "");
   const appLogin = `${appBase}/#/login`;
-  const lead = courses[0];
-
   // ── Cart: the emailed course(s) + any add-ons picked here ─────────────
   const [added, setAdded] = useState<number[]>([]);
+  // Linked courses the buyer took OUT of the cart. They reappear in the
+  // add-ons box so a change of mind is one tap away.
+  const [removed, setRemoved] = useState<number[]>([]);
   // One suggestion at a time; adding it slides the next one up in its place.
   const [showAllAddOns, setShowAllAddOns] = useState(false);
   const toggleAddOn = (id: number) => setAdded((a) => (a.includes(id) ? a.filter((x) => x !== id) : [...a, id]));
+  const isLinked = (id: number) => courses.some((c) => c.id === id);
+  /** Remove any line — a linked course goes to `removed`, an add-on is un-added. */
+  const removeLine = (id: number) =>
+    isLinked(id) ? setRemoved((r) => (r.includes(id) ? r : [...r, id])) : toggleAddOn(id);
+  /** Add from the add-ons box — a removed linked course comes back, else an add-on is added. */
+  const addLine = (id: number) =>
+    isLinked(id) ? setRemoved((r) => r.filter((x) => x !== id)) : toggleAddOn(id);
   const cart = useMemo(
-    () => [...courses, ...suggestions.filter((s) => added.includes(s.id))],
-    [courses, suggestions, added]
+    () => [...courses.filter((c) => !removed.includes(c.id)), ...suggestions.filter((s) => added.includes(s.id))],
+    [courses, suggestions, added, removed]
   );
+  // The course the page is "about" — the first one still in the cart.
+  const lead = cart[0] ?? courses[0];
 
   // ── Identity ──────────────────────────────────────────────────────────
   const [identity, setIdentity] = useState<Identity>(prefillEmail || linkToken ? "checking" : "unknown");
@@ -286,6 +296,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
   const purchase = async (pay: PayWith): Promise<Outcome> => {
     setSubmitError(null);
     const fail = (message: string): Outcome => ({ ok: false, message });
+    if (cart.length === 0) return fail("Add at least one course to continue.");
     if (linkToken && linkToken === DEMO_LINK) return fail("This is a preview link — nothing was charged.");
 
     if (signedInPath) {
@@ -557,7 +568,12 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
   const certName = knownName || fullName.trim() || "Your Name";
   const firstName = (knownName || fullName).trim().split(/\s+/)[0] || "";
   const isLoading = identity === "checking";
-  const openSuggestions = suggestions.filter((s) => !added.includes(s.id));
+  // Removed linked courses lead the add-ons box (one tap brings them back),
+  // then the suggestions not yet added.
+  const openSuggestions = [
+    ...courses.filter((c) => removed.includes(c.id)),
+    ...suggestions.filter((s) => !added.includes(s.id) && !isLinked(s.id))
+  ];
   const where = stateCode ? stateName(stateCode) : singleStateName(lead.stateLabel);
   // Admin-authored Marketplace Overview (rich text), scrubbed of anything
   // executable. Empty when the admin hasn't written one.
@@ -628,22 +644,28 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
 
             {/* Order */}
             <ul className="v10-lines">
-              {cart.map((c, i) => (
-                <li key={c.id} className="v10-line">
+              {cart.map((c) => (
+                <li key={c.id} className="v10-line v10-line--removable">
                   <span className="v10-line__thumb">
                     {c.image ? <img src={c.image} alt="" /> : <i className="fas fa-certificate" aria-hidden="true" />}
                   </span>
                   <span className="v10-line__name">
                     {c.name}
-                    {i >= courses.length ? (
-                      <button type="button" className="v10-line__remove" onClick={() => toggleAddOn(c.id)}>Remove</button>
-                    ) : c.stateLabel ? (
-                      <small>{c.stateLabel}</small>
-                    ) : null}
+                    {c.stateLabel && <small>{c.stateLabel}</small>}
                   </span>
                   <span className="v10-line__price">{money(c.price)}</span>
+                  {/* Every line can be taken out — the empty-cart note below covers "none left". */}
+                  <button type="button" className="v10-line__x" onClick={() => removeLine(c.id)} aria-label={`Remove ${c.name}`} title="Remove">
+                    <i className="fas fa-times" aria-hidden="true" />
+                  </button>
                 </li>
               ))}
+              {cart.length === 0 && (
+                <li className="v10-line v10-line--empty">
+                  <i className="fas fa-shopping-basket" aria-hidden="true" />
+                  <span>Your order is empty. Add a course below to continue.</span>
+                </li>
+              )}
             </ul>
 
             {/* Promo code */}
@@ -835,7 +857,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
                   {suggestionsByState && where ? `Often added by ${where} workers` : "Popular with other learners"}
                 </p>
                 {(showAllAddOns ? openSuggestions : openSuggestions.slice(0, 1)).map((s) => (
-                  <button key={s.id} type="button" className="v10-addon" onClick={() => toggleAddOn(s.id)}>
+                  <button key={s.id} type="button" className="v10-addon" onClick={() => addLine(s.id)}>
                     <span className="v10-addon__thumb">
                       {s.image ? <img src={s.image} alt="" /> : <i className="fas fa-certificate" aria-hidden="true" />}
                     </span>
@@ -855,7 +877,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
               </div>
             )}
 
-            <button ref={payBtnRef} type="submit" className="v10-btn v10-btn--pay" disabled={submitting || isLoading || offer !== null}>
+            <button ref={payBtnRef} type="submit" className="v10-btn v10-btn--pay" disabled={submitting || isLoading || offer !== null || cart.length === 0}>
               {submitting ? (
                 <><span className="v10-spin" aria-hidden="true" /> Processing…</>
               ) : identity === "unknown" ? (
