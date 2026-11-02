@@ -83,7 +83,7 @@ export type QuickBuyProps = {
   linkToken?: string;
   /** Highlights under the certificate; Studio-managed per course, else the built-in four. */
   benefits?: EnrollBenefit[];
-  /** &state= from the link: names the state in the add-on box title even when the lead course isn't state-tagged. */
+  /** &state= from the link: preselects billing state and names state-based add-ons. */
   stateCode?: string | null;
   /** Whether `suggestions` are the state's own courses (titled by state) or the popular list. */
   suggestionsByState?: boolean;
@@ -220,7 +220,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
   const [fullName, setFullName] = useState(prefillName);
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
-  const [bill, setBill] = useState({ address: "", city: "", state: "", zip: "" });
+  const [bill, setBill] = useState({ address: "", city: "", state: stateCode ? stateName(stateCode) : "", zip: "" });
   const [errors, setErrors] = useState<Errors>({});
   const clearErr = (k: string) => setErrors((p) => ({ ...p, [k]: undefined }));
   const [cardComplete, setCardComplete] = useState(false);
