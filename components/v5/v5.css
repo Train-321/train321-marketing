@@ -520,7 +520,8 @@
   height: 560px;
   left: -220px;
   bottom: -260px;
-  background: radial-gradient(closest-side, rgba(246, 183, 60, 0.22), transparent);
+  /* Same cyan family as blob A (was an amber glow — read as a stray colour). */
+  background: radial-gradient(closest-side, rgba(0, 180, 219, 0.16), transparent);
   animation-delay: -11s;
 }
 .v5-hero__grid {
