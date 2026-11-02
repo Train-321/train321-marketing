@@ -34,8 +34,12 @@ const PAGE = 9;
 /** Simple mode: "Show more" reveals this many more cards per click. */
 const MORE = 10;
 
-const SORTS = ["Recommended", "Price: low to high", "Price: high to low", "Name: A to Z"] as const;
-type Sort = (typeof SORTS)[number];
+/** Price order lives in the Price filter; "" keeps the recommended order. */
+type PriceOrder = "" | "asc" | "desc";
+const PRICE_ORDERS: Array<{ key: PriceOrder; label: string; icon: string }> = [
+  { key: "asc", label: "Low to high", icon: "fa-sort-amount-up-alt" },
+  { key: "desc", label: "High to low", icon: "fa-sort-amount-down" }
+];
 
 /** Price chips (simple mode). `test` decides membership; the first is "any". */
 const PRICE_CHIPS: Array<{ label: string; test: (price: number) => boolean }> = [
@@ -56,12 +60,22 @@ const LENGTH_CHIPS: Array<{ label: string; test: (min: number | null) => boolean
   { label: "2+ hours", test: (m) => m !== null && m > 120 }
 ];
 
-function sortCourses(list: MarketplaceCourse[], sort: Sort): MarketplaceCourse[] {
-  if (sort === "Recommended") return list; // FinderContext order: the state's own versions first
+/**
+ * Order the (already filtered) list: a price order when one is picked in the
+ * Price filter, else A–Z when that toggle is on, else the recommended order
+ * from FinderContext (the state's own versions first).
+ */
+function sortCourses(list: MarketplaceCourse[], priceOrder: PriceOrder, az: boolean): MarketplaceCourse[] {
+  if (!priceOrder && !az) return list;
   const out = [...list];
-  if (sort === "Price: low to high") out.sort((a, b) => a.price - b.price);
-  else if (sort === "Price: high to low") out.sort((a, b) => b.price - a.price);
-  else out.sort((a, b) => a.name.localeCompare(b.name));
+  if (priceOrder) {
+    // "Custom" (price 0) courses go last either way — a 0 is not a real
+    // price, it means "ask us".
+    const priced = (c: MarketplaceCourse) => (c.price > 0 ? c.price : priceOrder === "asc" ? Number.POSITIVE_INFINITY : -1);
+    out.sort((a, b) => (priceOrder === "asc" ? priced(a) - priced(b) : priced(b) - priced(a)));
+  } else {
+    out.sort((a, b) => a.name.localeCompare(b.name));
+  }
   return out;
 }
 
@@ -86,7 +100,8 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
   const [showAll, setShowAll] = useState(false);
   const [limit, setLimit] = useState(PAGE);
   const [gridKey, setGridKey] = useState(0);
-  const [sort, setSort] = useState<Sort>("Recommended");
+  const [priceOrder, setPriceOrder] = useState<PriceOrder>("");
+  const [az, setAz] = useState(false);
   // Simple mode: category / price / length pickers live in the state panel as
   // accordions, closed until opened, so nothing clutters the grid.
   const [openAcc, setOpenAcc] = useState<"cats" | "price" | "length" | null>(null);
@@ -101,7 +116,7 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
     setGridKey((k) => k + 1);
     setShowAll(false);
     setLimit(PAGE);
-  }, [stateCode, chip, sort, priceIdx, lengthIdx]);
+  }, [stateCode, chip, priceOrder, az, priceIdx, lengthIdx]);
 
   // Tag on each card (simple mode): the course's marketplace category, else
   // its course group — looked up by name from the same chips the full layout
@@ -124,7 +139,7 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
   const narrowed = simple
     ? results.filter((c) => PRICE_CHIPS[priceIdx].test(c.price) && LENGTH_CHIPS[lengthIdx].test(c.lengthMinutes))
     : results;
-  const ordered = simple ? sortCourses(narrowed, sort) : results;
+  const ordered = simple ? sortCourses(narrowed, priceOrder, az) : results;
   const visible = simple ? ordered.slice(0, limit) : showAll ? ordered : ordered.slice(0, PAGE);
   const specificCount = stateCode ? results.filter((c) => c.availability.kind === "in").length : 0;
   const nationwideCount = results.length - specificCount;
@@ -259,24 +274,46 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
                     >
                       <span className="v5-statepanel__label">Price</span>
                       <span className="v5-statepanel__acc-right">
-                        <span className="v5-statepanel__acc-value">{PRICE_CHIPS[priceIdx].label}</span>
+                        <span className="v5-statepanel__acc-value">
+                          {PRICE_CHIPS[priceIdx].label}
+                          {priceOrder && ` · ${PRICE_ORDERS.find((o) => o.key === priceOrder)?.label.toLowerCase()}`}
+                        </span>
                         <i className="fas fa-chevron-down v5-statepanel__acc-chev" aria-hidden="true" />
                       </span>
                     </button>
                     {openAcc === "price" && (
-                      <div id="v5-price-list" className="v5-statepanel__acc-chips" role="radiogroup" aria-label="Price">
-                        {PRICE_CHIPS.map((p, i) => (
-                          <button
-                            key={p.label}
-                            type="button"
-                            role="radio"
-                            aria-checked={priceIdx === i}
-                            className={`v5-chip${priceIdx === i ? " is-on" : ""}`}
-                            onClick={() => setPriceIdx(i)}
-                          >
-                            {p.label}
-                          </button>
-                        ))}
+                      <div id="v5-price-list" className="v5-statepanel__acc-body">
+                        <div className="v5-statepanel__acc-chips" role="radiogroup" aria-label="Price range">
+                          {PRICE_CHIPS.map((p, i) => (
+                            <button
+                              key={p.label}
+                              type="button"
+                              role="radio"
+                              aria-checked={priceIdx === i}
+                              className={`v5-chip${priceIdx === i ? " is-on" : ""}`}
+                              onClick={() => setPriceIdx(i)}
+                            >
+                              {p.label}
+                            </button>
+                          ))}
+                        </div>
+                        {/* Price ORDER lives here too; tap the active one again to go back
+                            to the recommended order. */}
+                        <div className="v5-statepanel__acc-chips v5-statepanel__acc-chips--order" role="radiogroup" aria-label="Price order">
+                          <span className="v5-statepanel__acc-mini">Order</span>
+                          {PRICE_ORDERS.map((o) => (
+                            <button
+                              key={o.key}
+                              type="button"
+                              role="radio"
+                              aria-checked={priceOrder === o.key}
+                              className={`v5-chip${priceOrder === o.key ? " is-on" : ""}`}
+                              onClick={() => setPriceOrder(priceOrder === o.key ? "" : o.key)}
+                            >
+                              <i className={`fas ${o.icon}`} aria-hidden="true" /> {o.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -321,12 +358,17 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
                     <strong>
                       {results.length} {results.length === 1 ? "course" : "courses"} accepted in {stateName}
                     </strong>
-                    <span>
-                      {specificCount > 0
-                        ? `${specificCount} built for ${stateName}'s own rules, the rest accepted nationwide.`
-                        : `${stateName} accepts our nationwide, ANSI-accredited versions.`}
-                      {(stateSource === "geo" || stateSource === "gps") && " Detected from your location."}
-                    </span>
+                    {/* Simple mode keeps just the count + the split bar; the
+                        sentence and the "detected from your location" note
+                        are only shown in the full (v6) layout. */}
+                    {!simple && (
+                      <span>
+                        {specificCount > 0
+                          ? `${specificCount} built for ${stateName}'s own rules, the rest accepted nationwide.`
+                          : `${stateName} accepts our nationwide, ANSI-accredited versions.`}
+                        {(stateSource === "geo" || stateSource === "gps") && " Detected from your location."}
+                      </span>
+                    )}
                     {simple && results.length > 0 && (
                       <span className="v5-statepanel__split" aria-hidden="true">
                         <span className="v5-statepanel__bar">
@@ -344,7 +386,7 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
                 ) : (
                   <>
                     <strong>Showing all {results.length} courses</strong>
-                    <span>Each card says where it's accepted. Pick a state to narrow the list.</span>
+                    {!simple && <span>Each card says where it's accepted. Pick a state to narrow the list.</span>}
                   </>
                 )}
               </div>
@@ -388,32 +430,21 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
             )}
 
             <div className={`v5-results__head${simple ? " v5-results__head--simple" : ""}`}>
-              {/* Simple mode: no generic "Every course we offer" title — the
-                  heading only appears once a state or category narrows the list. */}
-              {simple && !stateName && activeChip.kind === "all" ? (
-                <span />
-              ) : (
-                <h3 className="v5-h3">
-                  {heading}
-                  {simple && stateName && specificCount > 0 && (
-                    <small className="v5-results__sub">{stateName} versions first, then the nationwide ones.</small>
-                  )}
-                </h3>
-              )}
+              {/* Simple mode: no heading over the grid at all — the panel
+                  summary already says what is listed. The spacer keeps the
+                  A–Z toggle on the right. */}
+              {simple ? <span /> : <h3 className="v5-h3">{heading}</h3>}
               {simple ? (
-                <div className="v5-sort">
-                  <span className="v5-sort__label">
-                    <i className="fas fa-sort-amount-down" aria-hidden="true" /> Sort
-                  </span>
-                  <CustomSelect
-                    value={sort}
-                    options={[...SORTS]}
-                    placeholder="Recommended"
-                    ariaLabel="Sort courses"
-                    onChange={(v) => setSort((SORTS as readonly string[]).includes(v) ? (v as Sort) : "Recommended")}
-                    direction="down"
-                  />
-                </div>
+                // One toggle: A–Z on/off. Price order is in the Price filter.
+                <button
+                  type="button"
+                  className={`v5-sortaz${az ? " is-on" : ""}`}
+                  aria-pressed={az}
+                  title={az ? "Back to recommended order" : "Sort by name, A to Z"}
+                  onClick={() => setAz((v) => !v)}
+                >
+                  <i className="fas fa-sort-alpha-down" aria-hidden="true" /> Sort A–Z
+                </button>
               ) : (
                 <span className="v5-results__count">
                   {stateName && specificCount > 0 && (
