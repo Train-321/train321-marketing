@@ -18,6 +18,8 @@ type Props = {
   stateCode: string | null;
   /** Position in the grid — staggers the entrance animation. */
   index: number;
+  /** Marketplace category name, shown as a small tag above the title (v5 homepage). */
+  category?: string | null;
 };
 
 function badgeFor(course: MarketplaceCourse, stateCode: string | null): { text: string; tone: string; icon: string } {
@@ -32,7 +34,7 @@ function badgeFor(course: MarketplaceCourse, stateCode: string | null): { text: 
   return { text: availabilityShort(a), tone: "limited", icon: "fa-map-marker-alt" };
 }
 
-export default function V5CourseCard({ course, stateCode, index }: Props) {
+export default function V5CourseCard({ course, stateCode, index, category = null }: Props) {
   const { open, activeId, morphId } = useCourseModal();
   const isOpen = activeId === course.id;
   const isMorphSource = morphId === course.id && !isOpen;
@@ -69,6 +71,11 @@ export default function V5CourseCard({ course, stateCode, index }: Props) {
         </span>
       </div>
       <div className="v5-course__body">
+        {category && (
+          <span className="v5-course__cat">
+            <i className="fas fa-tag" aria-hidden="true" /> {category}
+          </span>
+        )}
         <h3 className="v5-course__name">{course.name}</h3>
         {blurb && <p className="v5-course__blurb">{blurb}</p>}
         <div className="v5-course__foot">

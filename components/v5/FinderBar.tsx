@@ -15,7 +15,6 @@ export default function FinderBar({ cta = "Search courses" }: { cta?: string }) 
 
   return (
     <form
-      id="v5-finder"
       className="v5-finderbar"
       role="search"
       aria-label="Find your course"

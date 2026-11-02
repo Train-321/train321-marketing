@@ -65,6 +65,8 @@ export type MarketplaceCourse = {
    * the LMS admin, not a hardcoded list.
    */
   lmsGroupId: string | null;
+  /** Course length in minutes as the LMS admin entered it; null when unset. */
+  lengthMinutes: number | null;
 };
 
 export type MarketplaceCategory = {
@@ -105,6 +107,12 @@ export const COURSE_PLACEHOLDER_IMAGE = "/img/course-placeholder.svg";
  * URL from the API goes through here so no card ever depends on the
  * browser's auto-upgrade behavior.
  */
+/** LMS course `length` (minutes, stored as text) → number, or null when unset/zero. */
+function toMinutes(raw: unknown): number | null {
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
 export function secureImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   return url.replace(/^http:\/\//i, "https://");
@@ -175,6 +183,8 @@ type RawVariant = {
   state_redirect_url?: string | null;
   /** The variant's own marketplace Overview. Older backends omit it. */
   marketplace_description?: string;
+  /** Course length in minutes (LMS stores it as text). */
+  length?: number | string | null;
 };
 
 type RawCourse = {
@@ -192,6 +202,8 @@ type RawCourse = {
   state_codes?: string[];
   state_exclude?: number;
   variants?: RawVariant[];
+  /** Course length in minutes (LMS stores it as text). */
+  length?: number | string | null;
 };
 
 /**
@@ -297,7 +309,8 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
             isSeatBased: Number(v.is_seat_based ?? 0) === 1,
             stateLabel: v.state_label || null,
             availability,
-            lmsGroupId: gid
+            lmsGroupId: gid,
+            lengthMinutes: toMinutes(v.length)
           });
         }
         continue;
@@ -319,7 +332,8 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
         isSeatBased: Number(c.is_seat_based ?? 0) === 1,
         stateLabel: c.state_label || null,
         availability,
-        lmsGroupId: null
+        lmsGroupId: null,
+        lengthMinutes: toMinutes(c.length)
       });
     }
 

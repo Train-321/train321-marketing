@@ -1,15 +1,24 @@
 "use client";
 
 // The course finder proper. Desktop: a sticky state panel (interactive map,
-// searchable select, popular-state chips) beside category tabs and the
-// results grid. Everything filters in memory via FinderContext, so the grid
-// re-sorts instantly and the cards re-run their entrance animation.
+// searchable select, popular-state chips) beside the results grid. Everything
+// filters in memory via FinderContext, so the grid re-sorts instantly and the
+// cards re-run their entrance animation.
+//
+// `simple` (the v5 homepage, after client feedback): same state panel — it
+// shares one selection with the hero finder bar, so a state picked up top is
+// highlighted here too — but no category tiles over the grid (the category
+// shows as a small tag on each card instead), a sort dropdown in the results
+// header, no "Show all" button (the catalog link covers that), and a summary
+// bar of state-version vs nationwide counts in the panel. v6 keeps the full
+// layout: category tiles, "Show all", no sort.
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomSelect from "@/components/CustomSelect";
 import { CourseModalProvider } from "@/components/CourseModal";
+import type { MarketplaceCourse } from "@/lib/newFeatures";
 import { STATE_CODES_BY_NAME, STATE_NAMES, US_STATES } from "@/lib/states";
 import { POPULAR_STATES } from "./industries";
 import { EXPLORER_ID, useFinderV5 } from "./FinderContext";
@@ -22,18 +31,40 @@ const UsMap = dynamic(() => import("./UsMap"), {
 });
 
 const PAGE = 9;
+/** Simple mode: "Show more" reveals this many more cards per click. */
+const MORE = 10;
 
-/** The hero's finder bar — "Pick your state" below scrolls back up to it. */
-export const FINDER_ID = "v5-finder";
+const SORTS = ["Recommended", "Price: low to high", "Price: high to low", "Name: A to Z"] as const;
+type Sort = (typeof SORTS)[number];
 
-/**
- * `simple` (the v5 homepage): the state is picked ONCE, in the hero finder
- * bar. This section drops its own state panel (map, select, popular chips)
- * and the category tiles; over the grid sits a card with a course search on
- * the left and a "Pick your state" button on the right that scrolls back to
- * the hero. The picked state shows in the results heading. v6 keeps the
- * full layout.
- */
+/** Price chips (simple mode). `test` decides membership; the first is "any". */
+const PRICE_CHIPS: Array<{ label: string; test: (price: number) => boolean }> = [
+  { label: "Any price", test: () => true },
+  { label: "Under $10", test: (p) => p > 0 && p < 10 },
+  { label: "$10 – $25", test: (p) => p >= 10 && p <= 25 },
+  { label: "$25 – $50", test: (p) => p > 25 && p <= 50 },
+  { label: "$50+", test: (p) => p > 50 }
+];
+
+/** Course-length chips (minutes, as the LMS admin entered them). */
+const LENGTH_CHIPS: Array<{ label: string; test: (min: number | null) => boolean }> = [
+  { label: "Any length", test: () => true },
+  { label: "Under 15 min", test: (m) => m !== null && m < 15 },
+  { label: "15 – 30 min", test: (m) => m !== null && m >= 15 && m <= 30 },
+  { label: "30 – 60 min", test: (m) => m !== null && m > 30 && m <= 60 },
+  { label: "1 – 2 hours", test: (m) => m !== null && m > 60 && m <= 120 },
+  { label: "2+ hours", test: (m) => m !== null && m > 120 }
+];
+
+function sortCourses(list: MarketplaceCourse[], sort: Sort): MarketplaceCourse[] {
+  if (sort === "Recommended") return list; // FinderContext order: the state's own versions first
+  const out = [...list];
+  if (sort === "Price: low to high") out.sort((a, b) => a.price - b.price);
+  else if (sort === "Price: high to low") out.sort((a, b) => b.price - a.price);
+  else out.sort((a, b) => a.name.localeCompare(b.name));
+  return out;
+}
+
 export default function CourseExplorer({ simple = false }: { simple?: boolean } = {}) {
   const {
     stateCode,
@@ -53,25 +84,50 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
     stateSource
   } = useFinderV5();
   const [showAll, setShowAll] = useState(false);
+  const [limit, setLimit] = useState(PAGE);
   const [gridKey, setGridKey] = useState(0);
-  // Simple mode's free-text search: narrows the (state-filtered) results by
-  // course name or state label, in memory like everything else here.
-  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<Sort>("Recommended");
+  // Simple mode: category / price / length pickers live in the state panel as
+  // accordions, closed until opened, so nothing clutters the grid.
+  const [openAcc, setOpenAcc] = useState<"cats" | "price" | "length" | null>(null);
+  const [priceIdx, setPriceIdx] = useState(0);
+  const [lengthIdx, setLengthIdx] = useState(0);
+  const toggleAcc = (k: "cats" | "price" | "length") => setOpenAcc((cur) => (cur === k ? null : k));
 
   // Re-key the grid when the selection changes so the cards replay their
   // staggered entrance — the "live" feel of a filter that actually did
-  // something. Also collapse "show all" back to the first page.
+  // something. Also collapse "show all" / "show more" back to the first page.
   useEffect(() => {
     setGridKey((k) => k + 1);
     setShowAll(false);
-  }, [stateCode, chip, query]);
+    setLimit(PAGE);
+  }, [stateCode, chip, sort, priceIdx, lengthIdx]);
 
-  const q = query.trim().toLowerCase();
-  const shown = q
-    ? results.filter((c) => c.name.toLowerCase().includes(q) || (c.stateLabel || "").toLowerCase().includes(q))
+  // Tag on each card (simple mode): the course's marketplace category, else
+  // its course group — looked up by name from the same chips the full layout
+  // shows as tiles.
+  const tagFor = useMemo(() => {
+    const cats: Record<number, string> = {};
+    const groups: Record<string, string> = {};
+    for (const c of chips) {
+      if (c.kind === "category") cats[Number(c.id.slice(4))] = c.label;
+      else if (c.kind === "group") groups[c.id.slice(6)] = c.label;
+    }
+    return (course: MarketplaceCourse): string | null =>
+      (course.categoryId != null ? cats[course.categoryId] : undefined) ??
+      (course.lmsGroupId ? groups[course.lmsGroupId] : undefined) ??
+      null;
+  }, [chips]);
+
+  // Simple mode narrows further by price / length (both "any" by default, so
+  // the list equals the context results until a chip is picked).
+  const narrowed = simple
+    ? results.filter((c) => PRICE_CHIPS[priceIdx].test(c.price) && LENGTH_CHIPS[lengthIdx].test(c.lengthMinutes))
     : results;
-  const visible = showAll ? shown : shown.slice(0, PAGE);
-  const specificCount = stateCode ? shown.filter((c) => c.availability.kind === "in").length : 0;
+  const ordered = simple ? sortCourses(narrowed, sort) : results;
+  const visible = simple ? ordered.slice(0, limit) : showAll ? ordered : ordered.slice(0, PAGE);
+  const specificCount = stateCode ? results.filter((c) => c.availability.kind === "in").length : 0;
+  const nationwideCount = results.length - specificCount;
 
   const catalogHref = (() => {
     const q = new URLSearchParams();
@@ -88,16 +144,6 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
     return activeChip.kind === "all" ? "Every course we offer" : `All ${activeChip.label} courses`;
   })();
 
-  // Back to the one place the state is picked (the hero finder bar).
-  const goToFinder = () => {
-    const el = document.getElementById(FINDER_ID);
-    if (!el) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
-    const first = el.querySelector<HTMLElement>("button, [tabindex]");
-    first?.focus({ preventScroll: true });
-  };
-
   return (
     <section className="v5-section v5-explorer" id={EXPLORER_ID} aria-labelledby="v5-explorer-title">
       <div className="v5-container">
@@ -106,60 +152,15 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
             <i className="fas fa-search-location" aria-hidden="true" /> Course finder
           </p>
           <h2 id="v5-explorer-title" className="v5-h2">
-            {simple ? (
-              <>
-                Only what's accepted <em>where you work.</em>
-              </>
-            ) : (
-              <>
-                Pick your state. <em>We only show what's accepted there.</em>
-              </>
-            )}
+            Pick your state. <em>We only show what's accepted there.</em>
           </h2>
           <p className="v5-lede">
-            {simple
-              ? "Requirements change at the state line. The list below shows the courses your health department and liquor authority recognize."
-              : "Requirements change at the state line. Choose where you work and the list below narrows to the courses your health department and liquor authority recognize."}
+            Requirements change at the state line. Choose where you work and the list below narrows to
+            the courses your health department and liquor authority recognize.
           </p>
         </Reveal>
 
-        <div className={`v5-explorer__layout${simple ? " v5-explorer__layout--single" : ""}`}>
-          {simple && (
-            <Reveal className="v5-explorer__bar" index={1}>
-              <div className="v5-explorer__bar-row">
-                <label className="v5-explorer__searchbox">
-                  <i className="fas fa-search" aria-hidden="true" />
-                  <input
-                    type="search"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search courses…"
-                    aria-label="Search courses"
-                    autoComplete="off"
-                  />
-                  {query && (
-                    <button type="button" className="v5-explorer__searchclear" aria-label="Clear search" onClick={() => setQuery("")}>
-                      <i className="fas fa-times" aria-hidden="true" />
-                    </button>
-                  )}
-                </label>
-                {/* The state itself is picked once, in the hero finder — this
-                    just takes the visitor back up to it. */}
-                <button type="button" className="v5-btn v5-btn--ghost v5-explorer__statebtn" onClick={goToFinder}>
-                  <i className="fas fa-map-marker-alt" aria-hidden="true" />
-                  {stateName ? (
-                    <>
-                      {stateName} <span className="v5-explorer__statebtn-change">· change</span>
-                    </>
-                  ) : (
-                    "Pick your state"
-                  )}
-                </button>
-              </div>
-            </Reveal>
-          )}
-
-          {!simple && (
+        <div className="v5-explorer__layout">
           <Reveal className="v5-explorer__side" index={1}>
             <div className="v5-statepanel">
               <div className="v5-statepanel__map">
@@ -213,6 +214,107 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
                 </div>
               </div>
 
+              {simple && (
+                <>
+                  <div className={`v5-statepanel__acc${openAcc === "cats" ? " is-open" : ""}`}>
+                    <button
+                      type="button"
+                      className="v5-statepanel__acc-head"
+                      aria-expanded={openAcc === "cats"}
+                      aria-controls="v5-cat-list"
+                      onClick={() => toggleAcc("cats")}
+                    >
+                      <span className="v5-statepanel__label">Course category</span>
+                      <span className="v5-statepanel__acc-right">
+                        <span className="v5-statepanel__acc-value">{activeChip.label}</span>
+                        <i className="fas fa-chevron-down v5-statepanel__acc-chev" aria-hidden="true" />
+                      </span>
+                    </button>
+                    {openAcc === "cats" && (
+                      <div id="v5-cat-list" className="v5-statepanel__acc-chips" role="radiogroup" aria-label="Course category">
+                        {chips.map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            role="radio"
+                            aria-checked={chip === c.id}
+                            className={`v5-chip${chip === c.id ? " is-on" : ""}`}
+                            onClick={() => setChip(c.id)}
+                            title={`${chipCounts[c.id] ?? 0} ${(chipCounts[c.id] ?? 0) === 1 ? "course" : "courses"}`}
+                          >
+                            {c.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={`v5-statepanel__acc${openAcc === "price" ? " is-open" : ""}`}>
+                    <button
+                      type="button"
+                      className="v5-statepanel__acc-head"
+                      aria-expanded={openAcc === "price"}
+                      aria-controls="v5-price-list"
+                      onClick={() => toggleAcc("price")}
+                    >
+                      <span className="v5-statepanel__label">Price</span>
+                      <span className="v5-statepanel__acc-right">
+                        <span className="v5-statepanel__acc-value">{PRICE_CHIPS[priceIdx].label}</span>
+                        <i className="fas fa-chevron-down v5-statepanel__acc-chev" aria-hidden="true" />
+                      </span>
+                    </button>
+                    {openAcc === "price" && (
+                      <div id="v5-price-list" className="v5-statepanel__acc-chips" role="radiogroup" aria-label="Price">
+                        {PRICE_CHIPS.map((p, i) => (
+                          <button
+                            key={p.label}
+                            type="button"
+                            role="radio"
+                            aria-checked={priceIdx === i}
+                            className={`v5-chip${priceIdx === i ? " is-on" : ""}`}
+                            onClick={() => setPriceIdx(i)}
+                          >
+                            {p.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={`v5-statepanel__acc${openAcc === "length" ? " is-open" : ""}`}>
+                    <button
+                      type="button"
+                      className="v5-statepanel__acc-head"
+                      aria-expanded={openAcc === "length"}
+                      aria-controls="v5-length-list"
+                      onClick={() => toggleAcc("length")}
+                    >
+                      <span className="v5-statepanel__label">Course length</span>
+                      <span className="v5-statepanel__acc-right">
+                        <span className="v5-statepanel__acc-value">{LENGTH_CHIPS[lengthIdx].label}</span>
+                        <i className="fas fa-chevron-down v5-statepanel__acc-chev" aria-hidden="true" />
+                      </span>
+                    </button>
+                    {openAcc === "length" && (
+                      <div id="v5-length-list" className="v5-statepanel__acc-chips" role="radiogroup" aria-label="Course length">
+                        {LENGTH_CHIPS.map((l, i) => (
+                          <button
+                            key={l.label}
+                            type="button"
+                            role="radio"
+                            aria-checked={lengthIdx === i}
+                            className={`v5-chip${lengthIdx === i ? " is-on" : ""}`}
+                            onClick={() => setLengthIdx(i)}
+                          >
+                            {l.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
               <div className="v5-statepanel__summary" aria-live="polite">
                 {stateName ? (
                   <>
@@ -225,6 +327,19 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
                         : `${stateName} accepts our nationwide, ANSI-accredited versions.`}
                       {(stateSource === "geo" || stateSource === "gps") && " Detected from your location."}
                     </span>
+                    {simple && results.length > 0 && (
+                      <span className="v5-statepanel__split" aria-hidden="true">
+                        <span className="v5-statepanel__bar">
+                          <i style={{ width: `${Math.round((specificCount / results.length) * 100)}%` }} />
+                        </span>
+                        <small>
+                          <span className="v5-statepanel__dot v5-statepanel__dot--specific" />
+                          {specificCount} {stateName} {specificCount === 1 ? "version" : "versions"}
+                          <span className="v5-statepanel__dot v5-statepanel__dot--all" />
+                          {nationwideCount} nationwide
+                        </small>
+                      </span>
+                    )}
                   </>
                 ) : (
                   <>
@@ -235,47 +350,71 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
               </div>
             </div>
           </Reveal>
-          )}
 
           <div className="v5-explorer__main">
             {!simple && (
-            <div className="v5-cats" role="tablist" aria-label="Course type">
-              {chips.map((c) => {
-                const n = chipCounts[c.id] ?? 0;
-                const meta = [
-                  `${n} ${n === 1 ? "course" : "courses"}`,
-                  c.priceFrom > 0 ? `from $${c.priceFrom}` : null
-                ]
-                  .filter(Boolean)
-                  .join(" · ");
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={chip === c.id}
-                    className={`v5-cat${chip === c.id ? " is-on" : ""}`}
-                    onClick={() => setChip(c.id)}
-                  >
-                    <span className="v5-cat__icon" aria-hidden="true">
-                      <i className={`fas ${c.icon}`} />
-                    </span>
-                    <span className="v5-cat__text">
-                      <span className="v5-cat__name">{c.label}</span>
-                      <span className="v5-cat__meta">{meta}</span>
-                    </span>
-                    <span className="v5-cat__check" aria-hidden="true">
-                      <i className="fas fa-check" />
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+              <div className="v5-cats" role="tablist" aria-label="Course type">
+                {chips.map((c) => {
+                  const n = chipCounts[c.id] ?? 0;
+                  const meta = [
+                    `${n} ${n === 1 ? "course" : "courses"}`,
+                    c.priceFrom > 0 ? `from $${c.priceFrom}` : null
+                  ]
+                    .filter(Boolean)
+                    .join(" · ");
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={chip === c.id}
+                      className={`v5-cat${chip === c.id ? " is-on" : ""}`}
+                      onClick={() => setChip(c.id)}
+                    >
+                      <span className="v5-cat__icon" aria-hidden="true">
+                        <i className={`fas ${c.icon}`} />
+                      </span>
+                      <span className="v5-cat__text">
+                        <span className="v5-cat__name">{c.label}</span>
+                        <span className="v5-cat__meta">{meta}</span>
+                      </span>
+                      <span className="v5-cat__check" aria-hidden="true">
+                        <i className="fas fa-check" />
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             )}
 
-            <div className="v5-results__head">
-              <h3 className="v5-h3">{heading}</h3>
-              {!simple && (
+            <div className={`v5-results__head${simple ? " v5-results__head--simple" : ""}`}>
+              {/* Simple mode: no generic "Every course we offer" title — the
+                  heading only appears once a state or category narrows the list. */}
+              {simple && !stateName && activeChip.kind === "all" ? (
+                <span />
+              ) : (
+                <h3 className="v5-h3">
+                  {heading}
+                  {simple && stateName && specificCount > 0 && (
+                    <small className="v5-results__sub">{stateName} versions first, then the nationwide ones.</small>
+                  )}
+                </h3>
+              )}
+              {simple ? (
+                <div className="v5-sort">
+                  <span className="v5-sort__label">
+                    <i className="fas fa-sort-amount-down" aria-hidden="true" /> Sort
+                  </span>
+                  <CustomSelect
+                    value={sort}
+                    options={[...SORTS]}
+                    placeholder="Recommended"
+                    ariaLabel="Sort courses"
+                    onChange={(v) => setSort((SORTS as readonly string[]).includes(v) ? (v as Sort) : "Recommended")}
+                    direction="down"
+                  />
+                </div>
+              ) : (
                 <span className="v5-results__count">
                   {stateName && specificCount > 0 && (
                     <>
@@ -287,10 +426,16 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
             </div>
 
             <CourseModalProvider>
-              {shown.length ? (
+              {ordered.length ? (
                 <div className="v5-results" key={gridKey}>
                   {visible.map((c, i) => (
-                    <V5CourseCard key={c.id} course={c} stateCode={stateCode} index={i} />
+                    <V5CourseCard
+                      key={c.id}
+                      course={c}
+                      stateCode={stateCode}
+                      index={i}
+                      category={simple ? tagFor(c) : null}
+                    />
                   ))}
                 </div>
               ) : (
@@ -298,29 +443,48 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
                   <i className="fas fa-map-signs" aria-hidden="true" />
                   <strong>Nothing matches that combination yet.</strong>
                   <span>
-                    {q ? "Try a different search, or clear it to see every course." : "Try another course type, or clear the state to see every version."}
+                    {simple && (priceIdx || lengthIdx)
+                      ? "Try a different price or length, or clear those filters."
+                      : "Try another course type, or clear the state to see every version."}
                   </span>
                   <button
                     type="button"
                     className="v5-btn v5-btn--ghost"
-                    onClick={() => (q ? setQuery("") : setChip("all"))}
+                    onClick={() => {
+                      if (simple && (priceIdx || lengthIdx)) {
+                        setPriceIdx(0);
+                        setLengthIdx(0);
+                      } else setChip("all");
+                    }}
                   >
-                    {q ? "Clear search" : "Show all course types"}
+                    {simple && (priceIdx || lengthIdx) ? "Clear price & length" : "Show all course types"}
                   </button>
                 </div>
               )}
             </CourseModalProvider>
 
-            <div className="v5-results__foot">
-              {shown.length > PAGE && !showAll && (
-                <button type="button" className="v5-btn v5-btn--ghost" onClick={() => setShowAll(true)}>
-                  Show all {shown.length} courses <i className="fas fa-chevron-down" aria-hidden="true" />
-                </button>
-              )}
-              <Link href={catalogHref} className="v5-link v5-link--arrow">
-                Open the full catalog <i className="fas fa-arrow-right" aria-hidden="true" />
-              </Link>
-            </div>
+            {simple ? (
+              // Simple mode: no catalog link — "Show more" reveals MORE cards
+              // per click until the list is complete.
+              <div className="v5-results__foot">
+                {ordered.length > limit && (
+                  <button type="button" className="v5-btn v5-btn--ghost" onClick={() => setLimit((n) => n + MORE)}>
+                    Show more <i className="fas fa-chevron-down" aria-hidden="true" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="v5-results__foot">
+                {ordered.length > PAGE && !showAll && (
+                  <button type="button" className="v5-btn v5-btn--ghost" onClick={() => setShowAll(true)}>
+                    Show all {ordered.length} courses <i className="fas fa-chevron-down" aria-hidden="true" />
+                  </button>
+                )}
+                <Link href={catalogHref} className="v5-link v5-link--arrow">
+                  Open the full catalog <i className="fas fa-arrow-right" aria-hidden="true" />
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
