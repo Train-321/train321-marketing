@@ -27,19 +27,16 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// ── TEMPORARY: Halloween promo takeover ──────────────────────────────────
-// While the promo is live, the homepage — still at "/" — renders the v5 event
-// page with the Halloween bar + decor + 20% off forced on (no redirect, the
-// URL stays "/"). It auto-reverts to the normal homepage after the offer ends,
-// so it needs no cleanup; to turn it off sooner, delete this constant and the
-// `if (promoLive)` block below. The end date mirrors HALLOWEEN.endsAt in
-// components/v5/halloween/event.ts.
-const HALLOWEEN_HOME_ENDS = Date.parse("2026-11-01T03:59:59Z");
+// ── Homepage = the v5 design ─────────────────────────────────────────────
+// The homepage — still at "/" — renders the v5 page (no redirect, the URL
+// stays "/"), with no date gate. The Halloween takeover that used to sit here
+// (Oct 27–31, 2026) ended on its own; this keeps the v5 look on permanently.
+// To go back to the classic homepage, flip HOME_V5 to false — the classic
+// render below is untouched. The /v5 route itself is unaffected either way.
+const HOME_V5 = true;
 
 export default async function Page() {
-  const promoLive = Date.now() < HALLOWEEN_HOME_ENDS;
-
-  if (promoLive) {
+  if (HOME_V5) {
     const [courses, testimonials, faqs, settings, home, catalog] = await Promise.all([
       getCourses(),
       getTestimonials(),
@@ -50,23 +47,26 @@ export default async function Page() {
       getMarketplaceCatalog({ perPage: 500, keepVariants: true })
     ]);
     return (
-      <HomeV5
-        courses={courses}
-        testimonials={testimonials}
-        faqs={faqs}
-        companyStats={settings.companyStats || []}
-        trustLogos={settings.trustLogos || []}
-        home={home}
-        marketplace={{
-          courses: catalog.courses,
-          groups: catalog.groups,
-          categories: catalog.categories,
-          total: catalog.total
-        }}
-        phone={settings.phone || "561-325-7300"}
-        email={settings.email || "info@train321.com"}
-        forceEvent
-      />
+      <>
+        {/* WebSite node lives on the home page only; Organization is in the layout. */}
+        <JsonLd data={WEBSITE_LD} />
+        <HomeV5
+          courses={courses}
+          testimonials={testimonials}
+          faqs={faqs}
+          companyStats={settings.companyStats || []}
+          trustLogos={settings.trustLogos || []}
+          home={home}
+          marketplace={{
+            courses: catalog.courses,
+            groups: catalog.groups,
+            categories: catalog.categories,
+            total: catalog.total
+          }}
+          phone={settings.phone || "561-325-7300"}
+          email={settings.email || "info@train321.com"}
+        />
+      </>
     );
   }
 
