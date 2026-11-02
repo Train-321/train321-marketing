@@ -97,7 +97,8 @@ export default function HomeV5({
         />
         <TrustStrip logos={trustLogos} label={studio?.trustLabel} />
         <PillarsV5 head={home?.pillarsHead} pillars={home?.pillars} />
-        <CourseExplorer />
+        {/* State and course type are picked once, in the hero finder bar. */}
+        <CourseExplorer simple />
         <PopularRail courses={courses} slugs={popularSlugs} head={home?.popularHead} />
         <StatsBand stats={companyStats} />
         <RolesMarquee />

@@ -61,7 +61,7 @@ export default function FinalCta({
                 searchable
                 clearable
                 searchPlaceholder="Type a state…"
-                onChange={(name) => setStateCode(STATE_CODES_BY_NAME[name] || null)}
+                onChange={(name) => setStateCode(STATE_CODES_BY_NAME[name.toLowerCase()] || null)}
                 onClear={() => setStateCode(null)}
                 action={{
                   label: detecting ? "Finding your state…" : "Use my location",

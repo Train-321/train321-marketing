@@ -15,6 +15,7 @@ export default function FinderBar({ cta = "Search courses" }: { cta?: string }) 
 
   return (
     <form
+      id="v5-finder"
       className="v5-finderbar"
       role="search"
       aria-label="Find your course"
@@ -35,7 +36,7 @@ export default function FinderBar({ cta = "Search courses" }: { cta?: string }) 
           searchable
           clearable
           searchPlaceholder="Type a state…"
-          onChange={(name) => setStateCode(STATE_CODES_BY_NAME[name] || null)}
+          onChange={(name) => setStateCode(STATE_CODES_BY_NAME[name.toLowerCase()] || null)}
           onClear={() => setStateCode(null)}
           action={{
             label: detecting ? "Finding your state…" : "Use my location",

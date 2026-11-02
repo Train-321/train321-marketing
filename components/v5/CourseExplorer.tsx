@@ -23,7 +23,18 @@ const UsMap = dynamic(() => import("./UsMap"), {
 
 const PAGE = 9;
 
-export default function CourseExplorer() {
+/** The hero's finder bar — "Pick your state" below scrolls back up to it. */
+export const FINDER_ID = "v5-finder";
+
+/**
+ * `simple` (the v5 homepage): the state is picked ONCE, in the hero finder
+ * bar. This section drops its own state panel (map, select, popular chips)
+ * and the category tiles; over the grid sits a card with a course search on
+ * the left and a "Pick your state" button on the right that scrolls back to
+ * the hero. The picked state shows in the results heading. v6 keeps the
+ * full layout.
+ */
+export default function CourseExplorer({ simple = false }: { simple?: boolean } = {}) {
   const {
     stateCode,
     stateName,
@@ -43,6 +54,9 @@ export default function CourseExplorer() {
   } = useFinderV5();
   const [showAll, setShowAll] = useState(false);
   const [gridKey, setGridKey] = useState(0);
+  // Simple mode's free-text search: narrows the (state-filtered) results by
+  // course name or state label, in memory like everything else here.
+  const [query, setQuery] = useState("");
 
   // Re-key the grid when the selection changes so the cards replay their
   // staggered entrance — the "live" feel of a filter that actually did
@@ -50,10 +64,14 @@ export default function CourseExplorer() {
   useEffect(() => {
     setGridKey((k) => k + 1);
     setShowAll(false);
-  }, [stateCode, chip]);
+  }, [stateCode, chip, query]);
 
-  const visible = showAll ? results : results.slice(0, PAGE);
-  const specificCount = stateCode ? results.filter((c) => c.availability.kind === "in").length : 0;
+  const q = query.trim().toLowerCase();
+  const shown = q
+    ? results.filter((c) => c.name.toLowerCase().includes(q) || (c.stateLabel || "").toLowerCase().includes(q))
+    : results;
+  const visible = showAll ? shown : shown.slice(0, PAGE);
+  const specificCount = stateCode ? shown.filter((c) => c.availability.kind === "in").length : 0;
 
   const catalogHref = (() => {
     const q = new URLSearchParams();
@@ -70,6 +88,16 @@ export default function CourseExplorer() {
     return activeChip.kind === "all" ? "Every course we offer" : `All ${activeChip.label} courses`;
   })();
 
+  // Back to the one place the state is picked (the hero finder bar).
+  const goToFinder = () => {
+    const el = document.getElementById(FINDER_ID);
+    if (!el) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
+    const first = el.querySelector<HTMLElement>("button, [tabindex]");
+    first?.focus({ preventScroll: true });
+  };
+
   return (
     <section className="v5-section v5-explorer" id={EXPLORER_ID} aria-labelledby="v5-explorer-title">
       <div className="v5-container">
@@ -78,15 +106,60 @@ export default function CourseExplorer() {
             <i className="fas fa-search-location" aria-hidden="true" /> Course finder
           </p>
           <h2 id="v5-explorer-title" className="v5-h2">
-            Pick your state. <em>We only show what's accepted there.</em>
+            {simple ? (
+              <>
+                Only what's accepted <em>where you work.</em>
+              </>
+            ) : (
+              <>
+                Pick your state. <em>We only show what's accepted there.</em>
+              </>
+            )}
           </h2>
           <p className="v5-lede">
-            Requirements change at the state line. Choose where you work and the list below narrows to
-            the courses your health department and liquor authority recognize.
+            {simple
+              ? "Requirements change at the state line. The list below shows the courses your health department and liquor authority recognize."
+              : "Requirements change at the state line. Choose where you work and the list below narrows to the courses your health department and liquor authority recognize."}
           </p>
         </Reveal>
 
-        <div className="v5-explorer__layout">
+        <div className={`v5-explorer__layout${simple ? " v5-explorer__layout--single" : ""}`}>
+          {simple && (
+            <Reveal className="v5-explorer__bar" index={1}>
+              <div className="v5-explorer__bar-row">
+                <label className="v5-explorer__searchbox">
+                  <i className="fas fa-search" aria-hidden="true" />
+                  <input
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search courses…"
+                    aria-label="Search courses"
+                    autoComplete="off"
+                  />
+                  {query && (
+                    <button type="button" className="v5-explorer__searchclear" aria-label="Clear search" onClick={() => setQuery("")}>
+                      <i className="fas fa-times" aria-hidden="true" />
+                    </button>
+                  )}
+                </label>
+                {/* The state itself is picked once, in the hero finder — this
+                    just takes the visitor back up to it. */}
+                <button type="button" className="v5-btn v5-btn--ghost v5-explorer__statebtn" onClick={goToFinder}>
+                  <i className="fas fa-map-marker-alt" aria-hidden="true" />
+                  {stateName ? (
+                    <>
+                      {stateName} <span className="v5-explorer__statebtn-change">· change</span>
+                    </>
+                  ) : (
+                    "Pick your state"
+                  )}
+                </button>
+              </div>
+            </Reveal>
+          )}
+
+          {!simple && (
           <Reveal className="v5-explorer__side" index={1}>
             <div className="v5-statepanel">
               <div className="v5-statepanel__map">
@@ -115,7 +188,7 @@ export default function CourseExplorer() {
                     searchable
                     clearable
                     searchPlaceholder="Type a state…"
-                    onChange={(name) => setStateCode(STATE_CODES_BY_NAME[name] || null)}
+                    onChange={(name) => setStateCode(STATE_CODES_BY_NAME[name.toLowerCase()] || null)}
                     onClear={() => setStateCode(null)}
                     action={{
                       label: detecting ? "Finding your state…" : "Use my location",
@@ -162,8 +235,10 @@ export default function CourseExplorer() {
               </div>
             </div>
           </Reveal>
+          )}
 
           <div className="v5-explorer__main">
+            {!simple && (
             <div className="v5-cats" role="tablist" aria-label="Course type">
               {chips.map((c) => {
                 const n = chipCounts[c.id] ?? 0;
@@ -196,20 +271,23 @@ export default function CourseExplorer() {
                 );
               })}
             </div>
+            )}
 
             <div className="v5-results__head">
               <h3 className="v5-h3">{heading}</h3>
-              <span className="v5-results__count">
-                {stateName && specificCount > 0 && (
-                  <>
-                    <i className="fas fa-sort-amount-down" aria-hidden="true" /> {stateName} versions first
-                  </>
-                )}
-              </span>
+              {!simple && (
+                <span className="v5-results__count">
+                  {stateName && specificCount > 0 && (
+                    <>
+                      <i className="fas fa-sort-amount-down" aria-hidden="true" /> {stateName} versions first
+                    </>
+                  )}
+                </span>
+              )}
             </div>
 
             <CourseModalProvider>
-              {results.length ? (
+              {shown.length ? (
                 <div className="v5-results" key={gridKey}>
                   {visible.map((c, i) => (
                     <V5CourseCard key={c.id} course={c} stateCode={stateCode} index={i} />
@@ -219,18 +297,24 @@ export default function CourseExplorer() {
                 <div className="v5-results__empty">
                   <i className="fas fa-map-signs" aria-hidden="true" />
                   <strong>Nothing matches that combination yet.</strong>
-                  <span>Try another course type, or clear the state to see every version.</span>
-                  <button type="button" className="v5-btn v5-btn--ghost" onClick={() => setChip("all")}>
-                    Show all course types
+                  <span>
+                    {q ? "Try a different search, or clear it to see every course." : "Try another course type, or clear the state to see every version."}
+                  </span>
+                  <button
+                    type="button"
+                    className="v5-btn v5-btn--ghost"
+                    onClick={() => (q ? setQuery("") : setChip("all"))}
+                  >
+                    {q ? "Clear search" : "Show all course types"}
                   </button>
                 </div>
               )}
             </CourseModalProvider>
 
             <div className="v5-results__foot">
-              {results.length > PAGE && !showAll && (
+              {shown.length > PAGE && !showAll && (
                 <button type="button" className="v5-btn v5-btn--ghost" onClick={() => setShowAll(true)}>
-                  Show all {results.length} courses <i className="fas fa-chevron-down" aria-hidden="true" />
+                  Show all {shown.length} courses <i className="fas fa-chevron-down" aria-hidden="true" />
                 </button>
               )}
               <Link href={catalogHref} className="v5-link v5-link--arrow">

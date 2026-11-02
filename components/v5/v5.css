@@ -1127,6 +1127,112 @@
   font-size: 0.95rem;
 }
 
+/* Simple explorer (v5 homepage): no side panel — one column with a white
+   card over the grid: course search on the left, "Pick your state" on the
+   right (scrolls back to the hero finder). */
+.v5-explorer__layout.v5-explorer__layout--single {
+  /* Doubled selector so the breakpoint rules for the two-column layout below
+     can't bring the side column back. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+}
+/* No card: just the two controls side by side. */
+.v5-explorer__bar {
+  position: relative;
+  z-index: 5;
+}
+.v5-explorer__bar:focus-within {
+  z-index: 30;
+}
+.v5-explorer__layout--single .v5-explorer__main {
+  margin-top: -0.25rem;
+}
+.v5-explorer__bar-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.9rem;
+}
+.v5-explorer__statebtn {
+  min-height: 40px;
+  padding: 0 0.95rem;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  background: transparent;
+  box-shadow: none;
+}
+.v5-explorer__statebtn-change {
+  font-weight: 500;
+  color: var(--v5-muted-2);
+}
+.v5-explorer__searchbox {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 1 360px;
+  min-width: 0;
+  min-height: 40px;
+  margin: 0;
+  padding: 0 0.75rem 0 0.85rem;
+  background: transparent;
+  /* Same border as the "Pick your state" ghost button beside it. */
+  border: 1px solid var(--v5-line-2);
+  border-radius: 999px;
+  color: var(--v5-muted-2);
+  cursor: text;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.v5-explorer__searchbox:hover {
+  border-color: var(--v5-ink);
+}
+.v5-explorer__searchbox:focus-within {
+  border-color: var(--v5-cyan);
+  box-shadow: 0 0 0 3px var(--v5-cyan-wash);
+}
+.v5-explorer__searchbox > i {
+  color: var(--v5-cyan);
+}
+.v5-explorer__searchbox input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--v5-ink);
+  outline: none;
+}
+.v5-explorer__searchbox input::placeholder {
+  color: var(--v5-muted-2);
+}
+.v5-explorer__searchbox input::-webkit-search-cancel-button {
+  display: none;
+}
+.v5-explorer__searchclear {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0.25rem;
+  color: var(--v5-muted-2);
+  cursor: pointer;
+}
+.v5-explorer__searchclear:hover {
+  color: var(--v5-ink);
+}
+@media (max-width: 767.98px) {
+  .v5-explorer__bar-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .v5-explorer__searchbox {
+    flex-basis: auto;
+  }
+  .v5-explorer__statebtn {
+    justify-content: center;
+  }
+}
+
 .v5-map {
   position: relative;
 }
