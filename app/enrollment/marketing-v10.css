@@ -129,8 +129,6 @@
   transition: background .15s, color .15s, border-color .15s;
 }
 .t321-v10 .v10-line__x:hover, .t321-v10 .v10-line__x:focus-visible { background: #fdecec; border-color: #f3c3c3; color: #c0392b; outline: none; }
-.t321-v10 .v10-line--empty { grid-template-columns: auto 1fr; padding: 12px 14px; border-radius: 12px; background: var(--t321-mkt-accent-wash); color: var(--t321-mkt-accent-ink); font-size: 13.5px; font-weight: 500; }
-.t321-v10 .v10-line--empty i { font-size: 16px; }
 .t321-v10 .v10-line__price { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
 @keyframes v10-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 

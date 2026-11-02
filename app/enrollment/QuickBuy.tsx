@@ -645,7 +645,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
             {/* Order */}
             <ul className="v10-lines">
               {cart.map((c) => (
-                <li key={c.id} className="v10-line v10-line--removable">
+                <li key={c.id} className={`v10-line${cart.length > 1 ? " v10-line--removable" : ""}`}>
                   <span className="v10-line__thumb">
                     {c.image ? <img src={c.image} alt="" /> : <i className="fas fa-certificate" aria-hidden="true" />}
                   </span>
@@ -654,18 +654,14 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
                     {c.stateLabel && <small>{c.stateLabel}</small>}
                   </span>
                   <span className="v10-line__price">{money(c.price)}</span>
-                  {/* Every line can be taken out — the empty-cart note below covers "none left". */}
-                  <button type="button" className="v10-line__x" onClick={() => removeLine(c.id)} aria-label={`Remove ${c.name}`} title="Remove">
-                    <i className="fas fa-times" aria-hidden="true" />
-                  </button>
+                  {/* Any line can be taken out, as long as one course stays to buy. */}
+                  {cart.length > 1 && (
+                    <button type="button" className="v10-line__x" onClick={() => removeLine(c.id)} aria-label={`Remove ${c.name}`} title="Remove">
+                      <i className="fas fa-times" aria-hidden="true" />
+                    </button>
+                  )}
                 </li>
               ))}
-              {cart.length === 0 && (
-                <li className="v10-line v10-line--empty">
-                  <i className="fas fa-shopping-basket" aria-hidden="true" />
-                  <span>Your order is empty. Add a course below to continue.</span>
-                </li>
-              )}
             </ul>
 
             {/* Promo code */}
