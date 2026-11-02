@@ -27,12 +27,14 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// ── Homepage = the v5 design ─────────────────────────────────────────────
+// ── Homepage = the v5 design, Halloween theme on ─────────────────────────
 // The homepage — still at "/" — renders the v5 page (no redirect, the URL
-// stays "/"), with no date gate. The Halloween takeover that used to sit here
-// (Oct 27–31, 2026) ended on its own; this keeps the v5 look on permanently.
-// To go back to the classic homepage, flip HOME_V5 to false — the classic
-// render below is untouched. The /v5 route itself is unaffected either way.
+// stays "/") with the Halloween theme forced on and NO date gate: it stays
+// until HOME_V5 is flipped to false, which returns the classic homepage
+// (its render below is untouched). The offer bar inside the theme follows
+// the live HALLOWEEN promo code in the LMS (discount, wording, expiry): a
+// code that is expired or inactive hides the bar while the decor stays.
+// The /v5 route itself is unaffected either way.
 const HOME_V5 = true;
 
 export default async function Page() {
@@ -65,6 +67,7 @@ export default async function Page() {
           }}
           phone={settings.phone || "561-325-7300"}
           email={settings.email || "info@train321.com"}
+          forceEvent
         />
       </>
     );
