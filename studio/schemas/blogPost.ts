@@ -154,6 +154,21 @@ export default defineType({
       validation: (R) => R.required()
     }),
     defineField({
+      name: 'revisedAt',
+      title: 'Last updated',
+      type: 'datetime',
+      group: 'publishing',
+      description:
+        'Set this when you correct or refresh the article. It shows as "Updated <date>" on the post and tells Google the content changed. Leave it alone for typo fixes.',
+      validation: (R) =>
+        R.custom((value: string | undefined, ctx: any) => {
+          const published = ctx.document?.publishedAt
+          return !value || !published || value >= published
+            ? true
+            : 'Last updated cannot be before the publish date.'
+        })
+    }),
+    defineField({
       name: 'featured',
       title: 'Feature this post on the Journal page',
       type: 'boolean',

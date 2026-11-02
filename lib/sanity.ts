@@ -93,9 +93,12 @@ export type BlogPost = {
   title: string;
   excerpt?: string;
   category?: string;
-  author: { name: string; role?: string };
+  author: { name: string; role?: string; bio?: string };
   publishedAt: string;
   updatedAt?: string; // Sanity _updatedAt — dateModified + sitemap lastmod
+  /** Editor-set "Last updated" date for a real revision; shown on the article. */
+  revisedAt?: string;
+  seo?: { metaTitle?: string; metaDescription?: string; ogImage?: string; noIndex?: boolean };
   readMinutes?: number;
   featured?: boolean;
   coverImage?: string; // URL string
@@ -792,8 +795,13 @@ const BLOG_PROJECTION = `
   // guest authors who aren't in Team Members.
   "author": {
     "name": coalesce(author->name, authorName),
-    "role": coalesce(author->role, authorRole)
+    "role": coalesce(author->role, authorRole),
+    "bio": author->bio
   },
+  revisedAt,
+  // The post's SEO tab. Without it here the Studio fields were saved and
+  // never reached the page.
+  "seo": seo{ metaTitle, metaDescription, noIndex, "ogImage": ogImage.asset->url + "?w=1200&h=630&fit=crop&auto=format" },
   "coverImage": coverImage.asset->url + "?w=1600&auto=format",
   "coverImageAlt": coverImage.alt,
   // Inline images resolve their CDN url here so the renderer needs no extra
