@@ -42,7 +42,8 @@ export default function FinderBar({ cta = "Search courses" }: { cta?: string }) 
             busy: detecting,
             onSelect: () => void detectLocation()
           }}
-          direction="down"
+          // "auto": opens upward when there is more room above than below,
+          // so the list is never cut off at the bottom of the screen.
         />
       </div>
       <span className="v5-finderbar__divider" aria-hidden="true" />
@@ -59,7 +60,6 @@ export default function FinderBar({ cta = "Search courses" }: { cta?: string }) 
             const hit = chips.find((c) => c.label === label);
             setChip(hit ? hit.id : "all");
           }}
-          direction="down"
         />
       </div>
       <button type="submit" className="v5-btn v5-btn--ink v5-finderbar__go">

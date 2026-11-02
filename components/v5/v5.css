@@ -1590,13 +1590,13 @@
   overflow: hidden;
 }
 .v5-course__foot {
+  /* Same two-line footer on every card — price, then a full-width Add to
+     cart — so the buttons line up across the row whatever the price length
+     ("$5", "$34.44", "Custom"). */
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  /* A long price ("$34.44") must not push the button out of the card: the
-     button drops under the price instead of clipping. */
-  flex-wrap: wrap;
-  gap: 0.6rem 0.75rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.6rem;
   min-width: 0;
   margin-top: auto;
   padding-top: 0.8rem;
@@ -1636,11 +1636,12 @@
   color: var(--v5-muted-2);
 }
 .v5-course__actions {
-  display: inline-flex;
-  margin-left: auto;
-  max-width: 100%;
+  display: flex;
+  width: 100%;
 }
 .v5-course__actions .v5-btn {
+  flex: 1 1 auto;
+  justify-content: center;
   white-space: nowrap;
 }
 
@@ -2434,8 +2435,9 @@
 .v5-quotes {
   position: relative;
   scroll-margin-top: 110px;
+  /* Both corner glows in the cyan family (the bottom-right one was amber). */
   background: radial-gradient(900px 520px at 8% 0%, rgba(0, 180, 219, 0.14), transparent 60%),
-    radial-gradient(720px 420px at 100% 100%, rgba(246, 183, 60, 0.12), transparent 60%), #fff;
+    radial-gradient(720px 420px at 100% 100%, rgba(0, 180, 219, 0.08), transparent 60%), #fff;
 }
 .v5-quotes__rating {
   display: inline-flex;
