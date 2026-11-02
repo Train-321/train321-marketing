@@ -107,6 +107,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
   const elements = useElements();
   const appBase = (process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com").replace(/\/+$/, "");
   const appLogin = `${appBase}/#/login`;
+  const appForgotPassword = `${appBase}/#/forget_password`;
   // ── Cart: the emailed course(s) + any add-ons picked here ─────────────
   const [added, setAdded] = useState<number[]>([]);
   // Linked courses the buyer took OUT of the cart. They reappear in the
@@ -757,7 +758,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
                     <label className={`v10-field${errors.password ? " has-error" : ""}`}>
                       <span className="v10-field__label">
                         Password
-                        <a href={`${appLogin}?forgot=1`} target="_blank" rel="noopener noreferrer">Forgot?</a>
+                        <a href={appForgotPassword} target="_blank" rel="noopener noreferrer">Forgot?</a>
                       </span>
                       <span className="v10-field__wrap">
                         <input type={showPw ? "text" : "password"} autoComplete="current-password" value={password} onChange={(e) => { setPassword(e.target.value); clearErr("password"); }} />
