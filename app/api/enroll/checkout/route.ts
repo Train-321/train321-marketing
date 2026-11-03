@@ -27,6 +27,8 @@ export async function POST(request: Request) {
       cadence?: InvoiceCadence;
       companyName?: string;
       billing?: BillingContact | null;
+      /** From ?test=true on the page: ask the LMS for Stripe developer (test-key) mode. */
+      test_mode?: boolean;
     };
 
     const lines = Array.isArray(body.lines) ? body.lines : [];
@@ -54,7 +56,9 @@ export async function POST(request: Request) {
       locations: body.locations,
       cadence: body.cadence,
       companyName: body.companyName,
-      billing: body.billing ?? null
+      billing: body.billing ?? null,
+      // The dev token is added here, server-side; it never reaches the browser.
+      devMode: body.test_mode === true
     });
 
     return NextResponse.json(result);

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { login, AuthError, TOKEN_COOKIE, USER_COOKIE } from "@/lib/auth";
+import { devModeFields } from "@/lib/enroll";
 
 /**
  * Existing-account checkout for the marketing-v9 embed.
@@ -37,6 +38,8 @@ type Body = {
   billing_zip?: string;
   /** Promo code name — the purchase endpoint re-validates it and recomputes the discount. */
   promo_code?: string;
+  /** From ?test=true on the page: ask the LMS for Stripe developer (test-key) mode. */
+  test_mode?: boolean;
 };
 
 export async function POST(req: Request) {
@@ -165,7 +168,10 @@ export async function POST(req: Request) {
     ...(body.promo_code ? { promo_code: String(body.promo_code).trim() } : {}),
     // The purchase endpoint requires the buyer's id in the payload for
     // audience "myself" (the bearer alone doesn't satisfy its check).
-    ...(userId > 0 ? { user_id: userId } : {})
+    ...(userId > 0 ? { user_id: userId } : {}),
+    // ?test=true → LMS developer mode (test Stripe keys). The token is added
+    // here, server-side, and the LMS only honours it when it matches.
+    ...devModeFields(body.test_mode === true)
   };
   if (body.payment_method_id) purchasePayload.payment_method_id = String(body.payment_method_id);
   if (body.payment_intent_id) purchasePayload.payment_intent_id = String(body.payment_intent_id);

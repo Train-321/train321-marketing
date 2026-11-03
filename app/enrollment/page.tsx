@@ -110,7 +110,16 @@ export default async function EmailCheckoutLanding({
     (enrollmentPage?.defaultHighlights.length ? enrollmentPage.defaultHighlights : undefined);
   const featured = testimonials.filter((t) => t.featured);
   const quotes = (featured.length ? featured : testimonials).slice(0, 3);
-  const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || STAGING_TEST_PK;
+  // ?test=true (set by the LMS Marketing page's "Test mode" toggle on each
+  // enrollment link): the card is tokenised with the TEST publishable key and
+  // the purchase asks the LMS for developer mode, so the charge lands on
+  // Stripe's test account and costs nothing. Without the flag nothing changes.
+  // The test key is the checked-in constant, not an env var: it pairs with
+  // the test secret the LMS ships in config/services.php (same account).
+  const testMode = one(sp.test).toLowerCase() === "true";
+  const publishableKey = testMode
+    ? STAGING_TEST_PK
+    : process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || STAGING_TEST_PK;
 
   return (
     <div className="t321-v10">
@@ -228,6 +237,7 @@ export default async function EmailCheckoutLanding({
                 headline={isDefault ? enrollmentPage?.emptyTitle : ""}
                 lede={isDefault ? enrollmentPage?.emptyLede : ""}
                 publishableKey={publishableKey}
+                testMode={testMode}
                 rating={RATING}
               />
             </div>

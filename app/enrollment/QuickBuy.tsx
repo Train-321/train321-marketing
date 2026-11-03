@@ -92,6 +92,8 @@ export type QuickBuyProps = {
   lede?: string;
   publishableKey: string;
   rating: string;
+  /** ?test=true: charge against Stripe TEST keys (LMS developer mode). */
+  testMode?: boolean;
 };
 
 export default function QuickBuy(props: QuickBuyProps) {
@@ -102,7 +104,7 @@ export default function QuickBuy(props: QuickBuyProps) {
   );
 }
 
-function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillName = "", prefillPromo = "", linkToken = "", benefits = DEFAULT_BENEFITS, stateCode = null, suggestionsByState = false, headline = "", lede = "", rating }: QuickBuyProps) {
+function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillName = "", prefillPromo = "", linkToken = "", benefits = DEFAULT_BENEFITS, stateCode = null, suggestionsByState = false, headline = "", lede = "", rating, testMode = false }: QuickBuyProps) {
   const stripe = useStripe();
   const elements = useElements();
   const appBase = (process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com").replace(/\/+$/, "");
@@ -336,7 +338,9 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
         email: email.trim(),
         courses: cart.map((c) => ({ id: c.id, name: c.name })),
         promo_code: promoCode,
-        ...billing
+        ...billing,
+        // The server route turns this into the LMS developer-mode flag + token.
+        ...(testMode ? { test_mode: true } : {})
       };
       if (password) creds.password = password;
       else if (identity === "link") creds.link_token = linkToken;
@@ -390,6 +394,8 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
         stripeTokenId: tokenId,
         cardholderName: (pay.kind === "wallet" && pay.payerName) || fullName.trim(),
         audience: "individual",
+        // The server route turns this into the LMS developer-mode flag + token.
+        ...(testMode ? { test_mode: true } : {}),
         details: {
           email: email.trim(),
           password,

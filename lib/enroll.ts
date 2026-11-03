@@ -172,7 +172,25 @@ function messageFrom(body: unknown, status: number): string {
   return "Something went wrong. Please try again.";
 }
 
+/**
+ * Shared secret that unlocks the LMS's Stripe developer mode for the
+ * /enrollment?test=true checkout. Checked in on purpose so it works in every
+ * environment without a .env edit on either side; it must equal
+ * services.stripe.dev_token_builtin in the LMS config. Only this server
+ * reads it (not NEXT_PUBLIC_), so it never reaches the browser.
+ */
+const ENROLL_DEV_MODE_TOKEN = "7f0872e159836fdbe780058928db72cbf15bd8e58485f57a";
+
+/**
+ * The LMS developer-mode fields for a purchase payload (see checkout()).
+ * Empty unless asked, so an ordinary purchase payload is exactly as before.
+ */
+export function devModeFields(on: boolean | undefined): Record<string, string> {
+  return on ? { dev_mode: "1", dev_token: ENROLL_DEV_MODE_TOKEN } : {};
+}
+
 /** POST JSON to the LMS and return the parsed body, throwing on non-2xx. */
+
 async function post<T>(path: string, body: unknown): Promise<T> {
   let res: Response;
   try {
@@ -560,6 +578,14 @@ export async function checkout(input: {
   cadence?: InvoiceCadence;
   companyName?: string;
   billing?: BillingContact | null;
+  /**
+   * Stripe developer mode: the purchase carries dev_mode + the server-side
+   * built-in token, and the LMS (App\Support\StripeKeys) charges against its
+   * TEST secret key — only when that token matches the one in its config.
+   * Otherwise the LMS ignores the flag and charges live, so the request can
+   * never make a production checkout cheaper by itself.
+   */
+  devMode?: boolean;
 }): Promise<CheckoutResult> {
   const { courseIds, specialCourses } = splitLines(input.lines);
   const audience: BuyerAudience = input.audience === "company" ? "company" : "individual";
@@ -615,7 +641,8 @@ export async function checkout(input: {
     invoice_cadence: cadence,
     promo_code: input.promoCode || "",
     details,
-    pay
+    pay,
+    ...devModeFields(input.devMode)
   });
 
   // The staging LMS returns absolute URLs, but the production LMS still has
