@@ -142,10 +142,29 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
   const [email, setEmail] = useState(prefillEmail);
   const [emailLocked, setEmailLocked] = useState(Boolean(prefillEmail));
   const [accountName, setAccountName] = useState("");
+  // Landing from an email link: the card shows a "Signing you in…" veil
+  // while the token is validated, so the buyer doesn't see the email/password
+  // form flash before their account appears. Cleared once that first check
+  // settles (either way) and never shown again — later look-ups, e.g. after
+  // "Not you?", keep the small inline spinner as before.
+  const [landing, setLanding] = useState(Boolean(linkToken) && linkToken !== DEMO_LINK);
 
-  const lookUp = useCallback(async (addr: string) => {
-    if (!EMAIL.test(addr.trim())) return;
+  // What the visitor should know once the landing check settles: signed in
+  // from the link, or the link didn't work and what to do instead. Shown as
+  // a toast that dismisses itself; only the email-link landing sets it.
+  const [notice, setNotice] = useState<{ kind: "ok" | "warn"; text: string } | null>(null);
+  useEffect(() => {
+    if (!notice) return;
+    const t = setTimeout(() => setNotice(null), 7000);
+    return () => clearTimeout(t);
+  }, [notice]);
+
+  // Resolves to the identity it settled on, so the landing effect can word
+  // its notice without reading state that hasn't flushed yet.
+  const lookUp = useCallback(async (addr: string): Promise<Identity> => {
+    if (!EMAIL.test(addr.trim())) return "unknown";
     setIdentity("checking");
+    let who: Identity;
     try {
       const res = await fetch("/api/enroll/check-email", {
         method: "POST",
@@ -153,11 +172,13 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
         body: JSON.stringify({ email: addr.trim() })
       });
       const d = (await res.json().catch(() => null)) as { exists?: boolean } | null;
-      setIdentity(res.ok && d?.exists ? "existing" : "new");
+      who = res.ok && d?.exists ? "existing" : "new";
     } catch {
       // Can't tell — the new-account path reports a duplicate email itself.
-      setIdentity("new");
+      who = "new";
     }
+    setIdentity(who);
+    return who;
   }, []);
 
   useEffect(() => {
@@ -168,6 +189,9 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
         setIdentity("link");
         return;
       }
+      // Set when the page opened with a link token that did not sign the
+      // visitor in — the notice below then says so and what to do next.
+      let linkFailed = false;
       if (linkToken) {
         try {
           const res = await fetch("/api/enroll/link-validate", {
@@ -180,17 +204,26 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
             | null;
           if (cancelled) return;
           if (res.ok && d?.success) {
-            setAccountName(String(d.full_name || ""));
+            const name = String(d.full_name || "");
+            setAccountName(name);
             if (d.email) {
               setEmail(d.email);
               setEmailLocked(true);
             }
             setIdentity("link");
+            const first = name.trim().split(/\s+/)[0];
+            setNotice({
+              kind: "ok",
+              text: first
+                ? `Signed in as ${first} — no password needed. Your course is ready to enroll.`
+                : "You're signed in — no password needed. Your course is ready to enroll."
+            });
             return;
           }
         } catch {
           /* an unreachable validator just means the fallback path */
         }
+        linkFailed = true;
       }
       if (cancelled) return;
       // Already signed in on the site? The display cookie carries the name;
@@ -202,15 +235,35 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
           if (u?.name) {
             setAccountName(String(u.name));
             setIdentity("session");
+            if (linkFailed) {
+              setNotice({
+                kind: "warn",
+                text: `That link has expired, but you're already signed in as ${String(u.name).trim().split(/\s+/)[0]} — you can enroll below.`
+              });
+            }
             return;
           }
         }
       } catch {
         /* a bad cosmetic cookie just means "not signed in" */
       }
-      if (prefillEmail) await lookUp(prefillEmail);
+      let who: Identity = "unknown";
+      if (prefillEmail) who = await lookUp(prefillEmail);
       else setIdentity("unknown");
-    })();
+      if (cancelled || !linkFailed) return;
+      setNotice({
+        kind: "warn",
+        text:
+          who === "existing"
+            ? "We couldn't sign you in from this link — it may have expired. Enter your password below to continue."
+            : "We couldn't sign you in from this link — it may have expired. Enter your details below to continue."
+      });
+    })().finally(() => {
+      // The first identity check has settled, however it went: drop the
+      // landing veil. (The IIFE never throws — every path catches — so
+      // finally is just the one place that runs after all of them.)
+      if (!cancelled) setLanding(false);
+    });
     return () => {
       cancelled = true;
     };
@@ -648,7 +701,15 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
             </a>
           </div>
         ) : (
-          <form onSubmit={onSubmit} noValidate>
+          <form onSubmit={onSubmit} noValidate className={landing && isLoading ? "is-landing" : undefined} aria-busy={landing && isLoading}>
+            {/* Email-link landing: veil the form until the token check settles. */}
+            {landing && isLoading && (
+              <div className="v10-landing" role="status" aria-live="polite">
+                <span className="v10-spin v10-spin--dark v10-spin--lg" aria-hidden="true" />
+                <strong>Signing you in…</strong>
+                <small>Getting your course ready</small>
+              </div>
+            )}
             <div className="v10-card__head">
               <h2>Complete your enrollment</h2>
               <span><i className="fas fa-lock" aria-hidden="true" /> Secure</span>
@@ -958,6 +1019,19 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
           </span>
           <button type="button" className="v10-btn v10-btn--pay" onClick={jumpToCheckout}>
             Enroll now
+          </button>
+        </div>
+      )}
+
+      {/* Email-link landing outcome: signed in, or the link didn't work. */}
+      {notice && (
+        <div className={`v10-toast v10-toast--${notice.kind}`} role="status" aria-live="polite">
+          <span className="v10-toast__ic" aria-hidden="true">
+            <i className={notice.kind === "ok" ? "fas fa-check" : "fas fa-exclamation"} />
+          </span>
+          <p className="v10-toast__text">{notice.text}</p>
+          <button type="button" className="v10-toast__x" aria-label="Dismiss" onClick={() => setNotice(null)}>
+            <i className="fas fa-times" aria-hidden="true" />
           </button>
         </div>
       )}

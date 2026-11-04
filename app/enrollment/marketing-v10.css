@@ -249,6 +249,43 @@
 
 .t321-v10 .v10-spin { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .35); border-top-color: #fff; animation: v10-spin .7s linear infinite; display: inline-block; }
 .t321-v10 .v10-spin--dark { border-color: var(--v10-line); border-top-color: var(--v10-pay); }
+.t321-v10 .v10-spin--lg { width: 36px; height: 36px; border-width: 3px; margin-bottom: 6px; }
+
+/* Email-link landing: a veil over the checkout card while the link token is
+   validated. The form underneath keeps its layout (no jump when the veil
+   lifts); it is only dimmed and made inert for that moment. */
+.t321-v10 .v10-card form { position: relative; }
+.t321-v10 .v10-card form.is-landing > :not(.v10-landing) { opacity: .35; pointer-events: none; user-select: none; }
+.t321-v10 .v10-landing {
+  position: absolute; inset: -20px; z-index: 3; border-radius: 20px;
+  display: grid; place-content: center; justify-items: center; gap: 4px; text-align: center;
+  background: rgba(255, 255, 255, .72); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+  color: var(--v10-ink); animation: v10-veil .25s ease both;
+}
+@media (min-width: 480px) { .t321-v10 .v10-landing { inset: -28px; } }
+.t321-v10 .v10-landing strong { font-size: 16px; font-weight: 700; }
+.t321-v10 .v10-landing small { font-size: 13px; color: var(--v10-muted); }
+@keyframes v10-veil { from { opacity: 0; } to { opacity: 1; } }
+
+/* Landing outcome toast: "signed in as …" or "that link didn't work". Sits
+   above the phone sticky bar (z 50) and below the offer dialog (z 80). */
+.t321-v10 .v10-toast {
+  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 70;
+  transform: translateX(-50%); width: calc(100% - 32px); max-width: 460px;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px;
+  padding: 12px 12px 12px 14px; border-radius: 14px;
+  background: var(--v10-ink); color: #fff; box-shadow: 0 18px 40px -16px rgba(11, 31, 51, .6);
+  animation: v10-toast-in .28s cubic-bezier(.2, .9, .3, 1.2) both;
+}
+.t321-v10 .v10-toast__ic { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; background: var(--t321-mkt-positive); color: #fff; }
+.t321-v10 .v10-toast--warn .v10-toast__ic { background: #f59e0b; color: #1b1300; }
+.t321-v10 .v10-toast__text { margin: 0; font-size: 14px; line-height: 1.45; }
+.t321-v10 .v10-toast__x { border: 0; background: transparent; color: rgba(255, 255, 255, .7); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; }
+.t321-v10 .v10-toast__x:hover { color: #fff; background: rgba(255, 255, 255, .12); }
+body:has(.v10-sticky) .t321-v10 .v10-toast { bottom: calc(84px + env(safe-area-inset-bottom)); }
+@keyframes v10-toast-in { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@media (prefers-reduced-motion: reduce) { .t321-v10 .v10-toast { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .t321-v10 .v10-landing { animation: none; } .t321-v10 .v10-landing .v10-spin { animation: none; } }
 @keyframes v10-spin { to { transform: rotate(360deg); } }
 
 /* Success */
