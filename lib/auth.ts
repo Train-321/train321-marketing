@@ -97,10 +97,10 @@ export const USER_COOKIE = "t321_user";
  * copy stranded in browser history or a Referer header is already expired
  * (two minutes, single use).
  */
-export async function issueHandoffCode(token: string): Promise<string> {
+export async function issueHandoffCode(token: string, apiBase: string = API_BASE): Promise<string> {
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}/user/sso/issue`, {
+    res = await fetch(`${apiBase}/user/sso/issue`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -149,9 +149,9 @@ export const APP_BASE = (
  * `_cb` matches the parameter the learner app's own router already uses when
  * it self-recovers from a stale index (see frontend/src/routes/router.js).
  */
-export function handoffUrl(code: string, next?: string | null): string {
+export function handoffUrl(code: string, next?: string | null, appBase: string = APP_BASE): string {
   const q = new URLSearchParams({ code });
   if (next && /^\/[A-Za-z0-9_\-/]*$/.test(next)) q.set("next", next);
   const cb = Date.now().toString(36);
-  return `${APP_BASE}/?_cb=${cb}#/sso?${q.toString()}`;
+  return `${appBase}/?_cb=${cb}#/sso?${q.toString()}`;
 }
