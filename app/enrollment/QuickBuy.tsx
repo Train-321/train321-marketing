@@ -107,7 +107,10 @@ export default function QuickBuy(props: QuickBuyProps) {
 function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillName = "", prefillPromo = "", linkToken = "", benefits = DEFAULT_BENEFITS, stateCode = null, suggestionsByState = false, headline = "", lede = "", rating, testMode = false }: QuickBuyProps) {
   const stripe = useStripe();
   const elements = useElements();
-  const appBase = (process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com").replace(/\/+$/, "");
+  // After a ?test=true purchase the account lives on the staging LMS, so the
+  // "Start my course" fallback points at the staging app (static, like the
+  // staging API base in stageApi.ts). Normal visits keep the production app.
+  const appBase = (testMode ? "https://new-features.train321.com" : process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com").replace(/\/+$/, "");
   const appLogin = `${appBase}/#/login`;
   const appForgotPassword = `${appBase}/#/forget_password`;
   // ── Cart: the emailed course(s) + any add-ons picked here ─────────────
@@ -149,6 +152,12 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
   // "Not you?", keep the small inline spinner as before.
   const [landing, setLanding] = useState(Boolean(linkToken) && linkToken !== DEMO_LINK);
 
+  // ?test=true: every call this page makes to its own /api/enroll routes
+  // carries test_mode, and those routes then talk to the new-features staging
+  // LMS instead of production (see stageApi.ts). Empty otherwise, so a normal
+  // visit sends exactly the bodies it always did.
+  const stageFlag = useMemo(() => (testMode ? { test_mode: true as const } : {}), [testMode]);
+
   // What the visitor should know once the landing check settles: signed in
   // from the link, or the link didn't work and what to do instead. Shown as
   // a toast that dismisses itself; only the email-link landing sets it.
@@ -169,7 +178,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
       const res = await fetch("/api/enroll/check-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: addr.trim() })
+        body: JSON.stringify({ email: addr.trim(), ...stageFlag })
       });
       const d = (await res.json().catch(() => null)) as { exists?: boolean } | null;
       who = res.ok && d?.exists ? "existing" : "new";
@@ -179,7 +188,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
     }
     setIdentity(who);
     return who;
-  }, []);
+  }, [stageFlag]);
 
   useEffect(() => {
     let cancelled = false;
@@ -197,7 +206,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
           const res = await fetch("/api/enroll/link-validate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: linkToken })
+            body: JSON.stringify({ token: linkToken, ...stageFlag })
           });
           const d = (await res.json().catch(() => null)) as
             | { success?: boolean; full_name?: string; email?: string }
@@ -267,7 +276,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
     return () => {
       cancelled = true;
     };
-  }, [linkToken, prefillEmail, prefillName, lookUp]);
+  }, [linkToken, prefillEmail, prefillName, lookUp, stageFlag]);
 
   const signedInPath = identity === "link" || identity === "session" || identity === "existing";
 
@@ -298,7 +307,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
         const res = await fetch("/api/enroll/quote", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lines, audience: "individual", promoCode })
+          body: JSON.stringify({ lines, audience: "individual", promoCode, ...stageFlag })
         });
         const d = (await res.json()) as EnrollQuote;
         if (cancelled || !res.ok) return;
@@ -321,7 +330,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
     return () => {
       cancelled = true;
     };
-  }, [lines, promoCode]);
+  }, [lines, promoCode, stageFlag]);
   const applyPromo = () => {
     const code = promoInput.trim();
     if (!code) return setPromoError("Enter a promo code.");

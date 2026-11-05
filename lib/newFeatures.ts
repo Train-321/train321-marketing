@@ -23,6 +23,7 @@ import {
   isTestName,
   type CourseGroupSummary
 } from "@/lib/courseGroups";
+import { lmsBase } from "@/lib/lmsBase";
 
 const API_BASE = process.env.NEW_FEATURES_API_BASE || "https://api.train321.com";
 
@@ -241,7 +242,7 @@ export async function getMarketplaceCatalog(query: CatalogQuery = {}): Promise<M
     query.anyState || stateCode === null ? true : availableIn(a, stateCode);
 
   try {
-    const res = await fetch(`${API_BASE}/api/list/enroll-courses`, {
+    const res = await fetch(`${lmsBase(API_BASE)}/api/list/enroll-courses`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({

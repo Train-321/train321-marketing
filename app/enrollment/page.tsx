@@ -4,6 +4,7 @@ import { getSiteSettings, getTestimonials, getEnrollmentPage, type Testimonial, 
 import { getCartCourse, type CartCourse } from "@/lib/enroll";
 import { resolveGroup } from "./groupResolve";
 import { suggestAddOns, stateFromParam } from "./addOns";
+import { isTestParam, withStageApi } from "./stageApi";
 import CourseCertificate from "@/components/CourseCertificate";
 import QuickBuy, { DEFAULT_BENEFITS } from "./QuickBuy";
 import "./marketing-v10.css";
@@ -45,12 +46,22 @@ const FAQ = [
 
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) || "";
 
+type SearchParams = { [key: string]: string | string[] | undefined };
+
 export default async function EmailCheckoutLanding({
   searchParams
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<SearchParams>;
 }) {
   const sp = await searchParams;
+  // ?test=true: every LMS lookup this page makes (courses, group, add-ons)
+  // runs against the new-features staging API instead of production — see
+  // stageApi.ts. Without the flag withStageApi() is a plain call, so the
+  // page is built exactly as before.
+  return withStageApi(isTestParam(sp.test), () => renderLanding(sp));
+}
+
+async function renderLanding(sp: SearchParams) {
   const raw = [sp.ids, sp.course, sp.id].flat().filter(Boolean).join(",");
   const ids = [...new Set(raw.split(",").map((s) => Number(s.trim())).filter((n) => Number.isInteger(n) && n > 0))];
   const idCourses = (await Promise.all(ids.map((n) => getCartCourse(n)))).filter((c): c is CartCourse => c !== null);
@@ -116,7 +127,8 @@ export default async function EmailCheckoutLanding({
   // Stripe's test account and costs nothing. Without the flag nothing changes.
   // The test key is the checked-in constant, not an env var: it pairs with
   // the test secret the LMS ships in config/services.php (same account).
-  const testMode = one(sp.test).toLowerCase() === "true";
+  // test=true also moves the whole page onto the staging LMS (see above).
+  const testMode = isTestParam(sp.test);
   const publishableKey = testMode
     ? STAGING_TEST_PK
     : process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || STAGING_TEST_PK;

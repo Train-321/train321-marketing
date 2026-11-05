@@ -18,6 +18,7 @@
 // passes an invoice cadence.
 
 import { secureImageUrl } from "@/lib/newFeatures";
+import { lmsBase } from "@/lib/lmsBase";
 import {
   US_STATES,
   availabilityText,
@@ -194,7 +195,7 @@ export function devModeFields(on: boolean | undefined): Record<string, string> {
 async function post<T>(path: string, body: unknown): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}${path}`, {
+    res = await fetch(`${lmsBase(API_BASE)}${path}`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify(body),
@@ -276,7 +277,7 @@ export async function getPromo(code: string): Promise<PromoInfo | null> {
  */
 export async function getCartCourse(id: number): Promise<CartCourse | null> {
   try {
-    const res = await fetch(`${API_BASE}/api/purchase-course-new/course/${id}`, {
+    const res = await fetch(`${lmsBase(API_BASE)}/api/purchase-course-new/course/${id}`, {
       headers: { Accept: "application/json" },
       next: { revalidate: 300 }
     });
@@ -404,7 +405,7 @@ export async function getGroupPicker(enrollId?: string | null): Promise<GroupPic
     // POST fetches aren't cached by Next's data cache, but this runs inside
     // ISR page generation (5-minute revalidate on course pages), so the
     // backend sees one call per regeneration, not one per visitor.
-    const res = await fetch(`${API_BASE}/api/list/enroll-courses`, {
+    const res = await fetch(`${lmsBase(API_BASE)}/api/list/enroll-courses`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({ per_page: 500, page: 1, type: "all" })
@@ -660,7 +661,7 @@ export async function checkout(input: {
     employee: raw.employee,
     chargeId: raw.charge?.id ?? null,
     receiptUrl: raw.charge?.receipt ?? null,
-    invoiceUrl: absolute(raw.invoice_url, API_BASE),
+    invoiceUrl: absolute(raw.invoice_url, lmsBase(API_BASE)),
     loginUrl: absolute(raw.login_url, appBase) || `${appBase}/#/login`,
     amount: Number(raw.pricing?.due_today ?? 0),
     subscription: raw.subscription

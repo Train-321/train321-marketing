@@ -12,6 +12,8 @@
  * password and the returned bearer token never pass through client JS.
  */
 
+import { lmsBase } from "@/lib/lmsBase";
+
 const API_BASE = process.env.API_BASE || "https://api.train321.com";
 
 /** Shape the API returns on a successful login. */
@@ -36,7 +38,8 @@ export class AuthError extends Error {
 export async function login(email: string, password: string): Promise<LoginResult> {
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}/user/login`, {
+    // lmsBase(): production, except inside /enrollment?test=true's staging run.
+    res = await fetch(`${lmsBase(API_BASE)}/user/login`, {
       method: "POST",
       headers: { Accept: "application/json", "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),

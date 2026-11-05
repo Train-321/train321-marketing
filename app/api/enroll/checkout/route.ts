@@ -8,6 +8,7 @@ import {
   type EnrollCartLine,
   type InvoiceCadence
 } from "@/lib/enroll";
+import { withStageApi } from "@/app/enrollment/stageApi";
 
 // Creates the account + takes the payment. The card was already tokenised in
 // the browser by Stripe.js, so the only payment data crossing this route is an
@@ -45,21 +46,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Please enter your company name." }, { status: 422 });
     }
 
-    const result = await checkout({
-      lines,
-      details: body.details,
-      promoCode: body.promoCode,
-      stripeTokenId: body.stripeTokenId ?? null,
-      cardholderName: body.cardholderName,
-      audience: body.audience,
-      employees: body.employees,
-      locations: body.locations,
-      cadence: body.cadence,
-      companyName: body.companyName,
-      billing: body.billing ?? null,
-      // The dev token is added here, server-side; it never reaches the browser.
-      devMode: body.test_mode === true
-    });
+    const details = body.details;
+    // test_mode (the /enrollment page's ?test=true): the whole purchase runs
+    // against the staging LMS, with Stripe test keys. Without it this is the
+    // production checkout exactly as before.
+    const result = await withStageApi(body.test_mode === true, () =>
+      checkout({
+        lines,
+        details,
+        promoCode: body.promoCode,
+        stripeTokenId: body.stripeTokenId ?? null,
+        cardholderName: body.cardholderName,
+        audience: body.audience,
+        employees: body.employees,
+        locations: body.locations,
+        cadence: body.cadence,
+        companyName: body.companyName,
+        billing: body.billing ?? null,
+        // The dev token is added here, server-side; it never reaches the browser.
+        devMode: body.test_mode === true
+      })
+    );
 
     return NextResponse.json(result);
   } catch (err) {

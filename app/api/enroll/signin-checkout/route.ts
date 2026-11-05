@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { login, AuthError, TOKEN_COOKIE, USER_COOKIE } from "@/lib/auth";
 import { devModeFields } from "@/lib/enroll";
+import { lmsBase } from "@/lib/lmsBase";
+import { withStageApi } from "@/app/enrollment/stageApi";
 
 /**
  * Existing-account checkout for the marketing-v9 embed.
@@ -50,6 +52,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, message: "Invalid request." }, { status: 400 });
   }
 
+  // test_mode (the /enrollment page's ?test=true): sign-in, link exchange and
+  // the purchase all run against the staging LMS. Without it, production —
+  // exactly as before.
+  return withStageApi(body.test_mode === true, () => handle(body));
+}
+
+async function handle(body: Body) {
   const email = String(body.email || "").trim();
   const password = String(body.password || "");
   const courses = Array.isArray(body.courses)
@@ -99,7 +108,7 @@ export async function POST(req: Request) {
   } else if (linkToken) {
     usedFallback = true;
     try {
-      const res = await fetch(`${API_BASE}/api/enroll-link/exchange`, {
+      const res = await fetch(`${lmsBase(API_BASE)}/api/enroll-link/exchange`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({ token: linkToken }),
@@ -121,7 +130,9 @@ export async function POST(req: Request) {
     } catch {
       /* fall through to need_password below */
     }
-  } else {
+  } else if (body.test_mode !== true) {
+    // (Skipped in test mode: the site session is a PRODUCTION login, which
+    // the staging LMS wouldn't accept — the buyer is asked for a password.)
     token = jar.get(TOKEN_COOKIE)?.value || null;
     usedFallback = Boolean(token);
     try {
@@ -178,7 +189,7 @@ export async function POST(req: Request) {
 
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}/purchase-course-new/checkout`, {
+    res = await fetch(`${lmsBase(API_BASE)}/purchase-course-new/checkout`, {
       method: "POST",
       headers: {
         Accept: "application/json",

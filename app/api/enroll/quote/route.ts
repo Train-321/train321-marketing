@@ -5,6 +5,7 @@ import {
   type BuyerAudience,
   type EnrollCartLine
 } from "@/lib/enroll";
+import { withStageApi } from "@/app/enrollment/stageApi";
 
 // Prices the browser's cart. Called on every cart change and on promo entry.
 // Server-to-server so the LMS base URL stays off the client.
@@ -16,6 +17,8 @@ export async function POST(request: Request) {
       employees?: number;
       locations?: number;
       promoCode?: string;
+      /** From ?test=true on /enrollment: price against the staging LMS. */
+      test_mode?: boolean;
     };
 
     const lines = Array.isArray(body.lines) ? body.lines : [];
@@ -40,13 +43,15 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      await getQuote({
-        lines,
-        audience: body.audience,
-        employees: body.employees,
-        locations: body.locations,
-        promoCode: body.promoCode
-      })
+      await withStageApi(body.test_mode === true, () =>
+        getQuote({
+          lines,
+          audience: body.audience,
+          employees: body.employees,
+          locations: body.locations,
+          promoCode: body.promoCode
+        })
+      )
     );
   } catch (err) {
     const status = err instanceof EnrollApiError ? err.status : 500;
