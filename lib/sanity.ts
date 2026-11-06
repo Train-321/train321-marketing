@@ -494,6 +494,11 @@ const BROWSER_TOKEN = process.env.SANITY_API_READ_TOKEN;
 const STEGA_SKIP =
   /(^|\.)(category|icon|heroIcon|tone|heroTone|color|style|kind|slug|url|href|to|id|enrollId|videoUrl|linkHref)$/i;
 
+// Site-wide menus (Site Settings). Encoded text gets a click-to-edit overlay,
+// which swallows the click, so with Edit on an editor could not use the menus
+// to reach another page in the Presentation tool.
+const STEGA_SKIP_MENUS = /^(mainNav|footerColumns|footerLegalLinks)$/;
+
 // Default published client — used by the draft route + image URL builder.
 // stega.studioUrl lets the Live API encode click-to-edit pointers in preview.
 export const sanityClient = createClient({
@@ -507,6 +512,7 @@ export const sanityClient = createClient({
     filter: (props) => {
       const last = String(props.sourcePath[props.sourcePath.length - 1] ?? "");
       if (STEGA_SKIP.test(last)) return false;
+      if (STEGA_SKIP_MENUS.test(String(props.sourcePath[0] ?? ""))) return false;
       return props.filterDefault(props);
     }
   }

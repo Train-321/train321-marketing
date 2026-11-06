@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces, Montserrat } from "next/font/google";
 import { draftMode } from "next/headers";
-import dynamic from "next/dynamic";
+import { VisualEditing } from "next-sanity/visual-editing";
 import SiteHeader from "@/components/SiteHeaderShell";
 import SiteFooter from "@/components/SiteFooterShell";
 import ChatWidget from "@/components/ChatWidgetShell";
@@ -14,10 +14,6 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import JsonLd from "@/components/JsonLd";
 import { ORGANIZATION_LD } from "@/lib/seo";
 import "./globals.css";
-
-// Lazy-load visual editing — only pulled into the bundle when draft mode is on.
-// Saves ~120 KiB on the main JS bundle for the 99% of visitors who aren't editors.
-const VisualEditingClient = dynamic(() => import("@/components/VisualEditingClient"));
 
 const inter = Inter({
   subsets: ["latin"],
@@ -150,7 +146,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {isDraft && (
           <>
             <SanityLive />
-            <VisualEditingClient />
+            {/* next-sanity's wrapper, not the raw @sanity/visual-editing one: it
+                carries the Next router adapter that lets Presentation follow
+                and drive the preview's URL. It lazy-loads its own client code,
+                so visitors outside draft mode don't download it. */}
+            <VisualEditing />
             <DisableDraftMode />
           </>
         )}

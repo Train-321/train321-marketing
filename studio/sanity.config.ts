@@ -4,6 +4,7 @@ import { presentationTool } from 'sanity/presentation'
 import { visionTool } from '@sanity/vision'
 import { schemaTypes } from './schemas'
 import { pexelsAssetSource } from './components/PexelsAssetSource'
+import { PresentationToolMenu } from './components/PresentationToolMenu'
 
 const previewUrl = process.env.SANITY_STUDIO_PREVIEW_URL || 'http://localhost:3000'
 
@@ -19,6 +20,7 @@ export default defineConfig({
       structure: (S) => {
         const single = (id: string, type: string, title: string) =>
           S.listItem()
+            .id(id)
             .title(title)
             .child(S.document().schemaType(type).documentId(id))
 
@@ -136,6 +138,12 @@ export default defineConfig({
 
   schema: {
     types: schemaTypes
+  },
+
+  studio: {
+    components: {
+      toolMenu: PresentationToolMenu
+    }
   },
 
   form: {
