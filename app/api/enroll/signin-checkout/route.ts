@@ -42,6 +42,8 @@ type Body = {
   promo_code?: string;
   /** From ?test=true on the page: ask the LMS for Stripe developer (test-key) mode. */
   test_mode?: boolean;
+  /** A staging test link: run against the staging LMS instead of production. */
+  stage?: boolean;
 };
 
 export async function POST(req: Request) {
@@ -52,10 +54,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, message: "Invalid request." }, { status: 400 });
   }
 
-  // test_mode (the /enrollment page's ?test=true): sign-in, link exchange and
+  // stage (a staging test link on /enrollment): sign-in, link exchange and
   // the purchase all run against the staging LMS. Without it, production —
-  // exactly as before.
-  return withStageApi(body.test_mode === true, () => handle(body));
+  // exactly as before; a test link made by production sends only test_mode,
+  // which just puts the charge on Stripe test keys (devModeFields below).
+  return withStageApi(body.stage === true, () => handle(body));
 }
 
 async function handle(body: Body) {
@@ -130,9 +133,9 @@ async function handle(body: Body) {
     } catch {
       /* fall through to need_password below */
     }
-  } else if (body.test_mode !== true) {
-    // (Skipped in test mode: the site session is a PRODUCTION login, which
-    // the staging LMS wouldn't accept — the buyer is asked for a password.)
+  } else if (body.stage !== true) {
+    // (Skipped on staging: the site session is a PRODUCTION login, which the
+    // staging LMS wouldn't accept — the buyer is asked for a password.)
     token = jar.get(TOKEN_COOKIE)?.value || null;
     usedFallback = Boolean(token);
     try {

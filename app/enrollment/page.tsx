@@ -4,7 +4,7 @@ import { getSiteSettings, getTestimonials, getEnrollmentPage, type Testimonial, 
 import { getCartCourse, type CartCourse } from "@/lib/enroll";
 import { resolveGroup } from "./groupResolve";
 import { suggestAddOns, stateFromParam } from "./addOns";
-import { isTestParam, withStageApi } from "./stageApi";
+import { resolveTestTarget, withStageApi, type TestTarget } from "./stageApi";
 import CourseCertificate from "@/components/CourseCertificate";
 import QuickBuy, { DEFAULT_BENEFITS } from "./QuickBuy";
 import "./marketing-v10.css";
@@ -54,14 +54,18 @@ export default async function EmailCheckoutLanding({
   searchParams: Promise<SearchParams>;
 }) {
   const sp = await searchParams;
-  // ?test=true: every LMS lookup this page makes (courses, group, add-ons)
-  // runs against the new-features staging API instead of production — see
-  // stageApi.ts. Without the flag withStageApi() is a plain call, so the
-  // page is built exactly as before.
-  return withStageApi(isTestParam(sp.test), () => renderLanding(sp));
+  // ?test=true has two flavours (see resolveTestTarget in stageApi.ts):
+  //   - a test link made by PRODUCTION (its ?elt= token is one production
+  //     knows) stays on the production API; only the charge uses test keys;
+  //   - any other test link runs every LMS lookup this page makes (courses,
+  //     group, add-ons) against the new-features staging API.
+  // Without the flag the target is "off" and withStageApi() is a plain call,
+  // so the page is built exactly as before.
+  const target = await resolveTestTarget(sp.test, sp.elt);
+  return withStageApi(target === "stage", () => renderLanding(sp, target));
 }
 
-async function renderLanding(sp: SearchParams) {
+async function renderLanding(sp: SearchParams, target: TestTarget) {
   const raw = [sp.ids, sp.course, sp.id].flat().filter(Boolean).join(",");
   const ids = [...new Set(raw.split(",").map((s) => Number(s.trim())).filter((n) => Number.isInteger(n) && n > 0))];
   const idCourses = (await Promise.all(ids.map((n) => getCartCourse(n)))).filter((c): c is CartCourse => c !== null);
@@ -127,8 +131,9 @@ async function renderLanding(sp: SearchParams) {
   // Stripe's test account and costs nothing. Without the flag nothing changes.
   // The test key is the checked-in constant, not an env var: it pairs with
   // the test secret the LMS ships in config/services.php (same account).
-  // test=true also moves the whole page onto the staging LMS (see above).
-  const testMode = isTestParam(sp.test);
+  // Both test flavours charge in test mode; which LMS they talk to was
+  // decided above (target).
+  const testMode = target !== "off";
   const publishableKey = testMode
     ? STAGING_TEST_PK
     : process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || STAGING_TEST_PK;
@@ -250,6 +255,7 @@ async function renderLanding(sp: SearchParams) {
                 lede={isDefault ? enrollmentPage?.emptyLede : ""}
                 publishableKey={publishableKey}
                 testMode={testMode}
+                stage={target === "stage"}
                 rating={RATING}
               />
             </div>

@@ -30,6 +30,8 @@ export async function POST(request: Request) {
       billing?: BillingContact | null;
       /** From ?test=true on the page: ask the LMS for Stripe developer (test-key) mode. */
       test_mode?: boolean;
+      /** A staging test link: run against the staging LMS instead of production. */
+      stage?: boolean;
     };
 
     const lines = Array.isArray(body.lines) ? body.lines : [];
@@ -47,10 +49,13 @@ export async function POST(request: Request) {
     }
 
     const details = body.details;
-    // test_mode (the /enrollment page's ?test=true): the whole purchase runs
-    // against the staging LMS, with Stripe test keys. Without it this is the
-    // production checkout exactly as before.
-    const result = await withStageApi(body.test_mode === true, () =>
+    // Two independent flags from the /enrollment page's ?test=true:
+    //   test_mode — charge with Stripe TEST keys (LMS developer mode);
+    //   stage     — a staging test link: run the purchase on the staging LMS.
+    // A test link made by production sends test_mode alone, so the account
+    // and enrollment land on production and only the charge is a test one.
+    // With neither, this is the production checkout exactly as before.
+    const result = await withStageApi(body.stage === true, () =>
       checkout({
         lines,
         details,

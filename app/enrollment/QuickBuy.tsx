@@ -94,6 +94,12 @@ export type QuickBuyProps = {
   rating: string;
   /** ?test=true: charge against Stripe TEST keys (LMS developer mode). */
   testMode?: boolean;
+  /**
+   * The test visit runs on the STAGING LMS (see resolveTestTarget). False for
+   * a test link production made: that one stays on the production API and
+   * only the charge is in test mode.
+   */
+  stage?: boolean;
 };
 
 export default function QuickBuy(props: QuickBuyProps) {
@@ -104,17 +110,18 @@ export default function QuickBuy(props: QuickBuyProps) {
   );
 }
 
-function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillName = "", prefillPromo = "", linkToken = "", benefits = DEFAULT_BENEFITS, stateCode = null, suggestionsByState = false, headline = "", lede = "", rating, testMode = false }: QuickBuyProps) {
+function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillName = "", prefillPromo = "", linkToken = "", benefits = DEFAULT_BENEFITS, stateCode = null, suggestionsByState = false, headline = "", lede = "", rating, testMode = false, stage = false }: QuickBuyProps) {
   const stripe = useStripe();
   const elements = useElements();
-  // After a ?test=true purchase the account lives on the staging LMS, so the
-  // "Start my course" fallback points at the staging app (static, like the
-  // staging API base in stageApi.ts). Normal visits keep the production app.
-  const appBase = (testMode ? "https://new-features.train321.com" : process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com").replace(/\/+$/, "");
+  // After a staging test purchase the account lives on the staging LMS, so
+  // the "Start my course" fallback points at the staging app (static, like
+  // the staging API base in stageApi.ts). Normal visits — and test links made
+  // by production — keep the production app.
+  const appBase = (stage ? "https://new-features.train321.com" : process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com").replace(/\/+$/, "");
   const appLogin = `${appBase}/#/login`;
   // Came in on an email link: "Start my course" signs them in, no password.
   const startHref = linkToken && linkToken !== DEMO_LINK
-    ? `/api/enroll/start?elt=${encodeURIComponent(linkToken)}${testMode ? "&test=true" : ""}`
+    ? `/api/enroll/start?elt=${encodeURIComponent(linkToken)}${stage ? "&stage=1" : ""}`
     : appLogin;
   const appForgotPassword = `${appBase}/#/forget_password`;
   // ── Cart: the emailed course(s) + any add-ons picked here ─────────────
@@ -161,10 +168,15 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
   const [landing, setLanding] = useState(Boolean(linkToken) && linkToken !== DEMO_LINK);
 
   // ?test=true: every call this page makes to its own /api/enroll routes
-  // carries test_mode, and those routes then talk to the new-features staging
-  // LMS instead of production (see stageApi.ts). Empty otherwise, so a normal
-  // visit sends exactly the bodies it always did.
-  const stageFlag = useMemo(() => (testMode ? { test_mode: true as const } : {}), [testMode]);
+  // carries test_mode (charge with Stripe TEST keys), plus stage when the
+  // visit runs on the new-features staging LMS — the routes then talk to
+  // staging instead of production (see stageApi.ts). A test link made by
+  // production sends test_mode alone, so it stays on the production API.
+  // Empty otherwise: a normal visit sends exactly the bodies it always did.
+  const stageFlag = useMemo(
+    () => (testMode ? { test_mode: true as const, ...(stage ? { stage: true as const } : {}) } : {}),
+    [testMode, stage]
+  );
 
   // What the visitor should know once the landing check settles: signed in
   // from the link, or the link didn't work and what to do instead. Shown as
@@ -410,8 +422,9 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
         courses: cart.map((c) => ({ id: c.id, name: c.name })),
         promo_code: promoCode,
         ...billing,
-        // The server route turns this into the LMS developer-mode flag + token.
-        ...(testMode ? { test_mode: true } : {})
+        // The server route turns test_mode into the LMS developer-mode flag +
+        // token, and stage into "talk to the staging LMS".
+        ...stageFlag
       };
       if (password) creds.password = password;
       else if (identity === "link") creds.link_token = linkToken;
@@ -466,8 +479,9 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
         stripeTokenId: tokenId,
         cardholderName: (pay.kind === "wallet" && pay.payerName) || fullName.trim(),
         audience: "individual",
-        // The server route turns this into the LMS developer-mode flag + token.
-        ...(testMode ? { test_mode: true } : {}),
+        // The server route turns test_mode into the LMS developer-mode flag +
+        // token, and stage into "talk to the staging LMS".
+        ...stageFlag,
         details: {
           email: email.trim(),
           password,

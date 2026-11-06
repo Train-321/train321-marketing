@@ -11,11 +11,11 @@ const API_BASE = process.env.API_BASE || "https://api.train321.com";
 
 export async function POST(req: Request) {
   let token = "";
-  let testMode = false;
+  let stage = false;
   try {
-    const body = (await req.json()) as { token?: string; test_mode?: boolean };
+    const body = (await req.json()) as { token?: string; stage?: boolean };
     token = String(body.token || "");
-    testMode = body.test_mode === true;
+    stage = body.stage === true;
   } catch {
     /* fall through to the empty-token reply */
   }
@@ -23,9 +23,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, message: "Missing token." }, { status: 400 });
   }
 
-  // test_mode (the /enrollment page's ?test=true) validates against the
-  // staging LMS, where a staging-minted link token lives.
-  const base = testMode ? STAGE_API_BASE : API_BASE;
+  // stage (a staging test link on /enrollment) validates against the staging
+  // LMS, where a staging-minted link token lives. Everything else, including
+  // a test link made by production, validates on production.
+  const base = stage ? STAGE_API_BASE : API_BASE;
 
   let res: Response;
   try {

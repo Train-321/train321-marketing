@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { STAGE_API_BASE, isTestParam } from "@/app/enrollment/stageApi";
+import { STAGE_API_BASE } from "@/app/enrollment/stageApi";
 import { APP_BASE, handoffUrl, issueHandoffCode } from "@/lib/auth";
 
 /**
@@ -21,9 +21,12 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   const params = new URL(req.url).searchParams;
   const token = params.get("elt") || "";
-  const testMode = isTestParam(params.get("test"));
-  const apiBase = testMode ? STAGE_API_BASE : API_BASE;
-  const appBase = testMode ? STAGE_APP_BASE : APP_BASE;
+  // stage=1: the visit ran on the staging LMS (a staging test link), so the
+  // token and the account live there. A test link made by production does not
+  // send it and signs into the production app, like a normal link.
+  const stage = params.get("stage") === "1";
+  const apiBase = stage ? STAGE_API_BASE : API_BASE;
+  const appBase = stage ? STAGE_APP_BASE : APP_BASE;
 
   try {
     const res = await fetch(`${apiBase}/api/enroll-link/exchange`, {

@@ -7,12 +7,12 @@ import { withStageApi } from "@/app/enrollment/stageApi";
 // checkout() enforces the same rule, so this is purely a nicer failure point.
 export async function POST(request: Request) {
   try {
-    const { email, test_mode } = (await request.json()) as { email?: string; test_mode?: boolean };
+    const { email, stage } = (await request.json()) as { email?: string; stage?: boolean };
     if (!email) {
       return NextResponse.json({ message: "Email is required." }, { status: 422 });
     }
-    // test_mode (the /enrollment page's ?test=true) checks the staging LMS.
-    return NextResponse.json({ exists: await withStageApi(test_mode === true, () => checkEmail(email)) });
+    // stage (a staging test link on /enrollment) checks the staging LMS.
+    return NextResponse.json({ exists: await withStageApi(stage === true, () => checkEmail(email)) });
   } catch (err) {
     const status = err instanceof EnrollApiError ? err.status : 500;
     const message =

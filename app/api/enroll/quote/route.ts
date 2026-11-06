@@ -17,8 +17,8 @@ export async function POST(request: Request) {
       employees?: number;
       locations?: number;
       promoCode?: string;
-      /** From ?test=true on /enrollment: price against the staging LMS. */
-      test_mode?: boolean;
+      /** A staging test link on /enrollment: price against the staging LMS. */
+      stage?: boolean;
     };
 
     const lines = Array.isArray(body.lines) ? body.lines : [];
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      await withStageApi(body.test_mode === true, () =>
+      await withStageApi(body.stage === true, () =>
         getQuote({
           lines,
           audience: body.audience,
