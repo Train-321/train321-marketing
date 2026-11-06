@@ -112,6 +112,10 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
   // staging API base in stageApi.ts). Normal visits keep the production app.
   const appBase = (testMode ? "https://new-features.train321.com" : process.env.NEXT_PUBLIC_APP_BASE || "https://lms.train321.com").replace(/\/+$/, "");
   const appLogin = `${appBase}/#/login`;
+  // Came in on an email link: "Start my course" signs them in, no password.
+  const startHref = linkToken && linkToken !== DEMO_LINK
+    ? `/api/enroll/start?elt=${encodeURIComponent(linkToken)}${testMode ? "&test=true" : ""}`
+    : appLogin;
   const appForgotPassword = `${appBase}/#/forget_password`;
   // ── Cart: the emailed course(s) + any add-ons picked here ─────────────
   const [added, setAdded] = useState<number[]>([]);
@@ -139,6 +143,10 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
   // The course the page is "about" — the first linked course still in the
   // cart (add-ons on top must not retitle the page), else whatever is left.
   const lead = cart.find((c) => isLinked(c.id)) ?? cart[0] ?? courses[0];
+  // Courses this person already has, from the link check. The link stays open
+  // after a purchase, so someone can come back to it: nothing left to buy then.
+  const [heldIds, setHeldIds] = useState<number[]>([]);
+  const alreadyEnrolled = cart.length > 0 && cart.every((c) => heldIds.includes(c.id));
 
   // ── Identity ──────────────────────────────────────────────────────────
   const [identity, setIdentity] = useState<Identity>(prefillEmail || linkToken ? "checking" : "unknown");
@@ -209,11 +217,12 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
             body: JSON.stringify({ token: linkToken, ...stageFlag })
           });
           const d = (await res.json().catch(() => null)) as
-            | { success?: boolean; full_name?: string; email?: string }
+            | { success?: boolean; full_name?: string; email?: string; held_course_ids?: number[] }
             | null;
           if (cancelled) return;
           if (res.ok && d?.success) {
             const name = String(d.full_name || "");
+            setHeldIds(d.held_course_ids || []);
             setAccountName(name);
             if (d.email) {
               setEmail(d.email);
@@ -221,7 +230,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
             }
             setIdentity("link");
             const first = name.trim().split(/\s+/)[0];
-            setNotice({
+            if (!d.held_course_ids?.length) setNotice({
               kind: "ok",
               text: first
                 ? `Signed in as ${first} — no password needed. Your course is ready to enroll.`
@@ -424,6 +433,7 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
       }
       if (!ok || !data?.success) {
         if (data?.need_password) setIdentity("existing");
+        if (data?.already_enrolled) setHeldIds((data.refused_course_ids as number[]) || []);
         return fail(
           (typeof data?.message === "string" && data.message) ||
             "We couldn't complete your enrollment. Your card has not been charged."
@@ -705,7 +715,19 @@ function QuickBuyInner({ courses, suggestions = [], prefillEmail = "", prefillNa
               {done.courses.length === 1 ? <><strong>{lead.name}</strong> is</> : <>Your <strong>{done.courses.length} courses</strong> are</>} in your account,
               and your receipt is on its way to <strong>{done.result?.employee.email || email}</strong>.
             </p>
-            <a href={done.result?.loginUrl || appLogin} className="v10-btn v10-btn--pay">
+            <a href={done.result?.loginUrl || startHref} className="v10-btn v10-btn--pay">
+              Start my course <i className="fas fa-arrow-right" aria-hidden="true" />
+            </a>
+          </div>
+        ) : alreadyEnrolled ? (
+          <div className="v10-done" role="status">
+            <span className="v10-done__ic" aria-hidden="true"><i className="fas fa-check" /></span>
+            <h2>You&rsquo;re already enrolled{firstName ? `, ${firstName}` : ""}!</h2>
+            <p>
+              {cart.length === 1 ? <><strong>{lead.name}</strong> is</> : <>Your courses are</>} in your account.
+              There&rsquo;s nothing more to pay.
+            </p>
+            <a href={startHref} className="v10-btn v10-btn--pay">
               Start my course <i className="fas fa-arrow-right" aria-hidden="true" />
             </a>
           </div>
