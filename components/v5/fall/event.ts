@@ -115,7 +115,13 @@ export function useFall(forced = false): boolean {
     setAsked(new URLSearchParams(window.location.search).get("event") === FALL.key);
   }, []);
   if (forced) {
-    return Boolean(live) && Date.now() < (live as LiveFallPromo).endsAt;
+    // The homepage runs the fall look through the Thanksgiving window: until
+    // FALL.endsAt (end of the Sunday after Thanksgiving, Eastern), or the
+    // live code's own "valid until" if that is later — then it switches off
+    // by itself. The offer bar and sale strip still appear only while the
+    // THANKSGIVING code is live in the LMS, so a dead code is never shown.
+    const end = live ? Math.max(live.endsAt, Date.parse(FALL.endsAt)) : Date.parse(FALL.endsAt);
+    return Date.now() < end;
   }
   return asked && Date.now() < Date.parse(FALL.endsAt);
 }

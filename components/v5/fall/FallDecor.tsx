@@ -146,58 +146,8 @@ const OVERHANG_Y = 58;
 const PATCH_W = 190;
 const PATCH_H = 116;
 
-const GUST_COLORS = ["#d9541e", "#f2a93b", "#b23a12", "#e07b1a", "#c9611a", "#f0b429", "#a8321a", "#e38a24"];
-const GUST_KEY = "t321.v5.fall.gust";
-
-type GustLeaf = {
-  top: number;
-  size: number;
-  color: string;
-  oak: boolean;
-  delay: number;
-  dur: number;
-  /** Midpoint and end of the swirl, as offsets from the start (vw / px). */
-  mx: number;
-  my: number;
-  ex: number;
-  ey: number;
-  spin: number;
-};
-
-/** The welcome gust: a flurry blown off the branch, sweeping right to left. */
-function makeGust(): GustLeaf[] {
-  return Array.from({ length: 18 }, () => ({
-    top: 2 + Math.random() * 22,
-    size: 22 + Math.random() * 20,
-    color: GUST_COLORS[Math.floor(Math.random() * GUST_COLORS.length)],
-    oak: Math.random() < 0.4,
-    delay: Math.random() * 0.7,
-    dur: 2.2 + Math.random() * 0.9,
-    mx: -(30 + Math.random() * 25),
-    my: 60 + Math.random() * 160,
-    ex: -(75 + Math.random() * 40),
-    ey: 140 + Math.random() * 320,
-    spin: (Math.random() < 0.5 ? -1 : 1) * (360 + Math.random() * 540)
-  }));
-}
-
 export default function FallDecor() {
   const ref = useRef<HTMLDivElement>(null);
-  // Once per browser session, the page opens with a gust of leaves swirling
-  // off the branch across the hero. Off under reduced motion.
-  const [gust, setGust] = useState<GustLeaf[]>([]);
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    try {
-      if (window.sessionStorage.getItem(GUST_KEY)) return;
-      window.sessionStorage.setItem(GUST_KEY, "1");
-    } catch {
-      /* storage unavailable — still play it */
-    }
-    setGust(makeGust());
-    const done = window.setTimeout(() => setGust([]), 4200);
-    return () => window.clearTimeout(done);
-  }, []);
   // Where the pumpkin group goes, relative to the hero; null until measured
   // (or when the photo card isn't shown), so nothing jumps on first paint.
   const [patch, setPatch] = useState<{ left: number; top: number } | null>(null);
@@ -342,32 +292,6 @@ export default function FallDecor() {
         corner. Separate from the decor (which is behind the content) and
         click-through, so it never blocks anything. */}
     <div className="v5-fa-front" aria-hidden="true">
-      {gust.length > 0 && (
-      <div className="v5-fa-gustlayer">
-      {gust.map((g, i) => (
-        <span
-          key={i}
-          className="v5-fa-gust"
-          style={
-            {
-              top: `${g.top}%`,
-              color: g.color,
-              "--fa-size": `${g.size}px`,
-              "--g-delay": `${g.delay}s`,
-              "--g-dur": `${g.dur}s`,
-              "--g-mx": `${g.mx}vw`,
-              "--g-my": `${g.my}px`,
-              "--g-ex": `${g.ex}vw`,
-              "--g-ey": `${g.ey}px`,
-              "--g-spin": `${g.spin}deg`
-            } as React.CSSProperties
-          }
-        >
-          {g.oak ? <OakLeaf /> : <Leaf />}
-        </span>
-      ))}
-      </div>
-      )}
       {patch && (
         <div className="v5-fa-patch" style={{ left: patch.left, top: patch.top }}>
           <span className="v5-fa-pumpkin v5-fa-pumpkin--small">

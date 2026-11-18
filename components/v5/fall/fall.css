@@ -457,48 +457,6 @@
   z-index: 2;
   pointer-events: none;
 }
-/* Welcome gust (once per session): leaves blown off the branch in the
-   top-right, swirling across the hero and fading out. The front layer is
-   click-through, and the whole flurry is gone in about three seconds. */
-.v5-fa-gustlayer {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-.v5-fa-gust {
-  position: absolute;
-  right: 6%;
-  width: var(--fa-size, 28px);
-  height: var(--fa-size, 28px);
-  opacity: 0;
-  filter: drop-shadow(0 6px 8px rgba(80, 30, 0, 0.22));
-  animation: v5-fa-gust var(--g-dur, 2.6s) cubic-bezier(0.3, 0.1, 0.4, 1) var(--g-delay, 0s) forwards;
-}
-.v5-fa-gust svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-@keyframes v5-fa-gust {
-  0% {
-    opacity: 0;
-    transform: translate(0, 0) rotate(0deg) scale(0.6);
-  }
-  12% {
-    opacity: 1;
-  }
-  50% {
-    transform: translate(var(--g-mx), var(--g-my)) rotate(calc(var(--g-spin) * 0.5)) scale(1);
-  }
-  82% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(var(--g-ex), var(--g-ey)) rotate(var(--g-spin)) scale(0.85);
-  }
-}
-
 /* A slow golden light passing over the headline's highlighted word. */
 .v5--fall .v5-hero .v5-h1 em {
   background-image: linear-gradient(

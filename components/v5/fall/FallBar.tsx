@@ -113,10 +113,7 @@ export default function FallBar() {
 
         {/* The coupon: code on the left, perforation, action on the right. */}
         <div className={`v5-fa-ticket${applied ? " is-applied" : ""}`}>
-          <span className="v5-fa-ticket__code">
-            <small>Code</small>
-            {code}
-          </span>
+          <span className="v5-fa-ticket__code">{code}</span>
           {applied ? (
             <span className="v5-fa-ticket__action v5-fa-ticket__action--done" role="status">
               <i className="fas fa-check" aria-hidden="true" /> Applied
