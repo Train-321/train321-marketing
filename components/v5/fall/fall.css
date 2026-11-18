@@ -826,8 +826,7 @@
 
 /* Course finder: two pumpkins with a few leaves resting on the section's
    bottom edge in the bottom-right corner, beside "Show more" — grounded like
-   the hero's pumpkins. Decorative, click-through; hidden on narrow screens
-   where the list runs full width. */
+   the hero's pumpkins. Decorative and click-through. */
 .v5--fall .v5-explorer {
   position: relative;
 }
@@ -842,8 +841,14 @@
   filter: drop-shadow(0 6px 8px rgba(90, 37, 16, 0.18));
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 112'%3E%3Cdefs%3E%3CradialGradient id='b' cx='42%25' cy='36%25' r='72%25'%3E%3Cstop offset='0' stop-color='%23ffb257'/%3E%3Cstop offset='.55' stop-color='%23e8701a'/%3E%3Cstop offset='1' stop-color='%23a63d0a'/%3E%3C/radialGradient%3E%3CradialGradient id='s' cx='50%25' cy='40%25' r='70%25'%3E%3Cstop offset='0' stop-color='%23e9802a'/%3E%3Cstop offset='1' stop-color='%238f3208'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cellipse cx='104' cy='108' rx='90' ry='3.5' fill='rgba(90,37,16,.13)'/%3E%3Cg transform='translate(96 46) scale(0.56)'%3E%3Cpath d='M57 28c-1-11 1-17 7-22l5 3c-4 4-5 10-4 19z' fill='%234e6b1f'/%3E%3Cpath d='M66 12c6-6 14-7 20-3-6 1-10 4-12 9-3-2-6-4-8-6z' fill='none' stroke='%235b7a24' stroke-width='2.4' stroke-linecap='round'/%3E%3Cellipse cx='35' cy='68' rx='29' ry='37' fill='url(%23s)'/%3E%3Cellipse cx='85' cy='68' rx='29' ry='37' fill='url(%23s)'/%3E%3Cellipse cx='60' cy='68' rx='33' ry='41' fill='url(%23b)'/%3E%3Cpath d='M60 30v76' stroke='rgba(110,40,8,.22)' stroke-width='2'/%3E%3Cellipse cx='46' cy='52' rx='7' ry='11' fill='rgba(255,235,200,.22)'/%3E%3C/g%3E%3Cg transform='translate(36 11) scale(0.88)'%3E%3Cpath d='M57 28c-1-11 1-17 7-22l5 3c-4 4-5 10-4 19z' fill='%234e6b1f'/%3E%3Cpath d='M66 12c6-6 14-7 20-3-6 1-10 4-12 9-3-2-6-4-8-6z' fill='none' stroke='%235b7a24' stroke-width='2.4' stroke-linecap='round'/%3E%3Cellipse cx='35' cy='68' rx='29' ry='37' fill='url(%23s)'/%3E%3Cellipse cx='85' cy='68' rx='29' ry='37' fill='url(%23s)'/%3E%3Cellipse cx='60' cy='68' rx='33' ry='41' fill='url(%23b)'/%3E%3Cpath d='M60 30v76' stroke='rgba(110,40,8,.22)' stroke-width='2'/%3E%3Cellipse cx='46' cy='52' rx='7' ry='11' fill='rgba(255,235,200,.22)'/%3E%3C/g%3E%3Cg transform='translate(16 104) rotate(30) scale(0.2) translate(-50 -50)'%3E%3Cpath d='M50 4c3 10 7 17 13 22l-3 7 11-3c5 2 11 3 18 3-4 5-7 10-8 16l6 6-9 1c-2 6-2 12 0 19-6-4-12-6-18-6l-4 10-4-10c-6 0-12 2-18 6 2-7 2-13 0-19l-9-1 6-6c-1-6-4-11-8-16 7 0 13-1 18-3l11 3-3-7c6-5 10-12 13-22z' fill='%23d9541e'/%3E%3C/g%3E%3Cg transform='translate(34 108) rotate(-45) scale(0.16) translate(-50 -50)'%3E%3Cpath d='M50 4c3 10 7 17 13 22l-3 7 11-3c5 2 11 3 18 3-4 5-7 10-8 16l6 6-9 1c-2 6-2 12 0 19-6-4-12-6-18-6l-4 10-4-10c-6 0-12 2-18 6 2-7 2-13 0-19l-9-1 6-6c-1-6-4-11-8-16 7 0 13-1 18-3l11 3-3-7c6-5 10-12 13-22z' fill='%23f2a93b'/%3E%3C/g%3E%3Cg transform='translate(170 105) rotate(70) scale(0.19) translate(-50 -50)'%3E%3Cpath d='M50 4c3 10 7 17 13 22l-3 7 11-3c5 2 11 3 18 3-4 5-7 10-8 16l6 6-9 1c-2 6-2 12 0 19-6-4-12-6-18-6l-4 10-4-10c-6 0-12 2-18 6 2-7 2-13 0-19l-9-1 6-6c-1-6-4-11-8-16 7 0 13-1 18-3l11 3-3-7c6-5 10-12 13-22z' fill='%23b23a12'/%3E%3C/g%3E%3Cg transform='translate(188 108) rotate(-20) scale(0.15) translate(-50 -50)'%3E%3Cpath d='M50 4c3 10 7 17 13 22l-3 7 11-3c5 2 11 3 18 3-4 5-7 10-8 16l6 6-9 1c-2 6-2 12 0 19-6-4-12-6-18-6l-4 10-4-10c-6 0-12 2-18 6 2-7 2-13 0-19l-9-1 6-6c-1-6-4-11-8-16 7 0 13-1 18-3l11 3-3-7c6-5 10-12 13-22z' fill='%23e07b1a'/%3E%3C/g%3E%3C/svg%3E") center bottom / contain no-repeat;
 }
+/* Narrower screens: the list runs full width and "Show more" sits centred,
+   so the pair shrinks and rests in the empty space below the button (the
+   section's bottom padding), clear of it. */
 @media (max-width: 899.98px) {
   .v5--fall .v5-explorer::after {
-    display: none;
+    right: 4%;
+    bottom: 6px;
+    width: 112px;
+    height: 62px;
   }
 }

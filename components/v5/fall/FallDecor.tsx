@@ -166,7 +166,9 @@ export default function FallDecor() {
       setPatch({
         // Never past the hero's right edge (no sideways scroll on narrow screens).
         left: Math.min(c.right - h.left - PATCH_W + OVERLAP_X, h.width - PATCH_W - 8),
-        top: c.bottom - h.top - PATCH_H + OVERHANG_Y
+        // …and never past the hero's bottom edge (on phones the photo card
+        // sits near the bottom, so the group would spill into the next section).
+        top: Math.min(c.bottom - h.top - PATCH_H + OVERHANG_Y, h.height - PATCH_H - 6)
       });
     };
     place();
