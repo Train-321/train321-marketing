@@ -25,6 +25,11 @@ import HalloweenBar from "./halloween/HalloweenBar";
 import HalloweenDecor from "./halloween/HalloweenDecor";
 import "./v5.css";
 import "./halloween/halloween.css";
+import { useFall } from "./fall/event";
+import FallBar from "./fall/FallBar";
+import FallDecor from "./fall/FallDecor";
+import FallPageLeaves from "./fall/FallPageLeaves";
+import "./fall/fall.css";
 
 type CompanyStat = { value: string; label: string };
 
@@ -84,16 +89,24 @@ export default function HomeV5({
   // ?event=halloween: the event bar on top and a themed hero. Nothing else
   // on the page changes, and it switches itself off once the offer ends.
   const halloween = useHalloween(forceEvent);
+  // The Fall / Thanksgiving event works the same way with its own code
+  // (components/v5/fall). Only one event shows at a time: should both codes
+  // ever be live together, Halloween keeps the page exactly as it is today.
+  const fallLive = useFall(forceEvent);
+  const fall = !halloween && fallLive;
+  const eventClass = halloween ? " v5--halloween" : fall ? " v5--fall" : "";
 
   return (
     <FinderV5Provider marketplace={marketplace}>
       {halloween && <HalloweenBar />}
-      <div className={`v5${halloween ? " v5--halloween" : ""}`}>
+      {fall && <FallBar />}
+      {fall && <FallPageLeaves />}
+      <div className={`v5${eventClass}`}>
         <HeroV5
           audience={audience}
           onAudience={chooseAudience}
           home={home}
-          decor={halloween ? <HalloweenDecor /> : null}
+          decor={halloween ? <HalloweenDecor /> : fall ? <FallDecor /> : null}
         />
         <TrustStrip logos={trustLogos} label={studio?.trustLabel} />
         <PillarsV5 head={home?.pillarsHead} pillars={home?.pillars} />

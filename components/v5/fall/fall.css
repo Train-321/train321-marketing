@@ -1,0 +1,683 @@
+/* Fall / Thanksgiving event for the v5 homepage (?event=fall, or the live
+   THANKSGIVING promo code). Everything here is scoped to the event bar or to
+   .v5--fall .v5-hero, so the page and its other sections are untouched when
+   the event is off, and nothing overlaps the Halloween styles (v5-hw-*). The
+   bar renders outside .v5 (above the site header), so its colours are
+   literal, not --v5 tokens. */
+
+/* --------------------------------------------------------------------------
+   Event bar — warm evening: deep maple brown with amber and gold glows.
+   -------------------------------------------------------------------------- */
+
+.v5-fa-bar {
+  position: relative;
+  overflow: hidden;
+  color: #fff3e2;
+  background:
+    radial-gradient(2px 2px at 9% 34%, rgba(255, 205, 120, 0.55), transparent 60%),
+    radial-gradient(1.5px 1.5px at 27% 70%, rgba(255, 190, 90, 0.4), transparent 60%),
+    radial-gradient(2px 2px at 62% 24%, rgba(255, 215, 140, 0.45), transparent 60%),
+    radial-gradient(1.5px 1.5px at 84% 72%, rgba(255, 190, 90, 0.4), transparent 60%),
+    radial-gradient(380px 90px at 12% 50%, rgba(232, 112, 26, 0.38), transparent 70%),
+    radial-gradient(460px 110px at 88% 50%, rgba(178, 58, 18, 0.42), transparent 70%),
+    linear-gradient(90deg, #3a1a0b 0%, #5a2510 50%, #3a1a0b 100%);
+  border-bottom: 1px solid rgba(255, 178, 87, 0.28);
+  font-size: 0.86rem;
+  animation: v5-fa-drop 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes v5-fa-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+.v5-fa-bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.25rem;
+  max-width: 1240px;
+  min-height: 58px;
+  margin: 0 auto;
+  padding: 0.5rem 3.5rem;
+}
+
+/* Offer */
+.v5-fa-bar__offer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  white-space: nowrap;
+}
+.v5-fa-bar__leaves {
+  position: relative;
+  width: 34px;
+  height: 30px;
+  flex: none;
+}
+.v5-fa-bar__leaf {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+}
+.v5-fa-bar__leaf--a {
+  left: 0;
+  top: 2px;
+  color: #f2a93b;
+  animation: v5-fa-sway 2.4s ease-in-out infinite alternate;
+}
+.v5-fa-bar__leaf--b {
+  left: 12px;
+  top: 8px;
+  color: #d9541e;
+  animation: v5-fa-sway 2.9s ease-in-out -1.2s infinite alternate-reverse;
+}
+@keyframes v5-fa-sway {
+  from {
+    transform: rotate(-14deg) translateY(0);
+  }
+  to {
+    transform: rotate(12deg) translateY(2px);
+  }
+}
+.v5-fa-bar__title {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #ffd79a;
+}
+.v5-fa-bar__deal {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  color: rgba(255, 243, 226, 0.88);
+}
+.v5-fa-bar__deal strong {
+  font-size: 1.05rem;
+  color: #ffffff;
+}
+
+/* Countdown */
+.v5-fa-bar__clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  white-space: nowrap;
+}
+.v5-fa-bar__ends {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 243, 226, 0.7);
+}
+.v5-fa-bar__tiles {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+.v5-fa-bar__tile {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 40px;
+  padding: 0.2rem 0.35rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 178, 87, 0.22);
+  line-height: 1.1;
+}
+.v5-fa-bar__tile b {
+  font-size: 0.98rem;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+}
+.v5-fa-bar__tile small {
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 243, 226, 0.65);
+}
+
+/* Coupon */
+.v5-fa-ticket {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff6e8;
+  color: #3a1a0b;
+  box-shadow: 0 8px 22px -10px rgba(0, 0, 0, 0.6);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.v5-fa-ticket:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px -10px rgba(0, 0, 0, 0.65);
+}
+.v5-fa-ticket__code {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.3rem 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  border-right: 2px dashed rgba(58, 26, 11, 0.25);
+}
+.v5-fa-ticket__code small {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(58, 26, 11, 0.6);
+}
+.v5-fa-ticket__action {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: 0 1rem;
+  font: inherit;
+  font-weight: 700;
+  color: #2a1206;
+  background: linear-gradient(135deg, #ffc46a, #e8701a);
+  cursor: pointer;
+  transition: filter 0.18s ease;
+}
+.v5-fa-ticket__action:hover {
+  filter: brightness(1.06);
+}
+.v5-fa-ticket.is-applied {
+  background: #eaf7ea;
+}
+.v5-fa-ticket__action--done {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #2f8a4a;
+  color: #ffffff;
+  cursor: default;
+}
+.v5-fa-ticket__action--done:hover {
+  filter: none;
+}
+
+/* Close */
+.v5-fa-bar__close {
+  position: absolute;
+  top: 50%;
+  right: 0.9rem;
+  width: 34px;
+  height: 34px;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 243, 226, 0.85);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.v5-fa-bar__close:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+.v5-fa-bar__close:focus-visible {
+  outline: 2px solid #ffc46a;
+  outline-offset: 2px;
+}
+
+@media (max-width: 1099.98px) {
+  .v5-fa-bar__inner {
+    gap: 1.25rem;
+  }
+  .v5-fa-bar__deal-rest {
+    display: none;
+  }
+}
+@media (max-width: 859.98px) {
+  .v5-fa-bar__inner {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+    padding: 0.6rem 3rem 0.7rem 1rem;
+  }
+  .v5-fa-bar__clock {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: center;
+  }
+}
+@media (max-width: 479.98px) {
+  .v5-fa-bar__title {
+    font-size: 0.95rem;
+  }
+  .v5-fa-bar__tile {
+    min-width: 34px;
+  }
+  .v5-fa-ticket__code {
+    padding: 0.25rem 0.6rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Hero theme — warm cream sky, maple and gold accents.
+   -------------------------------------------------------------------------- */
+
+.v5--fall .v5-hero {
+  background: linear-gradient(180deg, #fff6ea 0%, #fffaf3 55%, #ffffff 100%);
+}
+.v5--fall .v5-hero__blob--a {
+  background: radial-gradient(closest-side, rgba(232, 112, 26, 0.24), transparent);
+}
+.v5--fall .v5-hero__blob--b {
+  background: radial-gradient(closest-side, rgba(178, 58, 18, 0.16), transparent);
+}
+.v5--fall .v5-hero .v5-h1 em {
+  background: linear-gradient(92deg, #e8701a 0%, #b23a12 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.v5--fall .v5-hero .v5-dot {
+  background: #e8701a;
+  box-shadow: 0 0 0 0 rgba(232, 112, 26, 0.55);
+  animation-name: v5-fa-ping;
+}
+@keyframes v5-fa-ping {
+  70% {
+    box-shadow: 0 0 0 10px rgba(232, 112, 26, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(232, 112, 26, 0);
+  }
+}
+.v5--fall .v5-hero .v5-finderbar__go {
+  background: linear-gradient(135deg, #ffc46a, #e8701a);
+  color: #2a1206;
+  box-shadow: 0 12px 28px -12px rgba(232, 112, 26, 0.8);
+}
+.v5--fall .v5-hero .v5-finderbar__go:hover {
+  box-shadow: 0 16px 34px -12px rgba(232, 112, 26, 0.95);
+}
+.v5--fall .v5-hero__proof-icon {
+  color: #e8701a;
+}
+
+/* --------------------------------------------------------------------------
+   Hero decoration — drifting leaves and a pumpkin patch.
+   -------------------------------------------------------------------------- */
+
+/* Its own clipping layer — never the hero's, so finder menus stay unclipped.
+   z-index 0 (not 1 like the Halloween art): the layer comes before the
+   hero's content in the markup, so at the same level the headline, finder
+   and photo card paint OVER it — leaves drift behind the copy and photo,
+   never across a word or a face. */
+.v5-fa-decor {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Top-right corner: a warm low-sun glow, and a maple branch reaching in. */
+.v5-fa-bloom {
+  position: absolute;
+  top: -180px;
+  right: -160px;
+  width: 560px;
+  height: 460px;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(255, 206, 120, 0.55),
+    rgba(255, 170, 80, 0.26) 45%,
+    rgba(255, 150, 60, 0) 100%
+  );
+  animation: v5-fa-glow 7s ease-in-out infinite alternate;
+}
+@keyframes v5-fa-glow {
+  from {
+    opacity: 0.75;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+.v5-fa-branch {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  width: 300px;
+  height: 200px;
+  transform-origin: 100% 0;
+  filter: drop-shadow(0 8px 10px rgba(90, 37, 16, 0.18));
+  animation: v5-fa-bough 6s ease-in-out infinite alternate;
+}
+.v5-fa-branch svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+@keyframes v5-fa-bough {
+  from {
+    transform: rotate(-1.6deg);
+  }
+  to {
+    transform: rotate(2deg);
+  }
+}
+/* Each leaf flutters on its stem (the group sits at the stem point). */
+.v5-fa-branch__leaf {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: v5-fa-flutter 2.6s ease-in-out infinite alternate;
+}
+@keyframes v5-fa-flutter {
+  from {
+    transform: rotate(-7deg);
+  }
+  to {
+    transform: rotate(7deg);
+  }
+}
+
+/* A leaf falls the full height while swaying side to side; the inner span
+   spins so the drift and the tumble can run on different clocks. */
+.v5-fa-leaf {
+  position: absolute;
+  top: -8%;
+  width: var(--fa-size, 24px);
+  height: var(--fa-size, 24px);
+  opacity: 0.85;
+  animation: v5-fa-fall var(--fa-dur, 16s) linear var(--fa-delay, 0s) infinite;
+  filter: drop-shadow(0 4px 6px rgba(80, 30, 0, 0.18));
+}
+/* The cursor's gust: JS sets this wrapper's transform, so it never fights
+   the fall (outer span) or the tumble (inner span) animations. */
+.v5-fa-leaf__push {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.v5-fa-leaf__spin {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: v5-fa-tumble calc(var(--fa-dur, 16s) / 3) ease-in-out var(--fa-delay, 0s) infinite alternate;
+}
+.v5-fa-leaf svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+@keyframes v5-fa-fall {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  6% {
+    opacity: 0.85;
+  }
+  25% {
+    transform: translate3d(28px, 28vh, 0);
+  }
+  50% {
+    transform: translate3d(-22px, 56vh, 0);
+  }
+  75% {
+    transform: translate3d(26px, 84vh, 0);
+  }
+  94% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(-10px, 112vh, 0);
+    opacity: 0;
+  }
+}
+@keyframes v5-fa-tumble {
+  from {
+    transform: rotate(-40deg) scaleX(1);
+  }
+  to {
+    transform: rotate(50deg) scaleX(0.72);
+  }
+}
+
+/* Front layer: holds only the pumpkin group, which sits OVER the photo
+   card's bottom-right corner (picture only — the caption is bottom-left).
+   z-index 2 puts it above the card; the finder menus (50) stay above it,
+   and it is click-through. FallDecor positions the group from the card. */
+.v5-fa-front {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+/* Welcome gust (once per session): leaves blown off the branch in the
+   top-right, swirling across the hero and fading out. The front layer is
+   click-through, and the whole flurry is gone in about three seconds. */
+.v5-fa-gustlayer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.v5-fa-gust {
+  position: absolute;
+  right: 6%;
+  width: var(--fa-size, 28px);
+  height: var(--fa-size, 28px);
+  opacity: 0;
+  filter: drop-shadow(0 6px 8px rgba(80, 30, 0, 0.22));
+  animation: v5-fa-gust var(--g-dur, 2.6s) cubic-bezier(0.3, 0.1, 0.4, 1) var(--g-delay, 0s) forwards;
+}
+.v5-fa-gust svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+@keyframes v5-fa-gust {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg) scale(0.6);
+  }
+  12% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate(var(--g-mx), var(--g-my)) rotate(calc(var(--g-spin) * 0.5)) scale(1);
+  }
+  82% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--g-ex), var(--g-ey)) rotate(var(--g-spin)) scale(0.85);
+  }
+}
+
+/* A slow golden light passing over the headline's highlighted word. */
+.v5--fall .v5-hero .v5-h1 em {
+  background-image: linear-gradient(
+    100deg,
+    #e8701a 0%,
+    #b23a12 38%,
+    #ffcf7a 50%,
+    #b23a12 62%,
+    #e8701a 100%
+  );
+  background-size: 260% 100%;
+  background-position: 100% 0;
+  animation: v5-fa-shimmer 6s ease-in-out 1.2s infinite;
+}
+@keyframes v5-fa-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  35%,
+  100% {
+    background-position: 0% 0;
+  }
+}
+
+.v5-fa-patch {
+  position: absolute;
+  width: 190px;
+  height: 116px;
+  animation: v5-fa-arrive 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes v5-fa-arrive {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+}
+.v5-fa-pumpkin--big {
+  --fa-size: 104px;
+  left: 44px;
+  bottom: 6px;
+}
+.v5-fa-pumpkin--small {
+  --fa-size: 64px;
+  left: 120px;
+  bottom: 4px;
+  --fa-delay: -1.3s;
+}
+.v5-fa-patch__leaf {
+  position: absolute;
+  width: var(--fa-size, 24px);
+  height: var(--fa-size, 24px);
+  filter: drop-shadow(0 3px 3px rgba(80, 30, 0, 0.18));
+}
+.v5-fa-patch__leaf svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.v5-fa-pumpkin {
+  position: absolute;
+  width: var(--fa-size, 72px);
+  height: calc(var(--fa-size, 72px) * 0.92);
+  filter: drop-shadow(0 10px 16px rgba(90, 37, 16, 0.28));
+  animation: v5-fa-settle 5.5s ease-in-out var(--fa-delay, 0s) infinite alternate;
+  transform-origin: 50% 100%;
+}
+.v5-fa-pumpkin svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+@keyframes v5-fa-settle {
+  from {
+    transform: scale(1) translateY(0);
+  }
+  to {
+    transform: scale(1.015, 0.985) translateY(1px);
+  }
+}
+
+@media (max-width: 767.98px) {
+  /* Fewer falling leaves on phones — less motion over the copy — and a
+     smaller group and branch. The group shrinks toward its own bottom-right,
+     so it stays on the card's corner. */
+  .v5-fa-leaf--extra {
+    display: none;
+  }
+  .v5-fa-patch {
+    transform: scale(0.72);
+    transform-origin: 100% 100%;
+  }
+  .v5-fa-branch {
+    width: 190px;
+    height: 127px;
+  }
+  .v5-fa-bloom {
+    width: 380px;
+    height: 320px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v5-fa-bar,
+  .v5-fa-bar__leaf,
+  .v5-fa-leaf,
+  .v5-fa-leaf__spin,
+  .v5--fall .v5-hero .v5-h1 em,
+  .v5-fa-patch,
+  .v5-fa-pumpkin,
+  .v5-fa-bloom,
+  .v5-fa-branch,
+  .v5-fa-branch__leaf {
+    animation: none;
+  }
+  /* Leaves rest scattered down the hero instead of falling. */
+  .v5-fa-leaf {
+    top: auto;
+    bottom: 8%;
+    opacity: 0.7;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Rest of the homepage — kept light on purpose: soft warm tints and a few
+   leaves drifting down. Brand colours (cyan accents, navy ink) and every
+   section's layout stay as they are. Scoped to .v5--fall, so nothing changes
+   when the event is off.
+   -------------------------------------------------------------------------- */
+
+/* Each light section keeps its own base colour and gets the hero's kind of
+   light: a soft warm sun-shine in the top-right corner and a gentler warm
+   glow in both bottom corners. No flat tint. */
+.v5--fall .v5-explorer,
+.v5--fall .v5-how,
+.v5--fall .v5-faq {
+  background: radial-gradient(780px 440px at 100% 0%, rgba(255, 196, 120, 0.24), transparent 65%),
+    radial-gradient(640px 400px at 0% 100%, rgba(242, 169, 59, 0.12), transparent 65%),
+    radial-gradient(640px 400px at 100% 100%, rgba(242, 169, 59, 0.12), transparent 65%), var(--v5-paper-2);
+}
+.v5--fall .v5-pillars-sec,
+.v5--fall .v5-popular,
+.v5--fall .v5-roles {
+  background: radial-gradient(780px 440px at 100% 0%, rgba(255, 196, 120, 0.2), transparent 65%),
+    radial-gradient(640px 400px at 0% 100%, rgba(242, 169, 59, 0.1), transparent 65%),
+    radial-gradient(640px 400px at 100% 100%, rgba(242, 169, 59, 0.1), transparent 65%), #fff;
+}
+
+.v5--fall .v5-quotes {
+  background: radial-gradient(900px 520px at 8% 0%, rgba(242, 169, 59, 0.12), transparent 60%),
+    radial-gradient(720px 420px at 100% 100%, rgba(226, 105, 28, 0.06), transparent 60%), #fff;
+}
+
+/* A handful of small, faint leaves drifting down the screen while the
+   visitor reads the sections below the hero (FallPageLeaves). Fixed to the
+   viewport, click-through, and hidden while the hero is on screen. */
+.v5-fa-page {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.v5-fa-page.is-on {
+  opacity: 1;
+}
+.v5-fa-page .v5-fa-leaf {
+  opacity: 0.5;
+  filter: none;
+}
+@media (max-width: 767.98px) {
+  .v5-fa-page .v5-fa-leaf--extra {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v5-fa-page {
+    display: none;
+  }
+}
