@@ -248,15 +248,85 @@
     justify-content: center;
   }
 }
-@media (max-width: 479.98px) {
-  .v5-fa-bar__title {
-    font-size: 0.95rem;
+/* Phones: a compact two-row bar — the offer on top, then the code and a
+   small countdown side by side — instead of three stacked rows. */
+@media (max-width: 599.98px) {
+  /* Full width for the second row; only the top row (the offer) keeps
+     room on both sides for the close button, so it stays centred. */
+  .v5-fa-bar__inner {
+    gap: 0.4rem 0.6rem;
+    min-height: 0;
+    padding: 0.45rem 0.6rem 0.5rem;
+  }
+  .v5-fa-bar__offer {
+    flex-basis: 100%;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0 2.2rem;
+  }
+  .v5-fa-bar__leaves {
+    width: 26px;
+    height: 22px;
+  }
+  .v5-fa-bar__leaf {
+    width: 17px;
+    height: 17px;
+  }
+  .v5-fa-bar__leaf--b {
+    left: 9px;
+    top: 5px;
+  }
+  .v5-fa-bar__title,
+  .v5-fa-bar__deal strong {
+    font-size: 0.92rem;
+  }
+  .v5-fa-bar__clock {
+    order: 0;
+    flex-basis: auto;
+    gap: 0.25rem;
+  }
+  .v5-fa-bar__ends {
+    display: none;
+  }
+  .v5-fa-bar__tiles {
+    gap: 0.2rem;
   }
   .v5-fa-bar__tile {
-    min-width: 34px;
+    min-width: 0;
+    padding: 0.15rem 0.3rem;
+    border-radius: 6px;
+  }
+  .v5-fa-bar__tile b {
+    font-size: 0.78rem;
+  }
+  .v5-fa-bar__tile small {
+    font-size: 0.5rem;
+  }
+  .v5-fa-ticket {
+    border-radius: 9px;
   }
   .v5-fa-ticket__code {
-    padding: 0.25rem 0.6rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.76rem;
+    letter-spacing: 0.04em;
+  }
+  .v5-fa-ticket__action {
+    padding: 0 0.6rem;
+    font-size: 0.76rem;
+    white-space: nowrap;
+  }
+  .v5-fa-bar__close {
+    top: 0.6rem;
+    right: 0.5rem;
+    width: 28px;
+    height: 28px;
+    transform: none;
+  }
+}
+/* Very narrow phones: drop the seconds tile so the row still fits. */
+@media (max-width: 369.98px) {
+  .v5-fa-bar__tile:last-child {
+    display: none;
   }
 }
 

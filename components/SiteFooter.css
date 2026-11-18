@@ -111,6 +111,10 @@
 }
 .t321-mkt-footer__news-wrap input {
   flex: 1;
+  /* The email box takes whatever space is left; without width: 0 its
+     built-in default width (~20 characters) forced the row wider than a
+     phone screen and the Subscribe button off the edge. */
+  width: 0;
   background: transparent;
   border: 0;
   color: #ffffff;
@@ -190,7 +194,9 @@
 @media (max-width: 991.98px) {
   .t321-mkt-footer { padding-top: 3.5rem; padding-bottom: 2.5rem; }
   .t321-mkt-footer__inner {
-    grid-template-columns: 1fr 1fr;
+    /* minmax(0, …): a column may shrink below its content's natural width,
+       so the newsletter row can never push the page wider than the screen. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 2.5rem;
   }
   .t321-mkt-footer__brand { grid-column: 1 / -1; }
@@ -199,7 +205,7 @@
 @media (max-width: 600px) {
   .t321-mkt-footer { padding-top: 3rem; padding-bottom: 2rem; }
   .t321-mkt-footer__inner {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 2rem;
   }
   .t321-mkt-footer__meta-inner { justify-content: flex-start; }
