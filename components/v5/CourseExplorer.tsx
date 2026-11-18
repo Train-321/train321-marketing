@@ -15,7 +15,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import CustomSelect from "@/components/CustomSelect";
 import { CourseModalProvider } from "@/components/CourseModal";
 import type { MarketplaceCourse } from "@/lib/newFeatures";
@@ -79,7 +79,17 @@ function sortCourses(list: MarketplaceCourse[], priceOrder: PriceOrder, az: bool
   return out;
 }
 
-export default function CourseExplorer({ simple = false }: { simple?: boolean } = {}) {
+export default function CourseExplorer({
+  simple = false,
+  listTop,
+  panelDecor
+}: {
+  simple?: boolean;
+  /** Optional block above the course cards (e.g. a seasonal sale strip). Nothing renders when absent. */
+  listTop?: ReactNode;
+  /** Optional absolutely-positioned overlay over the left filters card (e.g. seasonal art). Adds no height; nothing renders when absent. */
+  panelDecor?: ReactNode;
+} = {}) {
   const {
     stateCode,
     stateName,
@@ -391,9 +401,11 @@ export default function CourseExplorer({ simple = false }: { simple?: boolean } 
                 )}
               </div>
             </div>
+            {panelDecor}
           </Reveal>
 
           <div className="v5-explorer__main">
+            {listTop}
             {!simple && (
               <div className="v5-cats" role="tablist" aria-label="Course type">
                 {chips.map((c) => {

@@ -681,3 +681,211 @@
     display: none;
   }
 }
+
+/* Thanksgiving sale strip above the course finder's cards (FallSaleCard):
+   one slim row — pumpkin, offer, then the code and Apply button on the right;
+   wraps to two rows on narrow screens. Warm autumn tones, same rounding as
+   the course cards. */
+.v5-fa-sale {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin-bottom: 18px;
+  padding: 14px 16px 14px 18px;
+  border-radius: var(--v5-r, 20px);
+  border: 1px solid #f3dcc0;
+  background: radial-gradient(320px 140px at 100% 0%, rgba(255, 196, 120, 0.35), transparent 70%),
+    linear-gradient(180deg, #fffaf3 0%, #fff4e6 100%);
+  box-shadow: 0 10px 30px -20px rgba(160, 70, 20, 0.35);
+}
+.v5-fa-sale__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.v5-fa-sale__icon {
+  width: 42px;
+  height: 38px;
+  flex: none;
+  filter: drop-shadow(0 4px 6px rgba(90, 37, 16, 0.2));
+}
+.v5-fa-sale__title {
+  margin: 0;
+  font-family: var(--v5-display, Georgia, serif);
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #7a2f0b;
+}
+.v5-fa-sale__deal {
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+  color: #5b4636;
+}
+.v5-fa-sale__deal strong {
+  color: #b2410f;
+}
+.v5-fa-sale__ticket {
+  display: flex;
+  align-items: stretch;
+  flex: none;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #f0d6b6;
+}
+.v5-fa-sale__code {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #3a1a0b;
+  border-right: 2px dashed rgba(58, 26, 11, 0.2);
+}
+.v5-fa-sale__action {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: 0 1rem;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #2a1206;
+  background: linear-gradient(135deg, #ffc46a, #e8701a);
+  cursor: pointer;
+  transition: filter 0.18s ease;
+}
+.v5-fa-sale__action:hover {
+  filter: brightness(1.06);
+}
+.v5-fa-sale__action:focus-visible {
+  outline: 2px solid #b2410f;
+  outline-offset: -3px;
+}
+.v5-fa-sale__action--done {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #2f8a4a;
+  color: #fff;
+  cursor: default;
+}
+@media (max-width: 479.98px) {
+  .v5-fa-sale__ticket {
+    flex: 1 1 100%;
+  }
+  .v5-fa-sale__code {
+    flex: 1;
+  }
+}
+
+/* Map card vine (FallPanelVine): an overlay over the card's edges inside the
+   pinned left column — the column is the positioned box it hangs from, so
+   the card itself and its layout are untouched. */
+.v5-fa-vinewrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+/* Along the top edge from the left, around the top-right corner, down the
+   right side. Scales with the card's width, keeping its shape. */
+.v5-fa-vine {
+  position: absolute;
+  top: -18px;
+  right: -20px;
+  width: 80%;
+  height: auto;
+  aspect-ratio: 370 / 270;
+  overflow: visible;
+  filter: drop-shadow(0 4px 5px rgba(90, 37, 16, 0.18));
+}
+.v5-fa-vine__leaf {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: v5-fa-flutter 3s ease-in-out infinite alternate;
+}
+/* Leaves slipping off the card's top-left and drifting down its left side. */
+.v5-fa-vinefall {
+  position: absolute;
+  top: 6px;
+  width: var(--fa-size, 20px);
+  height: var(--fa-size, 20px);
+  opacity: 0;
+  animation: v5-fa-sidefall var(--fa-dur, 9s) linear var(--fa-delay, 0s) infinite;
+}
+.v5-fa-vinefall svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+@keyframes v5-fa-sidefall {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  8% {
+    opacity: 0.9;
+  }
+  30% {
+    transform: translate(-14px, 120px) rotate(120deg);
+  }
+  60% {
+    transform: translate(8px, 250px) rotate(240deg);
+  }
+  85% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-10px, 380px) rotate(360deg);
+  }
+}
+@media (max-width: 767.98px) {
+  .v5-fa-vine {
+    top: -12px;
+    right: -10px;
+    width: 72%;
+  }
+  /* Phones: the card runs nearly edge to edge, so no side leaves. */
+  .v5-fa-vinefall {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v5-fa-vine__leaf,
+  .v5-fa-vinefall {
+    animation: none;
+  }
+  .v5-fa-vinefall {
+    display: none;
+  }
+}
+
+/* Course finder: two pumpkins with a few leaves resting on the section's
+   bottom edge in the bottom-right corner, beside "Show more" — grounded like
+   the hero's pumpkins. Decorative, click-through; hidden on narrow screens
+   where the list runs full width. */
+.v5--fall .v5-explorer {
+  position: relative;
+}
+.v5--fall .v5-explorer::after {
+  content: "";
+  position: absolute;
+  right: 6%;
+  bottom: 14px;
+  width: 168px;
+  height: 94px;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 8px rgba(90, 37, 16, 0.18));
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 112'%3E%3Cdefs%3E%3CradialGradient id='b' cx='42%25' cy='36%25' r='72%25'%3E%3Cstop offset='0' stop-color='%23ffb257'/%3E%3Cstop offset='.55' stop-color='%23e8701a'/%3E%3Cstop offset='1' stop-color='%23a63d0a'/%3E%3C/radialGradient%3E%3CradialGradient id='s' cx='50%25' cy='40%25' r='70%25'%3E%3Cstop offset='0' stop-color='%23e9802a'/%3E%3Cstop offset='1' stop-color='%238f3208'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cellipse cx='104' cy='108' rx='90' ry='3.5' fill='rgba(90,37,16,.13)'/%3E%3Cg transform='translate(96 46) scale(0.56)'%3E%3Cpath d='M57 28c-1-11 1-17 7-22l5 3c-4 4-5 10-4 19z' fill='%234e6b1f'/%3E%3Cpath d='M66 12c6-6 14-7 20-3-6 1-10 4-12 9-3-2-6-4-8-6z' fill='none' stroke='%235b7a24' stroke-width='2.4' stroke-linecap='round'/%3E%3Cellipse cx='35' cy='68' rx='29' ry='37' fill='url(%23s)'/%3E%3Cellipse cx='85' cy='68' rx='29' ry='37' fill='url(%23s)'/%3E%3Cellipse cx='60' cy='68' rx='33' ry='41' fill='url(%23b)'/%3E%3Cpath d='M60 30v76' stroke='rgba(110,40,8,.22)' stroke-width='2'/%3E%3Cellipse cx='46' cy='52' rx='7' ry='11' fill='rgba(255,235,200,.22)'/%3E%3C/g%3E%3Cg transform='translate(36 11) scale(0.88)'%3E%3Cpath d='M57 28c-1-11 1-17 7-22l5 3c-4 4-5 10-4 19z' fill='%234e6b1f'/%3E%3Cpath d='M66 12c6-6 14-7 20-3-6 1-10 4-12 9-3-2-6-4-8-6z' fill='none' stroke='%235b7a24' stroke-width='2.4' stroke-linecap='round'/%3E%3Cellipse cx='35' cy='68' rx='29' ry='37' fill='url(%23s)'/%3E%3Cellipse cx='85' cy='68' rx='29' ry='37' fill='url(%23s)'/%3E%3Cellipse cx='60' cy='68' rx='33' ry='41' fill='url(%23b)'/%3E%3Cpath d='M60 30v76' stroke='rgba(110,40,8,.22)' stroke-width='2'/%3E%3Cellipse cx='46' cy='52' rx='7' ry='11' fill='rgba(255,235,200,.22)'/%3E%3C/g%3E%3Cg transform='translate(16 104) rotate(30) scale(0.2) translate(-50 -50)'%3E%3Cpath d='M50 4c3 10 7 17 13 22l-3 7 11-3c5 2 11 3 18 3-4 5-7 10-8 16l6 6-9 1c-2 6-2 12 0 19-6-4-12-6-18-6l-4 10-4-10c-6 0-12 2-18 6 2-7 2-13 0-19l-9-1 6-6c-1-6-4-11-8-16 7 0 13-1 18-3l11 3-3-7c6-5 10-12 13-22z' fill='%23d9541e'/%3E%3C/g%3E%3Cg transform='translate(34 108) rotate(-45) scale(0.16) translate(-50 -50)'%3E%3Cpath d='M50 4c3 10 7 17 13 22l-3 7 11-3c5 2 11 3 18 3-4 5-7 10-8 16l6 6-9 1c-2 6-2 12 0 19-6-4-12-6-18-6l-4 10-4-10c-6 0-12 2-18 6 2-7 2-13 0-19l-9-1 6-6c-1-6-4-11-8-16 7 0 13-1 18-3l11 3-3-7c6-5 10-12 13-22z' fill='%23f2a93b'/%3E%3C/g%3E%3Cg transform='translate(170 105) rotate(70) scale(0.19) translate(-50 -50)'%3E%3Cpath d='M50 4c3 10 7 17 13 22l-3 7 11-3c5 2 11 3 18 3-4 5-7 10-8 16l6 6-9 1c-2 6-2 12 0 19-6-4-12-6-18-6l-4 10-4-10c-6 0-12 2-18 6 2-7 2-13 0-19l-9-1 6-6c-1-6-4-11-8-16 7 0 13-1 18-3l11 3-3-7c6-5 10-12 13-22z' fill='%23b23a12'/%3E%3C/g%3E%3Cg transform='translate(188 108) rotate(-20) scale(0.15) translate(-50 -50)'%3E%3Cpath d='M50 4c3 10 7 17 13 22l-3 7 11-3c5 2 11 3 18 3-4 5-7 10-8 16l6 6-9 1c-2 6-2 12 0 19-6-4-12-6-18-6l-4 10-4-10c-6 0-12 2-18 6 2-7 2-13 0-19l-9-1 6-6c-1-6-4-11-8-16 7 0 13-1 18-3l11 3-3-7c6-5 10-12 13-22z' fill='%23e07b1a'/%3E%3C/g%3E%3C/svg%3E") center bottom / contain no-repeat;
+}
+@media (max-width: 899.98px) {
+  .v5--fall .v5-explorer::after {
+    display: none;
+  }
+}

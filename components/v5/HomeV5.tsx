@@ -29,6 +29,8 @@ import { useFall } from "./fall/event";
 import FallBar from "./fall/FallBar";
 import FallDecor from "./fall/FallDecor";
 import FallPageLeaves from "./fall/FallPageLeaves";
+import FallSaleCard from "./fall/FallSaleCard";
+import FallPanelVine from "./fall/FallPanelVine";
 import "./fall/fall.css";
 
 type CompanyStat = { value: string; label: string };
@@ -111,7 +113,11 @@ export default function HomeV5({
         <TrustStrip logos={trustLogos} label={studio?.trustLabel} />
         <PillarsV5 head={home?.pillarsHead} pillars={home?.pillars} />
         {/* State and course type are picked once, in the hero finder bar. */}
-        <CourseExplorer simple />
+        <CourseExplorer
+          simple
+          listTop={fall ? <FallSaleCard /> : undefined}
+          panelDecor={fall ? <FallPanelVine /> : undefined}
+        />
         <PopularRail courses={courses} slugs={popularSlugs} head={home?.popularHead} />
         <StatsBand stats={companyStats} />
         <RolesMarquee />
