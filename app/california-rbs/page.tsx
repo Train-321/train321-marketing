@@ -1,0 +1,249 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import {
+  getCaRbsPage,
+  getEnrollmentPage,
+  getSiteSettings,
+  getTestimonials,
+  type Testimonial,
+  type TrustLogo
+} from "@/lib/sanity";
+import { getRbsCourses, parseCourseIds, rbsPublishableKey } from "@/lib/adsRbs";
+import type { CartCourse } from "@/lib/enroll";
+import { stateFromParam, suggestAddOns } from "@/app/enrollment/addOns";
+import RbsCheckout from "./RbsCheckout";
+import "./rbs.css";
+
+// California RBS — the ad landing page. Where visitors land after clicking a
+// California RBS ad: one course, one checkout, no site navigation to wander
+// off into. Separate from /enrollment on purpose (its own layout, its own API
+// routes and LMS endpoints), so ad changes can't disturb that page.
+//
+// Every factual claim here is the wording already approved on the site's
+// California RBS course page (/courses/rbs).
+
+const DEFAULT_TITLE = "California RBS Certification Training Online";
+const DEFAULT_DESCRIPTION =
+  "Complete your required California Responsible Beverage Service (RBS) training online with Train 321, an approved California RBS training provider.";
+
+// Title / description from Studio (California RBS Ad Page → SEO), else the built-ins.
+export async function generateMetadata(): Promise<Metadata> {
+  const cms = await getCaRbsPage().catch(() => null);
+  return {
+    // The site's title template adds " | Train 321".
+    title: cms?.seoTitle || DEFAULT_TITLE,
+    description: cms?.seoDescription || DEFAULT_DESCRIPTION,
+    // Ad traffic only: keep it out of search results (the course page covers SEO).
+    robots: { index: false, follow: false }
+  };
+}
+
+const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) || "";
+const money = (n: number) =>
+  n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: Number.isInteger(n) ? 0 : 2 });
+
+const FAQ = [
+  {
+    q: "Who needs RBS training in California?",
+    a: "Anyone who serves alcoholic beverages, or manages people who do, at an ABC-licensed on-premises business needs to be RBS certified."
+  },
+  {
+    q: "Is Train 321 an approved provider?",
+    a: "Yes. Train 321 is an approved California RBS training provider."
+  },
+  {
+    q: "What happens after I finish the training?",
+    a: "We report your completion to California ABC within 24 hours. You then log in to the ABC's RBS Portal and pass the Alcohol Server Certification Exam with a score of 70% or higher within 30 days of your confirmed training date."
+  },
+  {
+    q: "Who issues my certification?",
+    a: "Your official California Alcohol Server Certification is issued by California ABC after you pass the state exam."
+  },
+  {
+    q: "I already have a Train 321 account. Will this create another one?",
+    a: "No. Enter the email you use with Train 321 and the course is added to your existing account."
+  }
+];
+
+export default async function CaliforniaRbsLanding({
+  searchParams
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const sp = await searchParams;
+  // The cart, the /enrollment way: ?ids=1,2 (also ?course= / ?id=). With no
+  // ids — the normal ad link — it's the California RBS course. The LMS
+  // re-checks every id and drops any it doesn't sell.
+  const ids = parseCourseIds(sp.ids, sp.course, sp.id);
+  const linkState = stateFromParam(one(sp.state));
+  // Studio copy (California RBS Ad Page). Blank fields keep the built-ins below.
+  const cms = await getCaRbsPage().catch(() => null);
+  // No ids in the link → Studio's "Courses to sell", else the LMS's RBS course.
+  const cartIds = ids.length ? ids : (cms?.defaultCourseIds ?? []);
+  const [courses, settings, testimonials, enrollmentPage] = await Promise.all([
+    getRbsCourses(cartIds),
+    getSiteSettings().catch(() => null),
+    getTestimonials().catch(() => [] as Testimonial[]),
+    getEnrollmentPage().catch(() => null)
+  ]);
+  // "Often added": Studio's own picks for this page, else the same as /enrollment.
+  const popularIds = cms?.popularCourseIds.length ? cms.popularCourseIds : (enrollmentPage?.popularCourseIds ?? []);
+  const { picks: suggestions } = courses.length
+    ? await suggestAddOns(courses, popularIds, linkState).catch(() => ({
+        picks: [] as CartCourse[],
+        byState: false
+      }))
+    : { picks: [] as CartCourse[] };
+  const supportEmail = settings?.supportEmail || "support@train321.com";
+  const logos: TrustLogo[] =(settings?.trustLogos || []).filter((l) => l.imageUrl).slice(0, 6);
+  // A short testimonial keeps this section compact: a featured short one,
+  // else any short one, else the shortest there is.
+  const SHORT_QUOTE = 260;
+  const shortQuotes = testimonials.filter((t) => (t.quote || "").length <= SHORT_QUOTE);
+  const quote =
+    shortQuotes.find((t) => t.featured) ??
+    shortQuotes[0] ??
+    [...testimonials].sort((a, b) => (a.quote || "").length - (b.quote || "").length)[0];
+  const total = courses.reduce((s, c) => s + c.price, 0);
+  const priceLabel = courses.length ? money(total) : null;
+  const faq = cms?.faqItems.length ? cms.faqItems : FAQ;
+
+  return (
+    <div className="t321-rbs">
+      {/* Landing page: the site header/footer step aside so the only way
+          forward is the checkout. */}
+      <style>{`.t321-mkt-header,.t321-mkt-footer{display:none !important;}`}</style>
+
+      <p className="rbs-ribbon">
+        <i className="fas fa-shield-alt" aria-hidden="true" />{" "}
+        {cms?.ribbonText || "Approved California Responsible Beverage Service (RBS) training provider"}
+      </p>
+
+      <header className="rbs-top">
+        <div className="rbs-wrap rbs-top__inner">
+          <Link href="/" className="rbs-top__logo" aria-label="Train 321 home">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/img/logos/train321_logo.png" alt="Train 321" />
+          </Link>
+          {/* Same support contact as /enrollment's header (Studio's support email). */}
+          <a href={`mailto:${supportEmail}`} className="rbs-top__phone">
+            <span className="rbs-top__phone-label">Questions?</span>
+            <i className="fas fa-envelope" aria-hidden="true" /> {supportEmail}
+          </a>
+        </div>
+      </header>
+
+      {/* The checkout is the first screen: the order (certificate, courses,
+          total) on the left, contact + payment + Pay on the right. */}
+      <section className="rbs-checkout" id="rbs-checkout">
+        <div className="rbs-wrap">
+          <div>
+            {courses.length > 0 ? (
+              <RbsCheckout
+                courses={courses}
+                suggestions={suggestions}
+                publishableKey={rbsPublishableKey()}
+                subtitle={cms?.heroTitle || "California RBS Certification Training"}
+                description={cms?.heroDescription || undefined}
+                proofPoints={cms?.proofPoints.length ? cms.proofPoints : undefined}
+                certificateNote={cms?.certificateNote || undefined}
+                checkoutHeading={cms?.checkoutHeading || undefined}
+                prefillEmail={one(sp.email)}
+                prefillName={one(sp.name)}
+                prefillPromo={one(sp.promo)}
+                stateCode={linkState}
+                isRbsDefault={ids.length === 0}
+              />
+            ) : (
+              <div className="rbs-card rbs-unavailable">
+                <h2>Enrollment is briefly unavailable</h2>
+                <p>Call us and we&rsquo;ll get you enrolled right away.</p>
+                <a href="tel:5613257300" className="rbs-btn rbs-btn--pay">
+                  <i className="fas fa-phone" aria-hidden="true" /> 561-325-7300
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {logos.length > 0 && (
+        <section className="rbs-logos" aria-label="Trusted by">
+          <div className="rbs-wrap">
+            <p>Trusted by restaurant brands and state restaurant associations</p>
+            <ul>
+              {logos.map((l) => (
+                <li key={l.name}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={l.imageUrl} alt={l.label || l.name} loading="lazy" />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      {quote && (
+        <section className="rbs-section rbs-section--tint rbs-section--quote" aria-label="What learners say">
+          <div className="rbs-wrap rbs-wrap--narrow">
+            <figure className="rbs-quote">
+              <span className="rbs-quote__stars" aria-label="5 stars">★★★★★</span>
+              <blockquote>&ldquo;{quote.quote}&rdquo;</blockquote>
+              <figcaption>
+                <strong>{quote.name}</strong>
+                {(quote.role || quote.company) && <span>{[quote.role, quote.company].filter(Boolean).join(", ")}</span>}
+              </figcaption>
+            </figure>
+          </div>
+        </section>
+      )}
+
+      <section className="rbs-section" aria-labelledby="rbs-faq-title">
+        <div className="rbs-wrap rbs-faq">
+          <div className="rbs-faq__intro">
+            <p className="rbs-kicker">FAQ</p>
+            <h2 id="rbs-faq-title" className="rbs-h2">{cms?.faqHeading || "Questions, answered"}</h2>
+            <p className="rbs-faq__help">
+              Still have a question? Call <a href="tel:5613257300">561-325-7300</a> or email{" "}
+              <a href="mailto:support@train321.com">support@train321.com</a>.
+            </p>
+          </div>
+          <div className="rbs-faq__list">
+            {faq.map((f) => (
+              <details key={f.q} className="rbs-faq__item">
+                <summary>
+                  {f.q}
+                  <i className="fas fa-plus" aria-hidden="true" />
+                </summary>
+                <p>{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="rbs-closer">
+        <div className="rbs-wrap rbs-closer__inner">
+          <div>
+            <h2>{cms?.closerHeading || "Get your California RBS training done today."}</h2>
+            <p>{cms?.closerSub || <>Approved provider &middot; Reported to ABC within 24 hours</>}</p>
+          </div>
+          <a href="#rbs-checkout" className="rbs-btn rbs-btn--gold">
+            {cms?.closerButton || "Enroll now"}
+            {priceLabel ? ` · ${priceLabel}` : ""} <i className="fas fa-arrow-right" aria-hidden="true" />
+          </a>
+        </div>
+      </section>
+
+      <footer className="rbs-foot">
+        <div className="rbs-wrap rbs-foot__inner">
+          <span>&copy; {new Date().getFullYear()} Train 321. All rights reserved.</span>
+          <nav aria-label="Legal">
+            <Link href="/legal/terms-conditions">Terms</Link>
+            <Link href="/legal/privacy-policy">Privacy</Link>
+          </nav>
+        </div>
+      </footer>
+    </div>
+  );
+}

@@ -1002,6 +1002,67 @@ export async function getEnrollmentPage(): Promise<EnrollmentPage | null> {
   };
 }
 
+/**
+ * Studio copy for the California RBS ad page (/california-rbs). Every field is
+ * optional — blank strings / empty lists mean "keep the page's built-in
+ * wording", so nothing changes on the page until it's edited in Studio.
+ */
+export type CaRbsPage = {
+  heroTitle: string;
+  heroDescription: string;
+  proofPoints: string[];
+  certificateNote: string;
+  checkoutHeading: string;
+  /** Courses the ad link sells when it carries no ?ids=. Empty → the LMS's California RBS course. */
+  defaultCourseIds: number[];
+  /** "Often added" chips. Empty → the Enrollment Page's popular courses. */
+  popularCourseIds: number[];
+  faqHeading: string;
+  faqItems: Array<{ q: string; a: string }>;
+  closerHeading: string;
+  closerSub: string;
+  closerButton: string;
+  ribbonText: string;
+  seoTitle: string;
+  seoDescription: string;
+};
+
+/** Null when the Studio document hasn't been created yet (the page keeps its built-ins). */
+export async function getCaRbsPage(): Promise<CaRbsPage | null> {
+  const r = (await (await getClient()).fetch(
+    `*[_id == "caRbsPage"][0] {
+      heroTitle, heroDescription, proofPoints, certificateNote, checkoutHeading,
+      defaultCourseIds, popularCourseIds, faqHeading, faqItems[]{ question, answer },
+      closerHeading, closerSub, closerButton, ribbonText, seoTitle, seoDescription
+    }`
+  )) as Record<string, unknown> | null;
+  if (!r) return null;
+
+  const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+  const ids = (v: unknown): number[] =>
+    Array.isArray(v) ? [...new Set(v.map(Number).filter((n) => Number.isInteger(n) && n > 0))] : [];
+
+  return {
+    heroTitle: str(r.heroTitle),
+    heroDescription: str(r.heroDescription),
+    proofPoints: (Array.isArray(r.proofPoints) ? r.proofPoints : []).map(str).filter(Boolean).slice(0, 3),
+    certificateNote: str(r.certificateNote),
+    checkoutHeading: str(r.checkoutHeading),
+    defaultCourseIds: ids(r.defaultCourseIds).slice(0, 10),
+    popularCourseIds: ids(r.popularCourseIds),
+    faqHeading: str(r.faqHeading),
+    faqItems: (Array.isArray(r.faqItems) ? (r.faqItems as Array<{ question?: unknown; answer?: unknown }>) : [])
+      .map((f) => ({ q: str(f?.question), a: str(f?.answer) }))
+      .filter((f) => f.q && f.a),
+    closerHeading: str(r.closerHeading),
+    closerSub: str(r.closerSub),
+    closerButton: str(r.closerButton),
+    ribbonText: str(r.ribbonText),
+    seoTitle: str(r.seoTitle),
+    seoDescription: str(r.seoDescription)
+  };
+}
+
 const SETTINGS_DEFAULT: SiteSettings = {
   siteName: "Train 321",
   tagline: "Online Food Safety Training",

@@ -75,6 +75,7 @@ export default defineConfig({
             single('testimonialsPage', 'testimonialsPage', 'Testimonials Page'),
             single('detailPagesCopy', 'detailPagesCopy', 'Detail Pages (chrome)'),
             single('enrollmentPage', 'enrollmentPage', 'Enrollment Page'),
+            single('caRbsPage', 'caRbsPage', 'California RBS Ad Page'),
             S.divider(),
             blog,
             S.divider(),
@@ -129,6 +130,10 @@ export default defineConfig({
           teamMember: {
             select: { name: 'name' },
             resolve: () => ({ locations: [{ title: 'About', href: '/about' }] })
+          },
+          caRbsPage: {
+            select: { title: 'heroTitle' },
+            resolve: () => ({ locations: [{ title: 'California RBS ad page', href: '/california-rbs' }] })
           }
         }
       }
