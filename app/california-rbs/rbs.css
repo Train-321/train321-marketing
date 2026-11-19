@@ -32,6 +32,7 @@
   color: #fff; background: var(--rbs-navy);
 }
 .t321-rbs .rbs-ribbon i { color: var(--rbs-gold); }
+.t321-rbs .rbs-ribbon__short { display: none; }
 
 /* Top bar */
 .t321-rbs .rbs-top { background: #fff; border-bottom: 1px solid var(--rbs-line); }
@@ -428,4 +429,29 @@
 @media (prefers-reduced-motion: reduce) {
   .t321-rbs .rbs-spin { animation: none; }
   .t321-rbs .rbs-faq__item summary i { transition: none; }
+}
+
+/* ── Phones (kept last so it wins over the base rules above) ─────────────
+   One compact first screen: one-line ribbon, smaller top bar, tighter
+   heading / description / certificate / checkmarks, so the whole first
+   section fits and the enrollment form starts right after it. */
+@media (max-width: 599.98px) {
+  .t321-rbs .rbs-ribbon { display: block; padding: 7px 12px; font-size: 0.74rem; line-height: 1.35; }
+  .t321-rbs .rbs-ribbon i { margin-right: 5px; }
+  .t321-rbs .rbs-ribbon__full { display: none; }
+  .t321-rbs .rbs-ribbon__short { display: inline; }
+}
+@media (max-width: 939.98px) {
+  .t321-rbs .rbs-top__inner { min-height: 58px; }
+  .t321-rbs .rbs-top__logo img,
+  .t321-rbs .rbs-top__logo-img { height: 32px; }
+  .t321-rbs .rbs-top__phone { font-size: 0.85rem; }
+  .t321-rbs .rbs-co { gap: 18px; padding-top: 18px; }
+  .t321-rbs .rbs-side__inner { gap: 10px; }
+  .t321-rbs .rbs-side__intro { gap: 6px; }
+  .t321-rbs .rbs-side__title { font-size: 22px; line-height: 1.2; }
+  .t321-rbs .rbs-side__lede { font-size: 0.88rem; line-height: 1.45; }
+  .t321-rbs .rbs-cert { max-width: 300px; }
+  .t321-rbs .rbs-proof { gap: 4px 12px; font-size: 0.76rem; }
+  .t321-rbs .rbs-cert__note { font-size: 0.72rem; }
 }

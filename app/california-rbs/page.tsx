@@ -120,7 +120,15 @@ export default async function CaliforniaRbsLanding({
 
       <p className="rbs-ribbon">
         <i className="fas fa-shield-alt" aria-hidden="true" />{" "}
-        {cms?.ribbonText || "Approved California Responsible Beverage Service (RBS) training provider"}
+        {cms?.ribbonText ? (
+          cms.ribbonText
+        ) : (
+          <>
+            {/* Phones get the short wording so it stays on one line. */}
+            <span className="rbs-ribbon__full">Approved California Responsible Beverage Service (RBS) training provider</span>
+            <span className="rbs-ribbon__short">Approved California RBS training provider</span>
+          </>
+        )}
       </p>
 
       <header className="rbs-top">
