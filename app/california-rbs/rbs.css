@@ -88,7 +88,7 @@
   /* The left side stays put at the top (its heading level with the card's
      heading), so a taller form never leaves an empty gap above it. */
   .t321-rbs .rbs-co__side {
-    padding: 58px 80px 36px 0;
+    padding: 28px 80px 28px 0;
     position: relative; isolation: isolate;
   }
   /* The soft panel reaches the left edge of the screen; its right edge is the
@@ -129,7 +129,18 @@
   margin: 0; width: 100%; max-width: 380px;
   filter: drop-shadow(0 22px 34px rgba(11, 35, 64, 0.16));
 }
-@media (min-width: 940px) { .t321-rbs .rbs-cert { max-width: 470px; } }
+@media (min-width: 940px) {
+  .t321-rbs .rbs-cert { max-width: 430px; }
+  .t321-rbs .rbs-side__inner { gap: 12px; }
+}
+/* Short screens (small laptops, 125% Windows scaling): shrink the left side a
+   little more so the checkmarks and note still fit on the first screen. */
+@media (min-width: 940px) and (max-height: 780px) {
+  .t321-rbs .rbs-cert { max-width: 370px; }
+  .t321-rbs .rbs-side__title { font-size: 24px; }
+  .t321-rbs .rbs-side__lede { font-size: 0.92rem; }
+  .t321-rbs .rbs-side__inner { gap: 10px; }
+}
 .t321-rbs .rbs-proof {
   list-style: none; padding: 0; margin: 4px 0 0;
   display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px;
