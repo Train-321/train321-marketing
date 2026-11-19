@@ -75,6 +75,10 @@ export default async function CaliforniaRbsLanding({
   // ids — the normal ad link — it's the California RBS course. The LMS
   // re-checks every id and drops any it doesn't sell.
   const ids = parseCourseIds(sp.ids, sp.course, sp.id);
+  // Local test run: ?demo=1 walks the whole checkout with a guest buyer and no
+  // LMS / Stripe calls. Only on the dev server — a production build ignores it,
+  // so the live page can never be put into demo mode.
+  const demo = process.env.NODE_ENV !== "production" && one(sp.demo) === "1";
   const linkState = stateFromParam(one(sp.state));
   // Studio copy (California RBS Ad Page). Blank fields keep the built-ins below.
   const cms = await getCaRbsPage().catch(() => null);
@@ -148,8 +152,9 @@ export default async function CaliforniaRbsLanding({
                 proofPoints={cms?.proofPoints.length ? cms.proofPoints : undefined}
                 certificateNote={cms?.certificateNote || undefined}
                 checkoutHeading={cms?.checkoutHeading || undefined}
-                prefillEmail={one(sp.email)}
-                prefillName={one(sp.name)}
+                prefillEmail={one(sp.email) || (demo ? "guest@example.com" : "")}
+                prefillName={one(sp.name) || (demo ? "Guest Tester" : "")}
+                demo={demo}
                 prefillPromo={one(sp.promo)}
                 stateCode={linkState}
                 isRbsDefault={ids.length === 0}

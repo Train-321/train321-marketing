@@ -95,6 +95,12 @@ type Props = {
   stateCode?: string | null;
   /** True when the page sells California RBS (no ids in the URL): shows its inclusions. */
   isRbsDefault?: boolean;
+  /**
+   * Local test run (?demo=1 on the dev server only — page.tsx never sets it in
+   * a production build). Walks the whole flow without the LMS or Stripe: no
+   * account, no charge, no attribution, no analytics. Quotes stay real (read-only).
+   */
+  demo?: boolean;
 };
 
 export default function RbsCheckout(props: Props) {
@@ -117,7 +123,8 @@ function CheckoutForm({
   prefillName = "",
   prefillPromo = "",
   stateCode = null,
-  isRbsDefault = false
+  isRbsDefault = false,
+  demo = false
 }: Props) {
   const stripe = useStripe();
   const elements = useElements();
@@ -214,6 +221,12 @@ function CheckoutForm({
     if (!EMAIL.test(a) || checkedFor.current === a.toLowerCase()) return;
     checkedFor.current = a.toLowerCase();
     setIdentity("checking");
+    if (demo) {
+      // Demo: no LMS call. An email starting with "existing" plays a returning buyer.
+      await new Promise((r) => window.setTimeout(r, 500));
+      setIdentity(/^existing/i.test(a) ? "existing" : "new");
+      return;
+    }
     try {
       const res = await fetch("/api/ads/ca-rbs/check-email", {
         method: "POST",
@@ -287,7 +300,7 @@ function CheckoutForm({
     if (busy) return;
     setError(null);
     if (cart.length === 0) return fail("Add a course to continue.");
-    if (!startedCheckout.current) {
+    if (!startedCheckout.current && !demo) {
       startedCheckout.current = true;
       trackBeginCheckout(items, dueToday);
     }
@@ -309,6 +322,13 @@ function CheckoutForm({
     }
 
     setBusy(true);
+    if (demo) {
+      // Demo: pretend to process, then show the success screen. Nothing is sent.
+      await new Promise((r) => window.setTimeout(r, 1200));
+      setBusy(false);
+      setDone(cart);
+      return;
+    }
     const card = elements?.getElement(CardElement) ?? null;
     if (dueToday > 0 && (!stripe || !card)) return fail("Payment is still loading. Try again in a moment.");
 
@@ -399,6 +419,17 @@ function CheckoutForm({
     setDone(cart);
   };
 
+  // The success panel is much shorter than the checkout it replaces, so the
+  // page would be left scrolled down past it. Bring it into view (smoothly,
+  // unless the visitor prefers reduced motion) and put focus on it.
+  const doneRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!done) return;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+    doneRef.current?.focus({ preventScroll: true });
+  }, [done]);
+
   // ── Start my course (signs them straight into the learner app) ────────
   const [starting, setStarting] = useState(false);
   const startCourse = async () => {
@@ -419,7 +450,7 @@ function CheckoutForm({
 
   if (done) {
     return (
-      <div className="rbs-card rbs-done" role="status">
+      <div className="rbs-card rbs-done" role="status" ref={doneRef} tabIndex={-1}>
         <span className="rbs-done__ic" aria-hidden="true">
           <i className="fas fa-check" />
         </span>
@@ -443,10 +474,22 @@ function CheckoutForm({
             <li>Pass the ABC exam on the RBS Portal within 30 days.</li>
           </ol>
         )}
-        <button type="button" className="rbs-btn rbs-btn--pay" onClick={startCourse} disabled={starting}>
-          {starting ? <span className="rbs-spin" aria-hidden="true" /> : null}
-          Start my course <i className="fas fa-arrow-right" aria-hidden="true" />
-        </button>
+        {demo ? (
+          <>
+            <p className="rbs-demo-note">
+              <i className="fas fa-flask" aria-hidden="true" /> Demo run: no account was created, nothing was charged and no
+              email was sent.
+            </p>
+            <button type="button" className="rbs-btn rbs-btn--pay" onClick={() => window.location.reload()}>
+              <i className="fas fa-rotate-right" aria-hidden="true" /> Run the demo again
+            </button>
+          </>
+        ) : (
+          <button type="button" className="rbs-btn rbs-btn--pay" onClick={startCourse} disabled={starting}>
+            {starting ? <span className="rbs-spin" aria-hidden="true" /> : null}
+            Start my course <i className="fas fa-arrow-right" aria-hidden="true" />
+          </button>
+        )}
       </div>
     );
   }
@@ -467,7 +510,7 @@ function CheckoutForm({
     }
     if (dueToday > 0) {
       if (identity === "existing" && (!address.trim() || !city.trim())) return "Add your billing address and city.";
-      if (!cardComplete) return "Enter your card details.";
+      if (!cardComplete && !demo) return "Enter your card details.";
     }
     if (quoting) return "Updating your total…";
     return null;
@@ -483,6 +526,8 @@ function CheckoutForm({
     <form className="rbs-co" onSubmit={onSubmit} noValidate aria-busy={busy}>
       {/* ── Left: a small heading and the certificate they'll earn, with their name on it ── */}
       <div className="rbs-co__side">
+        {/* Pinned to the top and sticky, so it stays beside the form however tall the form gets. */}
+        <div className="rbs-side__inner">
         <div className="rbs-side__intro">
           <h1 className="rbs-side__title">{subtitle}</h1>
           <p className="rbs-side__lede">
@@ -506,12 +551,19 @@ function CheckoutForm({
               "Your official California Alcohol Server Certification is issued by California ABC after you pass the state exam."}
           </p>
         )}
+        </div>
       </div>
 
       {/* ── Right: one card — courses, email, card, Pay ── */}
       <div className="rbs-co__main">
         <div className="rbs-paycard">
           <h2 className="rbs-paycard__h">{checkoutHeading || "Complete your enrollment"}</h2>
+          {demo && (
+            <p className="rbs-demo-banner" role="note">
+              <i className="fas fa-flask" aria-hidden="true" /> <strong>Demo mode</strong> — a test run. Nothing is saved,
+              charged or emailed. Use an email starting with &ldquo;existing&rdquo; to try the returning-buyer form.
+            </p>
+          )}
 
           {/* The order, in one soft box. */}
           <div className="rbs-order">
@@ -731,18 +783,24 @@ function CheckoutForm({
                   <i className="fab fa-cc-discover" />
                 </span>
               </span>
-              <div className="rbs-card-el">
-                <CardElement
-                  onChange={(e) => setCardComplete(e.complete)}
-                  onReady={() => setCardComplete(false)}
-                  options={{
-                    style: {
-                      base: { fontSize: "16px", color: "#0f2137", fontFamily: "Inter, system-ui, sans-serif", "::placeholder": { color: "#8a97a6" } },
-                      invalid: { color: "#a1222e" }
-                    }
-                  }}
-                />
-              </div>
+              {demo ? (
+                <div className="rbs-card-el rbs-card-el--demo">
+                  <i className="fas fa-flask" aria-hidden="true" /> Demo mode — no card needed, nothing is charged
+                </div>
+              ) : (
+                <div className="rbs-card-el">
+                  <CardElement
+                    onChange={(e) => setCardComplete(e.complete)}
+                    onReady={() => setCardComplete(false)}
+                    options={{
+                      style: {
+                        base: { fontSize: "16px", color: "#0f2137", fontFamily: "Inter, system-ui, sans-serif", "::placeholder": { color: "#8a97a6" } },
+                        invalid: { color: "#a1222e" }
+                      }
+                    }}
+                  />
+                </div>
+              )}
             </div>
           )}
 
