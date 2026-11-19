@@ -84,8 +84,6 @@ type Props = {
   /** Line under the "Checkout" heading (what's being bought). */
   subtitle: string;
   /** Studio copy (California RBS Ad Page). Blank → the built-in wording. */
-  description?: string;
-  proofPoints?: string[];
   certificateNote?: string;
   checkoutHeading?: string;
   prefillEmail?: string;
@@ -115,8 +113,6 @@ function CheckoutForm({
   courses,
   suggestions = [],
   subtitle,
-  description,
-  proofPoints,
   certificateNote,
   checkoutHeading,
   prefillEmail = "",
@@ -156,10 +152,15 @@ function CheckoutForm({
     if (linkedIds.has(id)) setRemoved((r) => r.filter((x) => x !== id));
     else setAdded((a) => (a.includes(id) ? a : [...a, id]));
   };
+  // Courses this buyer already holds, learned when the LMS refused to sell
+  // them again (it refuses before any charge). If that's the whole cart there
+  // is nothing left to buy, so the "already enrolled" screen shows instead.
+  const [heldIds, setHeldIds] = useState<number[]>([]);
+  const alreadyEnrolled = heldIds.length > 0 && cart.length > 0 && cart.every((c) => heldIds.includes(c.id));
   const openSuggestions = [
     ...courses.filter((c) => removed.includes(c.id)),
     ...suggestions.filter((s) => !added.includes(s.id) && !linkedIds.has(s.id))
-  ];
+  ].filter((s) => !heldIds.includes(s.id));
   const [addOpen, setAddOpen] = useState(false);
   const courseIds = cart.map((c) => c.id);
   const idsKey = courseIds.join(",");
@@ -224,7 +225,7 @@ function CheckoutForm({
     if (demo) {
       // Demo: no LMS call. An email starting with "existing" plays a returning buyer.
       await new Promise((r) => window.setTimeout(r, 500));
-      setIdentity(/^existing/i.test(a) ? "existing" : "new");
+      setIdentity(/^(existing|enrolled)/i.test(a) ? "existing" : "new");
       return;
     }
     try {
@@ -324,9 +325,11 @@ function CheckoutForm({
     setBusy(true);
     if (demo) {
       // Demo: pretend to process, then show the success screen. Nothing is sent.
+      // An email starting with "enrolled" plays a buyer who already has the course.
       await new Promise((r) => window.setTimeout(r, 1200));
       setBusy(false);
-      setDone(cart);
+      if (/^enrolled/i.test(addr)) setHeldIds(courseIds);
+      else setDone(cart);
       return;
     }
     const card = elements?.getElement(CardElement) ?? null;
@@ -403,6 +406,24 @@ function CheckoutForm({
         ({ ok, d } = await post({ payment_intent_id: String(d.intent_id || "") }));
       }
       if (!ok || !d?.success) {
+        if (d?.already_enrolled) {
+          // Nothing was charged. Keep the courses they already have out of the
+          // order: all of them → "already enrolled" screen; some → drop those
+          // lines and let them pay for the rest.
+          const refused = Array.isArray(d.refused_course_ids) ? (d.refused_course_ids as unknown[]).map(Number) : [];
+          const held = refused.length ? refused : courseIds;
+          setHeldIds((h) => Array.from(new Set([...h, ...held])));
+          if (cart.every((c) => held.includes(c.id))) {
+            setBusy(false);
+            return;
+          }
+          const names = cart.filter((c) => held.includes(c.id)).map((c) => c.name);
+          setRemoved((r) => Array.from(new Set([...r, ...courses.filter((c) => held.includes(c.id)).map((c) => c.id)])));
+          setAdded((a) => a.filter((id) => !held.includes(id)));
+          return fail(
+            `You're already enrolled in ${names.join(" and ")}, so we took ${names.length === 1 ? "it" : "them"} out of your order. Your card has not been charged — check the new total and pay again.`
+          );
+        }
         return fail((typeof d?.message === "string" && d.message) || "We couldn't complete your enrollment. Your card has not been charged.");
       }
       chargeId = (d.chargeId as string | null) ?? null;
@@ -423,12 +444,18 @@ function CheckoutForm({
   // page would be left scrolled down past it. Bring it into view (smoothly,
   // unless the visitor prefers reduced motion) and put focus on it.
   const doneRef = useRef<HTMLDivElement>(null);
+  const finished = Boolean(done) || alreadyEnrolled;
   useEffect(() => {
-    if (!done) return;
+    if (!finished) return;
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+    // The checkout is mid-page now, so bring the success panel itself into view.
+    doneRef.current?.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
     doneRef.current?.focus({ preventScroll: true });
-  }, [done]);
+    // Nothing left to buy: the page's "Enroll now" buttons step aside (rbs.css).
+    const page = doneRef.current?.closest(".t321-rbs");
+    page?.classList.add("is-enrolled");
+    return () => page?.classList.remove("is-enrolled");
+  }, [finished]);
 
   // ── Start my course (signs them straight into the learner app) ────────
   const [starting, setStarting] = useState(false);
@@ -447,6 +474,45 @@ function CheckoutForm({
       setStarting(false);
     }
   };
+
+  if (alreadyEnrolled && !done) {
+    return (
+      <div className="rbs-card rbs-done" role="status" ref={doneRef} tabIndex={-1}>
+        <span className="rbs-done__ic" aria-hidden="true">
+          <i className="fas fa-check" />
+        </span>
+        <h2>You&rsquo;re already enrolled!</h2>
+        <p>
+          {cart.length === 1 ? (
+            <>
+              <strong>{cart[0].name}</strong> is
+            </>
+          ) : (
+            <>
+              Your <strong>{cart.length} courses</strong> are
+            </>
+          )}{" "}
+          already in your Train 321 account, so there&rsquo;s nothing more to pay.{" "}
+          <strong>Your card has not been charged.</strong>
+        </p>
+        {demo ? (
+          <>
+            <p className="rbs-demo-note">
+              <i className="fas fa-flask" aria-hidden="true" /> Demo run: nothing was checked, charged or sent.
+            </p>
+            <button type="button" className="rbs-btn rbs-btn--pay" onClick={() => window.location.reload()}>
+              <i className="fas fa-rotate-right" aria-hidden="true" /> Run the demo again
+            </button>
+          </>
+        ) : (
+          <button type="button" className="rbs-btn rbs-btn--pay" onClick={startCourse} disabled={starting}>
+            {starting ? <span className="rbs-spin" aria-hidden="true" /> : null}
+            Go to my course <i className="fas fa-arrow-right" aria-hidden="true" />
+          </button>
+        )}
+      </div>
+    );
+  }
 
   if (done) {
     return (
@@ -516,178 +582,26 @@ function CheckoutForm({
     return null;
   })();
 
-  const proof = proofPoints?.length
-    ? proofPoints
-    : isRbsDefault
-      ? ["Approved California provider", "Reported to ABC within 24 hrs", "Self-paced, any device"]
-      : ["Instant access", "Self-paced, any device", "Certificate on completion"];
-
+  // One card split in two (hosted-checkout style): the form on the left,
+  // the order summary on the right. Every field, button and handler is the
+  // same as before — only where they sit has changed.
   return (
     <form className="rbs-co" onSubmit={onSubmit} noValidate aria-busy={busy}>
-      {/* ── Left: a small heading and the certificate they'll earn, with their name on it ── */}
-      <div className="rbs-co__side">
-        {/* Pinned to the top and sticky, so it stays beside the form however tall the form gets. */}
-        <div className="rbs-side__inner">
-        <div className="rbs-side__intro">
-          <h1 className="rbs-side__title">{subtitle}</h1>
-          <p className="rbs-side__lede">
-            {description ||
-              "Complete your required Responsible Beverage Service training online with Train 321, an approved California RBS training provider."}
-          </p>
-        </div>
-        <figure className="rbs-cert">
-          <CourseCertificate courseTitle={certTitle} learnerName={certName || "Your Name"} showExpiration={false} />
-        </figure>
-        {/* Checkmarks + note travel together, so no gap can open between them. */}
-        <div className="rbs-side__foot">
-          <ul className="rbs-proof">
-            {proof.map((t) => (
-              <li key={t}>
-                <i className="fas fa-check-circle" aria-hidden="true" /> {t}
-              </li>
-            ))}
-          </ul>
-          {(certificateNote || isRbsDefault) && (
-            <p className="rbs-cert__note">
-              {certificateNote ||
-                "Your official California Alcohol Server Certification is issued by California ABC after you pass the state exam."}
-            </p>
-          )}
-        </div>
-        </div>
-      </div>
-
-      {/* ── Right: one card — courses, email, card, Pay ── */}
-      <div className="rbs-co__main">
-        <div className="rbs-paycard">
+      <div className="rbs-split">
+        {/* ── Left: the form ── */}
+        <div className="rbs-split__form">
+          <p className="rbs-kicker">Enroll today</p>
           <h2 className="rbs-paycard__h">{checkoutHeading || "Complete your enrollment"}</h2>
+          {isRbsDefault && <p className="rbs-split__sub">Approved California RBS training provider</p>}
           {demo && (
             <p className="rbs-demo-banner" role="note">
               <i className="fas fa-flask" aria-hidden="true" /> <strong>Demo mode</strong> — a test run. Nothing is saved,
-              charged or emailed. Use an email starting with &ldquo;existing&rdquo; to try the returning-buyer form.
+              charged or emailed. Use an email starting with &ldquo;existing&rdquo; to try the returning-buyer form, or
+              &ldquo;enrolled&rdquo; to see the already-enrolled screen.
             </p>
           )}
 
-          {/* The order, in one soft box. */}
-          <div className="rbs-order">
-          <ul className="rbs-items">
-            {cart.map((c) => (
-              <li key={c.id}>
-                {/* The course's marketplace image (the site's placeholder when it has none). */}
-                <span className="rbs-items__thumb" aria-hidden="true">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={c.image || COURSE_PLACEHOLDER_IMAGE}
-                    alt=""
-                    loading="lazy"
-                    onError={(e) => {
-                      if (!e.currentTarget.src.endsWith(COURSE_PLACEHOLDER_IMAGE)) e.currentTarget.src = COURSE_PLACEHOLDER_IMAGE;
-                    }}
-                  />
-                </span>
-                <span className="rbs-items__name">
-                  {c.name}
-                  {c.stateLabel && <small>{c.stateLabel}</small>}
-                </span>
-                <span className="rbs-items__price">{money(c.price)}</span>
-                {cart.length > 1 ? (
-                  <button type="button" className="rbs-items__x" onClick={() => removeLine(c.id)} aria-label={`Remove ${c.name}`} title="Remove">
-                    <i className="fas fa-times" aria-hidden="true" />
-                  </button>
-                ) : (
-                  <span className="rbs-items__x-space" aria-hidden="true" />
-                )}
-              </li>
-            ))}
-          </ul>
-
-          {discount > 0 && (
-            <p className="rbs-items__discount">
-              <span>Discount</span>
-              <span>&minus;{money(discount)}</span>
-            </p>
-          )}
-          </div>
-
-          {/* One slim row: "Often added" chips on the left, promo link on the right. */}
-          <div className="rbs-extras">
-            {openSuggestions.length > 0 && (
-              <span className="rbs-chips__label">
-                <i className="fas fa-wand-magic-sparkles rbs-chips__spark" aria-hidden="true" /> Often added
-              </span>
-            )}
-            {!(quote?.promo && promoCode) && !promoOpen && (
-              <button type="button" className="rbs-textbtn rbs-extras__promo" onClick={() => setPromoOpen(true)}>
-                Promo code
-              </button>
-            )}
-          </div>
-          {openSuggestions.length > 0 && (
-            <div className="rbs-chips">
-              <ul>
-                {(addOpen ? openSuggestions : openSuggestions.slice(0, CHIPS_SHOWN)).map((s) => (
-                  <li key={s.id}>
-                    <button type="button" className="rbs-chip" onClick={() => addLine(s.id)} aria-label={`Add ${s.name}, ${money(s.price)}`}>
-                      <span className="rbs-chip__plus" aria-hidden="true">
-                        <i className="fas fa-plus" />
-                      </span>
-                      <span className="rbs-chip__name">{s.name}</span>
-                      <span className="rbs-chip__price">+{money(s.price)}</span>
-                    </button>
-                  </li>
-                ))}
-                {openSuggestions.length > CHIPS_SHOWN && (
-                  <li>
-                    <button type="button" className="rbs-chip rbs-chip--more" onClick={() => setAddOpen((v) => !v)} aria-expanded={addOpen}>
-                      {addOpen ? "Show less" : `+${openSuggestions.length - CHIPS_SHOWN} more`}
-                    </button>
-                  </li>
-                )}
-              </ul>
-            </div>
-          )}
-
-          {quote?.promo && promoCode ? (
-            <p className="rbs-promo-applied">
-              <span>
-                <i className="fas fa-tag" aria-hidden="true" /> Code <strong>{quote.promo.name}</strong> applied
-              </span>
-              <button type="button" className="rbs-textbtn" onClick={closePromo}>
-                Remove
-              </button>
-            </p>
-          ) : (
-            promoOpen && (
-              <div className="rbs-promo">
-                <input
-                  aria-label="Promo code"
-                  placeholder="Promo code"
-                  value={promoInput}
-                  autoFocus
-                  onChange={(e) => {
-                    setPromoInput(e.target.value);
-                    setPromoError(null);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      setPromoCode(promoInput.trim());
-                    } else if (e.key === "Escape") {
-                      closePromo();
-                    }
-                  }}
-                />
-                <button type="button" className="rbs-promo__apply" onClick={() => setPromoCode(promoInput.trim())}>
-                  Apply
-                </button>
-                <button type="button" className="rbs-promo__close" onClick={closePromo} aria-label="Close promo code" title="Close">
-                  <i className="fas fa-times" aria-hidden="true" />
-                </button>
-              </div>
-            )
-          )}
-          {promoError && <p className="rbs-err" role="alert">{promoError}</p>}
-
+          <h3 className="rbs-split__h">Contact</h3>
           <label className="rbs-field">
             <span>Email</span>
             <span className="rbs-field__wrap">
@@ -753,58 +667,63 @@ function CheckoutForm({
             </label>
           )}
 
-          {dueToday > 0 && identity === "existing" && (
-            <div className="rbs-row rbs-row--bill">
-              <label className="rbs-field">
-                <span>Billing address</span>
-                <input autoComplete="address-line1" value={address} onChange={(e) => setAddress(e.target.value)} />
-              </label>
-              <label className="rbs-field">
-                <span>City</span>
-                <input autoComplete="address-level2" value={city} onChange={(e) => setCity(e.target.value)} />
-              </label>
-              <label className="rbs-field">
-                <span>State</span>
-                <input
-                  autoComplete="address-level1"
-                  value={billState}
-                  maxLength={2}
-                  onChange={(e) => setBillState(e.target.value.toUpperCase())}
-                />
-              </label>
-            </div>
-          )}
-
           {dueToday > 0 && (
-            <div className="rbs-field">
-              <span className="rbs-field__label">
-                Card
-                <span className="rbs-brands" aria-hidden="true">
-                  <i className="fab fa-cc-visa" />
-                  <i className="fab fa-cc-mastercard" />
-                  <i className="fab fa-cc-amex" />
-                  <i className="fab fa-cc-discover" />
-                </span>
-              </span>
-              {demo ? (
-                <div className="rbs-card-el rbs-card-el--demo">
-                  <i className="fas fa-flask" aria-hidden="true" /> Demo mode — no card needed, nothing is charged
-                </div>
-              ) : (
-                <div className="rbs-card-el">
-                  <CardElement
-                    onChange={(e) => setCardComplete(e.complete)}
-                    onReady={() => setCardComplete(false)}
-                    options={{
-                      style: {
-                        base: { fontSize: "16px", color: "#0f2137", fontFamily: "Inter, system-ui, sans-serif", "::placeholder": { color: "#8a97a6" } },
-                        invalid: { color: "#a1222e" }
-                      }
-                    }}
-                  />
+            <>
+              <h3 className="rbs-split__h">Payment</h3>
+              {identity === "existing" && (
+                <div className="rbs-row rbs-row--bill">
+                  <label className="rbs-field">
+                    <span>Billing address</span>
+                    <input autoComplete="address-line1" value={address} onChange={(e) => setAddress(e.target.value)} />
+                  </label>
+                  <label className="rbs-field">
+                    <span>City</span>
+                    <input autoComplete="address-level2" value={city} onChange={(e) => setCity(e.target.value)} />
+                  </label>
+                  <label className="rbs-field">
+                    <span>State</span>
+                    <input
+                      autoComplete="address-level1"
+                      value={billState}
+                      maxLength={2}
+                      onChange={(e) => setBillState(e.target.value.toUpperCase())}
+                    />
+                  </label>
                 </div>
               )}
-            </div>
+              <div className="rbs-field">
+                <span className="rbs-field__label">
+                  Card
+                  <span className="rbs-brands" aria-hidden="true">
+                    <i className="fab fa-cc-visa" />
+                    <i className="fab fa-cc-mastercard" />
+                    <i className="fab fa-cc-amex" />
+                    <i className="fab fa-cc-discover" />
+                  </span>
+                </span>
+                {demo ? (
+                  <div className="rbs-card-el rbs-card-el--demo">
+                    <i className="fas fa-flask" aria-hidden="true" /> Demo mode — no card needed, nothing is charged
+                  </div>
+                ) : (
+                  // Locked until the email check has finished (new or returning
+                  // buyer known); it unlocks by itself as soon as it's done.
+                  <div className={`rbs-card-el${known ? "" : " is-locked"}`} title={known ? undefined : "Enter your email first"}>
+                    <CardElement
+                      onChange={(e) => setCardComplete(e.complete)}
+                      onReady={() => setCardComplete(false)}
+                      options={{
+                        disabled: !known,
+                        style: {
+                          base: { fontSize: "16px", color: "#0f2137", fontFamily: "Inter, system-ui, sans-serif", "::placeholder": { color: "#8a97a6" } },
+                          invalid: { color: "#a1222e" }
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            </>
           )}
 
           {error && <p className="rbs-err" role="alert">{error}</p>}
@@ -823,12 +742,155 @@ function CheckoutForm({
               missing
             ) : (
               <>
-                <i className="fas fa-bolt" aria-hidden="true" /> Instant access &middot; <i className="fas fa-lock" aria-hidden="true" /> Secure
-                payment by Stripe
+                <i className="fas fa-lock" aria-hidden="true" /> Powered by Stripe &middot; Instant access
               </>
             )}
           </p>
         </div>
+
+        {/* ── Right: the order summary ── */}
+        <aside className="rbs-split__summary" aria-label="Order summary">
+          {/* Compact "Your certificate" row: a small live preview (their name
+              fills in as they type) without making the summary heavy. */}
+          <div className="rbs-certrow">
+            <div className="rbs-certrow__thumb" aria-hidden="true">
+              <CourseCertificate courseTitle={certTitle} learnerName={certName || "Your Name"} showExpiration={false} />
+            </div>
+            <div className="rbs-certrow__text">
+              {/* Placeholder copy for now — to be replaced with the final wording. */}
+              <strong>Lorem ipsum dolor</strong>
+              <span>Lorem ipsum dolor sit amet, consectetur adipiscing.</span>
+              {(certificateNote || isRbsDefault) && (
+                <small>
+                  {certificateNote ||
+                    "Your official California Alcohol Server Certification is issued by California ABC after you pass the state exam."}
+                </small>
+              )}
+            </div>
+          </div>
+
+          <ul className="rbs-items">
+            {cart.map((c) => (
+              <li key={c.id}>
+                {/* The course's marketplace image (the site's placeholder when it has none). */}
+                <span className="rbs-items__thumb" aria-hidden="true">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={c.image || COURSE_PLACEHOLDER_IMAGE}
+                    alt=""
+                    loading="lazy"
+                    onError={(e) => {
+                      if (!e.currentTarget.src.endsWith(COURSE_PLACEHOLDER_IMAGE)) e.currentTarget.src = COURSE_PLACEHOLDER_IMAGE;
+                    }}
+                  />
+                </span>
+                <span className="rbs-items__name">
+                  {c.name}
+                  {c.stateLabel && <small>{c.stateLabel}</small>}
+                </span>
+                <span className="rbs-items__price">{money(c.price)}</span>
+                {cart.length > 1 ? (
+                  <button type="button" className="rbs-items__x" onClick={() => removeLine(c.id)} aria-label={`Remove ${c.name}`} title="Remove">
+                    <i className="fas fa-times" aria-hidden="true" />
+                  </button>
+                ) : (
+                  <span className="rbs-items__x-space" aria-hidden="true" />
+                )}
+              </li>
+            ))}
+          </ul>
+
+          {/* Promo code: a link that opens the field (× closes it); an applied code can be removed. */}
+          <div className="rbs-split__promo">
+            {quote?.promo && promoCode ? (
+              <p className="rbs-promo-applied">
+                <span>
+                  <i className="fas fa-tag" aria-hidden="true" /> Code <strong>{quote.promo.name}</strong> applied
+                </span>
+                <button type="button" className="rbs-textbtn" onClick={closePromo}>
+                  Remove
+                </button>
+              </p>
+            ) : promoOpen ? (
+              <div className="rbs-promo">
+                <input
+                  aria-label="Promo code"
+                  placeholder="Promo code"
+                  value={promoInput}
+                  autoFocus
+                  onChange={(e) => {
+                    setPromoInput(e.target.value);
+                    setPromoError(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      setPromoCode(promoInput.trim());
+                    } else if (e.key === "Escape") {
+                      closePromo();
+                    }
+                  }}
+                />
+                <button type="button" className="rbs-promo__apply" onClick={() => setPromoCode(promoInput.trim())}>
+                  Apply
+                </button>
+                <button type="button" className="rbs-promo__close" onClick={closePromo} aria-label="Close promo code" title="Close">
+                  <i className="fas fa-times" aria-hidden="true" />
+                </button>
+              </div>
+            ) : (
+              <button type="button" className="rbs-textbtn" onClick={() => setPromoOpen(true)}>
+                Have a promo code?
+              </button>
+            )}
+            {promoError && <p className="rbs-err" role="alert">{promoError}</p>}
+          </div>
+
+          <div className="rbs-split__totals" aria-live="polite">
+            <p>
+              <span>Subtotal</span>
+              <span>{money(subtotal)}</span>
+            </p>
+            {discount > 0 && (
+              <p className="is-discount">
+                <span>Discount</span>
+                <span>&minus;{money(discount)}</span>
+              </p>
+            )}
+            <p className="is-total">
+              <span>Total</span>
+              <strong>{money(dueToday)}</strong>
+            </p>
+          </div>
+
+          {openSuggestions.length > 0 && (
+            <div className="rbs-chips">
+              <span className="rbs-chips__label">
+                <i className="fas fa-wand-magic-sparkles rbs-chips__spark" aria-hidden="true" /> Add to your order
+              </span>
+              <ul>
+                {(addOpen ? openSuggestions : openSuggestions.slice(0, CHIPS_SHOWN)).map((s) => (
+                  <li key={s.id}>
+                    <button type="button" className="rbs-chip" onClick={() => addLine(s.id)} aria-label={`Add ${s.name}, ${money(s.price)}`}>
+                      <span className="rbs-chip__plus" aria-hidden="true">
+                        <i className="fas fa-plus" />
+                      </span>
+                      <span className="rbs-chip__name">{s.name}</span>
+                      <span className="rbs-chip__price">+{money(s.price)}</span>
+                    </button>
+                  </li>
+                ))}
+                {openSuggestions.length > CHIPS_SHOWN && (
+                  <li>
+                    <button type="button" className="rbs-chip rbs-chip--more" onClick={() => setAddOpen((v) => !v)} aria-expanded={addOpen}>
+                      {addOpen ? "Show less" : `+${openSuggestions.length - CHIPS_SHOWN} more`}
+                    </button>
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
+        </aside>
       </div>
     </form>
   );

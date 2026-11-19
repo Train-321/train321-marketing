@@ -57,7 +57,14 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           message: lmsMessage(data, "We couldn't complete your enrollment. Your card has not been charged."),
-          ...(data?.already_enrolled ? { already_enrolled: true } : {})
+          ...(data?.already_enrolled
+            ? {
+                already_enrolled: true,
+                refused_course_ids: Array.isArray(data.refused_course_ids)
+                  ? (data.refused_course_ids as unknown[]).map(Number).filter((n) => Number.isInteger(n) && n > 0)
+                  : []
+              }
+            : {})
         },
         { status: status >= 400 ? status : 502 }
       );

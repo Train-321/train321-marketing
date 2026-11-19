@@ -1,8 +1,8 @@
 import "./rbs.css";
 
 // Shown the moment someone lands on /california-rbs, while the page loads its
-// courses, prices and add-ons from the LMS. A skeleton in the exact shape of
-// the real page (ribbon, top bar, certificate on the left, checkout card on
+// courses, prices and add-ons from the LMS. A skeleton in the shape of the
+// page's first screen (ribbon, top bar, hero copy on the left, certificate on
 // the right), so the page fills in smoothly instead of flashing blank.
 
 function Bar({ w, h = 14, className = "" }: { w: string; h?: number; className?: string }) {
@@ -14,12 +14,13 @@ export default function Loading() {
     <div className="t321-rbs" aria-busy="true">
       <style>{`.t321-mkt-header,.t321-mkt-footer{display:none !important;}`}</style>
       <p className="rbs-sr-only" role="status">
-        Loading your enrollment…
+        Loading…
       </p>
 
       <p className="rbs-ribbon">
-        <i className="fas fa-shield-alt" aria-hidden="true" /> Approved California Responsible Beverage Service (RBS)
-        training provider
+        <i className="fas fa-shield-alt" aria-hidden="true" />{" "}
+        <span className="rbs-ribbon__full">Approved California Responsible Beverage Service (RBS) training provider</span>
+        <span className="rbs-ribbon__short">Approved California RBS training provider</span>
       </p>
 
       <header className="rbs-top">
@@ -30,50 +31,23 @@ export default function Loading() {
         </div>
       </header>
 
-      <section className="rbs-checkout">
-        <div className="rbs-wrap">
-          <div className="rbs-co rbs-co--loading">
-            <div className="rbs-co__side">
-              <div className="rbs-side__intro rbs-sk-stack">
-                <Bar w="78%" h={30} className="rbs-sk--center" />
-                <Bar w="92%" className="rbs-sk--center" />
-                <Bar w="70%" className="rbs-sk--center" />
-              </div>
-              <span className="rbs-sk rbs-sk--cert" aria-hidden="true" />
-              <div className="rbs-sk-row">
-                <Bar w="110px" />
-                <Bar w="140px" />
-                <Bar w="150px" />
-              </div>
+      <section className="rbs-hero rbs-hero--loading">
+        <div className="rbs-wrap rbs-hero__grid">
+          <div className="rbs-hero__copy">
+            <Bar w="240px" h={28} className="rbs-sk--pill" />
+            <Bar w="92%" h={46} />
+            <Bar w="70%" h={46} />
+            <Bar w="85%" />
+            <Bar w="60%" />
+            <Bar w="220px" />
+            <Bar w="200px" />
+            <div className="rbs-sk-row rbs-sk-row--start">
+              <Bar w="210px" h={54} className="rbs-sk--field" />
+              <Bar w="150px" h={54} className="rbs-sk--field" />
             </div>
-
-            <div className="rbs-co__main">
-              <div className="rbs-paycard">
-                <Bar w="62%" h={26} />
-                <div className="rbs-order rbs-sk-order">
-                  <span className="rbs-sk rbs-sk--thumb" aria-hidden="true" />
-                  <span className="rbs-sk-stack">
-                    <Bar w="85%" h={16} />
-                    <Bar w="30%" h={12} />
-                  </span>
-                  <Bar w="54px" h={16} />
-                </div>
-                <div className="rbs-sk-row rbs-sk-row--start">
-                  <Bar w="150px" h={30} className="rbs-sk--pill" />
-                  <Bar w="130px" h={30} className="rbs-sk--pill" />
-                </div>
-                <span className="rbs-sk-stack">
-                  <Bar w="60px" h={12} />
-                  <Bar w="100%" h={50} className="rbs-sk--field" />
-                </span>
-                <span className="rbs-sk-stack">
-                  <Bar w="50px" h={12} />
-                  <Bar w="100%" h={50} className="rbs-sk--field" />
-                </span>
-                <Bar w="100%" h={54} className="rbs-sk--field" />
-                <Bar w="46%" h={12} className="rbs-sk--center" />
-              </div>
-            </div>
+          </div>
+          <div className="rbs-hero__visual">
+            <span className="rbs-sk rbs-sk--cert" aria-hidden="true" />
           </div>
         </div>
       </section>

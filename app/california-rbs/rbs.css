@@ -56,7 +56,7 @@
 .t321-rbs .rbs-sk-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 18px; }
 .t321-rbs .rbs-sk-row--start { justify-content: flex-start; }
 .t321-rbs .rbs-sk-order { display: flex; align-items: center; gap: 12px; }
-.t321-rbs .rbs-co--loading .rbs-side__intro { width: 100%; }
+.t321-rbs .rbs-hero--loading .rbs-hero__copy { width: 100%; }
 @keyframes rbs-shimmer { from { background-position: 100% 0; } to { background-position: -120% 0; } }
 @media (prefers-reduced-motion: reduce) { .t321-rbs .rbs-sk { animation: none; } }
 .t321-rbs .rbs-top__phone {
@@ -70,102 +70,266 @@
   .t321-rbs .rbs-top__phone { font-size: 0.88rem; }
 }
 
-/* Checkout — the first screen.
-   Desktop: the certificate on a wide soft panel that runs to the left edge;
-   one pay card on the right (courses, email, card, Pay).
-   Phones: certificate, then the card. */
+/* ── Landing page for new visitors from the ad ────────────────────────────
+   ① hero (what it is + one clear Enroll button) → ② trusted-by logos →
+   ③ why Train 321 → ④ how you get certified → ⑤ enroll (the checkout)
+   → testimonial → FAQ → closing band. Every "Enroll now" jumps to ⑤. */
 .t321-rbs { overflow-x: clip; }
-.t321-rbs .rbs-checkout { border-bottom: 1px solid var(--rbs-line); }
-.t321-rbs .rbs-co { display: grid; gap: 22px; padding: 22px 0 36px; }
-.t321-rbs .rbs-co__side { display: block; }
-.t321-rbs .rbs-side__inner { display: grid; justify-items: center; gap: 14px; }
+
+/* ① Hero — modern US landing style: bold sans headline, compact proof row,
+   pill buttons, a trust strip with card logos, and the certificate on a soft
+   glow with a faint dot pattern. */
+.t321-rbs .rbs-hero {
+  position: relative; isolation: isolate; overflow: hidden; padding: 36px 0 44px;
+  background:
+    radial-gradient(760px 440px at 82% 30%, rgba(196, 146, 43, 0.13), transparent 70%),
+    radial-gradient(640px 400px at 0% 100%, rgba(21, 54, 94, 0.07), transparent 70%),
+    linear-gradient(180deg, #f6f8fb 0%, #ffffff 100%);
+  border-bottom: 1px solid var(--rbs-line);
+}
+/* Faint dot grid on the right half, fading out toward the copy. */
+.t321-rbs .rbs-hero::before {
+  content: ""; position: absolute; z-index: -1; inset: 0 0 0 40%;
+  background-image: radial-gradient(rgba(11, 35, 64, 0.12) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 40%, #000 80%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0%, #000 40%, #000 80%, transparent 100%);
+}
+.t321-rbs .rbs-hero__grid { display: grid; gap: 36px; align-items: center; }
+.t321-rbs .rbs-hero__copy { display: grid; gap: 18px; justify-items: start; }
+.t321-rbs .rbs-hero__eyebrow {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px;
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.02em; color: var(--rbs-navy);
+  background: #fff; border: 1px solid #e6d3a6; box-shadow: 0 4px 14px -8px rgba(196, 146, 43, 0.6);
+}
+.t321-rbs .rbs-hero__eyebrow i { color: var(--rbs-gold); }
+.t321-rbs .rbs-hero__title {
+  font-weight: 800; letter-spacing: -0.035em; line-height: 1.04;
+  font-size: clamp(32px, 3.7vw, 52px); color: var(--rbs-navy);
+}
+.t321-rbs .rbs-hero__lede { max-width: 560px; font-size: 1.1rem; line-height: 1.6; color: var(--rbs-muted); }
+/* Proof points as one compact row. */
+.t321-rbs .rbs-hero__checks { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px 22px; }
+.t321-rbs .rbs-hero__checks li { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.95rem; color: var(--rbs-ink-2); }
+.t321-rbs .rbs-hero__checks i { color: #1f8a5b; }
+/* Pill buttons. */
+.t321-rbs .rbs-hero__ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+.t321-rbs .rbs-hero__ctas .rbs-btn { width: auto; padding: 17px 30px; border-radius: 999px; }
+.t321-rbs .rbs-hero__ctas .rbs-hero__cta {
+  background: linear-gradient(135deg, #0b2340 0%, #1d4a80 100%);
+  box-shadow: 0 16px 30px -14px rgba(11, 35, 64, 0.7);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.t321-rbs .rbs-hero__ctas .rbs-hero__cta:hover { transform: translateY(-1px); box-shadow: 0 20px 34px -14px rgba(11, 35, 64, 0.75); }
+.t321-rbs .rbs-btn.rbs-btn--ghost {
+  color: var(--rbs-navy); background: #fff; border: 1.5px solid #c9d3df; box-shadow: none;
+}
+.t321-rbs .rbs-btn.rbs-btn--ghost:hover { border-color: var(--rbs-navy-2); background: #f7f9fc; }
+.t321-rbs .rbs-hero__ghost i { font-size: 0.8rem; }
+/* Trust strip under the buttons. */
+.t321-rbs .rbs-hero__trust { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; font-size: 0.84rem; color: var(--rbs-muted); }
+.t321-rbs .rbs-hero__trust li { display: inline-flex; align-items: center; gap: 6px; }
+.t321-rbs .rbs-hero__trust .fa-lock,
+.t321-rbs .rbs-hero__trust .fa-bolt { color: var(--rbs-navy-2); }
+.t321-rbs .rbs-hero__cards { gap: 5px; font-size: 1.4rem; line-height: 1; }
+.t321-rbs .rbs-hero__cards .fa-cc-visa { color: #1a1f71; }
+.t321-rbs .rbs-hero__cards .fa-cc-mastercard { color: #eb001b; }
+.t321-rbs .rbs-hero__cards .fa-cc-amex { color: #2e77bc; }
+.t321-rbs .rbs-hero__cards .fa-cc-discover { color: #e55c20; }
+/* The certificate as the hero image: soft glow behind, gentle tilt, fact chips. */
+.t321-rbs .rbs-hero__visual { position: relative; justify-self: center; width: 100%; max-width: 560px; padding: 26px 8px; }
+.t321-rbs .rbs-hero__visual::before {
+  content: ""; position: absolute; z-index: -1; inset: 4% 6%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(196, 146, 43, 0.28), rgba(56, 120, 200, 0.12) 60%, transparent 100%);
+  filter: blur(18px);
+}
+.t321-rbs .rbs-hero__cert { transform: rotate(-1.5deg); filter: drop-shadow(0 34px 44px rgba(11, 35, 64, 0.24)); }
+.t321-rbs .rbs-hero__chip {
+  position: absolute; display: inline-flex; align-items: center; gap: 8px; padding: 10px 15px; border-radius: 14px;
+  font-size: 0.82rem; font-weight: 700; color: var(--rbs-navy); white-space: nowrap;
+  background: rgba(255, 255, 255, 0.92); border: 1px solid var(--rbs-line);
+  box-shadow: 0 18px 34px -18px rgba(11, 35, 64, 0.45);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.t321-rbs .rbs-hero__chip i {
+  width: 24px; height: 24px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; color: #fff; background: var(--rbs-gold);
+}
+.t321-rbs .rbs-hero__chip--a { top: 0; left: 0; }
+.t321-rbs .rbs-hero__chip--b { bottom: 0; right: 0; }
 @media (min-width: 940px) {
-  /* The first screen fills the window under the ribbon + top bar (~104px), so
-     the next section starts below the fold instead of peeking in cut off. */
-  /* The row is as tall as its content (in practice the checkout card), so the
-     left side — stretched to the row — ends exactly where the card ends. The
-     "fill the screen" height sits on the section around it instead, so the
-     next section still starts below the fold. */
-  .t321-rbs .rbs-co { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 0; padding: 0; }
-  .t321-rbs .rbs-checkout {
-    min-height: calc(100vh - 104px); min-height: calc(100svh - 104px);
-    overflow: clip;
-  }
-  /* The left side stays put at the top (its heading level with the card's
-     heading), so a taller form never leaves an empty gap above it. */
-  .t321-rbs .rbs-co__side {
-    /* Same top / bottom padding as the checkout column, so the left content
-       spans exactly the card's height. */
-    padding: 28px 80px 36px 0;
-    position: relative; isolation: isolate;
-  }
-  /* The soft panel reaches the left edge of the screen; its right edge is the
-     dividing line the checkout card sits over. */
-  .t321-rbs .rbs-co__side::before {
-    /* bottom: -100vh carries the soft panel down to the end of the section
-       (clipped there), even when the section is taller than the row. */
-    content: ""; position: absolute; z-index: -1; top: 0; bottom: -100vh; right: 0; left: -100vw;
-    background:
-      radial-gradient(520px 320px at 60% 40%, rgba(196, 146, 43, 0.09), transparent 70%),
-      var(--rbs-soft);
-    border-right: 1px solid var(--rbs-line);
-  }
-  /* The checkout is a raised card that sits a little higher than the left side
-     and overlaps the dividing line. */
-  .t321-rbs .rbs-co__main { display: grid; align-content: start; padding: 28px 0 36px 0; position: relative; z-index: 2; }
-  /* The card is what moves: it stays in view while the page scrolls. */
-  .t321-rbs .rbs-paycard {
-    position: sticky; top: 20px; align-self: start;
-    margin-left: -36px; padding: 30px 32px; border-radius: 20px;
-    background: #fff; border: 1px solid var(--rbs-line);
-    box-shadow: 0 40px 80px -36px rgba(11, 35, 64, 0.42), 0 12px 28px -18px rgba(11, 35, 64, 0.22);
+  .t321-rbs .rbs-hero { padding: 64px 0 72px; }
+  .t321-rbs .rbs-hero__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; }
+  .t321-rbs .rbs-hero__chip--a { left: -18px; }
+  .t321-rbs .rbs-hero__chip--b { right: -14px; }
+}
+@media (prefers-reduced-motion: reduce) { .t321-rbs .rbs-hero__ctas .rbs-hero__cta { transition: none; } }
+
+/* ③ Why Train 321 */
+.t321-rbs .rbs-why__grid {
+  list-style: none; padding: 0; margin: 28px 0 0;
+  display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+.t321-rbs .rbs-why__card {
+  padding: 22px; border-radius: 16px; background: #fff; border: 1px solid var(--rbs-line);
+  box-shadow: 0 16px 34px -28px rgba(11, 35, 64, 0.35);
+}
+.t321-rbs .rbs-why__ic {
+  width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; color: var(--rbs-navy); background: var(--rbs-gold-soft);
+}
+.t321-rbs .rbs-why__card h3 { margin-top: 14px; font-size: 1.05rem; color: var(--rbs-navy); }
+.t321-rbs .rbs-why__card p { margin-top: 6px; font-size: 0.92rem; line-height: 1.55; color: var(--rbs-muted); }
+
+/* ④ How you get certified — centered header, three modern step cards
+   (icon tile + big faded 01/02/03, gold→navy accent on top), small arrow
+   circles between them, one centered pill button. */
+.t321-rbs .rbs-how__head { max-width: 640px; margin: 0 auto; text-align: center; }
+.t321-rbs .rbs-how__sub { margin-top: 10px; font-size: 1.02rem; line-height: 1.6; color: var(--rbs-muted); }
+.t321-rbs .rbs-how__steps { position: relative; list-style: none; padding: 0; margin: 40px 0 0; display: grid; gap: 16px; }
+.t321-rbs .rbs-how__step {
+  position: relative; overflow: hidden; padding: 26px 24px 26px; border-radius: 20px;
+  background: #fff; border: 1px solid var(--rbs-line);
+  box-shadow: 0 20px 44px -32px rgba(11, 35, 64, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+/* Thin accent along the top edge. */
+.t321-rbs .rbs-how__step::after {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--rbs-gold) 0%, #1d4a80 100%);
+}
+.t321-rbs .rbs-how__step:hover { transform: translateY(-4px); box-shadow: 0 30px 56px -32px rgba(11, 35, 64, 0.55); }
+.t321-rbs .rbs-how__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.t321-rbs .rbs-how__badge {
+  width: 52px; height: 52px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.15rem; color: #fff; background: linear-gradient(135deg, #0b2340 0%, #1d4a80 100%);
+  box-shadow: 0 12px 22px -12px rgba(11, 35, 64, 0.7);
+}
+.t321-rbs .rbs-how__num {
+  font-size: 2.6rem; font-weight: 800; line-height: 1; letter-spacing: -0.04em;
+  color: transparent; -webkit-text-stroke: 1.5px #d4dde8;
+}
+.t321-rbs .rbs-how__step h3 { margin-top: 20px; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; color: var(--rbs-navy); }
+.t321-rbs .rbs-how__step p { margin-top: 8px; font-size: 0.95rem; line-height: 1.6; color: var(--rbs-muted); }
+.t321-rbs .rbs-how__foot { margin-top: 36px; display: grid; justify-items: center; gap: 10px; }
+.t321-rbs .rbs-btn.rbs-how__cta { width: auto; padding: 17px 32px; border-radius: 999px; }
+.t321-rbs .rbs-how__note { font-size: 0.84rem; color: var(--rbs-muted); }
+.t321-rbs .rbs-how__note i { margin-right: 4px; }
+@media (min-width: 860px) {
+  /* Wide gaps, with the arrow circle centered in each one. */
+  .t321-rbs .rbs-how__steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 56px; }
+  /* Small arrow circle between neighbouring cards. */
+  .t321-rbs .rbs-how__step { overflow: visible; }
+  .t321-rbs .rbs-how__step::after { border-radius: 20px 20px 0 0; }
+  .t321-rbs .rbs-how__step + .rbs-how__step::before {
+    content: "\f054"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 0.7rem;
+    position: absolute; z-index: 2; top: 50%; left: -28px; transform: translate(-50%, -50%);
+    width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    color: var(--rbs-navy); background: #fff; border: 1px solid var(--rbs-line);
+    box-shadow: 0 8px 18px -10px rgba(11, 35, 64, 0.4);
   }
 }
+
+/* Shared "glow" pill for the main Enroll buttons (hero + steps). */
+.t321-rbs .rbs-btn.rbs-btn--glow {
+  border-radius: 999px;
+  background: linear-gradient(135deg, #0b2340 0%, #1d4a80 100%);
+  box-shadow: 0 16px 30px -14px rgba(11, 35, 64, 0.7);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.t321-rbs .rbs-btn.rbs-btn--glow:hover { transform: translateY(-1px); box-shadow: 0 20px 34px -14px rgba(11, 35, 64, 0.75); }
+@media (prefers-reduced-motion: reduce) {
+  .t321-rbs .rbs-how__step,
+  .t321-rbs .rbs-btn.rbs-btn--glow { transition: none; }
+  .t321-rbs .rbs-how__step:hover,
+  .t321-rbs .rbs-btn.rbs-btn--glow:hover { transform: none; }
+}
+
+/* ⑤ Enroll — no card: the section itself is the checkout. The whole left
+   side is a raised white panel (edge of the screen to the middle, full
+   section height, soft shadow cast onto the gray); the order summary sits
+   on the soft gray to the right. Phones: summary on gray, then the form. */
+.t321-rbs .rbs-checkout {
+  /* flow-root keeps the success card's margin inside the gray section (it
+     used to leak out above it as a white strip). */
+  display: flow-root;
+  padding: 0; scroll-margin-top: 12px; overflow: clip;
+  background: var(--rbs-soft); border-bottom: 1px solid var(--rbs-line);
+}
+.t321-rbs .rbs-co { display: block; }
+.t321-rbs .rbs-split { position: relative; display: grid; max-width: 1100px; margin: 0 auto; }
+.t321-rbs .rbs-split__form {
+  position: relative; isolation: isolate;
+  display: grid; gap: 14px; align-content: start; padding: 30px 0 40px;
+}
+/* The raised white panel behind the form. */
+.t321-rbs .rbs-split__form::before {
+  content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: -100vw; right: -100vw;
+  background: #fff;
+}
+.t321-rbs .rbs-split__summary { order: -1; display: grid; gap: 16px; align-content: start; padding: 28px 0 28px; }
+.t321-rbs .rbs-split__sub { margin-top: -8px; font-size: 0.9rem; color: var(--rbs-muted); }
+.t321-rbs .rbs-split__h { margin-top: 6px; font-size: 1.02rem; font-weight: 800; letter-spacing: -0.01em; color: var(--rbs-navy); }
+.t321-rbs .rbs-split__h--first { margin-top: 0; }
+/* Compact "Your certificate" row at the top of the summary. */
+.t321-rbs .rbs-certrow { display: flex; align-items: center; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--rbs-line); }
+.t321-rbs .rbs-certrow__thumb { flex: none; width: 128px; }
+.t321-rbs .rbs-certrow__thumb .t321-cert__page { box-shadow: none; border: 1px solid var(--rbs-line); border-radius: 6px; }
+.t321-rbs .rbs-certrow__text { display: grid; gap: 3px; min-width: 0; }
+.t321-rbs .rbs-certrow__text strong { font-size: 0.98rem; font-weight: 800; color: var(--rbs-navy); }
+.t321-rbs .rbs-certrow__text span { font-size: 0.86rem; color: var(--rbs-ink-2); }
+.t321-rbs .rbs-certrow__text small { margin-top: 3px; font-size: 0.74rem; line-height: 1.4; color: var(--rbs-muted); }
+.t321-rbs .rbs-cert__note { margin-top: 10px; font-size: 0.76rem; line-height: 1.45; color: var(--rbs-muted); text-align: center; }
+.t321-rbs .rbs-split__summary .rbs-items__thumb { background: #fff; }
+.t321-rbs .rbs-split__summary .rbs-items__x { background: #fff; }
+.t321-rbs .rbs-split__promo { display: grid; gap: 8px; }
+.t321-rbs .rbs-split__promo > .rbs-textbtn { justify-self: start; font-size: 0.88rem; }
+.t321-rbs .rbs-split__totals { display: grid; gap: 8px; padding-top: 14px; border-top: 1px solid var(--rbs-line); font-size: 0.95rem; }
+.t321-rbs .rbs-split__totals p { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; color: var(--rbs-ink-2); }
+.t321-rbs .rbs-split__totals .is-discount { color: #1f7a45; font-weight: 600; }
+.t321-rbs .rbs-split__totals .is-total { margin-top: 2px; padding-top: 12px; border-top: 1px solid var(--rbs-line); font-weight: 800; font-size: 1.05rem; color: var(--rbs-ink); }
+.t321-rbs .rbs-split__totals .is-total strong { font-size: 1.6rem; letter-spacing: -0.02em; color: var(--rbs-navy); }
+.t321-rbs .rbs-split .rbs-chips { display: grid; gap: 8px; }
+/* Pay turns into the navy gradient once it's enabled. */
+.t321-rbs .rbs-split .rbs-btn--pay { margin-top: 4px; }
+.t321-rbs .rbs-split .rbs-btn--pay:not(:disabled) {
+  background: linear-gradient(135deg, #0b2340 0%, #1d4a80 100%);
+  box-shadow: 0 14px 26px -14px rgba(11, 35, 64, 0.7);
+}
+@media (min-width: 900px) {
+  .t321-rbs .rbs-split { grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); }
+  .t321-rbs .rbs-split__form { padding: 64px 56px 72px 0; }
+  /* Desktop: the white panel runs from the left screen edge to the middle,
+     with a thin line where it meets the gray summary side. */
+  .t321-rbs .rbs-split__form::before { right: 0; border-right: 1px solid var(--rbs-line); }
+  .t321-rbs .rbs-split__summary { order: 0; padding: 64px 0 72px 52px; }
+}
+
+/* Phones: slim Enroll bar pinned to the bottom (StickyEnroll.tsx). */
+.t321-rbs .rbs-sticky {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.96); border-top: 1px solid var(--rbs-line);
+  box-shadow: 0 -10px 30px -18px rgba(11, 35, 64, 0.35);
+  transform: translateY(110%); transition: transform 0.25s ease;
+}
+.t321-rbs .rbs-sticky.is-shown { transform: none; }
+.t321-rbs .rbs-sticky .rbs-btn { padding: 14px 18px; }
+@media (min-width: 940px) { .t321-rbs .rbs-sticky { display: none; } }
+/* Enrolled (or already enrolled): nothing left to buy, so every "Enroll now"
+   button on the page steps aside. RbsCheckout adds .is-enrolled. */
+.t321-rbs.is-enrolled .rbs-hero__cta,
+.t321-rbs.is-enrolled .rbs-how__foot,
+.t321-rbs.is-enrolled .rbs-closer .rbs-btn,
+.t321-rbs.is-enrolled .rbs-sticky { display: none; }
+.t321-rbs.is-enrolled { padding-bottom: 0; }
+.t321-rbs .rbs-checkout .rbs-card { margin: 56px auto; }
+@media (prefers-reduced-motion: reduce) { .t321-rbs .rbs-sticky { transition: none; } }
 
 .t321-rbs .rbs-sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
   clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
-
-/* Left: small heading, certificate + three reasons */
-.t321-rbs .rbs-side__intro { display: grid; gap: 6px; max-width: 700px; text-align: center; }
-.t321-rbs .rbs-side__lede { font-size: 1.02rem; line-height: 1.55; color: var(--rbs-muted); }
-.t321-rbs .rbs-side__title {
-  font-family: var(--rbs-serif); font-weight: 600; letter-spacing: -0.01em; line-height: 1.18;
-  font-size: clamp(24px, 2.2vw, 28px); color: var(--rbs-navy);
-}
-@media (min-width: 940px) { .t321-rbs .rbs-side__intro { margin-bottom: 6px; } }
-.t321-rbs .rbs-cert {
-  margin: 0; width: 100%; max-width: 380px;
-  filter: drop-shadow(0 22px 34px rgba(11, 35, 64, 0.16));
-}
-@media (min-width: 940px) {
-  .t321-rbs .rbs-cert { max-width: 430px; }
-  /* The left side is as tall as the checkout card: heading level with the
-     card's top, checkmarks + note level with its bottom, and the certificate
-     centered in between — whatever the screen size or text length. */
-  .t321-rbs .rbs-side__inner {
-    height: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px;
-  }
-  .t321-rbs .rbs-side__inner > .rbs-cert { margin-block: auto; }
-}
-/* Short screens (small laptops, 125% Windows scaling): shrink the left side a
-   little more so the checkmarks and note still fit on the first screen. */
-@media (min-width: 940px) and (max-height: 780px) {
-  .t321-rbs .rbs-cert { max-width: 370px; }
-  .t321-rbs .rbs-side__title { font-size: 24px; }
-  .t321-rbs .rbs-side__lede { font-size: 0.92rem; }
-  .t321-rbs .rbs-side__inner { gap: 10px; }
-}
-.t321-rbs .rbs-side__foot { display: grid; justify-items: center; gap: 6px; }
-.t321-rbs .rbs-proof {
-  list-style: none; padding: 0; margin: 4px 0 0;
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px;
-  font-size: 0.84rem; font-weight: 600; color: var(--rbs-ink-2);
-}
-.t321-rbs .rbs-proof li { display: inline-flex; align-items: center; gap: 7px; }
-.t321-rbs .rbs-proof i { color: #1f8a5b; }
-.t321-rbs .rbs-cert__note { max-width: 460px; text-align: center; font-size: 0.78rem; line-height: 1.45; color: var(--rbs-muted); }
 
 /* Right: courses, email, card, Pay — straight on the page, no box around it. */
 .t321-rbs .rbs-paycard { display: grid; gap: 14px; max-width: 520px; }
@@ -198,6 +362,8 @@
 .t321-rbs .rbs-demo-banner i,
 .t321-rbs .rbs-demo-note i { margin-right: 4px; }
 .t321-rbs .rbs-card-el--demo { display: flex; align-items: center; gap: 8px; color: #6b4a00; background: #fffbef; border-style: dashed; font-size: 0.95rem; }
+/* Card field locked until the email check finishes. */
+.t321-rbs .rbs-card-el.is-locked { background: #f3f5f8; border-color: #e1e6ed; opacity: 0.7; cursor: not-allowed; }
 
 /* Heading + the order box */
 .t321-rbs .rbs-paycard__h { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; color: var(--rbs-navy); }
@@ -264,7 +430,6 @@
 }
 .t321-rbs .rbs-promo__apply:hover { border-color: var(--rbs-navy-2); }
 
-.t321-rbs .rbs-split { height: 1px; background: var(--rbs-line); margin: 2px 0; }
 
 .t321-rbs .rbs-field__label { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .t321-rbs .rbs-brands { display: inline-flex; gap: 5px; font-size: 1.3rem; line-height: 1; }
@@ -398,7 +563,8 @@
 .t321-rbs .rbs-section { padding: 64px 0; }
 .t321-rbs .rbs-section--tint { background: var(--rbs-soft); border-top: 1px solid var(--rbs-line); border-bottom: 1px solid var(--rbs-line); }
 .t321-rbs .rbs-kicker { font-size: 0.76rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--rbs-gold); }
-.t321-rbs .rbs-h2 { margin-top: 8px; font-family: var(--rbs-serif); font-weight: 600; font-size: clamp(26px, 3.6vw, 36px); letter-spacing: -0.015em; color: var(--rbs-navy); }
+/* Section headings in the same bold modern sans as the hero headline. */
+.t321-rbs .rbs-h2 { margin-top: 8px; font-weight: 800; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.12; letter-spacing: -0.03em; color: var(--rbs-navy); }
 
 
 /* Testimonial */
@@ -432,7 +598,7 @@
 /* Closing band */
 .t321-rbs .rbs-closer { padding: 40px 0; color: #fff; background: var(--rbs-navy); }
 .t321-rbs .rbs-closer__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px 28px; }
-.t321-rbs .rbs-closer h2 { font-family: var(--rbs-serif); font-weight: 600; font-size: clamp(22px, 3vw, 28px); }
+.t321-rbs .rbs-closer h2 { font-weight: 800; letter-spacing: -0.02em; font-size: clamp(22px, 3vw, 28px); }
 .t321-rbs .rbs-closer p { margin-top: 6px; font-size: 0.9rem; color: rgba(255, 255, 255, 0.72); }
 
 /* Footer */
@@ -448,9 +614,8 @@
 }
 
 /* ── Phones (kept last so it wins over the base rules above) ─────────────
-   One compact first screen: one-line ribbon, smaller top bar, tighter
-   heading / description / certificate / checkmarks, so the whole first
-   section fits and the enrollment form starts right after it. */
+   One-line ribbon, smaller top bar, a compact navy band, then the checkout
+   right away; the certificate and steps follow it. */
 @media (max-width: 599.98px) {
   .t321-rbs .rbs-ribbon { display: block; padding: 7px 12px; font-size: 0.74rem; line-height: 1.35; }
   .t321-rbs .rbs-ribbon i { margin-right: 5px; }
@@ -462,12 +627,18 @@
   .t321-rbs .rbs-top__logo img,
   .t321-rbs .rbs-top__logo-img { height: 32px; }
   .t321-rbs .rbs-top__phone { font-size: 0.85rem; }
-  .t321-rbs .rbs-co { gap: 18px; padding-top: 18px; }
-  .t321-rbs .rbs-side__inner { gap: 10px; }
-  .t321-rbs .rbs-side__intro { gap: 6px; }
-  .t321-rbs .rbs-side__title { font-size: 22px; line-height: 1.2; }
-  .t321-rbs .rbs-side__lede { font-size: 0.88rem; line-height: 1.45; }
-  .t321-rbs .rbs-cert { max-width: 300px; }
-  .t321-rbs .rbs-proof { gap: 4px 12px; font-size: 0.76rem; }
-  .t321-rbs .rbs-cert__note { font-size: 0.72rem; }
+  .t321-rbs .rbs-hero { padding: 26px 0 34px; }
+  .t321-rbs .rbs-hero__copy { gap: 12px; }
+  .t321-rbs .rbs-hero__eyebrow { font-size: 0.7rem; }
+  .t321-rbs .rbs-hero__title { font-size: 30px; }
+  .t321-rbs .rbs-hero__lede { font-size: 0.95rem; }
+  .t321-rbs .rbs-hero__checks li { font-size: 0.92rem; }
+  .t321-rbs .rbs-hero__ctas { width: 100%; }
+  .t321-rbs .rbs-hero__ctas .rbs-btn { flex: 1 1 auto; justify-content: center; }
+  .t321-rbs .rbs-hero__visual { max-width: 360px; }
+  .t321-rbs .rbs-hero__chip { font-size: 0.72rem; padding: 7px 10px; }
+  .t321-rbs .rbs-cert { max-width: 340px; justify-self: center; }
+  .t321-rbs .rbs-cert__note { font-size: 0.72rem; text-align: center; }
+  /* Room for the sticky Enroll bar so it never covers the footer. */
+  .t321-rbs { padding-bottom: 72px; }
 }

@@ -11,7 +11,9 @@ import {
 import { getRbsCourses, parseCourseIds, rbsPublishableKey } from "@/lib/adsRbs";
 import type { CartCourse } from "@/lib/enroll";
 import { stateFromParam, suggestAddOns } from "@/app/enrollment/addOns";
+import CourseCertificate from "@/components/CourseCertificate";
 import RbsCheckout from "./RbsCheckout";
+import StickyEnroll from "./StickyEnroll";
 import "./rbs.css";
 
 // California RBS — the ad landing page. Where visitors land after clicking a
@@ -115,6 +117,52 @@ export default async function CaliforniaRbsLanding({
   const priceLabel = courses.length ? money(total) : null;
   const faq = cms?.faqItems.length ? cms.faqItems : FAQ;
 
+  // The normal ad link (no ?ids=) sells California RBS; its copy uses the
+  // approved wording from the California RBS course page. Links for other
+  // courses get neutral wording, so no RBS-only claim is made about them.
+  const isRbs = ids.length === 0;
+  const heroCertTitle = isRbs ? "California RBS Training" : courses[0]?.name || "Your course";
+  const heroChecks = cms?.proofPoints.length
+    ? cms.proofPoints
+    : isRbs
+      ? ["Approved California provider", "Reported to ABC within 24 hours", "Self-paced on any device"]
+      : ["Instant access", "Self-paced on any device", "Certificate on completion"];
+  const benefits = isRbs
+    ? [
+        { icon: "fas fa-shield-halved", t: "Approved by California ABC", d: "Train 321 is an approved California RBS training provider." },
+        { icon: "fas fa-paper-plane", t: "Reported within 24 hours", d: "We report your completion to California ABC for you." },
+        { icon: "fas fa-mobile-screen", t: "Learn on any device", d: "Self-paced training on your phone or computer." },
+        { icon: "fas fa-bolt", t: "Start right away", d: "Instant access as soon as you enroll." }
+      ]
+    : [
+        { icon: "fas fa-bolt", t: "Start right away", d: "Instant access as soon as you enroll." },
+        { icon: "fas fa-mobile-screen", t: "Learn on any device", d: "Self-paced training on your phone or computer." },
+        { icon: "fas fa-award", t: "Get your certificate", d: "Download your certificate when you finish." }
+      ];
+  const howSteps = isRbs
+    ? [
+        {
+          icon: "fas fa-laptop",
+          t: "Complete the training",
+          d: "Take the approved RBS course online, on your phone or computer, at your own pace."
+        },
+        {
+          icon: "fas fa-paper-plane",
+          t: "We report to California ABC",
+          d: "Your training completion is reported to California ABC within 24 hours."
+        },
+        {
+          icon: "fas fa-clipboard-check",
+          t: "Pass the ABC exam",
+          d: "Log in to the ABC's RBS Portal and pass the certification exam with 70% or higher within 30 days."
+        }
+      ]
+    : [
+        { icon: "fas fa-credit-card", t: "Enroll", d: "Pay securely and get instant access." },
+        { icon: "fas fa-laptop", t: "Train online", d: "Learn at your own pace, on your phone or computer." },
+        { icon: "fas fa-award", t: "Get certified", d: "Pass the course and download your certificate." }
+      ];
+
   return (
     <div className="t321-rbs">
       {/* Landing page: the site header/footer step aside so the only way
@@ -148,41 +196,70 @@ export default async function CaliforniaRbsLanding({
         </div>
       </header>
 
-      {/* The checkout is the first screen: the order (certificate, courses,
-          total) on the left, contact + payment + Pay on the right. */}
-      <section className="rbs-checkout" id="rbs-checkout">
-        <div className="rbs-wrap">
-          <div>
-            {courses.length > 0 ? (
-              <RbsCheckout
-                courses={courses}
-                suggestions={suggestions}
-                publishableKey={rbsPublishableKey()}
-                subtitle={cms?.heroTitle || "California RBS Certification Training"}
-                description={cms?.heroDescription || undefined}
-                proofPoints={cms?.proofPoints.length ? cms.proofPoints : undefined}
-                certificateNote={cms?.certificateNote || undefined}
-                checkoutHeading={cms?.checkoutHeading || undefined}
-                prefillEmail={one(sp.email) || (demo ? "guest@example.com" : "")}
-                prefillName={one(sp.name) || (demo ? "Guest Tester" : "")}
-                demo={demo}
-                prefillPromo={one(sp.promo)}
-                stateCode={linkState}
-                isRbsDefault={ids.length === 0}
-              />
-            ) : (
-              <div className="rbs-card rbs-unavailable">
-                <h2>Enrollment is briefly unavailable</h2>
-                <p>Call us and we&rsquo;ll get you enrolled right away.</p>
-                <a href="tel:5613257300" className="rbs-btn rbs-btn--pay">
-                  <i className="fas fa-phone" aria-hidden="true" /> 561-325-7300
-                </a>
-              </div>
+      {/* ① Hero — the first thing a new visitor from the ad sees: what this
+          is, why it's trustworthy, and one clear way to enroll. */}
+      <section className="rbs-hero" aria-labelledby="rbs-hero-title">
+        <div className="rbs-wrap rbs-hero__grid">
+          <div className="rbs-hero__copy">
+            <p className="rbs-hero__eyebrow">
+              <i className="fas fa-shield-halved" aria-hidden="true" />{" "}
+              {isRbs ? "California ABC-approved RBS training" : "Online training by Train 321"}
+            </p>
+            <h1 id="rbs-hero-title" className="rbs-hero__title">
+              {cms?.heroTitle || "Get your California RBS certification online"}
+            </h1>
+            <p className="rbs-hero__lede">
+              {cms?.heroDescription ||
+                "Complete your required Responsible Beverage Service training online with Train 321, an approved California RBS training provider."}
+            </p>
+            <ul className="rbs-hero__checks">
+              {heroChecks.map((t) => (
+                <li key={t}>
+                  <i className="fas fa-circle-check" aria-hidden="true" /> {t}
+                </li>
+              ))}
+            </ul>
+            <div className="rbs-hero__ctas">
+              <a href="#rbs-checkout" id="rbs-hero-cta" className="rbs-btn rbs-btn--pay rbs-btn--glow rbs-hero__cta">
+                Enroll now{priceLabel ? ` — ${priceLabel}` : ""} <i className="fas fa-arrow-right" aria-hidden="true" />
+              </a>
+              <a href="#rbs-how" className="rbs-btn rbs-btn--ghost rbs-hero__ghost">
+                How it works <i className="fas fa-arrow-down" aria-hidden="true" />
+              </a>
+            </div>
+            {/* Trust strip: the reassurance US buyers look for next to a Buy button. */}
+            <ul className="rbs-hero__trust">
+              <li>
+                <i className="fas fa-lock" aria-hidden="true" /> Secure checkout
+              </li>
+              <li>
+                <i className="fas fa-bolt" aria-hidden="true" /> Instant access
+              </li>
+              <li className="rbs-hero__cards" aria-label="Visa, Mastercard, American Express and Discover accepted">
+                <i className="fab fa-cc-visa" aria-hidden="true" />
+                <i className="fab fa-cc-mastercard" aria-hidden="true" />
+                <i className="fab fa-cc-amex" aria-hidden="true" />
+                <i className="fab fa-cc-discover" aria-hidden="true" />
+              </li>
+            </ul>
+          </div>
+          <div className="rbs-hero__visual" aria-hidden="true">
+            <div className="rbs-hero__cert">
+              <CourseCertificate courseTitle={heroCertTitle} learnerName="Your Name" showExpiration={false} />
+            </div>
+            {isRbs && (
+              <span className="rbs-hero__chip rbs-hero__chip--a">
+                <i className="fas fa-paper-plane" /> Reported to ABC within 24 hrs
+              </span>
             )}
+            <span className="rbs-hero__chip rbs-hero__chip--b">
+              <i className="fas fa-mobile-screen" /> Self-paced &middot; any device
+            </span>
           </div>
         </div>
       </section>
 
+      {/* ② Trusted by */}
       {logos.length > 0 && (
         <section className="rbs-logos" aria-label="Trusted by">
           <div className="rbs-wrap">
@@ -198,6 +275,102 @@ export default async function CaliforniaRbsLanding({
           </div>
         </section>
       )}
+
+      {/* ③ Why Train 321 */}
+      <section className="rbs-section rbs-why" aria-labelledby="rbs-why-title">
+        <div className="rbs-wrap">
+          <p className="rbs-kicker">Why Train 321</p>
+          <h2 id="rbs-why-title" className="rbs-h2">
+            {isRbs ? "The simple way to get RBS certified" : "Training that fits your schedule"}
+          </h2>
+          <ul className="rbs-why__grid">
+            {benefits.map((b) => (
+              <li key={b.t} className="rbs-why__card">
+                <span className="rbs-why__ic" aria-hidden="true">
+                  <i className={b.icon} />
+                </span>
+                <h3>{b.t}</h3>
+                <p>{b.d}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* ④ How you get certified — three step cards joined by a dashed line. */}
+      <section className="rbs-section rbs-section--tint rbs-how" id="rbs-how" aria-labelledby="rbs-how-title">
+        <div className="rbs-wrap">
+          <div className="rbs-how__head">
+            <p className="rbs-kicker">How it works</p>
+            <h2 id="rbs-how-title" className="rbs-h2">
+              {isRbs ? "How you get RBS certified" : "Three simple steps"}
+            </h2>
+            <p className="rbs-how__sub">
+              {isRbs
+                ? "From enrolling to your California Alcohol Server Certification, in three steps."
+                : "From enrolling to your certificate — all online."}
+            </p>
+          </div>
+          <ol className="rbs-how__steps">
+            {howSteps.map((s, i) => (
+              <li key={s.t} className="rbs-how__step">
+                <div className="rbs-how__top">
+                  <span className="rbs-how__badge" aria-hidden="true">
+                    <i className={s.icon} />
+                  </span>
+                  <span className="rbs-how__num">
+                    <span className="rbs-sr-only">Step </span>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                </div>
+                <h3>{s.t}</h3>
+                <p>{s.d}</p>
+              </li>
+            ))}
+          </ol>
+          <div className="rbs-how__foot">
+            <a href="#rbs-checkout" className="rbs-btn rbs-btn--pay rbs-btn--glow rbs-how__cta">
+              Enroll now{priceLabel ? ` — ${priceLabel}` : ""} <i className="fas fa-arrow-right" aria-hidden="true" />
+            </a>
+            <p className="rbs-how__note">
+              <i className="fas fa-lock" aria-hidden="true" /> Secure checkout by Stripe &middot; Instant access
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ⑤ Enroll — the checkout (every "Enroll now" button lands here). */}
+      <section className="rbs-checkout" id="rbs-checkout" aria-label="Enroll">
+        <div className="rbs-wrap">
+          {courses.length > 0 ? (
+            <RbsCheckout
+              courses={courses}
+              suggestions={suggestions}
+              publishableKey={rbsPublishableKey()}
+              subtitle={cms?.heroTitle || "California RBS Certification Training"}
+              certificateNote={cms?.certificateNote || undefined}
+              checkoutHeading={cms?.checkoutHeading || undefined}
+              prefillEmail={one(sp.email) || (demo ? "guest@example.com" : "")}
+              prefillName={one(sp.name) || (demo ? "Guest Tester" : "")}
+              demo={demo}
+              prefillPromo={one(sp.promo)}
+              stateCode={linkState}
+              isRbsDefault={isRbs}
+            />
+          ) : (
+            <div className="rbs-card rbs-unavailable">
+              <h2>Enrollment is briefly unavailable</h2>
+              <p>Call us and we&rsquo;ll get you enrolled right away.</p>
+              <a href="tel:5613257300" className="rbs-btn rbs-btn--pay">
+                <i className="fas fa-phone" aria-hidden="true" /> 561-325-7300
+              </a>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Phones: a slim enroll bar once the hero button has scrolled away. */}
+      <StickyEnroll label={`Enroll now${priceLabel ? ` — ${priceLabel}` : ""}`} />
 
       {quote && (
         <section className="rbs-section rbs-section--tint rbs-section--quote" aria-label="What learners say">
