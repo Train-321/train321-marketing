@@ -96,9 +96,9 @@ type Props = {
   /** True when the page sells California RBS (no ids in the URL): shows its inclusions. */
   isRbsDefault?: boolean;
   /**
-   * Local test run (?demo=1 on the dev server only — page.tsx never sets it in
-   * a production build). Walks the whole flow without the LMS or Stripe: no
-   * account, no charge, no attribution, no analytics. Quotes stay real (read-only).
+   * Test run (?demo=1, locally and on the live site). Walks the whole flow
+   * without the LMS or Stripe: no account, no charge, no attribution, no
+   * analytics. Quotes stay real (read-only).
    */
   demo?: boolean;
 };
@@ -538,19 +538,22 @@ function CheckoutForm({
         <figure className="rbs-cert">
           <CourseCertificate courseTitle={certTitle} learnerName={certName || "Your Name"} showExpiration={false} />
         </figure>
-        <ul className="rbs-proof">
-          {proof.map((t) => (
-            <li key={t}>
-              <i className="fas fa-check-circle" aria-hidden="true" /> {t}
-            </li>
-          ))}
-        </ul>
-        {(certificateNote || isRbsDefault) && (
-          <p className="rbs-cert__note">
-            {certificateNote ||
-              "Your official California Alcohol Server Certification is issued by California ABC after you pass the state exam."}
-          </p>
-        )}
+        {/* Checkmarks + note travel together, so no gap can open between them. */}
+        <div className="rbs-side__foot">
+          <ul className="rbs-proof">
+            {proof.map((t) => (
+              <li key={t}>
+                <i className="fas fa-check-circle" aria-hidden="true" /> {t}
+              </li>
+            ))}
+          </ul>
+          {(certificateNote || isRbsDefault) && (
+            <p className="rbs-cert__note">
+              {certificateNote ||
+                "Your official California Alcohol Server Certification is issued by California ABC after you pass the state exam."}
+            </p>
+          )}
+        </div>
         </div>
       </div>
 

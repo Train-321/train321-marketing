@@ -75,10 +75,13 @@ export default async function CaliforniaRbsLanding({
   // ids — the normal ad link — it's the California RBS course. The LMS
   // re-checks every id and drops any it doesn't sell.
   const ids = parseCourseIds(sp.ids, sp.course, sp.id);
-  // Local test run: ?demo=1 walks the whole checkout with a guest buyer and no
-  // LMS / Stripe calls. Only on the dev server — a production build ignores it,
-  // so the live page can never be put into demo mode.
-  const demo = process.env.NODE_ENV !== "production" && one(sp.demo) === "1";
+  // Test run: ?demo=1 walks the whole checkout with a guest buyer — locally and
+  // on the live site. It can't take a payment or create anything: in demo mode
+  // the card field isn't rendered (Stripe is never used), the email check and
+  // "Pay" are simulated in the browser, and no LMS checkout / sign-in / start
+  // call, ad attribution or analytics purchase event is ever made. Links
+  // without ?demo=1 behave exactly as before.
+  const demo = one(sp.demo) === "1";
   const linkState = stateFromParam(one(sp.state));
   // Studio copy (California RBS Ad Page). Blank fields keep the built-ins below.
   const cms = await getCaRbsPage().catch(() => null);
