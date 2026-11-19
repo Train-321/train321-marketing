@@ -757,9 +757,9 @@ function CheckoutForm({
               <CourseCertificate courseTitle={certTitle} learnerName={certName || "Your Name"} showExpiration={false} />
             </div>
             <div className="rbs-certrow__text">
-              {/* Placeholder copy for now — to be replaced with the final wording. */}
-              <strong>Lorem ipsum dolor</strong>
-              <span>Lorem ipsum dolor sit amet, consectetur adipiscing.</span>
+              {/* Follows the form: the name typed on the left, the course in the cart. */}
+              <strong>{certName || "Your Name"}</strong>
+              <span>{certTitle}</span>
               {(certificateNote || isRbsDefault) && (
                 <small>
                   {certificateNote ||

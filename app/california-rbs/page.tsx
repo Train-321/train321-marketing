@@ -127,18 +127,6 @@ export default async function CaliforniaRbsLanding({
     : isRbs
       ? ["Approved California provider", "Reported to ABC within 24 hours", "Self-paced on any device"]
       : ["Instant access", "Self-paced on any device", "Certificate on completion"];
-  const benefits = isRbs
-    ? [
-        { icon: "fas fa-shield-halved", t: "Approved by California ABC", d: "Train 321 is an approved California RBS training provider." },
-        { icon: "fas fa-paper-plane", t: "Reported within 24 hours", d: "We report your completion to California ABC for you." },
-        { icon: "fas fa-mobile-screen", t: "Learn on any device", d: "Self-paced training on your phone or computer." },
-        { icon: "fas fa-bolt", t: "Start right away", d: "Instant access as soon as you enroll." }
-      ]
-    : [
-        { icon: "fas fa-bolt", t: "Start right away", d: "Instant access as soon as you enroll." },
-        { icon: "fas fa-mobile-screen", t: "Learn on any device", d: "Self-paced training on your phone or computer." },
-        { icon: "fas fa-award", t: "Get your certificate", d: "Download your certificate when you finish." }
-      ];
   const howSteps = isRbs
     ? [
         {
@@ -275,27 +263,6 @@ export default async function CaliforniaRbsLanding({
           </div>
         </section>
       )}
-
-      {/* ③ Why Train 321 */}
-      <section className="rbs-section rbs-why" aria-labelledby="rbs-why-title">
-        <div className="rbs-wrap">
-          <p className="rbs-kicker">Why Train 321</p>
-          <h2 id="rbs-why-title" className="rbs-h2">
-            {isRbs ? "The simple way to get RBS certified" : "Training that fits your schedule"}
-          </h2>
-          <ul className="rbs-why__grid">
-            {benefits.map((b) => (
-              <li key={b.t} className="rbs-why__card">
-                <span className="rbs-why__ic" aria-hidden="true">
-                  <i className={b.icon} />
-                </span>
-                <h3>{b.t}</h3>
-                <p>{b.d}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
 
       {/* ④ How you get certified — three step cards joined by a dashed line. */}
       <section className="rbs-section rbs-section--tint rbs-how" id="rbs-how" aria-labelledby="rbs-how-title">

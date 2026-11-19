@@ -165,22 +165,6 @@
 }
 @media (prefers-reduced-motion: reduce) { .t321-rbs .rbs-hero__ctas .rbs-hero__cta { transition: none; } }
 
-/* ③ Why Train 321 */
-.t321-rbs .rbs-why__grid {
-  list-style: none; padding: 0; margin: 28px 0 0;
-  display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-.t321-rbs .rbs-why__card {
-  padding: 22px; border-radius: 16px; background: #fff; border: 1px solid var(--rbs-line);
-  box-shadow: 0 16px 34px -28px rgba(11, 35, 64, 0.35);
-}
-.t321-rbs .rbs-why__ic {
-  width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;
-  font-size: 1.1rem; color: var(--rbs-navy); background: var(--rbs-gold-soft);
-}
-.t321-rbs .rbs-why__card h3 { margin-top: 14px; font-size: 1.05rem; color: var(--rbs-navy); }
-.t321-rbs .rbs-why__card p { margin-top: 6px; font-size: 0.92rem; line-height: 1.55; color: var(--rbs-muted); }
-
 /* ④ How you get certified — centered header, three modern step cards
    (icon tile + big faded 01/02/03, gold→navy accent on top), small arrow
    circles between them, one centered pill button. */
@@ -276,7 +260,7 @@
 .t321-rbs .rbs-certrow__thumb { flex: none; width: 128px; }
 .t321-rbs .rbs-certrow__thumb .t321-cert__page { box-shadow: none; border: 1px solid var(--rbs-line); border-radius: 6px; }
 .t321-rbs .rbs-certrow__text { display: grid; gap: 3px; min-width: 0; }
-.t321-rbs .rbs-certrow__text strong { font-size: 0.98rem; font-weight: 800; color: var(--rbs-navy); }
+.t321-rbs .rbs-certrow__text strong { font-size: 0.98rem; font-weight: 800; color: var(--rbs-navy); overflow-wrap: anywhere; }
 .t321-rbs .rbs-certrow__text span { font-size: 0.86rem; color: var(--rbs-ink-2); }
 .t321-rbs .rbs-certrow__text small { margin-top: 3px; font-size: 0.74rem; line-height: 1.4; color: var(--rbs-muted); }
 .t321-rbs .rbs-cert__note { margin-top: 10px; font-size: 0.76rem; line-height: 1.45; color: var(--rbs-muted); text-align: center; }
