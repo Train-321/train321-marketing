@@ -82,20 +82,29 @@
 @media (min-width: 940px) {
   /* The first screen fills the window under the ribbon + top bar (~104px), so
      the next section starts below the fold instead of peeking in cut off. */
-  .t321-rbs .rbs-co {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 0; padding: 0;
+  /* The row is as tall as its content (in practice the checkout card), so the
+     left side — stretched to the row — ends exactly where the card ends. The
+     "fill the screen" height sits on the section around it instead, so the
+     next section still starts below the fold. */
+  .t321-rbs .rbs-co { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 0; padding: 0; }
+  .t321-rbs .rbs-checkout {
     min-height: calc(100vh - 104px); min-height: calc(100svh - 104px);
+    overflow: clip;
   }
   /* The left side stays put at the top (its heading level with the card's
      heading), so a taller form never leaves an empty gap above it. */
   .t321-rbs .rbs-co__side {
-    padding: 28px 80px 28px 0;
+    /* Same top / bottom padding as the checkout column, so the left content
+       spans exactly the card's height. */
+    padding: 28px 80px 36px 0;
     position: relative; isolation: isolate;
   }
   /* The soft panel reaches the left edge of the screen; its right edge is the
      dividing line the checkout card sits over. */
   .t321-rbs .rbs-co__side::before {
-    content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; right: 0; left: -100vw;
+    /* bottom: -100vh carries the soft panel down to the end of the section
+       (clipped there), even when the section is taller than the row. */
+    content: ""; position: absolute; z-index: -1; top: 0; bottom: -100vh; right: 0; left: -100vw;
     background:
       radial-gradient(520px 320px at 60% 40%, rgba(196, 146, 43, 0.09), transparent 70%),
       var(--rbs-soft);
@@ -132,7 +141,13 @@
 }
 @media (min-width: 940px) {
   .t321-rbs .rbs-cert { max-width: 430px; }
-  .t321-rbs .rbs-side__inner { gap: 12px; }
+  /* The left side is as tall as the checkout card: heading level with the
+     card's top, checkmarks + note level with its bottom, and the certificate
+     centered in between — whatever the screen size or text length. */
+  .t321-rbs .rbs-side__inner {
+    height: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+  .t321-rbs .rbs-side__inner > .rbs-cert { margin-block: auto; }
 }
 /* Short screens (small laptops, 125% Windows scaling): shrink the left side a
    little more so the checkmarks and note still fit on the first screen. */
