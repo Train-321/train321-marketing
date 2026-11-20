@@ -96,6 +96,8 @@
           mask-image: linear-gradient(90deg, transparent 0%, #000 40%, #000 80%, transparent 100%);
 }
 .t321-rbs .rbs-hero__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 36px; align-items: center; }
+/* The hero's content paints above any seasonal decoration layer (FallTheme). */
+.t321-rbs .rbs-hero > .rbs-wrap { position: relative; z-index: 1; }
 .t321-rbs .rbs-hero__copy { display: grid; gap: 18px; justify-items: start; }
 .t321-rbs .rbs-hero__eyebrow {
   display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px;
@@ -106,6 +108,10 @@
 .t321-rbs .rbs-hero__title {
   font-weight: 800; letter-spacing: -0.035em; line-height: 1.04;
   font-size: clamp(32px, 3.7vw, 52px); color: var(--rbs-navy);
+}
+@media (min-width: 940px) {
+  /* Desktop: the headline sits on two balanced lines. */
+  .t321-rbs .rbs-hero__title { font-size: clamp(28px, 2.6vw, 35px); line-height: 1.1; text-wrap: balance; }
 }
 .t321-rbs .rbs-hero__lede { max-width: 560px; font-size: 1.1rem; line-height: 1.6; color: var(--rbs-muted); }
 /* Proof points as one compact row. */
@@ -163,13 +169,8 @@
   transition: transform 0.35s ease;
 }
 .t321-rbs .rbs-hero__cert.is-named { transform: rotate(0deg) scale(1.015); }
-/* Gold shine that sweeps across the certificate when the name changes. */
-.t321-rbs .rbs-hero__shine {
-  position: absolute; inset: -20% auto -20% -40%; width: 38%; pointer-events: none;
-  background: linear-gradient(100deg, transparent 0%, rgba(255, 236, 179, 0) 20%, rgba(255, 236, 179, 0.75) 50%, rgba(255, 255, 255, 0) 80%);
-  transform: skewX(-18deg); animation: rbs-shine 0.9s ease-out forwards;
-}
-@keyframes rbs-shine { to { left: 120%; } }
+/* Course name on one line (HeroCertificate fine-tunes the size). */
+.t321-rbs .rbs-hero__cert .t321-cert__course { white-space: nowrap; font-size: var(--rbs-course-em, 3em); }
 
 /* "Type your name" bar under the hero certificate. */
 .t321-rbs .rbs-namebar { display: grid; gap: 8px; width: 100%; max-width: 580px; margin-top: 4px; }
@@ -190,9 +191,9 @@
 .t321-rbs .rbs-namebar button {
   appearance: none; flex: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
   padding: 11px 18px; border: 0; border-radius: 999px; font: inherit; font-size: 0.9rem; font-weight: 800; color: #fff;
-  /* A deeper gold so the white text stays readable. */
-  background: linear-gradient(135deg, #c99a33 0%, #a87814 100%);
-  box-shadow: 0 10px 20px -10px rgba(168, 120, 20, 0.8);
+  /* The site's navy, like the other Enroll buttons. */
+  background: linear-gradient(135deg, #0b2340 0%, #1d4a80 100%);
+  box-shadow: 0 10px 22px -10px rgba(11, 35, 64, 0.7);
   transition: filter 0.15s, transform 0.15s;
 }
 .t321-rbs .rbs-namebar button:hover { filter: brightness(1.06); }
@@ -205,7 +206,6 @@
   .t321-rbs .rbs-namebar button { padding: 11px 20px; font-size: 0.95rem; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .t321-rbs .rbs-hero__shine { display: none; }
   .t321-rbs .rbs-hero__cert { transition: none; }
 }
 .t321-rbs .rbs-hero__chip {
@@ -223,8 +223,10 @@
 .t321-rbs .rbs-hero__chip--a { top: 4px; bottom: auto; left: 0; right: auto; }
 .t321-rbs .rbs-hero__chip--b { top: auto; bottom: 4px; right: 0; left: auto; }
 @media (min-width: 940px) {
-  .t321-rbs .rbs-hero { padding: 36px 0 60px; }
-  .t321-rbs .rbs-hero__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; }
+  /* Desktop: balanced space above and below (no forced full-screen height,
+     which left big empty bands on taller screens). */
+  .t321-rbs .rbs-hero { padding: 48px 0 56px; }
+  .t321-rbs .rbs-hero__grid { grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: 48px; }
   .t321-rbs .rbs-hero__chip--a { left: -18px; }
   .t321-rbs .rbs-hero__chip--b { right: -14px; }
 }
@@ -252,10 +254,10 @@ body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
 .t321-rbs .rbs-how__step:last-child { padding-bottom: 0; border-bottom: 0; }
 .t321-rbs .rbs-how__num {
   width: 44px; height: 44px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-  font-size: 1.05rem; font-weight: 800; color: #9a6c12; background: #fff; border: 1.5px solid var(--rbs-gold);
+  font-size: 1.05rem; font-weight: 800; color: var(--rbs-navy); background: #fff; border: 1.5px solid var(--rbs-navy-2);
   transition: background 0.2s ease, color 0.2s ease;
 }
-.t321-rbs .rbs-how__step:hover .rbs-how__num { color: #fff; background: var(--rbs-gold); }
+.t321-rbs .rbs-how__step:hover .rbs-how__num { color: #fff; background: var(--rbs-navy); border-color: var(--rbs-navy); }
 .t321-rbs .rbs-how__body { padding-top: 2px; }
 .t321-rbs .rbs-how__step h3 { font-size: 1.12rem; font-weight: 800; letter-spacing: -0.01em; color: var(--rbs-navy); }
 .t321-rbs .rbs-how__step p { margin-top: 4px; font-size: 0.95rem; line-height: 1.6; color: var(--rbs-muted); }
@@ -337,7 +339,6 @@ body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
 .t321-rbs .rbs-split__totals .is-discount { color: #1f7a45; font-weight: 600; }
 .t321-rbs .rbs-split__totals .is-total { margin-top: 2px; padding-top: 12px; border-top: 1px solid var(--rbs-line); font-weight: 800; font-size: 1.05rem; color: var(--rbs-ink); }
 .t321-rbs .rbs-split__totals .is-total strong { font-size: 1.6rem; letter-spacing: -0.02em; color: var(--rbs-navy); }
-.t321-rbs .rbs-split .rbs-chips { display: grid; gap: 8px; }
 /* Pay turns into the navy gradient once it's enabled. */
 .t321-rbs .rbs-split .rbs-btn--pay { margin-top: 4px; }
 .t321-rbs .rbs-split .rbs-btn--pay:not(:disabled) {
@@ -507,54 +508,55 @@ body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
 .t321-rbs .rbs-extras { display: flex; align-items: center; gap: 12px; min-height: 20px; }
 .t321-rbs .rbs-extras:empty { display: none; }
 .t321-rbs .rbs-extras__promo { margin-left: auto; font-size: 0.82rem; }
-.t321-rbs .rbs-chips__label { font-size: 0.8rem; font-weight: 600; color: var(--rbs-muted); }
-.t321-rbs .rbs-extras + .rbs-chips { margin-top: -6px; }
-.t321-rbs .rbs-chips ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
-.t321-rbs .rbs-chips li { max-width: 100%; }
-.t321-rbs .rbs-chip {
-  display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
-  padding: 4px 11px 4px 4px; border-radius: 999px; cursor: pointer;
-  font: inherit; font-size: 0.8rem; font-weight: 600; color: var(--rbs-ink-2); text-align: left;
-  background: #fff; border: 1px solid #d9e0e9;
-  transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.15s;
+/* "Add to your order": clean add-on rows (image, name, price, Add) that
+   match the cart lines above — no gold, no shimmer. */
+.t321-rbs .rbs-addons { display: grid; gap: 10px; padding-top: 16px; border-top: 1px solid var(--rbs-line); }
+.t321-rbs .rbs-addons__label { font-size: 0.74rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rbs-muted); }
+.t321-rbs .rbs-addons ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.t321-rbs .rbs-addon {
+  appearance: none; width: 100%; cursor: pointer; text-align: left; font: inherit;
+  display: grid; grid-template-columns: 40px minmax(0, 1fr) auto auto; align-items: center; gap: 12px;
+  padding: 8px 10px 8px 8px; border-radius: 12px; background: #fff; border: 1px solid var(--rbs-line);
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.t321-rbs .rbs-chip:hover { color: var(--rbs-navy); border-color: var(--rbs-navy-2); background: #f6f9fc; }
-.t321-rbs .rbs-chip:active { transform: scale(0.98); }
-.t321-rbs .rbs-chip:focus-visible { outline: 2px solid var(--rbs-gold); outline-offset: 2px; }
-.t321-rbs .rbs-chip__plus {
-  flex: none; width: 18px; height: 18px; border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 0.55rem; color: var(--rbs-navy); background: var(--rbs-gold-soft); transition: background 0.15s, color 0.15s;
+.t321-rbs .rbs-addon:hover { border-color: #b9c6d6; box-shadow: 0 10px 22px -16px rgba(11, 35, 64, 0.45); }
+.t321-rbs .rbs-addon:focus-visible { outline: 3px solid var(--rbs-navy-2); outline-offset: 2px; }
+.t321-rbs .rbs-addon__thumb { width: 40px; height: 40px; border-radius: 8px; overflow: hidden; background: var(--rbs-soft); }
+.t321-rbs .rbs-addon__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.t321-rbs .rbs-addon__name { min-width: 0; font-size: 0.9rem; font-weight: 700; line-height: 1.3; color: var(--rbs-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t321-rbs .rbs-addon__name small { display: block; font-size: 0.74rem; font-weight: 500; color: var(--rbs-muted); }
+.t321-rbs .rbs-addon__price { font-size: 0.86rem; font-weight: 700; color: var(--rbs-ink-2); white-space: nowrap; }
+.t321-rbs .rbs-addon__add {
+  display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 999px;
+  font-size: 0.78rem; font-weight: 800; color: var(--rbs-navy); border: 1.5px solid var(--rbs-navy);
+  transition: background 0.15s, color 0.15s;
 }
-.t321-rbs .rbs-chip:hover .rbs-chip__plus { color: #fff; background: var(--rbs-navy); }
-.t321-rbs .rbs-chip__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 210px; }
-.t321-rbs .rbs-chip__price { flex: none; font-weight: 500; color: var(--rbs-muted); }
-.t321-rbs .rbs-chip--more { padding: 4px 11px; color: var(--rbs-muted); border-style: dashed; }
+.t321-rbs .rbs-addon__add i { font-size: 0.62rem; }
+.t321-rbs .rbs-addon:hover .rbs-addon__add { color: #fff; background: var(--rbs-navy); }
+.t321-rbs .rbs-addons__more { justify-self: start; font-size: 0.84rem; }
 
-/* A little sparkle so the add-ons catch the eye: a gold icon that twinkles,
-   a soft light sweep across each chip in turn, and a gentle pulse on "+". */
-.t321-rbs .rbs-chips__label { display: inline-flex; align-items: center; gap: 6px; }
-.t321-rbs .rbs-chips__spark { color: var(--rbs-gold); font-size: 0.85rem; animation: rbs-twinkle 2.6s ease-in-out infinite; }
-.t321-rbs .rbs-chip:not(.rbs-chip--more) { position: relative; overflow: hidden; border-color: #e6d3a8; background: #fffdf8; }
-.t321-rbs .rbs-chip:not(.rbs-chip--more)::after {
-  content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 45%; pointer-events: none;
-  background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.85) 50%, transparent 100%);
-  transform: skewX(-18deg); animation: rbs-shine 4.2s ease-in-out infinite;
+/* Reasons to buy under the summary: what's included, a short review, and the
+   secure-checkout line. Phones show them after the Pay button. */
+.t321-rbs .rbs-included {
+  list-style: none; margin: 0; padding: 16px 0 0; display: grid; gap: 9px; border-top: 1px solid var(--rbs-line);
 }
-.t321-rbs .rbs-chips li:nth-child(2) .rbs-chip::after { animation-delay: 0.6s; }
-.t321-rbs .rbs-chips li:nth-child(3) .rbs-chip::after { animation-delay: 1.2s; }
-.t321-rbs .rbs-chip:not(.rbs-chip--more) .rbs-chip__plus { animation: rbs-pulse 2.4s ease-out infinite; }
-.t321-rbs .rbs-chip:hover::after { animation-play-state: paused; }
-@keyframes rbs-shine { 0%, 62% { left: -60%; } 100% { left: 130%; } }
-@keyframes rbs-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(196, 146, 43, 0.45); }
-  70%, 100% { box-shadow: 0 0 0 7px rgba(196, 146, 43, 0); }
+.t321-rbs .rbs-included li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.9rem; line-height: 1.45; color: var(--rbs-ink-2); }
+.t321-rbs .rbs-included i { margin-top: 3px; color: #1f8a5b; }
+.t321-rbs .rbs-review { margin: 0; padding: 12px 16px; border-radius: 14px; background: #fff; border: 1px solid var(--rbs-line); }
+.t321-rbs .rbs-review__stars { font-size: 0.9rem; letter-spacing: 2px; color: #f5b301; }
+.t321-rbs .rbs-review blockquote {
+  margin: 6px 0 0; font-size: 0.9rem; line-height: 1.55; color: var(--rbs-ink);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
-@keyframes rbs-twinkle { 0%, 100% { opacity: 1; transform: scale(1) rotate(0); } 50% { opacity: 0.6; transform: scale(1.15) rotate(-8deg); } }
-@media (prefers-reduced-motion: reduce) {
-  .t321-rbs .rbs-chips__spark,
-  .t321-rbs .rbs-chip::after,
-  .t321-rbs .rbs-chip .rbs-chip__plus { animation: none; }
+.t321-rbs .rbs-review figcaption { margin-top: 6px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; font-size: 0.8rem; color: var(--rbs-muted); }
+.t321-rbs .rbs-review figcaption strong { font-size: 0.84rem; color: var(--rbs-navy); }
+@media (max-width: 899.98px) {
+  .t321-rbs .rbs-included,
+  .t321-rbs .rbs-review { order: 2; }
+}
+@media (min-width: 900px) {
+  /* The summary stays in view while the form on the left scrolls. */
+  .t321-rbs .rbs-split__summary { position: sticky; top: 0; align-self: start; }
 }
 
 .t321-rbs .rbs-promo__apply {
@@ -749,6 +751,12 @@ body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
 .t321-rbs .rbs-closer__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px 28px; }
 .t321-rbs .rbs-closer h2 { font-weight: 800; letter-spacing: -0.02em; font-size: clamp(22px, 3vw, 28px); }
 .t321-rbs .rbs-closer p { margin-top: 6px; font-size: 0.9rem; color: rgba(255, 255, 255, 0.72); }
+/* Closing banner button: white with navy text (site theme) on the navy band. */
+.t321-rbs .rbs-closer .rbs-btn.rbs-btn--gold {
+  padding: 15px 28px; border-radius: 999px; color: var(--rbs-navy); background: #fff;
+  box-shadow: 0 14px 28px -16px rgba(0, 0, 0, 0.6); transition: background 0.15s, transform 0.15s;
+}
+.t321-rbs .rbs-closer .rbs-btn.rbs-btn--gold:hover { background: #e9eff6; transform: translateY(-1px); }
 
 /* Footer */
 .t321-rbs .rbs-foot { padding: 20px 0 26px; font-size: 0.84rem; color: var(--rbs-muted); background: #fff; }
@@ -867,4 +875,30 @@ body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
   /* A touch smaller certificate so headline + certificate + name + button
      still fit on the first screen. */
   .t321-rbs .rbs-hero__visual { max-width: 270px; }
+}
+
+/* ── Thanksgiving look (.rbs--fall, on until fall.ts's end date; no promo) ──
+   The homepage's autumn pieces, placed to suit this page. */
+/* Hero certificate: a pumpkin pair on its free bottom-left corner (the ABC
+   tag is top-left, "Instant certificate download" bottom-right). */
+.t321-rbs .rbs-fall-patch { z-index: 3; pointer-events: none; }
+.t321-rbs .rbs-fall-patch--cert { top: auto; right: auto; left: -30px; bottom: -12px; transform: scale(0.8); transform-origin: 0 100%; }
+/* "How it works": the pair rests on the section's bottom edge, bottom-right. */
+.t321-rbs.rbs--fall .rbs-how { position: relative; padding-bottom: 116px; }
+.t321-rbs .rbs-fall-patch--how { top: auto; left: auto; right: 4%; bottom: 6px; transform: scale(0.72); transform-origin: 100% 100%; }
+/* Light sections get the homepage's warm sun-glow (no flat tint). */
+.t321-rbs.rbs--fall .rbs-section--tint {
+  background: radial-gradient(780px 440px at 100% 0%, rgba(255, 196, 120, 0.24), transparent 65%),
+    radial-gradient(640px 400px at 0% 100%, rgba(242, 169, 59, 0.12), transparent 65%),
+    radial-gradient(640px 400px at 100% 100%, rgba(242, 169, 59, 0.12), transparent 65%), var(--rbs-soft);
+}
+.t321-rbs.rbs--fall .rbs-section:not(.rbs-section--tint) {
+  background: radial-gradient(780px 440px at 100% 0%, rgba(255, 196, 120, 0.2), transparent 65%),
+    radial-gradient(640px 400px at 0% 100%, rgba(242, 169, 59, 0.1), transparent 65%), #fff;
+}
+@media (max-width: 939.98px) {
+  /* Phones: a smaller pair tucked onto the certificate's corner, clear of the
+     name field below it. */
+  .t321-rbs .rbs-fall-patch--cert { left: -10px; bottom: 0; transform: scale(0.52); transform-origin: 0 100%; }
+  .t321-rbs .rbs-fall-patch--how { right: 2%; bottom: 4px; transform: scale(0.5); }
 }

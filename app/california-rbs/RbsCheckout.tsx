@@ -36,6 +36,9 @@ const EMAIL_CHECK_DELAY = 300;
 /** Give up on a slow email check after this long and carry on as a new buyer
  *  (the new-account checkout still refuses an email that already exists). */
 const EMAIL_CHECK_TIMEOUT = 5000;
+/** Show the "Just me / My team" switch. Off: the page always sells to
+ *  individuals ("Just me"); the team checkout code stays for later. */
+const SHOW_TEAM_OPTION = false;
 /** A team account starts at 5 employees (and 1 location). */
 const MIN_EMPLOYEES = 5;
 
@@ -104,6 +107,8 @@ type Props = {
    * analytics. Quotes stay real (read-only).
    */
   demo?: boolean;
+  /** A short learner review shown under the order summary (the page's testimonial). */
+  review?: { text: string; name: string; role?: string };
 };
 
 export default function RbsCheckout(props: Props) {
@@ -125,7 +130,8 @@ function CheckoutForm({
   prefillPromo = "",
   stateCode = null,
   isRbsDefault = false,
-  demo = false
+  demo = false,
+  review
 }: Props) {
   const stripe = useStripe();
   const elements = useElements();
@@ -836,7 +842,9 @@ function CheckoutForm({
             </p>
           )}
 
-          {/* Who it's for — "My team" is the marketing cart's company checkout. */}
+          {/* Who it's for — "My team" is the marketing cart's company checkout.
+              Hidden for now (SHOW_TEAM_OPTION): the page sells to individuals. */}
+          {SHOW_TEAM_OPTION && (
           <div className="rbs-aud" role="radiogroup" aria-label="Who is this training for?">
             <button
               type="button"
@@ -865,6 +873,7 @@ function CheckoutForm({
               </span>
             </button>
           </div>
+          )}
 
           {isCompany && (
             <>
@@ -908,7 +917,7 @@ function CheckoutForm({
             </>
           )}
 
-          <h3 className="rbs-split__h">{isCompany ? "Admin account" : "Contact"}</h3>
+          {isCompany && <h3 className="rbs-split__h">Admin account</h3>}
           <label className="rbs-field">
             <span>Email</span>
             <span className="rbs-field__wrap">
@@ -1218,31 +1227,70 @@ function CheckoutForm({
           </div>
 
           {openSuggestions.length > 0 && (
-            <div className="rbs-chips">
-              <span className="rbs-chips__label">
-                <i className="fas fa-wand-magic-sparkles rbs-chips__spark" aria-hidden="true" /> Add to your order
-              </span>
+            // Add-ons: clean rows (image, name, price, "Add") like the cart lines.
+            <div className="rbs-addons">
+              <p className="rbs-addons__label">Add to your order</p>
               <ul>
                 {(addOpen ? openSuggestions : openSuggestions.slice(0, CHIPS_SHOWN)).map((s) => (
                   <li key={s.id}>
-                    <button type="button" className="rbs-chip" onClick={() => addLine(s.id)} aria-label={`Add ${s.name}, ${money(s.price)}`}>
-                      <span className="rbs-chip__plus" aria-hidden="true">
-                        <i className="fas fa-plus" />
+                    <button type="button" className="rbs-addon" onClick={() => addLine(s.id)} aria-label={`Add ${s.name}, ${money(s.price)}`}>
+                      <span className="rbs-addon__thumb" aria-hidden="true">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={s.image || COURSE_PLACEHOLDER_IMAGE}
+                          alt=""
+                          loading="lazy"
+                          onError={(e) => {
+                            if (!e.currentTarget.src.endsWith(COURSE_PLACEHOLDER_IMAGE)) e.currentTarget.src = COURSE_PLACEHOLDER_IMAGE;
+                          }}
+                        />
                       </span>
-                      <span className="rbs-chip__name">{s.name}</span>
-                      <span className="rbs-chip__price">+{money(s.price)}</span>
+                      <span className="rbs-addon__name">
+                        {s.name}
+                        {s.stateLabel && <small>{s.stateLabel}</small>}
+                      </span>
+                      <span className="rbs-addon__price">+{money(s.price)}</span>
+                      <span className="rbs-addon__add" aria-hidden="true">
+                        <i className="fas fa-plus" /> Add
+                      </span>
                     </button>
                   </li>
                 ))}
-                {openSuggestions.length > CHIPS_SHOWN && (
-                  <li>
-                    <button type="button" className="rbs-chip rbs-chip--more" onClick={() => setAddOpen((v) => !v)} aria-expanded={addOpen}>
-                      {addOpen ? "Show less" : `+${openSuggestions.length - CHIPS_SHOWN} more`}
-                    </button>
-                  </li>
-                )}
               </ul>
+              {openSuggestions.length > CHIPS_SHOWN && (
+                <button type="button" className="rbs-textbtn rbs-addons__more" onClick={() => setAddOpen((v) => !v)} aria-expanded={addOpen}>
+                  {addOpen ? "Show less" : `Show ${openSuggestions.length - CHIPS_SHOWN} more`}
+                </button>
+              )}
             </div>
+          )}
+          {/* What's included + a short review: reasons to buy under the
+              summary, the way US checkouts do. */}
+          <ul className="rbs-included" aria-label="What's included">
+            {(isRbsDefault
+              ? [
+                  "Approved California RBS training provider",
+                  "Completion reported to California ABC within 24 hours",
+                  "Self-paced — learn on your phone or computer"
+                ]
+              : ["Instant access right after checkout", "Self-paced — learn on your phone or computer", "Certificate of completion included"]
+            ).map((t) => (
+              <li key={t}>
+                <i className="fas fa-circle-check" aria-hidden="true" /> {t}
+              </li>
+            ))}
+          </ul>
+          {review && (
+            <figure className="rbs-review">
+              <span className="rbs-review__stars" aria-label="5 out of 5 stars">
+                ★★★★★
+              </span>
+              <blockquote>&ldquo;{review.text}&rdquo;</blockquote>
+              <figcaption>
+                <strong>{review.name}</strong>
+                {review.role && <span>{review.role}</span>}
+              </figcaption>
+            </figure>
           )}
           {/* Phones: Pay comes last, after the order summary. */}
           {payBlock("phone")}

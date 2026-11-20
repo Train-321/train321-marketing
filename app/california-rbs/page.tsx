@@ -15,6 +15,8 @@ import HeroCertificate, { HeroNameBar } from "./HeroCertificate";
 import RbsCheckout from "./RbsCheckout";
 import StickyEnroll from "./StickyEnroll";
 import RevealOnScroll from "./RevealOnScroll";
+import FallTheme, { FallPageLeaves, RbsPumpkins } from "./FallTheme";
+import { isRbsFall } from "./fall";
 import "./rbs.css";
 
 // California RBS — the ad landing page. Where visitors land after clicking a
@@ -151,9 +153,11 @@ export default async function CaliforniaRbsLanding({
         { icon: "fas fa-laptop", t: "Train online", d: "Learn at your own pace, on your phone or computer." },
         { icon: "fas fa-award", t: "Get certified", d: "Pass the course and download your certificate." }
       ];
+  // Thanksgiving look (no promo) until the homepage's fall end date (fall.ts).
+  const fall = isRbsFall();
 
   return (
-    <div className="t321-rbs">
+    <div className={`t321-rbs${fall ? " rbs--fall" : ""}`}>
       {/* Landing page: the site header/footer step aside so the only way
           forward is the checkout. */}
       <style>{`.t321-mkt-header,.t321-mkt-footer{display:none !important;}`}</style>
@@ -188,6 +192,8 @@ export default async function CaliforniaRbsLanding({
       {/* ① Hero — the first thing a new visitor from the ad sees: what this
           is, why it's trustworthy, and one clear way to enroll. */}
       <section className="rbs-hero" aria-labelledby="rbs-hero-title">
+        {/* Thanksgiving decoration behind the hero (no promo); ends by itself. */}
+        {fall && <FallTheme />}
         <div className="rbs-wrap rbs-hero__grid">
           <div className="rbs-hero__copy">
             <p className="rbs-hero__eyebrow">
@@ -204,7 +210,7 @@ export default async function CaliforniaRbsLanding({
             {/* The main call to action: type your name → it appears on the
                 certificate on the right → "Get my certificate" opens checkout
                 with the name filled in. */}
-            <HeroNameBar priceLabel={priceLabel || undefined} />
+            <HeroNameBar />
             {/* Trust strip: the reassurance US buyers look for next to a Buy button. */}
             <ul className="rbs-hero__trust">
               <li>
@@ -238,7 +244,7 @@ export default async function CaliforniaRbsLanding({
           </div>
           {/* Live certificate: their name fills in as they type, then it
               carries into the checkout (HeroCertificate.tsx). */}
-          <HeroCertificate courseTitle={heroCertTitle} showChipA={isRbs} />
+          <HeroCertificate courseTitle={heroCertTitle} showChipA={isRbs} fall={fall} />
         </div>
       </section>
 
@@ -293,10 +299,12 @@ export default async function CaliforniaRbsLanding({
           {/* Desktop: sits under the heading (left column); phones: after the steps. */}
           <div className="rbs-how__foot rbs-reveal">
             <a href="#rbs-checkout" className="rbs-btn rbs-btn--pay rbs-btn--glow rbs-how__cta">
-              Enroll now{priceLabel ? ` — ${priceLabel}` : ""} <i className="fas fa-arrow-right" aria-hidden="true" />
+              Enroll now <i className="fas fa-arrow-right" aria-hidden="true" />
             </a>
           </div>
         </div>
+        {/* Thanksgiving: a pumpkin pair resting on the section's bottom edge. */}
+        {fall && <RbsPumpkins className="rbs-fall-patch--how" />}
       </section>
 
       {/* ⑤ Enroll — the checkout (every "Enroll now" button lands here). */}
@@ -316,6 +324,11 @@ export default async function CaliforniaRbsLanding({
               prefillPromo={one(sp.promo)}
               stateCode={linkState}
               isRbsDefault={isRbs}
+              review={
+                quote?.quote
+                  ? { text: quote.quote, name: quote.name, role: [quote.role, quote.company].filter(Boolean).join(", ") }
+                  : undefined
+              }
             />
           ) : (
             <div className="rbs-card rbs-unavailable">
@@ -332,6 +345,7 @@ export default async function CaliforniaRbsLanding({
       {/* Phones: a slim enroll bar once the hero button has scrolled away. */}
       <StickyEnroll label={`Enroll now${priceLabel ? ` — ${priceLabel}` : ""}`} />
       <RevealOnScroll />
+      {fall && <FallPageLeaves />}
 
       {quote && (
         <section className="rbs-section rbs-section--tint rbs-section--quote" aria-label="What learners say">
@@ -379,8 +393,7 @@ export default async function CaliforniaRbsLanding({
             <p>{cms?.closerSub || <>Approved provider &middot; Reported to ABC within 24 hours</>}</p>
           </div>
           <a href="#rbs-checkout" className="rbs-btn rbs-btn--gold">
-            {cms?.closerButton || "Enroll now"}
-            {priceLabel ? ` · ${priceLabel}` : ""} <i className="fas fa-arrow-right" aria-hidden="true" />
+            {cms?.closerButton || "Enroll now"} <i className="fas fa-arrow-right" aria-hidden="true" />
           </a>
         </div>
       </section>
