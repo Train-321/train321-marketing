@@ -18,8 +18,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { CardElement, Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import CourseCertificate from "@/components/CourseCertificate";
+import { RBS_NAME_EVENT } from "./HeroCertificate";
 import { trackBeginCheckout, trackPurchase } from "@/lib/analytics";
-import type { CartCourse } from "@/lib/enroll";
+import type { BuyerAudience, CartCourse, CheckoutResult, EnrollQuote, InvoiceCadence } from "@/lib/enroll";
 
 type Identity = "unknown" | "checking" | "new" | "existing";
 type Quote = { subtotal: number; discount: number; dueToday: number; promo: { name: string } | null };
@@ -28,11 +29,15 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ATTR_KEY = "t321.ads.ca-rbs.attr";
 const ATTR_PARAMS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "fbclid"];
 /** Same placeholder the storefront uses (lib/newFeatures COURSE_PLACEHOLDER_IMAGE). */
-const COURSE_PLACEHOLDER_IMAGE = "/img/course-placeholder.svg";
-/** Add-on chips shown before "+N more". */
+const COURSE_PLACEHOLDER_IMAGE = "/img/course-placeholder.svg";/** Add-on chips shown before "+N more". */
 const CHIPS_SHOWN = 2;
 /** How long typing has to pause before the email is checked. */
-const EMAIL_CHECK_DELAY = 700;
+const EMAIL_CHECK_DELAY = 300;
+/** Give up on a slow email check after this long and carry on as a new buyer
+ *  (the new-account checkout still refuses an email that already exists). */
+const EMAIL_CHECK_TIMEOUT = 5000;
+/** A team account starts at 5 employees (and 1 location). */
+const MIN_EMPLOYEES = 5;
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
@@ -165,6 +170,27 @@ function CheckoutForm({
   const courseIds = cart.map((c) => c.id);
   const idsKey = courseIds.join(",");
 
+  // ── Who it's for: just me (this page's own checkout) or my team ──────
+  // "My team" works exactly like the marketing cart's company checkout: it is
+  // priced and bought through the same /api/enroll/quote + /api/enroll/checkout
+  // routes (employees × locations, yearly/monthly subscription for compliance
+  // courses, seats for seat-based ones, an admin account).
+  const [audience, setAudience] = useState<BuyerAudience>("individual");
+  const isCompany = audience === "company";
+  const [companyName, setCompanyName] = useState("");
+  const [employees, setEmployees] = useState(MIN_EMPLOYEES);
+  const [locations, setLocations] = useState(1);
+  const [cadence, setCadence] = useState<InvoiceCadence>("yearly");
+  // Seat-based courses default to one seat per employee unless changed.
+  const [seatOverride, setSeatOverride] = useState<Record<number, number>>({});
+  const seatsFor = (c: CartCourse) => (c.isSeatBased ? Math.max(1, seatOverride[c.id] ?? employees) : 1);
+  const [billingDifferent, setBillingDifferent] = useState(false);
+  const [billing, setBilling] = useState({ first_name: "", last_name: "", email: "", phone: "" });
+  const hasCompliance = cart.some((c) => !c.isSeatBased);
+  const needsSubscription = isCompany && hasCompliance;
+  const companyLines = cart.map((c) => ({ id: c.id, users: seatsFor(c), isSeatBased: Boolean(c.isSeatBased) }));
+  const companyKey = companyLines.map((l) => `${l.id}:${l.users}:${l.isSeatBased ? 1 : 0}`).join("|");
+
   // ── Price ────────────────────────────────────────────────────────────
   const [promoCode, setPromoCode] = useState(prefillPromo.trim());
   const [promoOpen, setPromoOpen] = useState(Boolean(prefillPromo));
@@ -172,7 +198,44 @@ function CheckoutForm({
   const [promoError, setPromoError] = useState<string | null>(null);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [quoting, setQuoting] = useState(true);
+
+  // Company quote — the marketing cart's own pricing route.
+  const [cQuote, setCQuote] = useState<EnrollQuote | null>(null);
+  const [cQuoting, setCQuoting] = useState(false);
   useEffect(() => {
+    if (!isCompany) return;
+    let cancelled = false;
+    setCQuoting(true);
+    const t = window.setTimeout(async () => {
+      try {
+        const res = await fetch("/api/enroll/quote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lines: companyLines, audience: "company", employees, locations, promoCode })
+        });
+        const d = (await res.json()) as EnrollQuote;
+        if (cancelled || !res.ok) return;
+        if (promoCode && !d.promo) {
+          setPromoError(`"${promoCode}" isn't a valid or active code.`);
+          setPromoCode("");
+          return;
+        }
+        setCQuote(d);
+      } catch {
+        /* keep the last quote */
+      } finally {
+        if (!cancelled) setCQuoting(false);
+      }
+    }, 250);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCompany, companyKey, employees, locations, promoCode]);
+
+  useEffect(() => {
+    if (isCompany) return;
     let cancelled = false;
     setQuoting(true);
     (async () => {
@@ -199,7 +262,7 @@ function CheckoutForm({
     return () => {
       cancelled = true;
     };
-  }, [promoCode, idsKey]);
+  }, [promoCode, idsKey, isCompany]);
   // Close the promo box (or drop an applied code) and go back to the link.
   const closePromo = () => {
     setPromoOpen(false);
@@ -209,18 +272,33 @@ function CheckoutForm({
   };
   const listTotal = cart.reduce((s, c) => s + c.price, 0);
   const priced = quote && !quoting;
-  const subtotal = priced ? quote.subtotal : listTotal;
-  const discount = priced ? quote.discount : 0;
-  const dueToday = priced ? quote.dueToday : listTotal;
+  // Company: the chosen cadence's view — first invoice due today, renewals
+  // at the full ongoing rate (same numbers the marketing cart shows).
+  const cq = cQuote ? (cadence === "yearly" ? cQuote.yearly : cQuote.monthly) : null;
+  const cadenceUnit = cadence === "yearly" ? "yr" : "mo";
+  const subtotal = isCompany ? (cq?.subtotal ?? 0) : priced ? quote.subtotal : listTotal;
+  const discount = isCompany ? (cq?.discount ?? 0) : priced ? quote.discount : 0;
+  const dueToday = isCompany ? (cq?.dueToday ?? 0) : priced ? quote.dueToday : listTotal;
+  const appliedPromo = isCompany ? cQuote?.promo : quote?.promo;
+  // A company subscription always needs a card on file, even at $0 today.
+  const needsCard = dueToday > 0 || needsSubscription;
+  const pricing = isCompany ? cQuoting || !cQuote : quoting;
 
   // ── Who's buying ─────────────────────────────────────────────────────
   const [email, setEmail] = useState(prefillEmail);
   const [identity, setIdentity] = useState<Identity>("unknown");
   const checkedFor = useRef("");
+  // Answers already fetched this visit, so going back to an email is instant.
+  const seen = useRef(new Map<string, Identity>());
   const lookUp = async (addr: string) => {
     const a = addr.trim();
     if (!EMAIL.test(a) || checkedFor.current === a.toLowerCase()) return;
     checkedFor.current = a.toLowerCase();
+    const cached = seen.current.get(a.toLowerCase());
+    if (cached) {
+      setIdentity(cached);
+      return;
+    }
     setIdentity("checking");
     if (demo) {
       // Demo: no LMS call. An email starting with "existing" plays a returning buyer.
@@ -228,16 +306,24 @@ function CheckoutForm({
       setIdentity(/^(existing|enrolled)/i.test(a) ? "existing" : "new");
       return;
     }
+    const ctrl = new AbortController();
+    const timer = window.setTimeout(() => ctrl.abort(), EMAIL_CHECK_TIMEOUT);
     try {
       const res = await fetch("/api/ads/ca-rbs/check-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: a })
+        body: JSON.stringify({ email: a }),
+        signal: ctrl.signal
       });
-      const d = (await res.json()) as { exists?: boolean };
-      setIdentity(d.exists ? "existing" : "new");
+      const d = (await res.json()) as { exists?: boolean; unknown?: boolean };
+      const who: Identity = d.exists ? "existing" : "new";
+      if (!d.unknown) seen.current.set(a.toLowerCase(), who);
+      // Ignore a late answer for an email they've since changed.
+      if (checkedFor.current === a.toLowerCase()) setIdentity(who);
     } catch {
-      setIdentity("new");
+      if (checkedFor.current === a.toLowerCase()) setIdentity("new");
+    } finally {
+      window.clearTimeout(timer);
     }
   };
   // Checked as they type (once they pause), so there's no "Continue" step.
@@ -275,6 +361,23 @@ function CheckoutForm({
   const [city, setCity] = useState("");
   const [billState, setBillState] = useState(stateCode || "CA");
   const certName = `${firstName} ${lastName}`.trim();
+  // The hero's live certificate hands its name over ("Get this certificate"):
+  // fill first/last name, then put the cursor in the email field.
+  useEffect(() => {
+    const onName = (e: Event) => {
+      const full = String((e as CustomEvent<{ name?: string }>).detail?.name || "").trim();
+      if (full) {
+        const [f, ...rest] = full.split(/\s+/);
+        setFirstName(f);
+        setLastName(rest.join(" "));
+      }
+      window.setTimeout(() => {
+        if (!emailRef.current?.readOnly) emailRef.current?.focus({ preventScroll: true });
+      }, 650);
+    };
+    window.addEventListener(RBS_NAME_EVENT, onName);
+    return () => window.removeEventListener(RBS_NAME_EVENT, onName);
+  }, []);
   // Stripe tells us when the card number, expiry, CVC and ZIP are all valid.
   const [cardComplete, setCardComplete] = useState(false);
 
@@ -282,6 +385,8 @@ function CheckoutForm({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<CartCourse[] | null>(null);
+  // Company purchase result (its admin sign-in link) from the cart's checkout.
+  const [companyDone, setCompanyDone] = useState<CheckoutResult | null>(null);
   const startedCheckout = useRef(false);
   const items = cart.map((c) => ({
     item_id: String(c.id),
@@ -312,17 +417,85 @@ function CheckoutForm({
       await lookUp(addr);
       return;
     }
+    // New learners only — an existing account can't buy here.
+    if (identity === "existing") return fail("This email already has a Train 321 account. Use a different email to continue.");
     if (identity === "new") {
       if (!firstName.trim() || !lastName.trim()) return fail("Enter your first and last name as they should appear on your certificate.");
       if (password.length < 8) return fail("Choose a password with at least 8 characters.");
     } else if (!password) {
       return fail("Enter your Train 321 password.");
     }
-    if (dueToday > 0 && identity === "existing" && (!address.trim() || !city.trim())) {
-      return fail("Add your billing address and city.");
+    if (isCompany) {
+      if (!companyName.trim()) return fail("Enter your company name.");
+      if (billingDifferent) {
+        if (!billing.first_name.trim() || !billing.last_name.trim()) return fail("Enter the billing contact's first and last name.");
+        if (!EMAIL.test(billing.email.trim())) return fail("Enter a valid billing email address.");
+      }
+      if (pricing) return fail("Updating your total — try again in a moment.");
     }
 
     setBusy(true);
+    if (demo && isCompany) {
+      // Demo: pretend to process, then show the success screen. Nothing is sent.
+      await new Promise((r) => window.setTimeout(r, 1200));
+      setBusy(false);
+      setDone(cart);
+      return;
+    }
+    if (isCompany) {
+      // Company: the marketing cart's own checkout — company account + admin,
+      // subscription for compliance courses, seats for seat-based ones.
+      const companyCard = elements?.getElement(CardElement) ?? null;
+      let tokenId: string | null = null;
+      if (needsCard) {
+        if (!stripe || !companyCard) return fail("Payment is still loading. Try again in a moment.");
+        const { token, error: tokErr } = await stripe.createToken(companyCard, { name: `${firstName.trim()} ${lastName.trim()}` });
+        if (tokErr || !token) return fail(tokErr?.message || "We couldn't verify that card.");
+        tokenId = token.id;
+      }
+      try {
+        const res = await fetch("/api/enroll/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            lines: companyLines,
+            promoCode,
+            stripeTokenId: tokenId,
+            cardholderName: `${firstName.trim()} ${lastName.trim()}`,
+            audience: "company",
+            employees,
+            locations,
+            cadence,
+            companyName: companyName.trim(),
+            billing: billingDifferent
+              ? {
+                  first_name: billing.first_name.trim(),
+                  last_name: billing.last_name.trim(),
+                  email: billing.email.trim(),
+                  phone: billing.phone.trim()
+                }
+              : null,
+            details: { email: addr, password, first_name: firstName.trim(), last_name: lastName.trim() }
+          })
+        });
+        const d = (await res.json().catch(() => null)) as (CheckoutResult & { message?: string }) | null;
+        if (!res.ok || !d?.employee) {
+          return fail(d?.message || "We couldn't complete your enrollment. Your card has not been charged.");
+        }
+        trackPurchase({
+          transactionId: d.chargeId || d.subscription?.id || `ca-rbs-co-${d.employee.id}`,
+          value: Number(d.amount || 0),
+          items,
+          ...(promoCode ? { coupon: promoCode } : {})
+        });
+        setCompanyDone(d);
+        setBusy(false);
+        setDone(cart);
+      } catch {
+        fail("We couldn't reach the enrollment service. Your card has not been charged.");
+      }
+      return;
+    }
     if (demo) {
       // Demo: pretend to process, then show the success screen. Nothing is sent.
       // An email starting with "enrolled" plays a buyer who already has the course.
@@ -459,13 +632,13 @@ function CheckoutForm({
 
   // ── Start my course (signs them straight into the learner app) ────────
   const [starting, setStarting] = useState(false);
-  const startCourse = async () => {
+  const startCourse = async (admin = false) => {
     setStarting(true);
     try {
       const res = await fetch("/api/ads/ca-rbs/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password })
+        body: JSON.stringify(admin ? { email: email.trim(), password, admin: true } : { email: email.trim(), password })
       });
       const d = (await res.json()) as { url?: string };
       if (d.url) window.location.href = d.url;
@@ -505,7 +678,7 @@ function CheckoutForm({
             </button>
           </>
         ) : (
-          <button type="button" className="rbs-btn rbs-btn--pay" onClick={startCourse} disabled={starting}>
+          <button type="button" className="rbs-btn rbs-btn--pay" onClick={() => startCourse()} disabled={starting}>
             {starting ? <span className="rbs-spin" aria-hidden="true" /> : null}
             Go to my course <i className="fas fa-arrow-right" aria-hidden="true" />
           </button>
@@ -520,20 +693,28 @@ function CheckoutForm({
         <span className="rbs-done__ic" aria-hidden="true">
           <i className="fas fa-check" />
         </span>
-        <h2>You&rsquo;re enrolled!</h2>
-        <p>
-          {done.length === 1 ? (
-            <>
-              <strong>{done[0].name}</strong> is
-            </>
-          ) : (
-            <>
-              Your <strong>{done.length} courses</strong> are
-            </>
-          )}{" "}
-          in your Train 321 account. Your receipt is on its way to <strong>{email.trim()}</strong>.
-        </p>
-        {isRbsDefault && (
+        <h2>{isCompany ? "Your team is set up!" : <>You&rsquo;re enrolled!</>}</h2>
+        {isCompany ? (
+          <p>
+            <strong>{companyName.trim()}</strong> now has a Train 321 company account with{" "}
+            {done.length === 1 ? <strong>{done[0].name}</strong> : <strong>{done.length} courses</strong>}. Sign in as the admin
+            with <strong>{email.trim()}</strong> to add your team. Your receipt is on its way.
+          </p>
+        ) : (
+          <p>
+            {done.length === 1 ? (
+              <>
+                <strong>{done[0].name}</strong> is
+              </>
+            ) : (
+              <>
+                Your <strong>{done.length} courses</strong> are
+              </>
+            )}{" "}
+            in your Train 321 account. Your receipt is on its way to <strong>{email.trim()}</strong>.
+          </p>
+        )}
+        {isRbsDefault && !isCompany && (
           <ol className="rbs-done__next">
             <li>Complete the training online.</li>
             <li>We report your completion to California ABC within 24 hours.</li>
@@ -550,8 +731,15 @@ function CheckoutForm({
               <i className="fas fa-rotate-right" aria-hidden="true" /> Run the demo again
             </button>
           </>
+        ) : companyDone ? (
+          // Signs the new admin straight in (same hand-off as "Start my course"),
+          // landing on the company dashboard; the app's login page is only the fallback.
+          <button type="button" className="rbs-btn rbs-btn--pay" onClick={() => startCourse(true)} disabled={starting}>
+            {starting ? <span className="rbs-spin" aria-hidden="true" /> : null}
+            Go to my admin dashboard <i className="fas fa-arrow-right" aria-hidden="true" />
+          </button>
         ) : (
-          <button type="button" className="rbs-btn rbs-btn--pay" onClick={startCourse} disabled={starting}>
+          <button type="button" className="rbs-btn rbs-btn--pay" onClick={() => startCourse()} disabled={starting}>
             {starting ? <span className="rbs-spin" aria-hidden="true" /> : null}
             Start my course <i className="fas fa-arrow-right" aria-hidden="true" />
           </button>
@@ -561,6 +749,10 @@ function CheckoutForm({
   }
 
   const known = identity === "new" || identity === "existing";
+  // This page is for NEW learners only: an email that already has an account
+  // gets a "use a different email" message instead of the password form, and
+  // the payment part stays hidden.
+  const isNew = identity === "new";
 
   // The Pay button stays disabled until everything it needs is filled in;
   // the hint under it names the first thing still missing.
@@ -568,19 +760,26 @@ function CheckoutForm({
     if (cart.length === 0) return "Add a course to continue.";
     if (identity === "checking") return "Checking your email…";
     if (!known) return "Enter your email to continue.";
+    if (identity === "existing") return "Use a different email to continue.";
     if (identity === "new") {
       if (!firstName.trim() || !lastName.trim()) return "Enter your first and last name.";
       if (password.length < 8) return "Choose a password with at least 8 characters.";
     } else if (!password) {
       return "Enter your Train 321 password.";
     }
-    if (dueToday > 0) {
-      if (identity === "existing" && (!address.trim() || !city.trim())) return "Add your billing address and city.";
+    if (isCompany) {
+      if (!companyName.trim()) return "Enter your company name.";
+      if (billingDifferent && (!billing.first_name.trim() || !billing.last_name.trim() || !EMAIL.test(billing.email.trim())))
+        return "Add the billing contact's name and email.";
+    }
+    if (needsCard) {
       if (!cardComplete && !demo) return "Enter your card details.";
     }
-    if (quoting) return "Updating your total…";
+    if (pricing) return "Updating your total…";
     return null;
   })();
+  // Payment stays mounted while a company quote refreshes, so a typed card isn't lost.
+  const showPayment = identity !== "existing" && (isCompany ? pricing || needsCard : dueToday > 0);
 
   // One card split in two (hosted-checkout style): the form on the left,
   // the order summary on the right. Every field, button and handler is the
@@ -596,12 +795,84 @@ function CheckoutForm({
           {demo && (
             <p className="rbs-demo-banner" role="note">
               <i className="fas fa-flask" aria-hidden="true" /> <strong>Demo mode</strong> — a test run. Nothing is saved,
-              charged or emailed. Use an email starting with &ldquo;existing&rdquo; to try the returning-buyer form, or
-              &ldquo;enrolled&rdquo; to see the already-enrolled screen.
+              charged or emailed. Use an email starting with &ldquo;existing&rdquo; to see the message an
+              existing account gets.
             </p>
           )}
 
-          <h3 className="rbs-split__h">Contact</h3>
+          {/* Who it's for — "My team" is the marketing cart's company checkout. */}
+          <div className="rbs-aud" role="radiogroup" aria-label="Who is this training for?">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={!isCompany}
+              className={!isCompany ? "is-active" : undefined}
+              onClick={() => setAudience("individual")}
+            >
+              <i className="fas fa-user" aria-hidden="true" />
+              <span>
+                <strong>Just me</strong>
+                <small>One-time payment</small>
+              </span>
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={isCompany}
+              className={isCompany ? "is-active" : undefined}
+              onClick={() => setAudience("company")}
+            >
+              <i className="fas fa-users" aria-hidden="true" />
+              <span>
+                <strong>My team</strong>
+                <small>Company account</small>
+              </span>
+            </button>
+          </div>
+
+          {isCompany && (
+            <>
+              <h3 className="rbs-split__h">Company</h3>
+              <label className="rbs-field">
+                <span>Company name</span>
+                <input autoComplete="organization" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required />
+              </label>
+              <div className="rbs-counts">
+                <div className="rbs-counts__item">
+                  <span>Employees</span>
+                  <Stepper small min={MIN_EMPLOYEES} value={employees} onChange={setEmployees} label="Number of employees" />
+                </div>
+                <div className="rbs-counts__item">
+                  <span>Locations</span>
+                  <Stepper small value={locations} onChange={setLocations} label="Number of locations" />
+                </div>
+              </div>
+              {hasCompliance && (
+                <div className="rbs-cadence" role="radiogroup" aria-label="Billing">
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={cadence === "yearly"}
+                    className={cadence === "yearly" ? "is-active" : undefined}
+                    onClick={() => setCadence("yearly")}
+                  >
+                    Yearly <em>Save 10%</em>
+                  </button>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={cadence === "monthly"}
+                    className={cadence === "monthly" ? "is-active" : undefined}
+                    onClick={() => setCadence("monthly")}
+                  >
+                    Monthly
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          <h3 className="rbs-split__h">{isCompany ? "Admin account" : "Contact"}</h3>
           <label className="rbs-field">
             <span>Email</span>
             <span className="rbs-field__wrap">
@@ -633,7 +904,20 @@ function CheckoutForm({
             </span>
           </label>
 
-          {identity === "existing" && <p className="rbs-note">Welcome back. Enter your password to add this to your account.</p>}
+          {identity === "existing" && (
+            <div className="rbs-exists" role="status">
+              <i className="fas fa-circle-info rbs-exists__ic" aria-hidden="true" />
+              <div>
+                <strong>This email already has a Train 321 account.</strong>
+                <p>Use a different email to continue.</p>
+                <div className="rbs-exists__actions">
+                  <button type="button" className="rbs-exists__btn" onClick={changeEmail}>
+                    Use a different email
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {identity === "new" && (
             <div className="rbs-row">
@@ -648,7 +932,7 @@ function CheckoutForm({
             </div>
           )}
 
-          {known && (
+          {isNew && (
             <label className="rbs-field">
               <span>{identity === "new" ? "Create a password" : "Password"}</span>
               <span className="rbs-field__wrap">
@@ -667,30 +951,42 @@ function CheckoutForm({
             </label>
           )}
 
-          {dueToday > 0 && (
+          {isCompany && isNew && (
+            <>
+              <label className="rbs-check">
+                <input type="checkbox" checked={billingDifferent} onChange={(e) => setBillingDifferent(e.target.checked)} />
+                Billing contact is someone else
+              </label>
+              {billingDifferent && (
+                <>
+                  <div className="rbs-row">
+                    <label className="rbs-field">
+                      <span>Billing first name</span>
+                      <input value={billing.first_name} onChange={(e) => setBilling((b) => ({ ...b, first_name: e.target.value }))} />
+                    </label>
+                    <label className="rbs-field">
+                      <span>Billing last name</span>
+                      <input value={billing.last_name} onChange={(e) => setBilling((b) => ({ ...b, last_name: e.target.value }))} />
+                    </label>
+                  </div>
+                  <div className="rbs-row">
+                    <label className="rbs-field">
+                      <span>Billing email</span>
+                      <input type="email" value={billing.email} onChange={(e) => setBilling((b) => ({ ...b, email: e.target.value }))} />
+                    </label>
+                    <label className="rbs-field">
+                      <span>Billing phone (optional)</span>
+                      <input type="tel" value={billing.phone} onChange={(e) => setBilling((b) => ({ ...b, phone: e.target.value }))} />
+                    </label>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {showPayment && (
             <>
               <h3 className="rbs-split__h">Payment</h3>
-              {identity === "existing" && (
-                <div className="rbs-row rbs-row--bill">
-                  <label className="rbs-field">
-                    <span>Billing address</span>
-                    <input autoComplete="address-line1" value={address} onChange={(e) => setAddress(e.target.value)} />
-                  </label>
-                  <label className="rbs-field">
-                    <span>City</span>
-                    <input autoComplete="address-level2" value={city} onChange={(e) => setCity(e.target.value)} />
-                  </label>
-                  <label className="rbs-field">
-                    <span>State</span>
-                    <input
-                      autoComplete="address-level1"
-                      value={billState}
-                      maxLength={2}
-                      onChange={(e) => setBillState(e.target.value.toUpperCase())}
-                    />
-                  </label>
-                </div>
-              )}
               <div className="rbs-field">
                 <span className="rbs-field__label">
                   Card
@@ -708,12 +1004,12 @@ function CheckoutForm({
                 ) : (
                   // Locked until the email check has finished (new or returning
                   // buyer known); it unlocks by itself as soon as it's done.
-                  <div className={`rbs-card-el${known ? "" : " is-locked"}`} title={known ? undefined : "Enter your email first"}>
+                  <div className={`rbs-card-el${isNew ? "" : " is-locked"}`} title={isNew ? undefined : "Enter your email first"}>
                     <CardElement
                       onChange={(e) => setCardComplete(e.complete)}
                       onReady={() => setCardComplete(false)}
                       options={{
-                        disabled: !known,
+                        disabled: !isNew,
                         style: {
                           base: { fontSize: "16px", color: "#0f2137", fontFamily: "Inter, system-ui, sans-serif", "::placeholder": { color: "#8a97a6" } },
                           invalid: { color: "#a1222e" }
@@ -735,7 +1031,13 @@ function CheckoutForm({
             aria-describedby={missing && !busy ? "rbs-pay-note" : undefined}
           >
             {busy ? <span className="rbs-spin" aria-hidden="true" /> : <i className="fas fa-lock" aria-hidden="true" />}
-            {dueToday > 0 ? `Pay ${money(dueToday)}` : "Enroll now · Free"}
+            {isCompany && pricing
+              ? "Pay"
+              : needsSubscription
+                ? `Pay ${money(dueToday)} today`
+                : dueToday > 0
+                  ? `Pay ${money(dueToday)}`
+                  : "Enroll now · Free"}
           </button>
           <p id="rbs-pay-note" className="rbs-pay-note">
             {missing && !busy ? (
@@ -787,8 +1089,40 @@ function CheckoutForm({
                 <span className="rbs-items__name">
                   {c.name}
                   {c.stateLabel && <small>{c.stateLabel}</small>}
+                  {/* Team pricing, as on the marketing cart: seats for seat-based
+                      courses, a per-employee base for compliance courses. */}
+                  {isCompany &&
+                    (c.isSeatBased ? (
+                      <>
+                        <span className="rbs-items__seats">
+                          <Stepper
+                            small
+                            value={seatsFor(c)}
+                            onChange={(n) => setSeatOverride((s) => ({ ...s, [c.id]: n }))}
+                            label={`Seats for ${c.name}`}
+                          />
+                          <small>
+                            {money(c.price)} &times; {seatsFor(c)} {seatsFor(c) === 1 ? "seat" : "seats"} &middot; one-time
+                          </small>
+                        </span>
+                        {seatsFor(c) < employees && (
+                          <small className="rbs-items__seatnote">
+                            Covers {seatsFor(c)} of your {employees} employees.{" "}
+                            <button
+                              type="button"
+                              className="rbs-textbtn"
+                              onClick={() => setSeatOverride((s) => ({ ...s, [c.id]: employees }))}
+                            >
+                              Use {employees} seats
+                            </button>
+                          </small>
+                        )}
+                      </>
+                    ) : (
+                      <small>{money(c.price)} / employee base</small>
+                    ))}
                 </span>
-                <span className="rbs-items__price">{money(c.price)}</span>
+                <span className="rbs-items__price">{money(isCompany && c.isSeatBased ? c.price * seatsFor(c) : c.price)}</span>
                 {cart.length > 1 ? (
                   <button type="button" className="rbs-items__x" onClick={() => removeLine(c.id)} aria-label={`Remove ${c.name}`} title="Remove">
                     <i className="fas fa-times" aria-hidden="true" />
@@ -802,10 +1136,11 @@ function CheckoutForm({
 
           {/* Promo code: a link that opens the field (× closes it); an applied code can be removed. */}
           <div className="rbs-split__promo">
-            {quote?.promo && promoCode ? (
+            {appliedPromo && promoCode ? (
               <p className="rbs-promo-applied">
                 <span>
-                  <i className="fas fa-tag" aria-hidden="true" /> Code <strong>{quote.promo.name}</strong> applied
+                  <i className="fas fa-tag" aria-hidden="true" /> Code <strong>{appliedPromo.name}</strong> applied
+                  {needsSubscription ? " to your first invoice" : ""}
                 </span>
                 <button type="button" className="rbs-textbtn" onClick={closePromo}>
                   Remove
@@ -848,8 +1183,8 @@ function CheckoutForm({
 
           <div className="rbs-split__totals" aria-live="polite">
             <p>
-              <span>Subtotal</span>
-              <span>{money(subtotal)}</span>
+              <span>{needsSubscription ? `First ${cadence} invoice` : "Subtotal"}</span>
+              <span>{isCompany && !cQuote ? "—" : money(subtotal)}</span>
             </p>
             {discount > 0 && (
               <p className="is-discount">
@@ -858,9 +1193,17 @@ function CheckoutForm({
               </p>
             )}
             <p className="is-total">
-              <span>Total</span>
-              <strong>{money(dueToday)}</strong>
+              <span>{isCompany ? "Due today" : "Total"}</span>
+              <strong>{isCompany && !cQuote ? "—" : money(dueToday)}</strong>
             </p>
+            {/* Subscription terms, stated before they pay (as on the marketing cart). */}
+            {needsSubscription && cq && cq.ongoing > 0 && (
+              <span className="rbs-ongoing">
+                <i className="fas fa-rotate" aria-hidden="true" /> Then <strong>{money(cq.ongoing)}/{cadenceUnit}</strong>{" "}
+                &middot; {money(cq.perLocation)}/{cadenceUnit} &times; {locations} {locations === 1 ? "location" : "locations"}{" "}
+                &middot; {employees} {employees === 1 ? "employee" : "employees"} &middot; cancel anytime
+              </span>
+            )}
           </div>
 
           {openSuggestions.length > 0 && (
@@ -893,5 +1236,51 @@ function CheckoutForm({
         </aside>
       </div>
     </form>
+  );
+}
+
+/** − [n] + number control (employees, locations, seats). */
+function Stepper({
+  value,
+  onChange,
+  label,
+  small = false,
+  min = 1
+}: {
+  value: number;
+  onChange: (n: number) => void;
+  label: string;
+  small?: boolean;
+  min?: number;
+}) {
+  const clamp = (n: number) => Math.min(9999, Math.max(min, Math.floor(n) || min));
+  // Typing is free (so "12" can pass through "1"); the minimum applies on blur.
+  const [draft, setDraft] = useState<string | null>(null);
+  return (
+    <span className={`rbs-stepper${small ? " rbs-stepper--sm" : ""}`}>
+      <button type="button" onClick={() => onChange(clamp(value - 1))} disabled={value <= min} aria-label={`Decrease ${label.toLowerCase()}`}>
+        <i className="fas fa-minus" aria-hidden="true" />
+      </button>
+      <input
+        type="number"
+        inputMode="numeric"
+        min={min}
+        max={9999}
+        value={draft ?? value}
+        aria-label={label}
+        onChange={(e) => {
+          setDraft(e.target.value);
+          const n = Math.floor(Number(e.target.value));
+          if (n >= min && n <= 9999) onChange(n);
+        }}
+        onBlur={() => {
+          if (draft !== null) onChange(clamp(Number(draft)));
+          setDraft(null);
+        }}
+      />
+      <button type="button" onClick={() => onChange(clamp(value + 1))} aria-label={`Increase ${label.toLowerCase()}`}>
+        <i className="fas fa-plus" aria-hidden="true" />
+      </button>
+    </span>
   );
 }

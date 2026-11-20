@@ -95,7 +95,7 @@
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 40%, #000 80%, transparent 100%);
           mask-image: linear-gradient(90deg, transparent 0%, #000 40%, #000 80%, transparent 100%);
 }
-.t321-rbs .rbs-hero__grid { display: grid; gap: 36px; align-items: center; }
+.t321-rbs .rbs-hero__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 36px; align-items: center; }
 .t321-rbs .rbs-hero__copy { display: grid; gap: 18px; justify-items: start; }
 .t321-rbs .rbs-hero__eyebrow {
   display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px;
@@ -112,6 +112,13 @@
 .t321-rbs .rbs-hero__checks { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px 22px; }
 .t321-rbs .rbs-hero__checks li { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.95rem; color: var(--rbs-ink-2); }
 .t321-rbs .rbs-hero__checks i { color: #1f8a5b; }
+/* Proof points under the trust line: plain text with green checks. */
+.t321-rbs .rbs-hero__proof {
+  list-style: none; padding: 12px 0 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 18px;
+  border-top: 1px solid var(--rbs-line); max-width: 580px;
+}
+.t321-rbs .rbs-hero__proof li { display: inline-flex; align-items: center; gap: 6px; font-size: 0.86rem; font-weight: 600; color: var(--rbs-ink-2); }
+.t321-rbs .rbs-hero__proof i { color: #1f8a5b; }
 /* Pill buttons. */
 .t321-rbs .rbs-hero__ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
 .t321-rbs .rbs-hero__ctas .rbs-btn { width: auto; padding: 17px 30px; border-radius: 999px; }
@@ -129,6 +136,12 @@
 /* Trust strip under the buttons. */
 .t321-rbs .rbs-hero__trust { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; font-size: 0.84rem; color: var(--rbs-muted); }
 .t321-rbs .rbs-hero__trust li { display: inline-flex; align-items: center; gap: 6px; }
+.t321-rbs .rbs-hero__how {
+  font-weight: 700; color: var(--rbs-navy); text-decoration: underline; text-underline-offset: 3px;
+  text-decoration-color: rgba(21, 54, 94, 0.35);
+}
+.t321-rbs .rbs-hero__how:hover { text-decoration-color: currentColor; }
+.t321-rbs .rbs-hero__how i { margin-left: 2px; font-size: 0.75rem; }
 .t321-rbs .rbs-hero__trust .fa-lock,
 .t321-rbs .rbs-hero__trust .fa-bolt { color: var(--rbs-navy-2); }
 .t321-rbs .rbs-hero__cards { gap: 5px; font-size: 1.4rem; line-height: 1; }
@@ -137,13 +150,64 @@
 .t321-rbs .rbs-hero__cards .fa-cc-amex { color: #2e77bc; }
 .t321-rbs .rbs-hero__cards .fa-cc-discover { color: #e55c20; }
 /* The certificate as the hero image: soft glow behind, gentle tilt, fact chips. */
-.t321-rbs .rbs-hero__visual { position: relative; justify-self: center; width: 100%; max-width: 560px; padding: 26px 8px; }
-.t321-rbs .rbs-hero__visual::before {
+.t321-rbs .rbs-hero__visual { position: relative; justify-self: center; width: 100%; max-width: 560px; display: grid; gap: 18px; }
+.t321-rbs .rbs-hero__stage { position: relative; isolation: isolate; padding: 26px 8px; }
+.t321-rbs .rbs-hero__stage::before {
   content: ""; position: absolute; z-index: -1; inset: 4% 6%; border-radius: 50%;
   background: radial-gradient(closest-side, rgba(196, 146, 43, 0.28), rgba(56, 120, 200, 0.12) 60%, transparent 100%);
   filter: blur(18px);
 }
-.t321-rbs .rbs-hero__cert { transform: rotate(-1.5deg); filter: drop-shadow(0 34px 44px rgba(11, 35, 64, 0.24)); }
+.t321-rbs .rbs-hero__cert {
+  position: relative; overflow: hidden; border-radius: 6px;
+  transform: rotate(-1.5deg); filter: drop-shadow(0 22px 30px rgba(11, 35, 64, 0.16));
+  transition: transform 0.35s ease;
+}
+.t321-rbs .rbs-hero__cert.is-named { transform: rotate(0deg) scale(1.015); }
+/* Gold shine that sweeps across the certificate when the name changes. */
+.t321-rbs .rbs-hero__shine {
+  position: absolute; inset: -20% auto -20% -40%; width: 38%; pointer-events: none;
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 236, 179, 0) 20%, rgba(255, 236, 179, 0.75) 50%, rgba(255, 255, 255, 0) 80%);
+  transform: skewX(-18deg); animation: rbs-shine 0.9s ease-out forwards;
+}
+@keyframes rbs-shine { to { left: 120%; } }
+
+/* "Type your name" bar under the hero certificate. */
+.t321-rbs .rbs-namebar { display: grid; gap: 8px; width: 100%; max-width: 580px; margin-top: 4px; }
+.t321-rbs .rbs-namebar__label { font-size: 0.86rem; font-weight: 700; color: var(--rbs-navy); }
+.t321-rbs .rbs-namebar__label i { margin-right: 4px; color: var(--rbs-gold); }
+.t321-rbs .rbs-namebar__row {
+  display: flex; align-items: center; gap: 6px; padding: 6px; border-radius: 999px;
+  background: #fff; border: 1px solid #cdd6e1; box-shadow: 0 18px 34px -24px rgba(11, 35, 64, 0.45);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.t321-rbs .rbs-namebar__row:focus-within { border-color: var(--rbs-navy-2); box-shadow: 0 0 0 4px rgba(21, 54, 94, 0.12), 0 18px 34px -24px rgba(11, 35, 64, 0.45); }
+.t321-rbs .rbs-namebar input {
+  flex: 1 1 0; width: 0; min-width: 0; padding: 10px 14px; border: 0; background: transparent;
+  font: inherit; font-size: 1rem; font-weight: 600; color: var(--rbs-ink);
+}
+.t321-rbs .rbs-namebar input:focus { outline: none; }
+.t321-rbs .rbs-namebar input::placeholder { color: #8a97a6; font-weight: 500; }
+.t321-rbs .rbs-namebar button {
+  appearance: none; flex: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 18px; border: 0; border-radius: 999px; font: inherit; font-size: 0.9rem; font-weight: 800; color: #fff;
+  /* A deeper gold so the white text stays readable. */
+  background: linear-gradient(135deg, #c99a33 0%, #a87814 100%);
+  box-shadow: 0 10px 20px -10px rgba(168, 120, 20, 0.8);
+  transition: filter 0.15s, transform 0.15s;
+}
+.t321-rbs .rbs-namebar button:hover { filter: brightness(1.06); }
+.t321-rbs .rbs-namebar button:active { transform: translateY(1px); }
+.t321-rbs .rbs-namebar button:focus-visible { outline: 3px solid var(--rbs-navy-2); outline-offset: 2px; }
+@media (min-width: 940px) {
+  /* It's the hero's main call to action now: a touch larger. */
+  .t321-rbs .rbs-namebar__row { padding: 5px; }
+  .t321-rbs .rbs-namebar input { padding: 9px 16px; font-size: 1rem; }
+  .t321-rbs .rbs-namebar button { padding: 11px 20px; font-size: 0.95rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .t321-rbs .rbs-hero__shine { display: none; }
+  .t321-rbs .rbs-hero__cert { transition: none; }
+}
 .t321-rbs .rbs-hero__chip {
   position: absolute; display: inline-flex; align-items: center; gap: 8px; padding: 10px 15px; border-radius: 14px;
   font-size: 0.82rem; font-weight: 700; color: var(--rbs-navy); white-space: nowrap;
@@ -155,14 +219,20 @@
   width: 24px; height: 24px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
   font-size: 0.72rem; color: #fff; background: var(--rbs-gold);
 }
-.t321-rbs .rbs-hero__chip--a { top: 0; left: 0; }
-.t321-rbs .rbs-hero__chip--b { bottom: 0; right: 0; }
+/* Fact tags on the certificate: one top-left, one bottom-right. */
+.t321-rbs .rbs-hero__chip--a { top: 4px; bottom: auto; left: 0; right: auto; }
+.t321-rbs .rbs-hero__chip--b { top: auto; bottom: 4px; right: 0; left: auto; }
 @media (min-width: 940px) {
-  .t321-rbs .rbs-hero { padding: 64px 0 72px; }
+  .t321-rbs .rbs-hero { padding: 36px 0 60px; }
   .t321-rbs .rbs-hero__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; }
   .t321-rbs .rbs-hero__chip--a { left: -18px; }
   .t321-rbs .rbs-hero__chip--b { right: -14px; }
 }
+
+/* This page's own support line is in the header, so the site-wide chat
+   bubble steps aside here (only while this landing page is on screen). */
+body:has(.t321-rbs) .t321-chat-fab,
+body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
 @media (prefers-reduced-motion: reduce) { .t321-rbs .rbs-hero__ctas .rbs-hero__cta { transition: none; } }
 
 /* ④ How you get certified — centered header, three modern step cards
@@ -303,6 +373,7 @@
 /* Enrolled (or already enrolled): nothing left to buy, so every "Enroll now"
    button on the page steps aside. RbsCheckout adds .is-enrolled. */
 .t321-rbs.is-enrolled .rbs-hero__cta,
+.t321-rbs.is-enrolled .rbs-namebar,
 .t321-rbs.is-enrolled .rbs-how__foot,
 .t321-rbs.is-enrolled .rbs-closer .rbs-btn,
 .t321-rbs.is-enrolled .rbs-sticky { display: none; }
@@ -329,6 +400,77 @@
 .t321-rbs .rbs-items__name { font-weight: 700; font-size: 1.05rem; line-height: 1.3; color: var(--rbs-ink); }
 .t321-rbs .rbs-items__name small { display: block; margin-top: 2px; font-weight: 500; font-size: 0.78rem; color: var(--rbs-muted); }
 .t321-rbs .rbs-items__price { font-weight: 700; color: var(--rbs-navy); white-space: nowrap; }
+/* Team: seat stepper + "covers N of M employees" under a seat-based line. */
+.t321-rbs .rbs-items__seats { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 6px; }
+.t321-rbs .rbs-items__seats small { margin-top: 0; }
+.t321-rbs .rbs-items__name small.rbs-items__seatnote { margin-top: 6px; color: #8a5a00; }
+.t321-rbs .rbs-items__seatnote .rbs-textbtn { font-size: inherit; }
+
+/* "Just me" / "My team" switch at the top of the form. */
+.t321-rbs .rbs-aud { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.t321-rbs .rbs-aud button {
+  appearance: none; cursor: pointer; display: flex; align-items: center; gap: 12px; text-align: left;
+  padding: 9px 12px; border-radius: 12px; border: 1.5px solid #d5dde7; background: #fff; font: inherit; color: var(--rbs-ink);
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.t321-rbs .rbs-aud button:hover { border-color: #aebdcf; }
+.t321-rbs .rbs-aud button i {
+  flex: none; width: 30px; height: 30px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; color: var(--rbs-navy-2); background: var(--rbs-soft);
+}
+.t321-rbs .rbs-aud button span { display: grid; gap: 1px; min-width: 0; }
+.t321-rbs .rbs-aud button strong { font-size: 0.95rem; font-weight: 800; color: var(--rbs-navy); }
+.t321-rbs .rbs-aud button small { font-size: 0.78rem; color: var(--rbs-muted); }
+.t321-rbs .rbs-aud button.is-active { border-color: var(--rbs-navy); background: #f6f9fd; box-shadow: 0 0 0 3px rgba(21, 54, 94, 0.1); }
+.t321-rbs .rbs-aud button.is-active i { color: #fff; background: var(--rbs-navy); }
+.t321-rbs .rbs-aud button:focus-visible { outline: 3px solid var(--rbs-gold); outline-offset: 2px; }
+
+/* − n + stepper */
+.t321-rbs .rbs-stepper {
+  display: inline-flex; align-items: stretch; width: 100%; max-width: 100%; height: 48px; box-sizing: border-box;
+  border: 1px solid #cdd6e1; border-radius: 10px; background: #fff; overflow: hidden;
+}
+.t321-rbs .rbs-stepper button {
+  appearance: none; flex: none; width: 44px; border: 0; background: var(--rbs-soft); cursor: pointer;
+  font-size: 0.8rem; color: var(--rbs-navy); transition: background 0.15s;
+}
+.t321-rbs .rbs-stepper button:hover:not(:disabled) { background: #e6ecf3; }
+.t321-rbs .rbs-stepper button:disabled { opacity: 0.4; cursor: not-allowed; }
+.t321-rbs .rbs-stepper input {
+  flex: 1; min-width: 0; width: 100%; border: 0; padding: 0 6px; text-align: center; background: #fff;
+  font: inherit; font-weight: 700; font-size: 1rem; color: var(--rbs-ink); -moz-appearance: textfield;
+}
+.t321-rbs .rbs-stepper input::-webkit-outer-spin-button,
+.t321-rbs .rbs-stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.t321-rbs .rbs-stepper input:focus { outline: none; }
+.t321-rbs .rbs-stepper:focus-within { border-color: var(--rbs-navy-2); box-shadow: 0 0 0 3px rgba(21, 54, 94, 0.14); }
+.t321-rbs .rbs-stepper--sm { width: auto; height: 34px; border-radius: 999px; }
+.t321-rbs .rbs-stepper--sm button { width: 32px; font-size: 0.66rem; background: transparent; }
+.t321-rbs .rbs-stepper--sm input { width: 42px; flex: none; padding: 0; font-size: 0.92rem; }
+.t321-rbs .rbs-items__seats .rbs-stepper--sm { height: 30px; }
+.t321-rbs .rbs-items__seats .rbs-stepper--sm button { width: 28px; }
+.t321-rbs .rbs-items__seats .rbs-stepper--sm input { width: 36px; }
+
+/* Employees / Locations on one compact line. */
+.t321-rbs .rbs-counts { display: flex; flex-wrap: wrap; gap: 10px 28px; }
+.t321-rbs .rbs-counts__item { display: inline-flex; align-items: center; gap: 10px; font-size: 0.88rem; font-weight: 600; color: var(--rbs-ink); }
+
+/* Yearly / Monthly */
+.t321-rbs .rbs-cadence { display: inline-flex; justify-self: start; padding: 4px; gap: 4px; border-radius: 999px; background: var(--rbs-soft); border: 1px solid var(--rbs-line); }
+.t321-rbs .rbs-cadence button {
+  appearance: none; cursor: pointer; padding: 6px 14px; border: 0; border-radius: 999px; background: transparent;
+  font: inherit; font-size: 0.88rem; font-weight: 700; color: var(--rbs-muted); transition: background 0.15s, color 0.15s;
+}
+.t321-rbs .rbs-cadence button em { margin-left: 6px; font-style: normal; font-size: 0.74rem; font-weight: 800; color: #1f7a45; }
+.t321-rbs .rbs-cadence button.is-active { color: var(--rbs-navy); background: #fff; box-shadow: 0 1px 3px rgba(11, 35, 64, 0.12); }
+
+.t321-rbs .rbs-check { display: inline-flex; align-items: center; gap: 10px; font-size: 0.88rem; font-weight: 600; color: var(--rbs-ink-2); cursor: pointer; }
+.t321-rbs .rbs-check input { width: 18px; height: 18px; accent-color: var(--rbs-navy); }
+
+/* "Then $X/yr ongoing…" under the company total. */
+.t321-rbs .rbs-ongoing { display: block; font-size: 0.8rem; line-height: 1.5; color: var(--rbs-muted); }
+.t321-rbs .rbs-ongoing i { margin-right: 4px; color: var(--rbs-navy-2); }
+.t321-rbs .rbs-ongoing strong { color: var(--rbs-ink); }
 .t321-rbs .rbs-items__x {
   align-self: center; width: 24px; height: 24px; border-radius: 50%; border: 0; background: var(--rbs-soft);
   display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
@@ -483,6 +625,22 @@
 .t321-rbs .rbs-note { flex-wrap: wrap; }
 
 .t321-rbs .rbs-note { display: flex; align-items: center; gap: 8px; font-size: 0.84rem; color: var(--rbs-muted); }
+/* Email already has an account: this page is for new learners only. */
+.t321-rbs .rbs-exists {
+  display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px;
+  background: #fdf7e9; border: 1px solid #f0dcaa; color: var(--rbs-ink);
+}
+.t321-rbs .rbs-exists__ic { margin-top: 2px; font-size: 1.05rem; color: #b07d14; }
+.t321-rbs .rbs-exists strong { display: block; font-size: 0.95rem; font-weight: 800; color: var(--rbs-navy); }
+.t321-rbs .rbs-exists p { margin-top: 4px; font-size: 0.88rem; line-height: 1.5; color: var(--rbs-ink-2); }
+.t321-rbs .rbs-exists__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-top: 12px; }
+.t321-rbs .rbs-exists__btn {
+  appearance: none; cursor: pointer; padding: 9px 16px; border-radius: 999px; border: 0;
+  font: inherit; font-size: 0.86rem; font-weight: 700; color: #fff; background: var(--rbs-navy);
+  transition: background 0.15s;
+}
+.t321-rbs .rbs-exists__btn:hover { background: var(--rbs-navy-2); }
+.t321-rbs .rbs-exists__btn:focus-visible { outline: 3px solid var(--rbs-gold); outline-offset: 2px; }
 .t321-rbs .rbs-note--ok { color: #1f7a45; font-weight: 600; }
 .t321-rbs .rbs-err { font-size: 0.86rem; font-weight: 600; color: #a1222e; }
 
@@ -617,12 +775,57 @@
   .t321-rbs .rbs-hero__title { font-size: 30px; }
   .t321-rbs .rbs-hero__lede { font-size: 0.95rem; }
   .t321-rbs .rbs-hero__checks li { font-size: 0.92rem; }
+  .t321-rbs .rbs-hero__proof li { font-size: 0.82rem; }
   .t321-rbs .rbs-hero__ctas { width: 100%; }
   .t321-rbs .rbs-hero__ctas .rbs-btn { flex: 1 1 auto; justify-content: center; }
   .t321-rbs .rbs-hero__visual { max-width: 360px; }
   .t321-rbs .rbs-hero__chip { font-size: 0.72rem; padding: 7px 10px; }
+  .t321-rbs .rbs-namebar__label { font-size: 0.8rem; }
+  .t321-rbs .rbs-namebar input { padding: 9px 10px; font-size: 0.95rem; }
+  .t321-rbs .rbs-namebar button { padding: 10px 14px; font-size: 0.84rem; }
   .t321-rbs .rbs-cert { max-width: 340px; justify-self: center; }
   .t321-rbs .rbs-cert__note { font-size: 0.72rem; text-align: center; }
   /* Room for the sticky Enroll bar so it never covers the footer. */
   .t321-rbs { padding-bottom: 72px; }
 }
+
+/* ── Motion (subtle, modern; off for prefers-reduced-motion) ──────────────
+   Uses the individual `translate`/`scale` properties so it never fights the
+   elements' own `transform` (certificate tilt, card hover lift). */
+@media (prefers-reduced-motion: no-preference) {
+  /* Hero: copy fades up in a quick stagger, then the certificate arrives. */
+  .t321-rbs .rbs-hero__eyebrow,
+  .t321-rbs .rbs-hero__title,
+  .t321-rbs .rbs-hero__lede,
+  .t321-rbs .rbs-namebar,
+  .t321-rbs .rbs-hero__trust,
+  .t321-rbs .rbs-hero__proof { animation: rbs-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  .t321-rbs .rbs-hero__title { animation-delay: 0.08s; }
+  .t321-rbs .rbs-hero__lede { animation-delay: 0.16s; }
+  .t321-rbs .rbs-namebar { animation-delay: 0.24s; }
+  .t321-rbs .rbs-hero__trust { animation-delay: 0.32s; }
+  .t321-rbs .rbs-hero__proof { animation-delay: 0.38s; }
+  .t321-rbs .rbs-hero__stage { animation: rbs-rise-big 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.2s both, rbs-float 7s ease-in-out 1.3s infinite; }
+  .t321-rbs .rbs-hero__chip { animation: rbs-pop 0.5s cubic-bezier(0.3, 1.4, 0.5, 1) both; }
+  .t321-rbs .rbs-hero__chip--a { animation-delay: 0.8s; }
+  .t321-rbs .rbs-hero__chip--b { animation-delay: 0.95s; }
+
+  /* "Get my certificate": a soft light sweep every few seconds + arrow nudge. */
+  .t321-rbs .rbs-namebar button { position: relative; overflow: hidden; isolation: isolate; }
+  .t321-rbs .rbs-namebar button::after {
+    content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: -60%; width: 45%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    transform: skewX(-20deg); animation: rbs-sweep 4.5s ease-in-out 1.6s infinite;
+  }
+  .t321-rbs .rbs-namebar button i { transition: translate 0.2s ease; }
+  .t321-rbs .rbs-namebar button:hover i { translate: 4px 0; }
+
+  /* Sections fade up as they scroll in (RevealOnScroll adds .rbs-anim/.is-in). */
+  .t321-rbs.rbs-anim .rbs-reveal:not(.is-in) { opacity: 0; }
+  .t321-rbs.rbs-anim .rbs-reveal.is-in { animation: rbs-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) var(--rbs-d, 0ms) both; }
+}
+@keyframes rbs-rise { from { opacity: 0; translate: 0 18px; } to { opacity: 1; translate: none; } }
+@keyframes rbs-rise-big { from { opacity: 0; translate: 0 34px; } to { opacity: 1; translate: none; } }
+@keyframes rbs-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
+@keyframes rbs-pop { from { opacity: 0; scale: 0.85; } to { opacity: 1; scale: 1; } }
+@keyframes rbs-sweep { 0%, 70% { left: -60%; } 100% { left: 130%; } }

@@ -11,9 +11,10 @@ import {
 import { getRbsCourses, parseCourseIds, rbsPublishableKey } from "@/lib/adsRbs";
 import type { CartCourse } from "@/lib/enroll";
 import { stateFromParam, suggestAddOns } from "@/app/enrollment/addOns";
-import CourseCertificate from "@/components/CourseCertificate";
+import HeroCertificate, { HeroNameBar } from "./HeroCertificate";
 import RbsCheckout from "./RbsCheckout";
 import StickyEnroll from "./StickyEnroll";
+import RevealOnScroll from "./RevealOnScroll";
 import "./rbs.css";
 
 // California RBS — the ad landing page. Where visitors land after clicking a
@@ -200,23 +201,17 @@ export default async function CaliforniaRbsLanding({
               {cms?.heroDescription ||
                 "Complete your required Responsible Beverage Service training online with Train 321, an approved California RBS training provider."}
             </p>
-            <ul className="rbs-hero__checks">
-              {heroChecks.map((t) => (
-                <li key={t}>
-                  <i className="fas fa-circle-check" aria-hidden="true" /> {t}
-                </li>
-              ))}
-            </ul>
-            <div className="rbs-hero__ctas">
-              <a href="#rbs-checkout" id="rbs-hero-cta" className="rbs-btn rbs-btn--pay rbs-btn--glow rbs-hero__cta">
-                Enroll now{priceLabel ? ` — ${priceLabel}` : ""} <i className="fas fa-arrow-right" aria-hidden="true" />
-              </a>
-              <a href="#rbs-how" className="rbs-btn rbs-btn--ghost rbs-hero__ghost">
-                How it works <i className="fas fa-arrow-down" aria-hidden="true" />
-              </a>
-            </div>
+            {/* The main call to action: type your name → it appears on the
+                certificate on the right → "Get my certificate" opens checkout
+                with the name filled in. */}
+            <HeroNameBar priceLabel={priceLabel || undefined} />
             {/* Trust strip: the reassurance US buyers look for next to a Buy button. */}
             <ul className="rbs-hero__trust">
+              <li>
+                <a href="#rbs-how" className="rbs-hero__how">
+                  How it works <i className="fas fa-arrow-down" aria-hidden="true" />
+                </a>
+              </li>
               <li>
                 <i className="fas fa-lock" aria-hidden="true" /> Secure checkout
               </li>
@@ -230,20 +225,20 @@ export default async function CaliforniaRbsLanding({
                 <i className="fab fa-cc-discover" aria-hidden="true" />
               </li>
             </ul>
-          </div>
-          <div className="rbs-hero__visual" aria-hidden="true">
-            <div className="rbs-hero__cert">
-              <CourseCertificate courseTitle={heroCertTitle} learnerName="Your Name" showExpiration={false} />
-            </div>
-            {isRbs && (
-              <span className="rbs-hero__chip rbs-hero__chip--a">
-                <i className="fas fa-paper-plane" /> Reported to ABC within 24 hrs
-              </span>
+            {/* Proof points: a quiet line of green checks under the action. */}
+            {heroChecks.length > 0 && (
+              <ul className="rbs-hero__proof">
+                {heroChecks.map((t) => (
+                  <li key={t}>
+                    <i className="fas fa-circle-check" aria-hidden="true" /> {t}
+                  </li>
+                ))}
+              </ul>
             )}
-            <span className="rbs-hero__chip rbs-hero__chip--b">
-              <i className="fas fa-mobile-screen" /> Self-paced &middot; any device
-            </span>
           </div>
+          {/* Live certificate: their name fills in as they type, then it
+              carries into the checkout (HeroCertificate.tsx). */}
+          <HeroCertificate courseTitle={heroCertTitle} showChipA={isRbs} />
         </div>
       </section>
 
@@ -267,7 +262,7 @@ export default async function CaliforniaRbsLanding({
       {/* ④ How you get certified — three step cards joined by a dashed line. */}
       <section className="rbs-section rbs-section--tint rbs-how" id="rbs-how" aria-labelledby="rbs-how-title">
         <div className="rbs-wrap">
-          <div className="rbs-how__head">
+          <div className="rbs-how__head rbs-reveal">
             <p className="rbs-kicker">How it works</p>
             <h2 id="rbs-how-title" className="rbs-h2">
               {isRbs ? "How you get RBS certified" : "Three simple steps"}
@@ -280,7 +275,7 @@ export default async function CaliforniaRbsLanding({
           </div>
           <ol className="rbs-how__steps">
             {howSteps.map((s, i) => (
-              <li key={s.t} className="rbs-how__step">
+              <li key={s.t} className="rbs-how__step rbs-reveal" style={{ ["--rbs-d" as string]: `${i * 120}ms` }}>
                 <div className="rbs-how__top">
                   <span className="rbs-how__badge" aria-hidden="true">
                     <i className={s.icon} />
@@ -295,7 +290,7 @@ export default async function CaliforniaRbsLanding({
               </li>
             ))}
           </ol>
-          <div className="rbs-how__foot">
+          <div className="rbs-how__foot rbs-reveal">
             <a href="#rbs-checkout" className="rbs-btn rbs-btn--pay rbs-btn--glow rbs-how__cta">
               Enroll now{priceLabel ? ` — ${priceLabel}` : ""} <i className="fas fa-arrow-right" aria-hidden="true" />
             </a>
@@ -338,11 +333,12 @@ export default async function CaliforniaRbsLanding({
 
       {/* Phones: a slim enroll bar once the hero button has scrolled away. */}
       <StickyEnroll label={`Enroll now${priceLabel ? ` — ${priceLabel}` : ""}`} />
+      <RevealOnScroll />
 
       {quote && (
         <section className="rbs-section rbs-section--tint rbs-section--quote" aria-label="What learners say">
           <div className="rbs-wrap rbs-wrap--narrow">
-            <figure className="rbs-quote">
+            <figure className="rbs-quote rbs-reveal">
               <span className="rbs-quote__stars" aria-label="5 stars">★★★★★</span>
               <blockquote>&ldquo;{quote.quote}&rdquo;</blockquote>
               <figcaption>
@@ -356,7 +352,7 @@ export default async function CaliforniaRbsLanding({
 
       <section className="rbs-section" aria-labelledby="rbs-faq-title">
         <div className="rbs-wrap rbs-faq">
-          <div className="rbs-faq__intro">
+          <div className="rbs-faq__intro rbs-reveal">
             <p className="rbs-kicker">FAQ</p>
             <h2 id="rbs-faq-title" className="rbs-h2">{cms?.faqHeading || "Questions, answered"}</h2>
             <p className="rbs-faq__help">
@@ -364,7 +360,7 @@ export default async function CaliforniaRbsLanding({
               <a href="mailto:support@train321.com">support@train321.com</a>.
             </p>
           </div>
-          <div className="rbs-faq__list">
+          <div className="rbs-faq__list rbs-reveal" style={{ ["--rbs-d" as string]: "120ms" }}>
             {faq.map((f) => (
               <details key={f.q} className="rbs-faq__item">
                 <summary>
@@ -379,7 +375,7 @@ export default async function CaliforniaRbsLanding({
       </section>
 
       <section className="rbs-closer">
-        <div className="rbs-wrap rbs-closer__inner">
+        <div className="rbs-wrap rbs-closer__inner rbs-reveal">
           <div>
             <h2>{cms?.closerHeading || "Get your California RBS training done today."}</h2>
             <p>{cms?.closerSub || <>Approved provider &middot; Reported to ABC within 24 hours</>}</p>
