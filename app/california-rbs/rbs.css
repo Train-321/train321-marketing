@@ -769,16 +769,26 @@ body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
   .t321-rbs .rbs-top__logo img,
   .t321-rbs .rbs-top__logo-img { height: 32px; }
   .t321-rbs .rbs-top__phone { font-size: 0.85rem; }
-  .t321-rbs .rbs-hero { padding: 26px 0 34px; }
-  .t321-rbs .rbs-hero__copy { gap: 12px; }
+  .t321-rbs .rbs-hero { padding: 16px 0 34px; }
+  /* Phones: the certificate comes up right under the headline, with the name
+     bar straight below it, so they see their name appear as they type. The
+     copy column dissolves into the hero grid so its pieces can be reordered. */
+  .t321-rbs .rbs-hero__copy { display: contents; }
+  .t321-rbs .rbs-hero__grid { gap: 12px; justify-items: start; }
+  .t321-rbs .rbs-hero__visual { order: 1; justify-self: center; margin: -4px 0 2px; max-width: 300px; }
+  /* Compact so headline + certificate + name bar fit on the first screen. */
+  .t321-rbs .rbs-hero__stage { padding: 14px 6px; }
+  .t321-rbs .rbs-namebar { order: 2; }
+  .t321-rbs .rbs-hero__trust { order: 3; }
+  .t321-rbs .rbs-hero__proof { order: 4; }
+  .t321-rbs .rbs-hero__lede { order: 5; margin-top: 4px; }
   .t321-rbs .rbs-hero__eyebrow { font-size: 0.7rem; }
-  .t321-rbs .rbs-hero__title { font-size: 30px; }
+  .t321-rbs .rbs-hero__title { font-size: 28px; }
   .t321-rbs .rbs-hero__lede { font-size: 0.95rem; }
   .t321-rbs .rbs-hero__checks li { font-size: 0.92rem; }
   .t321-rbs .rbs-hero__proof li { font-size: 0.82rem; }
   .t321-rbs .rbs-hero__ctas { width: 100%; }
   .t321-rbs .rbs-hero__ctas .rbs-btn { flex: 1 1 auto; justify-content: center; }
-  .t321-rbs .rbs-hero__visual { max-width: 360px; }
   .t321-rbs .rbs-hero__chip { font-size: 0.72rem; padding: 7px 10px; }
   .t321-rbs .rbs-namebar__label { font-size: 0.8rem; }
   .t321-rbs .rbs-namebar input { padding: 9px 10px; font-size: 0.95rem; }
