@@ -100,7 +100,7 @@ export default function RbsFallBar() {
             </span>
           ) : (
             <button type="button" className="v5-fa-ticket__action" onClick={apply} aria-label={`Apply code ${live.code} at checkout`}>
-              Apply code
+              Apply<span className="rbs-fall-bar__long"> code</span>
             </button>
           )}
         </div>
