@@ -902,3 +902,12 @@ body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
   .t321-rbs .rbs-fall-patch--cert { left: -10px; bottom: 0; transform: scale(0.52); transform-origin: 0 100%; }
   .t321-rbs .rbs-fall-patch--how { right: 2%; bottom: 4px; transform: scale(0.5); }
 }
+
+/* Checkout summary: the homepage's leafy vine (FallPanelVine) on the review
+   card — over its top edge and right side, sized for this smaller card; the
+   trailing end and drifting leaves fill the empty space below it. */
+.t321-rbs .rbs-review { position: relative; }
+.t321-rbs .rbs-review .v5-fa-vine { top: -16px; right: -18px; width: min(320px, 70%); }
+@media (max-width: 899.98px) {
+  .t321-rbs .rbs-review .v5-fa-vine { top: -12px; right: -8px; width: min(240px, 66%); }
+}

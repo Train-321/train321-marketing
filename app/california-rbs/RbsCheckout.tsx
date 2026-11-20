@@ -19,6 +19,8 @@ import { loadStripe } from "@stripe/stripe-js";
 import { CardElement, Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import CourseCertificate from "@/components/CourseCertificate";
 import { RBS_NAME_EVENT } from "./HeroCertificate";
+import FallPanelVine from "@/components/v5/fall/FallPanelVine";
+import { RBS_PROMO_EVENT } from "./RbsFallBar";
 import { trackBeginCheckout, trackPurchase } from "@/lib/analytics";
 import type { BuyerAudience, CartCourse, CheckoutResult, EnrollQuote, InvoiceCadence } from "@/lib/enroll";
 
@@ -109,6 +111,8 @@ type Props = {
   demo?: boolean;
   /** A short learner review shown under the order summary (the page's testimonial). */
   review?: { text: string; name: string; role?: string };
+  /** Thanksgiving look: the homepage's leafy vine on the review card. */
+  fall?: boolean;
 };
 
 export default function RbsCheckout(props: Props) {
@@ -131,7 +135,8 @@ function CheckoutForm({
   stateCode = null,
   isRbsDefault = false,
   demo = false,
-  review
+  review,
+  fall = false
 }: Props) {
   const stripe = useStripe();
   const elements = useElements();
@@ -269,6 +274,19 @@ function CheckoutForm({
       cancelled = true;
     };
   }, [promoCode, idsKey, isCompany]);
+  // The Thanksgiving bar's "Apply code" (RbsFallBar) puts its code in here.
+  useEffect(() => {
+    const onPromo = (e: Event) => {
+      const code = String((e as CustomEvent<{ code?: string }>).detail?.code || "").trim();
+      if (!code) return;
+      setPromoOpen(true);
+      setPromoInput(code);
+      setPromoError(null);
+      setPromoCode(code);
+    };
+    window.addEventListener(RBS_PROMO_EVENT, onPromo);
+    return () => window.removeEventListener(RBS_PROMO_EVENT, onPromo);
+  }, []);
   // Close the promo box (or drop an applied code) and go back to the link.
   const closePromo = () => {
     setPromoOpen(false);
@@ -1282,6 +1300,9 @@ function CheckoutForm({
           </ul>
           {review && (
             <figure className="rbs-review">
+              {/* Thanksgiving: the homepage's leafy vine over the card's top
+                  edge and right side, leaves drifting past its left side. */}
+              {fall && <FallPanelVine />}
               <span className="rbs-review__stars" aria-label="5 out of 5 stars">
                 ★★★★★
               </span>

@@ -17,6 +17,7 @@ import StickyEnroll from "./StickyEnroll";
 import RevealOnScroll from "./RevealOnScroll";
 import FallTheme, { FallPageLeaves, RbsPumpkins } from "./FallTheme";
 import { isRbsFall } from "./fall";
+import RbsFallBar from "./RbsFallBar";
 import "./rbs.css";
 
 // California RBS — the ad landing page. Where visitors land after clicking a
@@ -161,6 +162,9 @@ export default async function CaliforniaRbsLanding({
       {/* Landing page: the site header/footer step aside so the only way
           forward is the checkout. */}
       <style>{`.t321-mkt-header,.t321-mkt-footer{display:none !important;}`}</style>
+
+      {/* Thanksgiving offer bar (live THANKSGIVING code from the LMS). */}
+      {fall && <RbsFallBar />}
 
       <p className="rbs-ribbon">
         <i className="fas fa-shield-alt" aria-hidden="true" />{" "}
@@ -324,6 +328,7 @@ export default async function CaliforniaRbsLanding({
               prefillPromo={one(sp.promo)}
               stateCode={linkState}
               isRbsDefault={isRbs}
+              fall={fall}
               review={
                 quote?.quote
                   ? { text: quote.quote, name: quote.name, role: [quote.role, quote.company].filter(Boolean).join(", ") }
