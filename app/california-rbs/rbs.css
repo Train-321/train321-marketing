@@ -911,3 +911,29 @@ body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
 @media (max-width: 899.98px) {
   .t321-rbs .rbs-review .v5-fa-vine { top: -12px; right: -8px; width: min(240px, 66%); }
 }
+/* Thanksgiving on phones: calmer, so the hero stays clean.
+   - offer bar: one compact row (offer + code), no countdown tiles;
+   - no maple branch / sun glow; only three small, faint falling leaves;
+   - no pumpkins on the certificate (they'd crowd its tag) — the
+     "How it works" pumpkins still show further down. */
+@media (max-width: 599.98px) {
+  .rbs-fall-bar .v5-fa-bar__inner { flex-wrap: nowrap; justify-content: center; gap: 0.6rem; padding: 0.45rem 2.6rem 0.45rem 0.75rem; }
+  .rbs-fall-bar .v5-fa-bar__offer { flex-basis: auto; padding: 0; gap: 0.4rem; min-width: 0; }
+  .rbs-fall-bar .v5-fa-bar__leaves { display: none; }
+  .rbs-fall-bar .v5-fa-bar__title { font-size: 0.82rem; }
+  .rbs-fall-bar .v5-fa-bar__deal strong { font-size: 0.86rem; }
+  .rbs-fall-bar .v5-fa-bar__clock { display: none; }
+  .rbs-fall-bar .v5-fa-bar__close { top: 50%; transform: translateY(-50%); width: 26px; height: 26px; }
+}
+@media (max-width: 379.98px) {
+  .rbs-fall-bar .v5-fa-bar__title { display: none; }
+}
+@media (max-width: 939.98px) {
+  .t321-rbs .rbs-hero .v5-fa-branch,
+  .t321-rbs .rbs-hero .v5-fa-bloom { display: none; }
+  .t321-rbs .rbs-hero .v5-fa-decor > .v5-fa-leaf { display: none; }
+  .t321-rbs .rbs-hero .v5-fa-decor > .v5-fa-leaf:nth-child(3),
+  .t321-rbs .rbs-hero .v5-fa-decor > .v5-fa-leaf:nth-child(7),
+  .t321-rbs .rbs-hero .v5-fa-decor > .v5-fa-leaf:nth-child(11) { display: block; width: 18px; height: 18px; opacity: 0.55; }
+  .t321-rbs .rbs-fall-patch--cert { display: none; }
+}
