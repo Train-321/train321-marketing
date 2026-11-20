@@ -851,3 +851,23 @@ body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
 @keyframes rbs-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
 @keyframes rbs-pop { from { opacity: 0; scale: 0.85; } to { opacity: 1; scale: 1; } }
 @keyframes rbs-sweep { 0%, 70% { left: -60%; } 100% { left: 130%; } }
+
+/* Narrow phones: the name field gets the full width (it was squeezed by the
+   long button), with the button full width underneath. */
+@media (max-width: 479.98px) {
+  .t321-rbs .rbs-namebar__row {
+    flex-direction: column; align-items: stretch; gap: 8px;
+    padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none;
+  }
+  .t321-rbs .rbs-namebar__row:focus-within { box-shadow: none; }
+  .t321-rbs .rbs-namebar input {
+    flex: none; width: 100%; box-sizing: border-box; padding: 12px 18px; border-radius: 999px;
+    border: 1px solid #cdd6e1; background: #fff; box-shadow: 0 14px 28px -22px rgba(11, 35, 64, 0.45);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .t321-rbs .rbs-namebar input:focus { border-color: var(--rbs-navy-2); box-shadow: 0 0 0 4px rgba(21, 54, 94, 0.12); }
+  .t321-rbs .rbs-namebar button { justify-content: center; padding: 12px 18px; font-size: 0.95rem; }
+  /* A touch smaller certificate so headline + certificate + name + button
+     still fit on the first screen. */
+  .t321-rbs .rbs-hero__visual { max-width: 270px; }
+}
