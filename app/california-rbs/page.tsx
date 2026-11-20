@@ -259,7 +259,7 @@ export default async function CaliforniaRbsLanding({
         </section>
       )}
 
-      {/* ④ How you get certified — three step cards joined by a dashed line. */}
+      {/* ④ How you get certified — a three-step timeline. */}
       <section className="rbs-section rbs-section--tint rbs-how" id="rbs-how" aria-labelledby="rbs-how-title">
         <div className="rbs-wrap">
           <div className="rbs-how__head rbs-reveal">
@@ -276,17 +276,14 @@ export default async function CaliforniaRbsLanding({
           <ol className="rbs-how__steps">
             {howSteps.map((s, i) => (
               <li key={s.t} className="rbs-how__step rbs-reveal" style={{ ["--rbs-d" as string]: `${i * 120}ms` }}>
-                <div className="rbs-how__top">
-                  <span className="rbs-how__badge" aria-hidden="true">
-                    <i className={s.icon} />
-                  </span>
-                  <span className="rbs-how__num">
-                    <span className="rbs-sr-only">Step </span>
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
+                <span className="rbs-how__dot" aria-hidden="true">
+                  <i className={s.icon} />
+                </span>
+                <div className="rbs-how__body">
+                  <span className="rbs-how__label">Step {i + 1}</span>
+                  <h3>{s.t}</h3>
+                  <p>{s.d}</p>
                 </div>
-                <h3>{s.t}</h3>
-                <p>{s.d}</p>
               </li>
             ))}
           </ol>
@@ -294,9 +291,6 @@ export default async function CaliforniaRbsLanding({
             <a href="#rbs-checkout" className="rbs-btn rbs-btn--pay rbs-btn--glow rbs-how__cta">
               Enroll now{priceLabel ? ` — ${priceLabel}` : ""} <i className="fas fa-arrow-right" aria-hidden="true" />
             </a>
-            <p className="rbs-how__note">
-              <i className="fas fa-lock" aria-hidden="true" /> Secure checkout by Stripe &middot; Instant access
-            </p>
           </div>
         </div>
       </section>

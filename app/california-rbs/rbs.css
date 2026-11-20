@@ -235,55 +235,44 @@ body:has(.t321-rbs) .t321-chat-fab,
 body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
 @media (prefers-reduced-motion: reduce) { .t321-rbs .rbs-hero__ctas .rbs-hero__cta { transition: none; } }
 
-/* ④ How you get certified — centered header, three modern step cards
-   (icon tile + big faded 01/02/03, gold→navy accent on top), small arrow
-   circles between them, one centered pill button. */
+/* ④ How you get certified — a three-step timeline: numbered icon circles on
+   one gold→navy line (horizontal on desktop, vertical on phones), no boxes. */
 .t321-rbs .rbs-how__head { max-width: 640px; margin: 0 auto; text-align: center; }
 .t321-rbs .rbs-how__sub { margin-top: 10px; font-size: 1.02rem; line-height: 1.6; color: var(--rbs-muted); }
-.t321-rbs .rbs-how__steps { position: relative; list-style: none; padding: 0; margin: 40px 0 0; display: grid; gap: 16px; }
-.t321-rbs .rbs-how__step {
-  position: relative; overflow: hidden; padding: 26px 24px 26px; border-radius: 20px;
-  background: #fff; border: 1px solid var(--rbs-line);
-  box-shadow: 0 20px 44px -32px rgba(11, 35, 64, 0.45);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.t321-rbs .rbs-how__steps { position: relative; list-style: none; padding: 0; margin: 40px auto 0; max-width: 520px; display: grid; gap: 26px; }
+.t321-rbs .rbs-how__step { position: relative; display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 16px; align-items: start; }
+/* Phones: the line runs down from each circle to the next one. */
+.t321-rbs .rbs-how__step:not(:last-child)::before {
+  content: ""; position: absolute; left: 25px; top: 56px; bottom: -24px; width: 2px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--rbs-gold) 0%, #1d4a80 100%); opacity: 0.45;
 }
-/* Thin accent along the top edge. */
-.t321-rbs .rbs-how__step::after {
-  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--rbs-gold) 0%, #1d4a80 100%);
+.t321-rbs .rbs-how__dot {
+  position: relative; z-index: 1; width: 52px; height: 52px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; color: #fff; background: linear-gradient(135deg, #0b2340 0%, #1d4a80 100%);
+  box-shadow: 0 0 0 6px var(--rbs-soft), 0 14px 26px -12px rgba(11, 35, 64, 0.65);
+  transition: scale 0.2s ease;
 }
-.t321-rbs .rbs-how__step:hover { transform: translateY(-4px); box-shadow: 0 30px 56px -32px rgba(11, 35, 64, 0.55); }
-.t321-rbs .rbs-how__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.t321-rbs .rbs-how__badge {
-  width: 52px; height: 52px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center;
-  font-size: 1.15rem; color: #fff; background: linear-gradient(135deg, #0b2340 0%, #1d4a80 100%);
-  box-shadow: 0 12px 22px -12px rgba(11, 35, 64, 0.7);
-}
-.t321-rbs .rbs-how__num {
-  font-size: 2.6rem; font-weight: 800; line-height: 1; letter-spacing: -0.04em;
-  color: transparent; -webkit-text-stroke: 1.5px #d4dde8;
-}
-.t321-rbs .rbs-how__step h3 { margin-top: 20px; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; color: var(--rbs-navy); }
-.t321-rbs .rbs-how__step p { margin-top: 8px; font-size: 0.95rem; line-height: 1.6; color: var(--rbs-muted); }
-.t321-rbs .rbs-how__foot { margin-top: 36px; display: grid; justify-items: center; gap: 10px; }
-.t321-rbs .rbs-btn.rbs-how__cta { width: auto; padding: 17px 32px; border-radius: 999px; }
-.t321-rbs .rbs-how__note { font-size: 0.84rem; color: var(--rbs-muted); }
-.t321-rbs .rbs-how__note i { margin-right: 4px; }
+.t321-rbs .rbs-how__step:hover .rbs-how__dot { scale: 1.06; }
+.t321-rbs .rbs-how__body { padding-top: 2px; }
+.t321-rbs .rbs-how__label { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--rbs-gold); }
+.t321-rbs .rbs-how__step h3 { margin-top: 4px; font-size: 1.12rem; font-weight: 800; letter-spacing: -0.01em; color: var(--rbs-navy); }
+.t321-rbs .rbs-how__step p { margin-top: 6px; font-size: 0.95rem; line-height: 1.6; color: var(--rbs-muted); }
+.t321-rbs .rbs-how__foot { margin-top: 36px; display: grid; justify-items: center; }
+.t321-rbs .rbs-btn.rbs-how__cta { width: auto; padding: 16px 32px; border-radius: 999px; }
 @media (min-width: 860px) {
-  /* Wide gaps, with the arrow circle centered in each one. */
-  .t321-rbs .rbs-how__steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 56px; }
-  /* Small arrow circle between neighbouring cards. */
-  .t321-rbs .rbs-how__step { overflow: visible; }
-  .t321-rbs .rbs-how__step::after { border-radius: 20px 20px 0 0; }
-  .t321-rbs .rbs-how__step + .rbs-how__step::before {
-    content: "\f054"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 0.7rem;
-    position: absolute; z-index: 2; top: 50%; left: -28px; transform: translate(-50%, -50%);
-    width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-    color: var(--rbs-navy); background: #fff; border: 1px solid var(--rbs-line);
-    box-shadow: 0 8px 18px -10px rgba(11, 35, 64, 0.4);
+  /* Desktop: three columns, centered text, one line through the circles. */
+  .t321-rbs .rbs-how__steps { max-width: none; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 48px; }
+  .t321-rbs .rbs-how__steps::before {
+    content: ""; position: absolute; top: 32px; left: 16.66%; right: 16.66%; height: 2px; border-radius: 2px;
+    background: linear-gradient(90deg, var(--rbs-gold) 0%, #1d4a80 100%); opacity: 0.45;
   }
+  .t321-rbs .rbs-how__step { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 18px; }
+  .t321-rbs .rbs-how__step:not(:last-child)::before { content: none; }
+  .t321-rbs .rbs-how__dot { width: 64px; height: 64px; font-size: 1.3rem; box-shadow: 0 0 0 10px var(--rbs-soft), 0 16px 30px -12px rgba(11, 35, 64, 0.65); }
+  .t321-rbs .rbs-how__body { max-width: 300px; padding-top: 0; }
+  .t321-rbs .rbs-how__foot { margin-top: 44px; }
 }
-
 /* Shared "glow" pill for the main Enroll buttons (hero + steps). */
 .t321-rbs .rbs-btn.rbs-btn--glow {
   border-radius: 999px;
