@@ -235,43 +235,40 @@ body:has(.t321-rbs) .t321-chat-fab,
 body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
 @media (prefers-reduced-motion: reduce) { .t321-rbs .rbs-hero__ctas .rbs-hero__cta { transition: none; } }
 
-/* ④ How you get certified — a three-step timeline: numbered icon circles on
-   one gold→navy line (horizontal on desktop, vertical on phones), no boxes. */
-.t321-rbs .rbs-how__head { max-width: 640px; margin: 0 auto; text-align: center; }
-.t321-rbs .rbs-how__sub { margin-top: 10px; font-size: 1.02rem; line-height: 1.6; color: var(--rbs-muted); }
-.t321-rbs .rbs-how__steps { position: relative; list-style: none; padding: 0; margin: 40px auto 0; max-width: 520px; display: grid; gap: 26px; }
-.t321-rbs .rbs-how__step { position: relative; display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 16px; align-items: start; }
-/* Phones: the line runs down from each circle to the next one. */
-.t321-rbs .rbs-how__step:not(:last-child)::before {
-  content: ""; position: absolute; left: 25px; top: 56px; bottom: -24px; width: 2px; border-radius: 2px;
-  background: linear-gradient(180deg, var(--rbs-gold) 0%, #1d4a80 100%); opacity: 0.45;
+/* ④ How you get certified — split layout: heading, line and Enroll button on
+   the left; a numbered list of the three steps (gold numbers, thin dividers)
+   on the right. Phones stack them: heading, steps, then the button. */
+.t321-rbs .rbs-how__grid { display: grid; gap: 28px; }
+.t321-rbs .rbs-how__head { display: grid; justify-items: start; align-content: start; }
+.t321-rbs .rbs-how__sub { margin-top: 10px; max-width: 440px; font-size: 1.02rem; line-height: 1.6; color: var(--rbs-muted); }
+.t321-rbs .rbs-how__foot { margin-top: 4px; }
+.t321-rbs .rbs-btn.rbs-how__cta { width: auto; padding: 16px 30px; border-radius: 999px; }
+.t321-rbs .rbs-how__steps { list-style: none; padding: 0; margin: 0; display: grid; }
+.t321-rbs .rbs-how__step {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 18px; align-items: start;
+  padding: 20px 0; border-bottom: 1px solid var(--rbs-line);
 }
-.t321-rbs .rbs-how__dot {
-  position: relative; z-index: 1; width: 52px; height: 52px; border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 1.1rem; color: #fff; background: linear-gradient(135deg, #0b2340 0%, #1d4a80 100%);
-  box-shadow: 0 0 0 6px var(--rbs-soft), 0 14px 26px -12px rgba(11, 35, 64, 0.65);
-  transition: scale 0.2s ease;
+.t321-rbs .rbs-how__step:first-child { padding-top: 0; }
+.t321-rbs .rbs-how__step:last-child { padding-bottom: 0; border-bottom: 0; }
+.t321-rbs .rbs-how__num {
+  width: 44px; height: 44px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.05rem; font-weight: 800; color: #9a6c12; background: #fff; border: 1.5px solid var(--rbs-gold);
+  transition: background 0.2s ease, color 0.2s ease;
 }
-.t321-rbs .rbs-how__step:hover .rbs-how__dot { scale: 1.06; }
+.t321-rbs .rbs-how__step:hover .rbs-how__num { color: #fff; background: var(--rbs-gold); }
 .t321-rbs .rbs-how__body { padding-top: 2px; }
-.t321-rbs .rbs-how__label { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--rbs-gold); }
-.t321-rbs .rbs-how__step h3 { margin-top: 4px; font-size: 1.12rem; font-weight: 800; letter-spacing: -0.01em; color: var(--rbs-navy); }
-.t321-rbs .rbs-how__step p { margin-top: 6px; font-size: 0.95rem; line-height: 1.6; color: var(--rbs-muted); }
-.t321-rbs .rbs-how__foot { margin-top: 36px; display: grid; justify-items: center; }
-.t321-rbs .rbs-btn.rbs-how__cta { width: auto; padding: 16px 32px; border-radius: 999px; }
+.t321-rbs .rbs-how__step h3 { font-size: 1.12rem; font-weight: 800; letter-spacing: -0.01em; color: var(--rbs-navy); }
+.t321-rbs .rbs-how__step p { margin-top: 4px; font-size: 0.95rem; line-height: 1.6; color: var(--rbs-muted); }
 @media (min-width: 860px) {
-  /* Desktop: three columns, centered text, one line through the circles. */
-  .t321-rbs .rbs-how__steps { max-width: none; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 48px; }
-  .t321-rbs .rbs-how__steps::before {
-    content: ""; position: absolute; top: 32px; left: 16.66%; right: 16.66%; height: 2px; border-radius: 2px;
-    background: linear-gradient(90deg, var(--rbs-gold) 0%, #1d4a80 100%); opacity: 0.45;
+  /* Heading over the button on the left; the steps fill the right column. */
+  .t321-rbs .rbs-how__grid {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); grid-template-areas: "head steps" "foot steps";
+    column-gap: 80px; row-gap: 0;
   }
-  .t321-rbs .rbs-how__step { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 18px; }
-  .t321-rbs .rbs-how__step:not(:last-child)::before { content: none; }
-  .t321-rbs .rbs-how__dot { width: 64px; height: 64px; font-size: 1.3rem; box-shadow: 0 0 0 10px var(--rbs-soft), 0 16px 30px -12px rgba(11, 35, 64, 0.65); }
-  .t321-rbs .rbs-how__body { max-width: 300px; padding-top: 0; }
-  .t321-rbs .rbs-how__foot { margin-top: 44px; }
+  .t321-rbs .rbs-how__head { grid-area: head; align-self: end; }
+  .t321-rbs .rbs-how__foot { grid-area: foot; align-self: start; margin-top: 26px; }
+  .t321-rbs .rbs-how__steps { grid-area: steps; align-self: center; }
+  .t321-rbs .rbs-how__step { padding: 24px 0; }
 }
 /* Shared "glow" pill for the main Enroll buttons (hero + steps). */
 .t321-rbs .rbs-btn.rbs-btn--glow {

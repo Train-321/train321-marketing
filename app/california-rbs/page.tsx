@@ -259,9 +259,10 @@ export default async function CaliforniaRbsLanding({
         </section>
       )}
 
-      {/* ④ How you get certified — a three-step timeline. */}
+      {/* ④ How you get certified — split: heading + Enroll on the left, a
+          numbered list of the three steps on the right. */}
       <section className="rbs-section rbs-section--tint rbs-how" id="rbs-how" aria-labelledby="rbs-how-title">
-        <div className="rbs-wrap">
+        <div className="rbs-wrap rbs-how__grid">
           <div className="rbs-how__head rbs-reveal">
             <p className="rbs-kicker">How it works</p>
             <h2 id="rbs-how-title" className="rbs-h2">
@@ -276,17 +277,20 @@ export default async function CaliforniaRbsLanding({
           <ol className="rbs-how__steps">
             {howSteps.map((s, i) => (
               <li key={s.t} className="rbs-how__step rbs-reveal" style={{ ["--rbs-d" as string]: `${i * 120}ms` }}>
-                <span className="rbs-how__dot" aria-hidden="true">
-                  <i className={s.icon} />
+                <span className="rbs-how__num" aria-hidden="true">
+                  {i + 1}
                 </span>
                 <div className="rbs-how__body">
-                  <span className="rbs-how__label">Step {i + 1}</span>
-                  <h3>{s.t}</h3>
+                  <h3>
+                    <span className="rbs-sr-only">Step {i + 1}: </span>
+                    {s.t}
+                  </h3>
                   <p>{s.d}</p>
                 </div>
               </li>
             ))}
           </ol>
+          {/* Desktop: sits under the heading (left column); phones: after the steps. */}
           <div className="rbs-how__foot rbs-reveal">
             <a href="#rbs-checkout" className="rbs-btn rbs-btn--pay rbs-btn--glow rbs-how__cta">
               Enroll now{priceLabel ? ` — ${priceLabel}` : ""} <i className="fas fa-arrow-right" aria-hidden="true" />
