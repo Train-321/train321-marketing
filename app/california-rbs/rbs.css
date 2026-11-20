@@ -321,7 +321,15 @@ body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
   content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: -100vw; right: -100vw;
   background: #fff;
 }
-.t321-rbs .rbs-split__summary { order: -1; display: grid; gap: 16px; align-content: start; padding: 28px 0 28px; }
+/* Phones: the form first, then the order summary, then Pay (.rbs-paybox--phone). */
+.t321-rbs .rbs-split__summary { order: 0; display: grid; gap: 16px; align-content: start; padding: 28px 0 28px; }
+.t321-rbs .rbs-paybox { display: grid; gap: 14px; }
+.t321-rbs .rbs-paybox--main { display: none; }
+.t321-rbs .rbs-paybox--phone { margin-top: 4px; }
+@media (min-width: 900px) {
+  .t321-rbs .rbs-paybox--main { display: grid; }
+  .t321-rbs .rbs-paybox--phone { display: none; }
+}
 .t321-rbs .rbs-split__sub { margin-top: -8px; font-size: 0.9rem; color: var(--rbs-muted); }
 .t321-rbs .rbs-split__h { margin-top: 6px; font-size: 1.02rem; font-weight: 800; letter-spacing: -0.01em; color: var(--rbs-navy); }
 .t321-rbs .rbs-split__h--first { margin-top: 0; }
@@ -424,6 +432,19 @@ body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
 .t321-rbs .rbs-aud button.is-active { border-color: var(--rbs-navy); background: #f6f9fd; box-shadow: 0 0 0 3px rgba(21, 54, 94, 0.1); }
 .t321-rbs .rbs-aud button.is-active i { color: #fff; background: var(--rbs-navy); }
 .t321-rbs .rbs-aud button:focus-visible { outline: 3px solid var(--rbs-gold); outline-offset: 2px; }
+/* Phones: one compact segmented switch (icon + title), subtitles hidden. */
+@media (max-width: 599.98px) {
+  .t321-rbs .rbs-aud { gap: 4px; padding: 4px; border-radius: 999px; background: var(--rbs-soft); border: 1px solid var(--rbs-line); }
+  .t321-rbs .rbs-aud button {
+    justify-content: center; gap: 8px; padding: 9px 10px; border: 0; border-radius: 999px; background: transparent; box-shadow: none;
+  }
+  .t321-rbs .rbs-aud button i { width: auto; height: auto; background: none; font-size: 0.9rem; color: var(--rbs-muted); }
+  .t321-rbs .rbs-aud button strong { font-size: 0.92rem; color: var(--rbs-muted); }
+  .t321-rbs .rbs-aud button small { display: none; }
+  .t321-rbs .rbs-aud button.is-active { background: #fff; box-shadow: 0 1px 4px rgba(11, 35, 64, 0.14); }
+  .t321-rbs .rbs-aud button.is-active i { color: var(--rbs-navy); background: none; }
+  .t321-rbs .rbs-aud button.is-active strong { color: var(--rbs-navy); }
+}
 
 /* − n + stepper */
 .t321-rbs .rbs-stepper {
@@ -779,9 +800,11 @@ body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
   /* Compact so headline + certificate + name bar fit on the first screen. */
   .t321-rbs .rbs-hero__stage { padding: 14px 6px; }
   .t321-rbs .rbs-namebar { order: 2; }
-  .t321-rbs .rbs-hero__trust { order: 3; }
-  .t321-rbs .rbs-hero__proof { order: 4; }
-  .t321-rbs .rbs-hero__lede { order: 5; margin-top: 4px; }
+  .t321-rbs .rbs-hero__proof { order: 3; }
+  .t321-rbs .rbs-hero__lede { order: 4; margin-top: 4px; }
+  /* The trust line (how it works · secure checkout · cards) moves below the
+     fold on phones; the first screen ends cleanly at the name bar. */
+  .t321-rbs .rbs-hero__trust { order: 5; }
   .t321-rbs .rbs-hero__eyebrow { font-size: 0.7rem; }
   .t321-rbs .rbs-hero__title { font-size: 28px; }
   .t321-rbs .rbs-hero__lede { font-size: 0.95rem; }

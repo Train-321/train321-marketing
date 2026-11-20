@@ -781,6 +781,42 @@ function CheckoutForm({
   // Payment stays mounted while a company quote refreshes, so a typed card isn't lost.
   const showPayment = identity !== "existing" && (isCompany ? pricing || needsCard : dueToday > 0);
 
+  // Error + Pay button + hint. Rendered twice: under the form (tablets and
+  // desktop) and at the end of the order summary (phones, so the order reads
+  // form → summary → Pay). CSS shows exactly one; both submit this same form.
+  const payBlock = (where: "main" | "phone") => {
+    const noteId = where === "main" ? "rbs-pay-note" : "rbs-pay-note-phone";
+    return (
+      <div className={`rbs-paybox rbs-paybox--${where}`}>
+        {error && <p className="rbs-err" role="alert">{error}</p>}
+        <button
+          type="submit"
+          className="rbs-btn rbs-btn--pay"
+          disabled={busy || missing !== null}
+          aria-describedby={missing && !busy ? noteId : undefined}
+        >
+          {busy ? <span className="rbs-spin" aria-hidden="true" /> : <i className="fas fa-lock" aria-hidden="true" />}
+          {isCompany && pricing
+            ? "Pay"
+            : needsSubscription
+              ? `Pay ${money(dueToday)} today`
+              : dueToday > 0
+                ? `Pay ${money(dueToday)}`
+                : "Enroll now · Free"}
+        </button>
+        <p id={noteId} className="rbs-pay-note">
+          {missing && !busy ? (
+            missing
+          ) : (
+            <>
+              <i className="fas fa-lock" aria-hidden="true" /> Powered by Stripe &middot; Instant access
+            </>
+          )}
+        </p>
+      </div>
+    );
+  };
+
   // One card split in two (hosted-checkout style): the form on the left,
   // the order summary on the right. Every field, button and handler is the
   // same as before — only where they sit has changed.
@@ -1022,32 +1058,7 @@ function CheckoutForm({
             </>
           )}
 
-          {error && <p className="rbs-err" role="alert">{error}</p>}
-
-          <button
-            type="submit"
-            className="rbs-btn rbs-btn--pay"
-            disabled={busy || missing !== null}
-            aria-describedby={missing && !busy ? "rbs-pay-note" : undefined}
-          >
-            {busy ? <span className="rbs-spin" aria-hidden="true" /> : <i className="fas fa-lock" aria-hidden="true" />}
-            {isCompany && pricing
-              ? "Pay"
-              : needsSubscription
-                ? `Pay ${money(dueToday)} today`
-                : dueToday > 0
-                  ? `Pay ${money(dueToday)}`
-                  : "Enroll now · Free"}
-          </button>
-          <p id="rbs-pay-note" className="rbs-pay-note">
-            {missing && !busy ? (
-              missing
-            ) : (
-              <>
-                <i className="fas fa-lock" aria-hidden="true" /> Powered by Stripe &middot; Instant access
-              </>
-            )}
-          </p>
+          {payBlock("main")}
         </div>
 
         {/* ── Right: the order summary ── */}
@@ -1233,6 +1244,8 @@ function CheckoutForm({
               </ul>
             </div>
           )}
+          {/* Phones: Pay comes last, after the order summary. */}
+          {payBlock("phone")}
         </aside>
       </div>
     </form>
