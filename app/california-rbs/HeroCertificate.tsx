@@ -20,7 +20,12 @@ const RBS_TYPING_EVENT = "rbs:hero-typing";
 
 const tidy = (s: string) => s.trim().replace(/\s+/g, " ");
 
-export function HeroNameBar() {
+/**
+ * The hero's call to action: just "Get my certificate", which scrolls down to
+ * the checkout (the name is entered there). The name-field version is kept
+ * below (withName) in case it's wanted back.
+ */
+export function HeroNameBar({ withName = false }: { withName?: boolean }) {
   const [name, setName] = useState("");
 
   const go = (e: React.FormEvent) => {
@@ -30,6 +35,17 @@ export function HeroNameBar() {
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     document.getElementById("rbs-checkout")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   };
+
+  if (!withName) {
+    return (
+      // id: the phone sticky Enroll bar appears once this has scrolled away.
+      <form className="rbs-namebar rbs-namebar--cta" id="rbs-hero-cta" onSubmit={go}>
+        <button type="submit">
+          Get my certificate <i className="fas fa-arrow-right" aria-hidden="true" />
+        </button>
+      </form>
+    );
+  }
 
   return (
     // id: the phone sticky Enroll bar appears once this has scrolled away.

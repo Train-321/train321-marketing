@@ -939,3 +939,11 @@ body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
   .t321-rbs .rbs-hero .v5-fa-decor > .v5-fa-leaf:nth-child(11) { display: block; width: 18px; height: 18px; opacity: 0.55; }
   .t321-rbs .rbs-fall-patch--cert { display: none; }
 }
+/* Hero call to action without the name field: one standalone navy button
+   ("Get my certificate") that scrolls to the checkout. */
+.t321-rbs .rbs-namebar--cta { justify-items: start; }
+.t321-rbs .rbs-namebar--cta button { padding: 16px 32px; font-size: 1rem; box-shadow: 0 16px 30px -14px rgba(11, 35, 64, 0.7); }
+@media (max-width: 479.98px) {
+  .t321-rbs .rbs-namebar--cta { justify-items: stretch; }
+  .t321-rbs .rbs-namebar--cta button { width: 100%; justify-content: center; padding: 14px 20px; }
+}
