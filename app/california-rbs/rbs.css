@@ -629,7 +629,10 @@ body:has(.t321-rbs) #t321-chat-panel { display: none !important; }
 }
 .t321-rbs .rbs-promo-applied i { margin-right: 4px; }
 /* Email confirmed: shown read-only with a "Change" button inside. */
-.t321-rbs .rbs-field input.is-locked { color: var(--rbs-ink-2); background: var(--rbs-soft); }
+.t321-rbs .rbs-field input.is-locked { color: var(--rbs-ink-2); background: var(--rbs-soft); cursor: default; caret-color: transparent; }
+/* A locked (checked) email isn't editable: no typing caret or focus glow;
+   "Change" unlocks it. */
+.t321-rbs .rbs-field input.is-locked:focus { border-color: #cdd6e1; box-shadow: none; }
 .t321-rbs .rbs-note .rbs-textbtn { font-size: inherit; }
 .t321-rbs .rbs-note { flex-wrap: wrap; }
 

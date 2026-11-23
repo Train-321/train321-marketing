@@ -107,7 +107,7 @@ export default async function CaliforniaRbsLanding({
         byState: false
       }))
     : { picks: [] as CartCourse[] };
-  const supportEmail = settings?.supportEmail || "support@train321.com";
+  const supportEmail = settings?.supportEmail || "info@train321.com";
   const logos: TrustLogo[] =(settings?.trustLogos || []).filter((l) => l.imageUrl).slice(0, 6);
   // A short testimonial keeps this section compact: a featured short one,
   // else any short one, else the shortest there is.
@@ -126,11 +126,12 @@ export default async function CaliforniaRbsLanding({
   // courses get neutral wording, so no RBS-only claim is made about them.
   const isRbs = ids.length === 0;
   const heroCertTitle = isRbs ? "California RBS Training" : courses[0]?.name || "Your course";
-  const heroChecks = cms?.proofPoints.length
-    ? cms.proofPoints
-    : isRbs
-      ? ["Approved California provider", "Reported to ABC within 24 hours", "Self-paced on any device"]
-      : ["Instant access", "Self-paced on any device", "Certificate on completion"];
+  // Two proof points under the hero: the first can come from Studio (its
+  // first proof point), the second is always "Instant certificate".
+  const heroChecks = [
+    cms?.proofPoints[0] || (isRbs ? "Approved California provider" : "Instant access"),
+    "Instant certificate"
+  ];
   const howSteps = isRbs
     ? [
         {
@@ -338,9 +339,9 @@ export default async function CaliforniaRbsLanding({
           ) : (
             <div className="rbs-card rbs-unavailable">
               <h2>Enrollment is briefly unavailable</h2>
-              <p>Call us and we&rsquo;ll get you enrolled right away.</p>
-              <a href="tel:5613257300" className="rbs-btn rbs-btn--pay">
-                <i className="fas fa-phone" aria-hidden="true" /> 561-325-7300
+              <p>Email us and we&rsquo;ll get you enrolled right away.</p>
+              <a href={`mailto:${supportEmail}`} className="rbs-btn rbs-btn--pay">
+                <i className="fas fa-envelope" aria-hidden="true" /> {supportEmail}
               </a>
             </div>
           )}
@@ -373,8 +374,7 @@ export default async function CaliforniaRbsLanding({
             <p className="rbs-kicker">FAQ</p>
             <h2 id="rbs-faq-title" className="rbs-h2">{cms?.faqHeading || "Questions, answered"}</h2>
             <p className="rbs-faq__help">
-              Still have a question? Call <a href="tel:5613257300">561-325-7300</a> or email{" "}
-              <a href="mailto:support@train321.com">support@train321.com</a>.
+              Still have a question? Email <a href={`mailto:${supportEmail}`}>{supportEmail}</a>.
             </p>
           </div>
           <div className="rbs-faq__list rbs-reveal" style={{ ["--rbs-d" as string]: "120ms" }}>
