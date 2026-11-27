@@ -5,6 +5,13 @@
 // event.ts is a client module). No promo code — the look only.
 export const RBS_FALL_ENDS_AT = "2026-11-30T04:59:59Z";
 
+/**
+ * Master switch for the Thanksgiving look (leaves, pumpkins, vine, warm tints
+ * and the offer bar). Off now that Thanksgiving is over — the code all stays;
+ * set to true (and move RBS_FALL_ENDS_AT) to bring it back.
+ */
+export const RBS_FALL_ENABLED = false;
+
 export function isRbsFall(now = Date.now()): boolean {
-  return now < Date.parse(RBS_FALL_ENDS_AT);
+  return RBS_FALL_ENABLED && now < Date.parse(RBS_FALL_ENDS_AT);
 }

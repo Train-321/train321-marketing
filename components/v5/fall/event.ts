@@ -105,6 +105,13 @@ export function useFallPromo(): LiveFallPromo | null | undefined {
 }
 
 /**
+ * Master switch for the homepage's Fall / Thanksgiving theme (offer bar,
+ * leaves, pumpkins, sale strip, map vine). Off now that Thanksgiving is over —
+ * all the code stays; set to true (and move FALL.endsAt) to bring it back.
+ */
+export const FALL_ENABLED = false;
+
+/**
  * True after mount when the fall event is live. While the promo is still
  * loading the theme stays off, so a plain page never flashes into the theme.
  */
@@ -114,6 +121,8 @@ export function useFall(forced = false): boolean {
   useEffect(() => {
     setAsked(new URLSearchParams(window.location.search).get("event") === FALL.key);
   }, []);
+  // Checked after the hooks above, so React always sees the same hook order.
+  if (!FALL_ENABLED) return false;
   if (forced) {
     // The homepage runs the fall look through the Thanksgiving window: until
     // FALL.endsAt (end of the Sunday after Thanksgiving, Eastern), or the
